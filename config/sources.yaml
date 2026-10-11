@@ -1,0 +1,107 @@
+# The source register (decision 0009). Every data source the platform may touch is listed here with the
+# evidence for whether its terms allow commercial use. A source whose status is `prohibited` cannot be enabled.
+# Re-check each source's terms at least every six months and update `checked` (the gap check reminds you).
+#
+#   status: allowed     the terms permit commercial use (attribution as stated)
+#           silent      no published terms found; used under the owner's rule, with the risk noted
+#           prohibited  the terms forbid commercial use or redistribution; never run
+
+pdmo:
+  name: Public Debt Management Office (Ministry of Finance, Sri Lanka), treasury.gov.lk
+  homepage: https://www.treasury.gov.lk/
+  enabled: true
+  rights:
+    status: silent
+    evidence: >-
+      No terms of use, copyright notice or data licence found on treasury.gov.lk (searched 2026-10-11;
+      /web/terms-and-conditions returns 404). Government publication. Enquiry recommended (docs/audit.md §7).
+    url: https://www.treasury.gov.lk/
+    checked: 2026-10-11
+    attribution: "Source: Public Debt Management Office, Ministry of Finance, Sri Lanka"
+  datasets: [bonds.quotes, bonds.volumes, bonds.trades, bonds.auction_results, bonds.auction_announcements]
+  calendar: lk_bond_market
+  notes: >-
+    Sucuri firewall: a challenge page is treated as a failure, never as content. Index pages exist per year;
+    years are derived from the date (the old pipeline's hard-coded years were audit finding F1).
+
+cse_api:
+  name: Colombo Stock Exchange public website API (www.cse.lk/api, cdn.cse.lk)
+  homepage: https://www.cse.lk/
+  enabled: true
+  rights:
+    status: silent
+    evidence: >-
+      No published terms for the cse.lk API or website found (searched 2026-10-11; /terms-of-use returns 404).
+      The API is undocumented. The CSE distributes market data commercially through vendors (e.g. ICE), so a
+      market-data licence may be required: enquiry recommended (docs/audit.md §7, decision 0001).
+    url: https://www.cse.lk/
+    checked: 2026-10-11
+    attribution: "Source: Colombo Stock Exchange"
+  datasets: [cse.security_list, cse.prices_daily, cse.indices_daily, cse.market_daily, cse.announcements,
+             cse.company_info_daily, cse.company_profiles]
+  calendar: cse
+
+# --- Not used by the product (kept so the decision and its evidence stay on record) -----------------------------
+
+coinmetrics_community:
+  name: Coin Metrics community API
+  homepage: https://coinmetrics.io/
+  enabled: false
+  rights:
+    status: prohibited
+    evidence: Community data is licensed CC BY-NC 4.0 (non-commercial).
+    url: https://docs.coinmetrics.io/packages/coin-metrics-community-data
+    checked: 2026-10-11
+  datasets: []
+
+coinbase_exchange:
+  name: Coinbase Exchange market data API
+  homepage: https://www.coinbase.com/
+  enabled: false
+  rights:
+    status: prohibited
+    evidence: >-
+      Market Data Terms: licence "solely for you", for "personal or research purposes", not to build an
+      application for end users outside your organisation.
+    url: https://www.coinbase.com/legal/market_data
+    checked: 2026-10-11
+  datasets: []
+
+defillama:
+  name: DefiLlama API
+  homepage: https://defillama.com/
+  enabled: false
+  rights:
+    status: prohibited
+    evidence: >-
+      Terms (24 Jun 2025): personal, non-commercial licence; "republish the data in any form without permission"
+      and commercial exploitation "without prior written consent" are prohibited.
+    url: https://defillama.com/terms
+    checked: 2026-10-11
+  datasets: []
+
+binance_vision:
+  name: Binance market data (data-api.binance.vision)
+  homepage: https://www.binance.com/
+  enabled: false
+  rights:
+    status: prohibited
+    evidence: The Binance Vision dataset terms are titled "Terms of Use (Non-Commercial)".
+    url: https://data.binance.vision/Binance_Vision-Terms_of_Use.pdf
+    checked: 2026-10-11
+  datasets: []
+
+coingecko_free:
+  name: CoinGecko API, free Demo plan
+  homepage: https://www.coingecko.com/
+  enabled: false
+  rights:
+    status: prohibited
+    evidence: >-
+      API terms (5 Sep 2025), clause 6.2: you may not "duplicate, reproduce, copy, store, derive from" the Data
+      except as expressly permitted; the plan-specific permissions for commercial products are described for the
+      paid plans (Basic $35/month upwards). Storing history, which this platform does, is therefore not permitted
+      on the free plan.
+    url: https://www.coingecko.com/en/api_terms
+    checked: 2026-10-11
+  datasets: []

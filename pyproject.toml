@@ -1,0 +1,37 @@
+[project]
+name = "data-platform"
+version = "0.1.0"
+description = "Collectors, raw archive and database layer for the TBD market-information portal"
+requires-python = ">=3.12"
+dependencies = [
+    "requests==2.34.2",
+    "beautifulsoup4==4.15.0",
+    "pdfplumber==0.11.10",
+    "xlrd==2.0.2",
+    "pydantic==2.13.4",
+    "psycopg[binary]==3.2.12",
+    "PyYAML==6.0.3",
+    "boto3==1.40.70",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "moto[s3]==5.1.17",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["data_platform"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "db: needs a Postgres database (TEST_DATABASE_URL)",
+    "legacy: needs local clones of the old repos and the safety archives (slow; run before cut-over)",
+]
+addopts = "-q"
