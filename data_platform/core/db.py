@@ -106,8 +106,10 @@ def insert_facts(conn: psycopg.Connection, table: str, rows: Sequence[dict], key
             continue
         where = " and ".join(f"{k} = %s" for k in key)
         stored = conn.execute(f"select * from {table} where {where}", [row[k] for k in key]).fetchone()
+        # A blank incoming value is "not provided in this response", not a disagreement: e.g. the CSE repeats the
+        # previous session but cannot give that session's change. Only a different, non-blank value is a conflict.
         diff = {c: (stored.get(c), row[c]) for c in cols
-                if c not in ignore and not _same(stored.get(c), row[c])}
+                if c not in ignore and row[c] is not None and not _same(stored.get(c), row[c])}
         if diff:
             conn.execute(
                 "insert into ops.value_conflicts (table_name, key, stored, incoming, fetch_id) values (%s,%s,%s,%s,%s)",
@@ -127,6 +129,8 @@ def record_fetch(conn: psycopg.Connection, store, *, source_id: str, method: str
     """Archive `body` (layer 1) and catalogue the request (ops.raw_fetches). Returns (fetch_id, sha256).
 
     Called for every response BEFORE it is parsed: store first, parse second (architecture §2).
+    Migration records (origin 'migration' / 're-download') are idempotent: replaying the same file again reuses
+    its existing catalogue entry, so a repeated migration adds nothing anywhere.
     """
     from .rawstore import sniff_ext
 
@@ -135,6 +139,13 @@ def record_fetch(conn: psycopg.Connection, store, *, source_id: str, method: str
     conn.execute("""insert into ops.raw_objects (sha256, bytes, content_type, ext, storage_key)
                     values (%s, %s, %s, %s, %s) on conflict (sha256) do nothing""",
                  (obj.sha256, obj.bytes, content_type, obj.ext, obj.key))
+    if origin != "live":
+        existing = conn.execute(
+            """select fetch_id from ops.raw_fetches where source_id = %s and url = %s and params = %s
+               and sha256 = %s and origin = %s and note is not distinct from %s limit 1""",
+            (source_id, url, Jsonb(params or {}), obj.sha256, origin, note)).fetchone()
+        if existing:
+            return existing["fetch_id"], obj.sha256
     fetch_id = conn.execute(
         """insert into ops.raw_fetches (source_id, run_id, method, url, params, http_status, fetched_at, sha256,
                                         origin, note)

@@ -1,7 +1,8 @@
 """Migration reconciliation against the real old data. Slow, and needs local inputs, so it only runs when pointed
 at them (it is run before every cut-over decision, and its report is committed under docs/migration/):
 
-    LEGACY_NS_DB=<Nelson-Siegel clone>/data/sgcp.sqlite  LEGACY_PDMO_ARCHIVE=<archive>/pdmo  pytest -m legacy
+    LEGACY_NS_DB=<Nelson-Siegel clone>/data/sgcp.sqlite  LEGACY_PDMO_ARCHIVE=<archive>/pdmo \
+    LEGACY_CSE_REPO=<CSE clone>  LEGACY_CSE_CHART_ARCHIVE=<archive>/cse_chart_2026-10-11  pytest -m legacy
 """
 from __future__ import annotations
 
@@ -27,3 +28,19 @@ def test_bond_history_migrates_and_reconciles_exactly(conn, store):
     assert report["ok"], report
     again = bonds.load(conn, store, Path(old_db), Path(archive), None, dt.date.today())
     assert again["rows_added"] == 0                       # repeatable
+
+
+@pytest.mark.db
+def test_cse_history_migrates_and_reconciles_exactly(conn, store):
+    from data_platform.migration import cse
+
+    repo, chart = os.environ.get("LEGACY_CSE_REPO"), os.environ.get("LEGACY_CSE_CHART_ARCHIVE")
+    if not (repo and chart):
+        pytest.skip("LEGACY_CSE_REPO / LEGACY_CSE_CHART_ARCHIVE not set")
+    cse.load(conn, store, Path(repo), Path(chart))
+    report = cse.reconcile(conn, Path(repo))
+    assert report["ok"], report
+    assert report["gap_2026_10_05_filled_rows"] > 250          # the session the old daily job missed
+    before = conn.execute("select count(*) n from ops.raw_fetches").fetchone()["n"]
+    cse.load(conn, store, Path(repo), Path(chart))
+    assert conn.execute("select count(*) n from ops.raw_fetches").fetchone()["n"] == before   # repeatable

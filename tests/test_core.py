@@ -159,3 +159,14 @@ def test_retries_on_server_errors_then_succeeds():
 def test_204_is_an_empty_body():
     client = PoliteClient(session=FakeSession([fake_response(204, b"")]), sleep=lambda s: None)
     assert client.post("https://www.cse.lk/api/getAnnouncementById", {"announcementId": 1}).status == 204
+
+
+@pytest.mark.db
+def test_a_blank_incoming_value_is_not_a_conflict(conn, store):
+    now = dt.datetime.now(dt.timezone.utc)
+    fetch_id, _ = db.record_fetch(conn, store, source_id="t", method="GET", url="https://x/", params={},
+                                  http_status=200, body=b"[1]", content_type=None, fetched_at=now)
+    row = {"session_date": dt.date(2026, 10, 9), "source": "daily", "turnover": 1.0, "fetch_id": fetch_id,
+           "fetched_at": now}
+    db.insert_facts(conn, "cse.market_daily", [row], key=["session_date", "source"])
+    assert db.insert_facts(conn, "cse.market_daily", [dict(row, turnover=None)], key=["session_date", "source"]) == (0, 0)

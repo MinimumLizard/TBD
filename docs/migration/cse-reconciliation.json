@@ -1,0 +1,83 @@
+{
+  "loaded": {
+    "raw_files_replayed": 1138,
+    "security_list": 0,
+    "prices_daily": 0,
+    "indices_daily": 0,
+    "market_daily": 0,
+    "company_info_daily": 0,
+    "company_profiles": 0,
+    "announcements": 0,
+    "prices_backfill": 0,
+    "indices_backfill": 0,
+    "prices_backfill_2026_10_11": 0,
+    "indices_backfill_2026_10_11": 0,
+    "legacy_files_archived": 3591
+  },
+  "reconciliation": {
+    "prices": {
+      "old": 69312,
+      "new": 69589,
+      "missing_in_new": 0,
+      "extra_in_new": 277,
+      "extra_expected": 277,
+      "extra_unexpected": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "unexpected_extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "indices": {
+      "old": 5382,
+      "new": 5404,
+      "missing_in_new": 0,
+      "extra_in_new": 22,
+      "extra_expected": 22,
+      "extra_unexpected": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "unexpected_extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "market": {
+      "old": 7,
+      "new": 7,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "extra_expected": 0,
+      "extra_unexpected": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "unexpected_extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "announcements": {
+      "old": 203,
+      "new": 203,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "extra_expected": 0,
+      "extra_unexpected": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "unexpected_extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "gap_2026_10_05_filled_rows": 277,
+    "value_conflicts": 0,
+    "ok": true
+  },
+  "generated_at": "2026-10-11T11:04:41+00:00"
+}
