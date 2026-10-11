@@ -1,0 +1,82 @@
+# One-off (but repeatable) migration of all existing history into PRODUCTION. Run it by hand once the accounts and
+# secrets exist: Actions → "Migrate history" → Run workflow. Re-running it adds nothing (each step is idempotent).
+#
+# It rebuilds everything from sources anyone can re-check, exactly as done and verified locally on 2026-10-11
+# (docs/phase2-verification.md):
+#   1. clones the three old repos (while they are public; afterwards add an OLD_REPOS_TOKEN secret with read access)
+#   2. re-downloads every PDMO original and checks each against the old database's recorded SHA-256
+#   3. rebuilds the bond database's row history from its git versions (self-verified)
+#   4. saves the CSE's one-year chart history (fills the missed 2026-10-05 session)
+#   5. replays bonds and CSE through the new parsers and reconciles with the old tables
+#   6. archives every file of every old repo plus full-history bundles, checked against the audit baselines
+# The three reconciliation reports are attached to the run as an artifact. The run fails if any check fails.
+name: "Migrate history (manual)"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate-history
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      RAW_STORE: s3
+      S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      OLD_REPOS_TOKEN: ${{ secrets.OLD_REPOS_TOKEN }}
+      WORK: ${{ github.workspace }}/../work
+    steps:
+      - name: Configured?
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$S3_BUCKET" ]; then
+            echo "::error::DATABASE_URL / S3_BUCKET secrets are not set (docs/architecture.md §19)"; exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen --no-dev
+      - name: Clone the old repos (read-only)
+        run: |
+          mkdir -p "$WORK" && cd "$WORK"
+          auth=""; [ -n "$OLD_REPOS_TOKEN" ] && auth="x-access-token:${OLD_REPOS_TOKEN}@"
+          for r in CSE Nelson-Siegel Crypto; do
+            git clone --quiet "https://${auth}github.com/MinimumLizard/$r.git" "$r"
+          done
+          git -C Crypto fetch --quiet origin data:refs/remotes/origin/data
+      - name: Full-history bundles
+        run: bash scripts/backup_repos.sh "$WORK/bundles"
+      - name: Re-download the PDMO originals and check their fingerprints
+        run: uv run --no-dev python scripts/archive_pdmo_files.py --db "$WORK/Nelson-Siegel/data/sgcp.sqlite" --out "$WORK/pdmo"
+      - name: Rebuild the bond database's row history from git (self-verifying)
+        run: uv run --no-dev python scripts/bond_db_history.py --repo "$WORK/Nelson-Siegel" --out "$WORK/bond_db_history.sqlite"
+      - name: Save the CSE one-year chart history
+        run: uv run --no-dev python scripts/archive_cse_history.py --out "$WORK/cse_chart"
+      - name: Migrate bonds (replay + reconcile)
+        run: >-
+          uv run --no-dev python -m data_platform.migration.bonds --old-db "$WORK/Nelson-Siegel/data/sgcp.sqlite"
+          --old-history "$WORK/bond_db_history.sqlite" --pdmo-archive "$WORK/pdmo" --report reports/bonds.json
+      - name: Migrate CSE (replay + reconcile)
+        run: >-
+          uv run --no-dev python -m data_platform.migration.cse --old-repo "$WORK/CSE" --chart-archive "$WORK/cse_chart"
+          --report reports/cse.json
+      - name: Archive every old file and check the audit baselines
+        run: >-
+          uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"
+          --crypto "$WORK/Crypto" --bundles "$WORK/bundles" --report reports/legacy.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-reports
+          path: reports/

@@ -235,13 +235,17 @@ def reconcile(conn, repo: Path) -> dict:
                                                 for k in differ[:3]]},
                         "ok": not missing and not unexpected and not differ}
 
-    is_gap_fill = lambda k: k[0] == "2026-10-05" and k[-1] == "backfill"   # noqa: E731 - filled from the 2026-10-11 archive
-
     old_p = {}
     for r in csv.DictReader((hist / "prices.csv").open(newline="")):
         old_p[(r["date"], r["symbol"], r["source"])] = (
             _num(r["close"]), _num(r["previous_close"]), _num(r["high"]), _num(r["low"]), _num(r["volume"]),
             _num(r["turnover"]), _num(r["turnover_est"]))
+    old_sessions = {k[0] for k in old_p}
+
+    def is_gap_fill(k) -> bool:
+        """Chart-history rows for a session the old CSVs do not have at all: a day the old daily job missed
+        (2026-10-05, and any later one), restored from the chart archive. Expected, and reported."""
+        return k[-1] == "backfill" and k[0] not in old_sessions
     new_p = {}
     for r in conn.execute("select * from cse.prices_daily"):
         vol = r["volume_regular"] if r["source"] == "daily" else r["volume_total"]
@@ -272,6 +276,7 @@ def reconcile(conn, repo: Path) -> dict:
 
     gap = conn.execute("""select count(*) n from cse.prices_daily where session_date = '2026-10-05'""").fetchone()["n"]
     report["gap_2026_10_05_filled_rows"] = gap
+    report["sessions_restored_from_chart"] = sorted({k[0] for k in new_p if is_gap_fill(k)})
     report["value_conflicts"] = conn.execute("select count(*) n from ops.value_conflicts").fetchone()["n"]
     report["ok"] = all(v.get("ok") for v in report.values() if isinstance(v, dict)) and report["value_conflicts"] == 0
     return report
