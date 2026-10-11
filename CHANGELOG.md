@@ -16,6 +16,10 @@
     recorded at the time;
   - `archive_cse_history.py`: saves the CSE's one-year chart history for every share and index, including the missed
     2026-10-05 session.
+- Results: all 678 PDMO originals re-downloaded and matched their recorded SHA-256 (one needed a retry after a
+  transient 404). The CSE chart archive holds 302 shares and 22 indices, 277 of the shares with a 2026-10-05 bar. The
+  bond row history covers 62 versions with 0 mismatches. These were packaged as `safety-copies-2026-10-11.tar.xz` (35.6 MB,
+  SHA-256 `2e3e507c…`) and handed to the owner. They are not in git.
 - Roadmap: instructions for the owner to fix the bond collector's 2027 rollover (this session may not change the old
   repos).
 
