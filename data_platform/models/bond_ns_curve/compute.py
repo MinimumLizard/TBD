@@ -2,7 +2,10 @@
 
 Version 1 is the old tool's curves/fit.py (MinimumLizard/Nelson-Siegel@1c33084), ported line for line and run
 against the same tables: dealer quote mids are fitted by weighted least squares at a fixed lambda, each quote
-weighted by 1/spread^2; executed trades are held out of the fit and compared with it afterwards. See METHOD.md.
+weighted by 1/spread^2; executed trades are held out of the fit and compared with it afterwards.
+
+Version 2 (decision 0014) fits every two-way quote from bond_identity version 2, step-coupon and administered bonds
+included, still weighted by 1/spread^2. See METHOD.md.
 """
 from __future__ import annotations
 
@@ -23,8 +26,9 @@ def _years(obs_date: dt.date, maturity: dt.date) -> float:
     return (maturity - obs_date).days / 365.25
 
 
-def load_day(conn, obs_date: str):
-    """Quotes to fit (step-coupon bonds and the last month of a bond's life left out), and the day's trades."""
+def load_day(conn, obs_date: str, exclude_step_coupon: bool = True):
+    """Quotes to fit (the last month of a bond's life left out; in version 1, step-coupon bonds too), and the day's
+    trades."""
     quotes = []
     day = dt.date.fromisoformat(obs_date)
     for row in conn.execute(
@@ -32,7 +36,7 @@ def load_day(conn, obs_date: str):
                  FROM observations o JOIN bonds b USING(isin)
                 WHERE o.obs_date = ? AND o.source = 'pdmo_daily'
                   AND o.mid_yield IS NOT NULL AND b.maturity_date IS NOT NULL""", (obs_date,)):
-        if len(series.coupon_steps(row["series_label"])) > 1:
+        if exclude_step_coupon and len(series.coupon_steps(row["series_label"])) > 1:
             continue
         tau = _years(day, dt.date.fromisoformat(row["maturity_date"]))
         if tau < MIN_TAU_YEARS:
@@ -72,9 +76,9 @@ def weights_from_spreads(quotes, max_spread_bp: float = MAX_SPREAD_BP) -> np.nda
     return weights / weights.mean()
 
 
-def fit_day(conn, obs_date: str, lam: float, max_spread_bp: float = MAX_SPREAD_BP):
+def fit_day(conn, obs_date: str, lam: float, max_spread_bp: float = MAX_SPREAD_BP, exclude_step_coupon: bool = True):
     """(summary, points) for one day, or None when fewer than MIN_BONDS quotes are usable."""
-    quotes, trades = load_day(conn, obs_date)
+    quotes, trades = load_day(conn, obs_date, exclude_step_coupon)
     if len(quotes) < MIN_BONDS:
         return None
     tau = np.array([q["tau"] for q in quotes])
@@ -120,10 +124,11 @@ def compute(inputs, as_of):
     conn = build_workspace(inputs, as_of)
     lam = float(inputs.params["lambda_years"])
     max_spread = float(inputs.params.get("max_spread_bp", MAX_SPREAD_BP))
+    exclude_steps = bool(inputs.params.get("exclude_step_coupon_quotes", True))
     fits, points = [], []
     for (obs_date,) in conn.execute("""SELECT DISTINCT obs_date FROM observations
                                        WHERE source='pdmo_daily' AND mid_yield IS NOT NULL ORDER BY obs_date"""):
-        result = fit_day(conn, obs_date, lam, max_spread)
+        result = fit_day(conn, obs_date, lam, max_spread, exclude_steps)
         if result:
             fits.append(result[0])
             points += result[1]

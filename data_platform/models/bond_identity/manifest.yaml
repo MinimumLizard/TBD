@@ -16,7 +16,7 @@ outputs:
   - models.bond_quotes
 versions:
   - method_version: "1.0.0"
-    status: current
+    status: reference
     parameters:
       # The old database file (data/sgcp.sqlite at Nelson-Siegel@1c33084), as archived by the history migration.
       legacy_reference_sha256: 34ec862c837f334d6daf017e538534442e4c7d1ce12161f9e878a1c650537bd9
@@ -24,3 +24,9 @@ versions:
       reference: "MinimumLizard/Nelson-Siegel@1c33084 pipeline/ingest.py, tables bonds and observations"
       tolerance: 0
       notes: Every bond row and every resolved quote must equal the old database exactly.
+  - method_version: "2.0.0"
+    status: current
+    changes: Keeps every quote row (decision 0014); a row is never overwritten by another resolving to the same bond.
+    parameters:
+      legacy_reference_sha256: 34ec862c837f334d6daf017e538534442e4c7d1ce12161f9e878a1c650537bd9
+      keep_every_quote: true

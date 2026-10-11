@@ -1,0 +1,22 @@
+name: cse_market_tape
+market: cse
+title_key: models.cse_market_tape.title
+summary_key: models.cse_market_tape.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current
+  - cse.market_daily
+  - cse.prices_daily_current
+outputs:
+  - models.cse_market_session
+  - models.cse_index_session
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parity:
+      reference: "MinimumLizard/CSE@f263830 cse/metrics.py and cse/build.py (Panel A), run for every stored raw session"
+      tolerance: 1.0e-9
+      notes: >-
+        The CSE publishes its own rounded percentage change for ASPI, S&P SL20 and each sector; the platform
+        computes change / previous value from the published level and change, so those agree to the CSE's
+        rounding (0.005 percentage points), not to 1e-9.

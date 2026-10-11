@@ -29,6 +29,29 @@ The Nelson-Siegel curve gives the yield of a bond with τ years to maturity as
 - Trades (weighted-average yields of bonds that traded) are held out of the fit. Each day stores how many there
   were, their root-mean-square error against the curve, and their median error (the trade bias).
 
+## Method (version 2.0.0, current; decision 0014)
+
+Identical, except that it fits every two-way quote from `bond_identity` version 2, step-coupon and administered
+bonds included. Each quote keeps its 1/spread² weight, so a 100 bp administered quote counts about 1/40th as much
+as a typical 16 bp one: it is in the fit without being able to pull the curve far. One-way quotes have no mid and
+cannot be fitted; the bond page shows them with that note.
+
+Measured effect over the 210 days both versions fitted (`python -m data_platform.models.bond_ns_curve.compare
+1.0.0 2.0.0`, 2026-10-11):
+
+| | version 1 | version 2 |
+|---|---|---|
+| bonds in the fit, per day (mean) | 52.5 | 92.1 |
+| weighted error on its own quotes (median) | 9.48 bp | 26.32 bp |
+| weighted error on version 1's quotes (median) | 9.48 bp | 9.84 bp |
+| curve move at version 1's bonds | | median 2.7 bp, 95th percentile 7.1 bp |
+| error against executed trades (median) | 21.39 bp | 19.47 bp |
+| trade bias (median) | 16.01 bp | 13.40 bp |
+
+The error on its own quotes rises because the administered quotes sit far from any curve; on the bonds both versions
+fit, the curve is almost unchanged, and it is slightly closer to where trades actually printed. Version 1 keeps
+running beside it as the reference series that matches the old tool.
+
 ## Limits
 
 - λ was chosen using the whole sample, including days after any given date. A test of how the residuals behaved

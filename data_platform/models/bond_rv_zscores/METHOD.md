@@ -39,6 +39,12 @@ shown on the site (config/entitlements.yaml).
 - One sample, one market regime. Over a few hundred days a 60-day window is a short history.
 - The residuals inherit the curve's limits, including its whole-sample λ.
 
+## Versions
+
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
+  Bonds that only version 2 fits (the restructuring bonds) appear here too.
+- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
+
 ## Parity
 
 Version 1 reproduces the old tool's per-bond scores (9,285 rows), pair scores (86,829 rows) and both reversion

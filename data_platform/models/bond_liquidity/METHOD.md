@@ -29,6 +29,12 @@ PDMO trade summaries (bonds only), auction results and announcements; the days o
 The thresholds (60, 120, 10, 8, 14 and 7 days) are the old tool's choices, set by inspection of this market's
 history, not by a formal test.
 
+## Versions
+
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
+  Bonds that only version 2 fits (the restructuring bonds) appear here too.
+- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
+
 ## Parity
 
 Version 1 reproduces the old tool's `liquidity.profile()` for every curve day (9,150 bond-days) exactly. The old

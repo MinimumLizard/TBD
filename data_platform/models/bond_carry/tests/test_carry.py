@@ -41,11 +41,20 @@ def test_funding_is_volume_weighted_12_month_bills_plus_the_spread():
 @pytest.mark.db
 def test_carry_on_a_real_day(bond_models):
     conn = bond_models
-    funding = conn.execute("select * from models.bond_funding").fetchone()
+    funding = conn.execute("select * from models.bond_funding where method_version = '1.0.0'").fetchone()
     assert str(funding["obs_date"]) == "2026-08-31" and funding["stale_days"] == 3   # bills from the 08-28 trades
-    rows = conn.execute("select * from models.bond_carry").fetchall()
+    rows = conn.execute("select * from models.bond_carry where method_version = '1.0.0'").fetchall()
     assert len(rows) > 40
     for r in rows:
         assert r["total_bp"] == pytest.approx(r["carry_bp"] + r["roll_bp"])
         assert r["carry_bp"] == pytest.approx((r["entry_yield"] - funding["rate_pct"]) * 100)
         assert r["per_duration_bp"] == pytest.approx(r["total_bp"] / r["duration"])
+
+
+@pytest.mark.db
+def test_step_coupon_bonds_are_never_priced(bond_models):
+    from data_platform.collectors.pdmo import series
+    rows = bond_models.execute("""select c.isin, r.series_label from models.bond_carry c
+                                  join models.bond_reference r on r.isin = c.isin and r.method_version = '2.0.0'
+                                  where c.method_version = '1.1.0'""").fetchall()
+    assert rows and all(len(series.coupon_steps(r["series_label"])) <= 1 for r in rows)

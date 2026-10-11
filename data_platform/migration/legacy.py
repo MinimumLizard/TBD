@@ -45,6 +45,11 @@ AUDIT_BASELINES = {   # docs/audit.md Appendix A (first 16 hex characters of SHA
     ("CSE", "data/runs.csv"): "389384458ef01f3a",
     ("Nelson-Siegel", "data/sgcp.sqlite"): "34ec862c837f334d",
 }
+# The commits the audit fingerprinted (docs/audit.md). The baselines are checked against these, whatever the old
+# repos' latest commit is by the time the migration runs (they keep collecting daily until cut-over).
+AUDITED = {"CSE": ("CSE", "f263830"), "Nelson-Siegel": ("Nelson-Siegel", "1c33084"),
+           "Crypto": ("Crypto", "4dc446a"), "Crypto@data": ("Crypto", "fce882b")}
+
 GROUP_BASELINES = {   # hash of the sorted "sha256  <path>" lines exactly as `sha256sum` printed them in the audit
     # (repo, path prefix, how the audit's `find` wrote the path): expected
     ("CSE", "data/raw/", "data/raw/"): "414cd7d24b457932",   # find data/raw -type f, run from the repo root
@@ -56,7 +61,8 @@ def git(repo: Path, *args: str) -> bytes:
     return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True).stdout
 
 
-def archive_tree(conn, store, repo: Path, name: str, ref: str, files: dict) -> int:
+def archive_tree(conn, store, repo: Path, name: str, ref: str, files: dict, key: str | None = None) -> int:
+    """Archive every file of `repo` at `ref`; record {(key, path): sha256} in `files` (key defaults to name)."""
     commit = git(repo, "rev-parse", "--short", ref).decode().strip()
     n = 0
     for line in git(repo, "ls-tree", "-r", "-z", ref).split(b"\0"):
@@ -71,8 +77,8 @@ def archive_tree(conn, store, repo: Path, name: str, ref: str, files: dict) -> i
         db.record_fetch(conn, store, source_id=f"legacy_{name.lower().replace('-', '_')}", method="GIT",
                         url=f"git://github.com/MinimumLizard/{name}@{commit}/{path}", params={"ref": ref},
                         http_status=200, body=body, content_type=None, fetched_at=dt.datetime.now(dt.timezone.utc),
-                        origin="migration", note="old repo file at the audited commit")
-        files[(name if ref in ("HEAD", "main") or name != "Crypto" else f"{name}@data", path)] = rawstore.sha256_of(body)
+                        origin="migration", note=f"old repo file at {commit}")
+        files[(key or name, path)] = rawstore.sha256_of(body)
         n += 1
     conn.commit()
     return n
@@ -123,13 +129,17 @@ def main(argv=None) -> int:
     conn = db.connect(s.database_url)
     db.migrate(conn)
     store = rawstore.from_settings(s)
+    clones = {"CSE": args.cse, "Nelson-Siegel": args.ns, "Crypto": args.crypto}
     files: dict = {}
-    counts = {
-        "CSE": archive_tree(conn, store, args.cse, "CSE", "HEAD", files),
-        "Nelson-Siegel": archive_tree(conn, store, args.ns, "Nelson-Siegel", "HEAD", files),
-        "Crypto (code branch)": archive_tree(conn, store, args.crypto, "Crypto", "HEAD", files),
-        "Crypto (data branch)": archive_tree(conn, store, args.crypto, "Crypto", "origin/data", files),
-    }
+    latest: dict = {}
+    counts = {}
+    for key, (name, commit) in AUDITED.items():           # the audited commits: checked against the baselines
+        counts[f"{key} @{commit}"] = archive_tree(conn, store, clones[name], name, commit, files, key=key)
+    for key, ref in (("CSE", "HEAD"), ("Nelson-Siegel", "HEAD"), ("Crypto", "HEAD"), ("Crypto@data", "origin/data")):
+        name = AUDITED[key][0]                              # and the latest state, which may be newer
+        head = git(clones[name], "rev-parse", "--short", ref).decode().strip()
+        if head != AUDITED[key][1]:
+            counts[f"{key} @{head} (latest)"] = archive_tree(conn, store, clones[name], name, ref, latest, key=key)
     bundles = {name: archive_bundle(conn, store, args.bundles / f"{name}.bundle", name)
                for name in ("CSE", "Nelson-Siegel", "Crypto")}
     checks = check_baselines(conn, store, files)

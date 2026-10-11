@@ -28,6 +28,21 @@ teach the model each bond's ISIN, maturity, coupon and series label. Each quote 
 Rows that match none of these are left out. In practice these are the 2023 restructuring bonds (step coupons,
 posted at 13.00/12.00 every day, 100 bp wide) and one-way quotes.
 
+## Method (version 2.0.0, current; decision 0014)
+
+The same order and the same matching, with two changes:
+
+- **No quote is left out.** A row that matches no released ISIN, including the restructuring bonds and one-way
+  quotes, is keyed on its own cash flows: `SYN:<maturity>:<coupon>`, or for a step-coupon bond every rate in turn
+  (`SYN:2027-12-15:12.000%9.000`). Version 2 holds about 92 quotes a day against version 1's 52.5.
+- **No quote overwrites another.** When two rows resolve to the same bond on the same day, the row identified most
+  directly keeps it (exact label, then label without its letter, then maturity and coupon), and the other is keyed
+  on its own cash flows. This keeps the 13.00%2029A quote that version 1 loses every day.
+
+One-way quotes are kept with their bid or offer and no mid; the curve cannot fit them (see `bond_ns_curve`).
+
+Version 1 keeps running beside version 2 as the reference series that matches the old tool.
+
 ## Limits
 
 - The old tool learned some labels and coupons from earlier versions of its parsers. Those survive only in its

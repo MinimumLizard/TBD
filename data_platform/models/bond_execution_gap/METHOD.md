@@ -23,6 +23,12 @@ The quote and trade points of `bond_ns_curve` (the same yields the curve stores)
 The gap has ranged over more than 140 bp in this history, and a 20-day median of a few dozen observations moves
 with it. It describes a recent regime, not a precise level.
 
+## Versions
+
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
+  Bonds that only version 2 fits (the restructuring bonds) appear here too.
+- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
+
 ## Parity
 
 Version 1 reproduces the old tool's `execution.gap()` for every curve day (209 days) exactly. Report:

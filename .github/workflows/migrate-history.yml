@@ -8,7 +8,11 @@
 #   3. rebuilds the bond database's row history from its git versions (self-verified)
 #   4. saves the CSE's one-year chart history (fills the missed 2026-10-05 session)
 #   5. replays bonds and CSE through the new parsers and reconciles with the old tables
-#   6. archives every file of every old repo plus full-history bundles, checked against the audit baselines
+#   6. archives every file of every old repo (at the audited commits, checked against the audit baselines, and at
+#      their latest commits) plus full-history bundles
+# The old repos keep collecting until cut-over, so steps 2-5 use their LATEST state (all history to date), while the
+# audit fingerprints are checked at the audited commits. bond_identity v1 starts from the old tool's bond list at the
+# audited commit (decision 0015), which is what its parity was proven against.
 # The three reconciliation reports are attached to the run as an artifact. The run fails if any check fails.
 name: "Migrate history (manual)"
 
@@ -55,6 +59,7 @@ jobs:
             git clone --quiet "https://${auth}github.com/MinimumLizard/$r.git" "$r"
           done
           git -C Crypto fetch --quiet origin data:refs/remotes/origin/data
+          git -C Nelson-Siegel show 1c33084:data/sgcp.sqlite > sgcp-1c33084.sqlite
       - name: Full-history bundles
         run: bash scripts/backup_repos.sh "$WORK/bundles"
       - name: Re-download the PDMO originals and check their fingerprints
@@ -66,6 +71,8 @@ jobs:
       - name: Migrate bonds (replay + reconcile)
         run: >-
           uv run --no-dev python -m data_platform.migration.bonds --old-db "$WORK/Nelson-Siegel/data/sgcp.sqlite"
+          --old-commit "$(git -C "$WORK/Nelson-Siegel" rev-parse --short HEAD)"
+          --legacy-reference-db "$WORK/sgcp-1c33084.sqlite"
           --old-history "$WORK/bond_db_history.sqlite" --pdmo-archive "$WORK/pdmo" --report reports/bonds.json
       - name: Migrate CSE (replay + reconcile)
         run: >-
@@ -75,6 +82,8 @@ jobs:
         run: >-
           uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"
           --crypto "$WORK/Crypto" --bundles "$WORK/bundles" --report reports/legacy.json
+      - name: Compute every model on the migrated history
+        run: uv run --no-dev python -m data_platform.jobs.models
       - uses: actions/upload-artifact@v4
         if: always()
         with:

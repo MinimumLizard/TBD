@@ -1,0 +1,104 @@
+{
+  "checks": [
+    {
+      "table": "cse_market_tape: index level and change",
+      "old_rows": 120,
+      "new_rows": 120,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 4.078515303262975e-12,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "cse_market_tape: TRI percentage change",
+      "old_rows": 10,
+      "new_rows": 10,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.235990476633475e-16,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "cse_market_tape: index percentage change (CSE-rounded)",
+      "old_rows": 110,
+      "new_rows": 110,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 4.485506441581459e-05,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "cse_market_tape: market activity, flows, valuation, breadth",
+      "old_rows": 5,
+      "new_rows": 5,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "cse_security_metrics: watchlist shares",
+      "old_rows": 200,
+      "new_rows": 200,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.1324274851176597e-14,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "cse_security_metrics: percentage change (CSE-rounded)",
+      "old_rows": 200,
+      "new_rows": 200,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.474514954580286e-16,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    }
+  ],
+  "sessions": [
+    "2026-10-02",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09"
+  ],
+  "ok": true,
+  "old_code_compared": true,
+  "generated_at": "2026-10-11T12:28:32+00:00"
+}

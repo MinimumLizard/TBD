@@ -18,7 +18,7 @@ import datetime as dt
 import math
 
 from .._lib import bond_workspace as ws, nelson_siegel as ns
-from ...collectors.pdmo import isin as isin_module
+from ...collectors.pdmo import isin as isin_module, series
 
 FUNDING_SPREAD_BP = 5.0
 BILL_MIN_DAYS = 240
@@ -80,9 +80,11 @@ def profile(conn, obs_date: str, entry_gap_bp: float = 0.0, spread_bp: float = F
     lam = fit["lambda_years"]
     out = {}
     for row in conn.execute(
-            """SELECT r.isin, r.tau_years, r.observed_yield, b.coupon_pct
+            """SELECT r.isin, r.tau_years, r.observed_yield, b.coupon_pct, b.series_label
                  FROM curve_residuals r JOIN bonds b USING(isin)
                 WHERE r.obs_date = ? AND r.source = 'quote' AND b.coupon_pct IS NOT NULL""", (obs_date,)):
+        if len(series.coupon_steps(row["series_label"])) > 1:
+            continue     # a level-coupon formula cannot price a step-coupon bond (none reach the version 1 curve)
         tau = row["tau_years"]
         entry = row["observed_yield"] + entry_gap_bp / 100.0
         price, duration = price_and_duration(entry, row["coupon_pct"], tau)

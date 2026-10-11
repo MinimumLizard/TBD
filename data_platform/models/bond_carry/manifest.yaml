@@ -10,7 +10,7 @@ outputs:
   - models.bond_carry
 versions:
   - method_version: "1.0.0"
-    status: current
+    status: reference
     requires_models: { bond_identity: "1.0.0", bond_ns_curve: "1.0.0", bond_execution_gap: "1.0.0" }
     parameters:
       # The old tool's dealer margin over the 12-month bill. A personal assumption, kept for parity; see METHOD.md.
@@ -18,3 +18,9 @@ versions:
     parity:
       reference: "MinimumLizard/Nelson-Siegel@1c33084 signals/carry.py profile() and funding_rate(), run on the old database for every curve day with the execution gap as entry shift"
       tolerance: 1.0e-9
+  - method_version: "1.1.0"
+    status: current
+    changes: Same method; reads the version 2 curve (every two-way quote, decision 0014).
+    requires_models: { bond_identity: "2.0.0", bond_ns_curve: "2.0.0", bond_execution_gap: "1.1.0" }
+    parameters:
+      funding_spread_bp: 5.0

@@ -3,7 +3,11 @@
 Version 1 reproduces the old tool exactly: starting from the old tool's own bond list (bonds.legacy_reference),
 every stored PDMO file is replayed, in the old tool's order, through its ported ingest logic
 (models/_lib/bond_workspace.py), and the resulting bond list and resolved quotes are the outputs. Quotes the old logic could not tie to a bond (the administered restructuring block, one-way quotes) are
-left out, as they were. See METHOD.md.
+left out, as they were.
+
+Version 2 (decision 0014) keeps every quote row: each is tied to a bond the same way, except that no row is left out
+and none overwrites another; a row that cannot be tied to a released ISIN is keyed on its own cash flows. See
+METHOD.md.
 """
 from __future__ import annotations
 
@@ -35,6 +39,7 @@ def replay(inputs, as_of):
         for row in inputs.rows(table, order_by="raw_sha256, parser_version, row_no"):
             facts.setdefault((kind, row["raw_sha256"], row["parser_version"]), []).append(row)
 
+    keep_every_quote = bool(inputs.params.get("keep_every_quote"))
     conn = ws.open_workspace()
     seed = inputs.params.get("legacy_reference_sha256")
     if seed:   # start from the old tool's own bond list (decision 0015)
@@ -49,6 +54,8 @@ def replay(inputs, as_of):
         day = f["report_date"].isoformat()
         if f["kind"] == "volumes":
             ws.ingest_volumes(conn, day, rows)
+        elif f["kind"] == "daily_summary" and keep_every_quote:
+            ws.ingest_daily_summary_all(conn, day, rows, ref, resolved)
         elif f["kind"] == "daily_summary":
             ws.ingest_daily_summary(conn, day, rows, ref, resolved)
         elif f["kind"] == "trade_summary":

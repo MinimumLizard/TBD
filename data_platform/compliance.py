@@ -2,8 +2,9 @@
 
     python -m data_platform.compliance        # exit 1 and list every hit
 
-User-facing text is defined by USER_FACING below. It grows as the product does: the web app's message files and
-every model's manifest and METHOD page are scanned automatically once they exist.
+User-facing text is defined by USER_FACING below. It grows as the product does: the web app's message files, every
+model's manifest and METHOD page, the models' own code (their labels end up on the page) and the web app's code are
+scanned automatically once they exist. Tests are not scanned: they may need to name a banned phrase to test it.
 """
 from __future__ import annotations
 
@@ -22,6 +23,13 @@ USER_FACING = [
     "data_platform/models/*/manifest.yaml",
     "data_platform/models/*/METHOD.md",
     "compliance/disclaimers.yaml",
+    # Code that produces or presents model outputs (hard rule 4 covers code and output labels, not only copy):
+    "data_platform/models/*.py",
+    "data_platform/models/*/*.py",
+    "web/app/**/*.ts",
+    "web/app/**/*.tsx",
+    "web/lib/**/*.ts",
+    "web/components/**/*.tsx",
 ]
 
 

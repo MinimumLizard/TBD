@@ -30,6 +30,10 @@ jobs:
       - run: uv sync --frozen
       - name: Tests (collectors, database guard rails, gap check, backups, repo rules)
         run: uv run pytest -m "not legacy"
+      - name: Model registry (every manifest valid; the web app's copy of it up to date)
+        run: |
+          uv run python -m data_platform.models.registry check
+          uv run python -m data_platform.models.registry export-web --check-only
       - name: Copy lint (banned advice language in user-facing text)
         run: uv run python -m data_platform.compliance
       - name: Source register (no prohibited source enabled)

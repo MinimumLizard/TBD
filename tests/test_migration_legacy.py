@@ -2,7 +2,8 @@
 at them (it is run before every cut-over decision, and its report is committed under docs/migration/):
 
     LEGACY_NS_DB=<Nelson-Siegel clone>/data/sgcp.sqlite  LEGACY_PDMO_ARCHIVE=<archive>/pdmo \
-    LEGACY_CSE_REPO=<CSE clone>  LEGACY_CSE_CHART_ARCHIVE=<archive>/cse_chart_2026-10-11  pytest -m legacy
+    LEGACY_CSE_REPO=<CSE clone>  LEGACY_CSE_CHART_ARCHIVE=<archive>/cse_chart_2026-10-11 \
+    LEGACY_NS_CODE=<Nelson-Siegel clone at 1c33084>  pytest -m legacy
 """
 from __future__ import annotations
 
@@ -60,4 +61,17 @@ def test_bond_models_version_1_reproduce_the_old_tool(conn, store):
     sha = bonds.archive_legacy_file(conn, store, Path(old_db), "data/sgcp.sqlite")
     assert bonds.load_legacy_reference(conn, Path(old_db), sha)["ok"]
     report = parity.bonds_parity(conn, Path(old_db), Path(old_code))
+    assert report["ok"], [c for c in report["checks"] if not c["ok"]]
+
+
+@pytest.mark.db
+def test_cse_models_version_1_reproduce_the_old_terminal(conn, store):
+    """Phase 3 parity for the CSE market summary and per-share metrics, against the old terminal's own code."""
+    from data_platform.migration import cse, parity_cse
+
+    repo, chart = os.environ.get("LEGACY_CSE_REPO"), os.environ.get("LEGACY_CSE_CHART_ARCHIVE")
+    if not (repo and chart):
+        pytest.skip("LEGACY_CSE_REPO / LEGACY_CSE_CHART_ARCHIVE not set")
+    cse.load(conn, store, Path(repo), Path(chart))
+    report = parity_cse.cse_parity(conn, Path(repo))
     assert report["ok"], [c for c in report["checks"] if not c["ok"]]

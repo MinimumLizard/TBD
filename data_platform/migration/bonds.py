@@ -40,10 +40,10 @@ def _d(value) -> dt.date | None:
     return dt.date.fromisoformat(value) if value else None
 
 
-def archive_legacy_file(conn, store, path: Path, label: str) -> str:
+def archive_legacy_file(conn, store, path: Path, label: str, commit: str = OLD_COMMIT) -> str:
     body = path.read_bytes()
     _, digest = db.record_fetch(
-        conn, store, source_id=LEGACY_SOURCE, method="GIT", url=f"git://github.com/MinimumLizard/Nelson-Siegel@{OLD_COMMIT}/{label}",
+        conn, store, source_id=LEGACY_SOURCE, method="GIT", url=f"git://github.com/MinimumLizard/Nelson-Siegel@{commit}/{label}",
         params={}, http_status=200, body=body, content_type="application/vnd.sqlite3",
         fetched_at=dt.datetime.now(dt.timezone.utc), origin="migration", note=f"old repo file {label}", ext="sqlite")
     return digest
@@ -254,19 +254,26 @@ def main(argv=None) -> int:
     ap.add_argument("--pdmo-archive", type=Path, required=True)
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--no-network", action="store_true", help="don't read today's index pages (label dates unknown)")
+    ap.add_argument("--old-commit", default=OLD_COMMIT, help="the Nelson-Siegel commit --old-db was taken from")
+    ap.add_argument("--legacy-reference-db", type=Path,
+                    help="the old database whose bond list bond_identity v1 starts from (default: --old-db). The "
+                         "manifest pins the audited one, 1c33084: git show 1c33084:data/sgcp.sqlite > file")
     args = ap.parse_args(argv)
     s = settings_mod.load()
     conn = db.connect(s.database_url)
     db.migrate(conn)
     store = rawstore.from_settings(s)
-    old_db_sha = archive_legacy_file(conn, store, args.old_db, "data/sgcp.sqlite")
+    old_db_sha = archive_legacy_file(conn, store, args.old_db, "data/sgcp.sqlite", args.old_commit)
+    ref_db = args.legacy_reference_db or args.old_db
+    ref_sha = (archive_legacy_file(conn, store, ref_db, "data/sgcp.sqlite") if args.legacy_reference_db
+               else old_db_sha)
     if args.old_history:
         archive_legacy_file(conn, store, args.old_history, "bond_db_history.sqlite (rebuilt from git, verified)")
     conn.commit()
     loaded = load(conn, store, args.old_db, args.pdmo_archive, None if args.no_network else PoliteClient(min_interval=1.5),
                   dt.date.today())
     reconciliation = reconcile(conn, args.old_db)
-    reconciliation["legacy_reference"] = load_legacy_reference(conn, args.old_db, old_db_sha)
+    reconciliation["legacy_reference"] = load_legacy_reference(conn, ref_db, ref_sha)
     reconciliation["ok"] = reconciliation["ok"] and reconciliation["legacy_reference"]["ok"]
     report = {"loaded": loaded, "reconciliation": reconciliation,
               "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),

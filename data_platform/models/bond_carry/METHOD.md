@@ -32,6 +32,12 @@ The day's curve and quote residuals (`bond_ns_curve`), coupons (`bond_identity`)
 - Tax is not modelled. Coupon income and price accretion may be taxed differently.
 - The bill rate can be up to 30 days stale; staleness is stored with each day's funding rate.
 
+## Versions
+
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
+  Step-coupon bonds, which now reach the curve, are left out here: a level-coupon formula cannot price them.
+- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
+
 ## Parity
 
 Version 1 reproduces the old tool's `carry.funding_rate()` (209 days) and `carry.profile()` (10,975 bond-days) for

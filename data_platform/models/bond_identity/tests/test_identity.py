@@ -10,7 +10,7 @@ from data_platform.models._lib import bond_workspace as ws
 
 def _quote(label, maturity, coupon, bid=10.2, offer=10.0, printed=None):
     return {"series_label": label, "printed_label": printed or label, "maturity_date": dt.date.fromisoformat(maturity),
-            "coupon_pct": coupon, "bid_yield": bid, "offer_yield": offer}
+            "coupon_pct": coupon, "bid_yield": bid, "offer_yield": offer, "bid_price": None, "offer_price": None}
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_only_real_two_way_single_coupon_quotes_get_a_synthetic_key():
 @pytest.mark.db
 def test_fixture_files_resolve_and_trace_back_to_their_file(bond_models):
     conn = bond_models
-    quotes = conn.execute("select * from models.bond_quotes").fetchall()
+    quotes = conn.execute("select * from models.bond_quotes where method_version = '1.0.0'").fetchall()
     daily_sha = conn.execute("select raw_sha256 from bonds.source_files where kind = 'daily_summary'").fetchone()
     assert len(quotes) == 53                                     # of 92 rows: step-coupon and administered left out
     assert {q["raw_sha256"] for q in quotes} == {daily_sha["raw_sha256"]}
@@ -59,7 +59,8 @@ def test_fixture_files_resolve_and_trace_back_to_their_file(bond_models):
     assert "LKB00530H016" in by_label                           # 10.00%2030A, named in the 2026-01-12 auction
     for q in quotes:
         assert q["mid_yield"] == pytest.approx((q["bid_yield"] + q["offer_yield"]) / 2)
-    synthetic = conn.execute("select isin, series_label from models.bond_reference where isin like 'SYN:%'").fetchall()
+    synthetic = conn.execute("""select isin, series_label from models.bond_reference
+                                where method_version = '1.0.0' and isin like 'SYN:%'""").fetchall()
     assert synthetic and all("%" in s["series_label"] and s["series_label"].count("%") == 1 for s in synthetic)
 
 
@@ -80,3 +81,33 @@ def test_version_1_refuses_to_run_without_the_old_bond_list(bond_facts):
     from conftest import run_models
     with pytest.raises(RuntimeError, match="legacy_reference"):
         run_models(bond_facts, ["bond_identity"])
+
+
+@pytest.mark.db
+def test_version_2_keeps_every_quote_row(bond_models):
+    conn = bond_models
+    n_rows = conn.execute("select count(*) n from bonds.quotes").fetchone()["n"]
+    v2 = conn.execute("select * from models.bond_quotes where method_version = '2.0.0'").fetchall()
+    assert len(v2) == n_rows == 92
+    def prices(rows):
+        return {(q["obs_date"], q["bid_yield"], q["offer_yield"], q["bid_price"], q["offer_price"]) for q in rows}
+    v1 = conn.execute("select * from models.bond_quotes where method_version = '1.0.0'").fetchall()
+    assert prices(v1) <= prices(v2)                # every quote version 1 kept, version 2 keeps too
+    assert len(prices(v2)) == 92                   # and none is lost to another row's key
+    keys = [r["isin"] for r in conn.execute(
+        "select isin from models.bond_reference where method_version = '2.0.0' and isin like 'SYN:%%'")]
+    steps = [k for k in keys if "%" in k]
+    assert steps                                   # step-coupon bonds keyed on every rate
+
+
+def test_two_rows_resolving_to_one_bond_do_not_overwrite_each_other():
+    conn = ws.open_workspace()
+    ws.upsert_bond(conn, "LKB00529L150", 11.0, "2029-12-15", 5, "2026-01-01", series_label="11.00%2029B")
+    rows = [_quote("11.00%2029B", "2029-12-15", 11.0, 10.3, 10.1),       # exact label
+            _quote("13.00%2029A", "2029-12-15", None, 10.6, 10.4)]       # maturity match, coupon unknown
+    resolved = {}
+    ws.ingest_daily_summary_all(conn, "2026-10-01", rows, "ref", resolved)
+    assert resolved[("2026-10-01", "LKB00529L150")] == "label"
+    assert sorted(k[1] for k in resolved) == ["LKB00529L150", "SYN:2029-12-15:13.000"]
+    stored = {r["isin"]: r["bid_yield"] for r in conn.execute("select * from observations")}
+    assert stored == {"LKB00529L150": 10.3, "SYN:2029-12-15:13.000": 10.6}

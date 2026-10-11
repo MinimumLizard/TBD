@@ -10,7 +10,7 @@ outputs:
   - models.bond_curve_point
 versions:
   - method_version: "1.0.0"
-    status: current
+    status: reference
     requires_models: { bond_identity: "1.0.0" }
     parameters:
       # Calibrated once by the old tool over its whole sample (curve_settings.lambda_years) and held fixed.
@@ -18,3 +18,10 @@ versions:
     parity:
       reference: "MinimumLizard/Nelson-Siegel@1c33084 curves/fit.py, tables curve_fits and curve_residuals"
       tolerance: 1.0e-9
+  - method_version: "2.0.0"
+    status: current
+    changes: Fits every two-way quote, step-coupon and administered bonds included, still weighted 1/spread^2 (decision 0014).
+    requires_models: { bond_identity: "2.0.0" }
+    parameters:
+      lambda_years: 2.821790673757931
+      exclude_step_coupon_quotes: false

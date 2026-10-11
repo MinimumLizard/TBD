@@ -1,0 +1,20 @@
+name: cse_security_metrics
+market: cse
+title_key: models.cse_security_metrics.title
+summary_key: models.cse_security_metrics.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current
+  - cse.prices_daily_current
+  - cse.company_info_daily
+outputs:
+  - models.cse_security_session
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parity:
+      reference: "MinimumLizard/CSE@f263830 cse/metrics.py and cse/build.py (Panel B), run for every watchlist share on every stored raw session"
+      tolerance: 1.0e-9
+      notes: >-
+        The CSE publishes its own rounded percentage change per share; the platform computes change / previous
+        close from the published prices, so the two agree to the CSE's rounding (0.005 percentage points).

@@ -2,8 +2,8 @@
 (audit B6, B7, B11).
 
 Version 1 is the old tool's signals/zscore.py and signals/run.py (MinimumLizard/Nelson-Siegel@1c33084), ported
-line for line. The old tool called these outputs "rich/cheap" and "switch" signals; the platform describes them
-neutrally (a residual above or below the bond's own recent norm) because it gives information, not trade ideas.
+line for line. The old tool labelled these outputs in trading language; the platform describes them neutrally (a
+residual above or below the bond's own recent norm), because it gives information, not trade ideas.
 
     z = (today's residual - mean of the trailing window) / sd of that window
 

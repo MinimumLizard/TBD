@@ -258,6 +258,56 @@ def ingest_daily_summary(conn, obs_date: str, rows: list[dict], raw_ref: str, re
     return how
 
 
+# --- version 2 of bond_identity (decision 0014): every quote row is kept --------------------------------------
+
+PRECEDENCE = {"label": 0, "label-no-letter": 1, "maturity+coupon": 2}
+
+
+def cash_flow_key(quote, taken: set) -> str:
+    """A key for a quote no release ties to an ISIN, built from its own cash flows: maturity and every coupon step
+    (step-coupon bonds keep all their rates, so two bonds differing only in a later step stay distinct)."""
+    steps = series.coupon_steps(quote["series_label"])
+    if len(steps) == 1 and quote["coupon_pct"] is not None:
+        key = isin_mod.synthetic_key(quote["coupon_pct"], quote["maturity_date"])
+    elif steps:
+        key = f"{isin_mod.SYNTHETIC_PREFIX}{iso(quote['maturity_date'])}:{'%'.join(f'{c:.3f}' for c in steps)}"
+    else:
+        key = f"{isin_mod.SYNTHETIC_PREFIX}{iso(quote['maturity_date'])}:{quote['printed_label']}"
+    base, n = key, 2
+    while key in taken:                    # never two rows under one key on one day
+        key, n = f"{base}#{n}", n + 1
+    return key
+
+
+def ingest_daily_summary_all(conn, obs_date: str, rows: list[dict], raw_ref: str, resolved: dict) -> dict:
+    """Like ingest_daily_summary, but no quote is left out and none overwrites another.
+
+    A bond carries one quote a day. When two rows resolve to the same bond (finding V1: the old matcher filed the
+    13.00%2029A quote under the 2029B bond, overwriting one of them every day), the row identified most directly
+    keeps it (exact label, then label without its letter, then maturity and coupon) and the other is keyed on its
+    own cash flows. Rows that resolve to nothing (the restructuring block, one-way quotes) are keyed the same way."""
+    clear_quotes(conn, raw_ref)
+    lookup = bond_lookup(conn)
+    matches = [(i, q, *resolve_isin(lookup, q)) for i, q in enumerate(rows)]
+    best: dict[str, tuple[int, str]] = {}
+    for i, _, key, method in matches:
+        if key is not None and (key not in best or PRECEDENCE[method] < PRECEDENCE[best[key][1]]):
+            best[key] = (i, method)
+    taken = {key for key in best}
+    how = {"label": 0, "label-no-letter": 0, "maturity+coupon": 0, "synthetic": 0}
+    for i, quote, key, method in matches:
+        if key is None or best[key][0] != i:
+            key, method = cash_flow_key(quote, taken), "synthetic"
+            taken.add(key)
+        how[method] += 1
+        upsert_bond(conn, key, quote["coupon_pct"], iso(quote["maturity_date"]), None, obs_date,
+                    notes=quote["printed_label"], series_label=quote["series_label"])
+        upsert_quote(conn, obs_date, key, quote["bid_yield"], quote["offer_yield"], quote["bid_price"],
+                     quote["offer_price"], raw_ref)
+        resolved[(obs_date, key)] = method
+    return how
+
+
 def ingest_trade_summary(conn, obs_date: str, rows: list[dict], raw_ref: str) -> None:
     clear_trade_summary(conn, raw_ref)
     for row in rows:

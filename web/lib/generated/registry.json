@@ -1,0 +1,117 @@
+{
+  "models": {
+    "bond_carry": {
+      "current_version": "1.1.0",
+      "disclaimer_key": "model_general",
+      "free_preview": null,
+      "market": "lk_bonds",
+      "minimum_tier": "pro",
+      "outputs": [
+        "models.bond_funding",
+        "models.bond_carry"
+      ],
+      "summary_key": "models.bond_carry.summary",
+      "title_key": "models.bond_carry.title"
+    },
+    "bond_execution_gap": {
+      "current_version": "1.1.0",
+      "disclaimer_key": "model_general",
+      "free_preview": null,
+      "market": "lk_bonds",
+      "minimum_tier": "plus",
+      "outputs": [
+        "models.bond_execution_gap"
+      ],
+      "summary_key": "models.bond_execution_gap.summary",
+      "title_key": "models.bond_execution_gap.title"
+    },
+    "bond_identity": {
+      "current_version": "2.0.0",
+      "disclaimer_key": "general",
+      "free_preview": null,
+      "market": "lk_bonds",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.bond_reference",
+        "models.bond_quotes"
+      ],
+      "summary_key": "models.bond_identity.summary",
+      "title_key": "models.bond_identity.title"
+    },
+    "bond_liquidity": {
+      "current_version": "1.1.0",
+      "disclaimer_key": "general",
+      "free_preview": null,
+      "market": "lk_bonds",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.bond_liquidity"
+      ],
+      "summary_key": "models.bond_liquidity.summary",
+      "title_key": "models.bond_liquidity.title"
+    },
+    "bond_ns_curve": {
+      "current_version": "2.0.0",
+      "disclaimer_key": "model_general",
+      "free_preview": null,
+      "market": "lk_bonds",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.bond_curve_fit",
+        "models.bond_curve_point"
+      ],
+      "summary_key": "models.bond_ns_curve.summary",
+      "title_key": "models.bond_ns_curve.title"
+    },
+    "bond_rv_zscores": {
+      "current_version": "1.1.0",
+      "disclaimer_key": "model_general",
+      "free_preview": {
+        "delay_days": 5
+      },
+      "market": "lk_bonds",
+      "minimum_tier": "plus",
+      "outputs": [
+        "models.bond_residual_zscore",
+        "models.bond_pair_zscore",
+        "models.model_stats"
+      ],
+      "summary_key": "models.bond_rv_zscores.summary",
+      "title_key": "models.bond_rv_zscores.title"
+    },
+    "cse_market_tape": {
+      "current_version": "1.0.0",
+      "disclaimer_key": "general",
+      "free_preview": null,
+      "market": "cse",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.cse_market_session",
+        "models.cse_index_session"
+      ],
+      "summary_key": "models.cse_market_tape.summary",
+      "title_key": "models.cse_market_tape.title"
+    },
+    "cse_security_metrics": {
+      "current_version": "1.0.0",
+      "disclaimer_key": "general",
+      "free_preview": null,
+      "market": "cse",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.cse_security_session"
+      ],
+      "summary_key": "models.cse_security_metrics.summary",
+      "title_key": "models.cse_security_metrics.title"
+    }
+  },
+  "tiers": [
+    "free",
+    "plus",
+    "pro",
+    "professional"
+  ],
+  "unpublished_outputs": [
+    "models.model_stats"
+  ]
+}

@@ -37,13 +37,24 @@ def test_weights_are_inverse_squared_spreads_floored_capped_and_average_one():
 @pytest.mark.db
 def test_a_real_day_fits_and_residuals_are_observed_minus_fitted(bond_models):
     conn = bond_models
-    fit = conn.execute("select * from models.bond_curve_fit").fetchone()
+    fit = conn.execute("select * from models.bond_curve_fit where method_version = '1.0.0'").fetchone()
     assert str(fit["obs_date"]) == "2026-08-31" and fit["n_quotes"] == 53
     assert fit["lambda_years"] == pytest.approx(2.821790673757931)
     assert 0 < fit["rmse_bp"] < 20
-    points = conn.execute("select * from models.bond_curve_point").fetchall()
+    points = conn.execute("select * from models.bond_curve_point where method_version = '1.0.0'").fetchall()
     assert len(points) == 53
     for p in points:
         assert p["residual_bp"] == pytest.approx((p["observed_yield"] - p["fitted_yield"]) * 100)
         assert p["tau_years"] >= curve.MIN_TAU_YEARS
     assert np.mean([p["weight"] for p in points]) == pytest.approx(1.0)
+
+
+@pytest.mark.db
+def test_version_2_fits_every_two_way_quote(bond_models):
+    conn = bond_models
+    two_way = conn.execute("""select count(*) n from models.bond_quotes q join models.bond_reference r
+                              using (method_version, isin)
+                              where q.method_version = '2.0.0' and q.mid_yield is not null
+                                and (r.maturity_date - q.obs_date) / 365.25 >= 0.08""").fetchone()["n"]
+    fit = conn.execute("select * from models.bond_curve_fit where method_version = '2.0.0'").fetchone()
+    assert fit["n_quotes"] == two_way > 53

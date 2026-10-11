@@ -1,0 +1,27 @@
+# Recompute the models after each collection (and once a day regardless, in case a trigger is missed). A model run
+# only writes rows whose value changed, keeping the old value in models.revisions, so running often is harmless.
+name: "Models"
+
+on:
+  workflow_run:
+    workflows: ["Collect: PDMO bonds", "Collect: CSE end of day", "Collect: CSE one-year history (gap repair)"]
+    types: [completed]
+  schedule:
+    - cron: "52 17 * * *"          # 23:22 Sri Lanka time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: models
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.models
+      timeout: 30
+    secrets: inherit
