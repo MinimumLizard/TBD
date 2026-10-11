@@ -1,0 +1,58 @@
+# Copy lint (decision 0010). CI fails if any user-facing text contains one of these phrases (case-insensitive,
+# whole words). User-facing text = web/messages/*.json, model manifests and METHOD.md files, compliance/*.yaml.
+#
+# The product is information, tools and education only: no buy/sell/hold language, no price targets, no picks,
+# no personalised recommendations (Sri Lanka SEC; owner's hard rule 4).
+#
+# A factual use the product genuinely needs (e.g. "directors bought Rs 12 mn on 3 Oct", or a disclaimer that says
+# what we do NOT do) is allowed only by an entry under `allow`, naming the file, the phrase, a snippet of the
+# surrounding text that must be present on the same line, and the reason. Adding one is a deliberate, visible
+# change in code review.
+
+banned:
+  - buy
+  - sell
+  - hold
+  - strong buy
+  - accumulate
+  - add to
+  - trim
+  - get in
+  - get out
+  - entry point
+  - exit point
+  - price target
+  - target price
+  - fair value of
+  - undervalued
+  - overvalued
+  - cheap
+  - rich
+  - bargain
+  - top pick
+  - top picks
+  - our picks
+  - you should
+  - we recommend
+  - recommended
+  - outperform
+  - underperform
+  - guaranteed
+  - sure thing
+  - can't lose
+  - switch candidate
+  - switch candidates
+
+allow:
+  - file: compliance/disclaimers.yaml
+    phrase: buy
+    context: "recommendation to buy, sell or hold any security"
+    reason: The disclaimer states what the product does not do.
+  - file: compliance/disclaimers.yaml
+    phrase: sell
+    context: "recommendation to buy, sell or hold any security"
+    reason: The disclaimer states what the product does not do.
+  - file: compliance/disclaimers.yaml
+    phrase: hold
+    context: "recommendation to buy, sell or hold any security"
+    reason: The disclaimer states what the product does not do.

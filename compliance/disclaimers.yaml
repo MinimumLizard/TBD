@@ -1,0 +1,21 @@
+# The single place for disclaimer text (decision 0010). Pages and model manifests refer to these by key; no
+# disclaimer is written anywhere else. Translations live beside the English text (si, ta) and are added with the
+# Sinhala and Tamil versions of the site. Wording to be reviewed by the owner's lawyer before launch.
+
+general:
+  en: >-
+    Information and education only. Nothing on this site is investment advice, and nothing here is a
+    recommendation to buy, sell or hold any security. Figures are computed from public sources and may contain
+    errors or delays; check the original source before relying on any number. Past values do not predict future
+    ones.
+
+model_general:
+  en: >-
+    This is the output of a stated statistical method applied to published data. It describes how prices and
+    yields relate to each other under that method's assumptions. It is not a forecast and not advice. The method,
+    its assumptions and its limits are on the method page.
+
+data_sources:
+  en: >-
+    Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka. This service is
+    not affiliated with or endorsed by either.

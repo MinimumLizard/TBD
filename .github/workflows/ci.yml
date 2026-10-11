@@ -1,0 +1,36 @@
+# Runs on every push and pull request. Nothing merges unless this is green (CLAUDE.md conventions).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only-throwaway
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:ci-only-throwaway@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen
+      - name: Tests (collectors, database guard rails, gap check, backups, repo rules)
+        run: uv run pytest -m "not legacy"
+      - name: Copy lint (banned advice language in user-facing text)
+        run: uv run python -m data_platform.compliance
+      - name: Source register (no prohibited source enabled)
+        run: uv run python -c "from data_platform.core import sources; print(len(sources.load()), 'sources valid')"

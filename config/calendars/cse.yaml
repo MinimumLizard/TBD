@@ -1,0 +1,28 @@
+# Colombo Stock Exchange trading calendar: weekdays are sessions unless listed below.
+#
+# These closures were INFERRED from the data (weekdays with no ASPI value in the CSE's own one-year history,
+# docs/audit.md §2.2). The reasons are left unconfirmed rather than guessed. When the CSE publishes its holiday
+# list, confirm each entry (confirmed: true) and add the coming year's dates in advance; until a closure is
+# listed, the gap check reports that day as "unconfirmed closure" and asks.
+name: CSE trading days
+starts: 2025-10-07          # the first session the archive holds
+closures:
+  2025-10-20: {reason: inferred from data, confirmed: false}
+  2025-11-05: {reason: inferred from data, confirmed: false}
+  2025-12-04: {reason: inferred from data, confirmed: false}
+  2025-12-25: {reason: inferred from data, confirmed: false}
+  2026-01-01: {reason: inferred from data, confirmed: false}
+  2026-01-07: {reason: inferred from data, confirmed: false}
+  2026-01-15: {reason: inferred from data, confirmed: false}
+  2026-02-04: {reason: inferred from data, confirmed: false}
+  2026-03-02: {reason: inferred from data, confirmed: false}
+  2026-04-01: {reason: inferred from data, confirmed: false}
+  2026-04-03: {reason: inferred from data, confirmed: false}
+  2026-04-13: {reason: inferred from data, confirmed: false}
+  2026-04-14: {reason: inferred from data, confirmed: false}
+  2026-05-01: {reason: inferred from data, confirmed: false}
+  2026-05-28: {reason: inferred from data, confirmed: false}
+  2026-06-29: {reason: inferred from data, confirmed: false}
+  2026-07-29: {reason: inferred from data, confirmed: false}
+  2026-08-26: {reason: inferred from data, confirmed: false}
+  2026-08-27: {reason: inferred from data, confirmed: false}

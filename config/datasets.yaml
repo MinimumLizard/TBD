@@ -1,0 +1,76 @@
+# What the daily gap check expects (data_platform/jobs/gapcheck.py).
+#
+#   table       the table or *_current view to look in
+#   date_column the column holding the trading day
+#   calendar    config/calendars/<name>.yaml
+#   starts      first day this dataset is expected to have (history before it does not exist)
+#   grace_days  how many business days after a session the data may still legitimately arrive
+#   witnesses   other datasets (keys in this file) that, if they have the day, prove it WAS a session, so a hole
+#               is a real gap (like 2026-10-05) rather than an unlisted holiday. Only same-market datasets: the
+#               bond market was open on days the CSE was closed.
+#   acknowledged  known, explained holes: reported as acknowledged, not as missing
+
+cse.prices_daily:
+  table: cse.prices_daily
+  date_column: session_date
+  calendar: cse
+  starts: 2025-10-07
+  grace_days: 1
+  witnesses: [cse.market_daily]
+
+cse.indices_daily:
+  table: cse.indices_daily
+  date_column: session_date
+  calendar: cse
+  starts: 2025-10-07
+  grace_days: 1
+  witnesses: [cse.prices_daily]
+
+cse.market_daily:
+  table: cse.market_daily
+  date_column: session_date
+  calendar: cse
+  starts: 2026-10-01          # the CSE serves market turnover only for the current session; history starts here
+  grace_days: 1
+  witnesses: [cse.prices_daily]
+
+bonds.quotes:
+  table: bonds.quotes_current
+  date_column: report_date
+  calendar: lk_bond_market
+  starts: 2025-12-01
+  grace_days: 1
+  witnesses: [bonds.trades, bonds.volumes]
+
+bonds.trades:
+  table: bonds.trades_current
+  date_column: obs_date
+  calendar: lk_bond_market
+  starts: 2025-12-01
+  grace_days: 4               # the trade file publishes a day or more later; it has stretched to three
+  witnesses: [bonds.quotes]
+  acknowledged:
+    2026-01-26: >-
+      No trade-summary file is dated 2026-01-26, while two files are dated 2026-01-29; one is probably
+      mislabelled at source (docs/audit.md §3.2). Enquiry with the PDMO pending.
+
+bonds.volumes:
+  table: bonds.volumes_current
+  date_column: obs_date
+  calendar: lk_bond_market
+  starts: 2025-12-01
+  grace_days: 3
+  witnesses: [bonds.quotes]
+  acknowledged:
+    2025-12-11: &derived_date >-
+      The volume file for this day is dated one business day later by the old "date from the data" rule
+      (maturity - remaining years x 365); the PDMO index labels it "as at" this day. Its rows are stored under the
+      later date. Whether to date volumes by the index label instead is a parser change awaiting review
+      (docs/phase2-verification.md, finding V3).
+    2025-12-26: *derived_date
+    2025-12-30: *derived_date
+    2026-01-05: >-
+      Never published: the PDMO index row for this day links a byte-identical copy of the 2026-01-06 volume file.
+    2026-05-11: >-
+      Never published: the PDMO index row for this day links a re-posted copy of the 2026-05-08 volume file
+      (different bytes, identical figures).

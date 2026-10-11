@@ -1,0 +1,24 @@
+# Bonds (PDMO). 19:07, 01:37 and 07:37 Sri Lanka time (cron is UTC). Several attempts a day because GitHub starts scheduled runs late or not at all (audit F6); the collector catches up on anything missed, and a run with nothing new is a quiet no-op.
+name: "Collect: PDMO bonds"
+
+on:
+  schedule:
+    - cron: "37 13 * * *"
+    - cron: "7 20 * * *"
+    - cron: "7 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-pdmo
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect pdmo
+      timeout: 45
+    secrets: inherit

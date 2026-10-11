@@ -66,10 +66,16 @@ def key_for(sha256: str, ext: str) -> str:
     return f"raw/{sha256[:2]}/{sha256}.{ext}"
 
 
+class AlreadyExists(RuntimeError):
+    """A named (non content-addressed) object already exists. Write-once: pick a new name."""
+
+
 class RawStore(Protocol):
     def put(self, data: bytes, ext: str) -> StoredObject: ...
     def get(self, sha256: str, ext: str) -> bytes: ...
     def exists(self, sha256: str, ext: str) -> bool: ...
+    def put_named(self, key: str, data: bytes) -> None: ...
+    def has_key(self, key: str) -> bool: ...
 
 
 class LocalRawStore:
@@ -97,6 +103,19 @@ class LocalRawStore:
 
     def exists(self, sha256: str, ext: str) -> bool:
         return self._path(sha256, ext).exists()
+
+    def has_key(self, key: str) -> bool:
+        return (self.root / key).exists()
+
+    def put_named(self, key: str, data: bytes) -> None:
+        """Write-once object under an explicit name (database exports). Never overwrites."""
+        path = self.root / key
+        if path.exists():
+            raise AlreadyExists(key)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(path.name + f".{os.getpid()}.part")
+        tmp.write_bytes(data)
+        os.replace(tmp, path)
 
 
 class S3RawStore:
@@ -130,6 +149,22 @@ class S3RawStore:
                 return False
             raise
 
+    def has_key(self, key: str) -> bool:
+        from botocore.exceptions import ClientError
+
+        try:
+            self.client.head_object(Bucket=self.bucket, Key=key)
+            return True
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                return False
+            raise
+
+    def put_named(self, key: str, data: bytes) -> None:
+        if self.has_key(key):
+            raise AlreadyExists(key)
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, Metadata={"sha256": sha256_of(data)})
+
     def put(self, data: bytes, ext: str) -> StoredObject:
         digest = sha256_of(data)
         key = key_for(digest, ext)
@@ -144,9 +179,20 @@ class S3RawStore:
         return data
 
 
-def from_settings(settings) -> RawStore:
-    if settings.raw_store.startswith("local:"):
-        return LocalRawStore(settings.raw_store.removeprefix("local:"))
-    if settings.raw_store == "s3":
-        return S3RawStore.from_settings(settings)
-    raise ValueError(f"RAW_STORE must be 'local:<path>' or 's3', got {settings.raw_store!r}")
+def from_settings(settings, secondary: bool = False) -> RawStore:
+    """The primary archive (RAW_STORE, Cloudflare R2), or with secondary=True the second copy (SECONDARY_STORE, B2)."""
+    spec = settings.secondary_store if secondary else settings.raw_store
+    if not spec:
+        raise ValueError("SECONDARY_STORE is not set" if secondary else "RAW_STORE is not set")
+    if spec.startswith("local:"):
+        return LocalRawStore(spec.removeprefix("local:"))
+    if spec == "s3":
+        if not secondary:
+            return S3RawStore.from_settings(settings)
+        import boto3
+
+        client = boto3.client("s3", endpoint_url=settings.secondary_s3_endpoint_url,
+                              aws_access_key_id=settings.secondary_s3_access_key_id,
+                              aws_secret_access_key=settings.secondary_s3_secret_access_key, region_name="auto")
+        return S3RawStore(settings.secondary_s3_bucket, client)
+    raise ValueError(f"store must be 'local:<path>' or 's3', got {spec!r}")

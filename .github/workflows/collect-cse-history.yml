@@ -1,0 +1,22 @@
+# Weekly, Sunday 05:47 Sri Lanka time: re-reads the CSE's one-year chart history and fills any session missing from the database (prices only: the chart has no turnover).
+name: "Collect: CSE one-year history (gap repair)"
+
+on:
+  schedule:
+    - cron: "17 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-cse-history
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect cse_api:history
+      timeout: 60
+    secrets: inherit

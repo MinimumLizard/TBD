@@ -1,0 +1,22 @@
+# Daily 08:53 Sri Lanka time: lists any trading day with missing data, or a closure not yet in the calendar. Fails (so GitHub emails) when there is something to look at.
+name: "Gap check"
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gapcheck
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.gapcheck
+      timeout: 10
+    secrets: inherit

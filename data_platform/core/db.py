@@ -34,7 +34,19 @@ class MigrationChanged(RuntimeError):
 
 
 def migrate(conn: psycopg.Connection, directory: Path = MIGRATIONS_DIR) -> list[str]:
-    """Apply every db/migrations/NNNN_*.sql not yet applied, in order, each in its own transaction."""
+    """Apply every db/migrations/NNNN_*.sql not yet applied, in order, each in its own transaction.
+
+    Safe to call from every job: a Postgres advisory lock makes concurrent callers wait their turn.
+    """
+    conn.execute("select pg_advisory_lock(727272)")
+    try:
+        return _migrate(conn, directory)
+    finally:
+        conn.execute("select pg_advisory_unlock(727272)")
+        conn.commit()
+
+
+def _migrate(conn: psycopg.Connection, directory: Path) -> list[str]:
     with conn.transaction():
         conn.execute("create schema if not exists ops")
         conn.execute("""create table if not exists ops.schema_migrations (

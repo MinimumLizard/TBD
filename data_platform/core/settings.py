@@ -34,6 +34,11 @@ class Settings:
     s3_secret_access_key: str | None
     healthchecks_base_url: str | None  # e.g. https://hc-ping.com/<project ping key>
     environment: str                   # local | staging | production
+    secondary_store: str | None        # second copy of the archive: "local:<path>" or "s3" (Backblaze B2)
+    secondary_s3_endpoint_url: str | None
+    secondary_s3_bucket: str | None
+    secondary_s3_access_key_id: str | None
+    secondary_s3_secret_access_key: str | None
 
 
 def load(dotenv: Path | None = None) -> Settings:
@@ -48,4 +53,9 @@ def load(dotenv: Path | None = None) -> Settings:
         s3_secret_access_key=env("S3_SECRET_ACCESS_KEY"),
         healthchecks_base_url=env("HEALTHCHECKS_BASE_URL"),
         environment=env("APP_ENV", "local"),
+        secondary_store=env("SECONDARY_STORE"),
+        secondary_s3_endpoint_url=env("SECONDARY_S3_ENDPOINT_URL"),
+        secondary_s3_bucket=env("SECONDARY_S3_BUCKET"),
+        secondary_s3_access_key_id=env("SECONDARY_S3_ACCESS_KEY_ID"),
+        secondary_s3_secret_access_key=env("SECONDARY_S3_SECRET_ACCESS_KEY"),
     )

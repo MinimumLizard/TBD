@@ -1,0 +1,24 @@
+# CSE end of day, weekdays 16:07, 18:37 and 22:07 Sri Lanka time. The first run after the API publishes the session stores it; later runs report no new session. The weekly history job repairs any session all three miss (prices only).
+name: "Collect: CSE end of day"
+
+on:
+  schedule:
+    - cron: "37 10 * * 1-5"
+    - cron: "7 13 * * 1-5"
+    - cron: "37 16 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-cse
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect cse_api
+      timeout: 45
+    secrets: inherit

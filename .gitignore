@@ -15,3 +15,6 @@ repo-backup-*/
 __pycache__/
 .venv/
 node_modules/
+
+# Default local raw archive for development (RAW_STORE unset)
+.local/

@@ -1,0 +1,24 @@
+# Sri Lankan government securities market (PDMO daily reports): weekdays are business days unless listed below.
+#
+# INFERRED from the data: weekdays since 2025-12-01 with no PDMO daily summary (docs/audit.md §3.2). Note this
+# calendar differs from the CSE's: the bond market was open on 2026-01-01 and 2026-01-07 when the CSE was closed.
+# Confirm each entry against an official list when available; unlisted closures are reported as
+# "unconfirmed closure" by the gap check.
+name: LKR government securities business days
+starts: 2025-12-01
+closures:
+  2025-12-04: {reason: inferred from data, confirmed: false}
+  2025-12-25: {reason: inferred from data, confirmed: false}
+  2026-01-15: {reason: inferred from data, confirmed: false}
+  2026-02-04: {reason: inferred from data, confirmed: false}
+  2026-03-02: {reason: inferred from data, confirmed: false}
+  2026-04-01: {reason: inferred from data, confirmed: false}
+  2026-04-03: {reason: inferred from data, confirmed: false}
+  2026-04-13: {reason: inferred from data, confirmed: false}
+  2026-04-14: {reason: inferred from data, confirmed: false}
+  2026-05-01: {reason: inferred from data, confirmed: false}
+  2026-05-28: {reason: inferred from data, confirmed: false}
+  2026-06-29: {reason: inferred from data, confirmed: false}
+  2026-07-29: {reason: inferred from data, confirmed: false}
+  2026-08-26: {reason: inferred from data, confirmed: false}
+  2026-08-27: {reason: inferred from data, confirmed: false}

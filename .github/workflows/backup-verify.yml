@@ -1,0 +1,22 @@
+# Monthly: re-reads a random sample of archived objects from both stores and checks every fingerprint.
+name: "Backup: verify a sample"
+
+on:
+  schedule:
+    - cron: "29 4 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-verify
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.backup verify
+      timeout: 60
+    secrets: inherit

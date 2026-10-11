@@ -170,3 +170,43 @@ def test_a_blank_incoming_value_is_not_a_conflict(conn, store):
            "fetched_at": now}
     db.insert_facts(conn, "cse.market_daily", [row], key=["session_date", "source"])
     assert db.insert_facts(conn, "cse.market_daily", [dict(row, turnover=None)], key=["session_date", "source"]) == (0, 0)
+
+
+# --- backups ------------------------------------------------------------------------------------------------------
+
+@pytest.mark.db
+def test_replicate_copies_every_object_once_and_verify_detects_damage(conn, store, tmp_path):
+    from data_platform.core.rawstore import AlreadyExists, LocalRawStore
+    from data_platform.jobs import backup
+
+    second = LocalRawStore(tmp_path / "second")
+    for i in range(3):
+        db.record_fetch(conn, store, source_id="t", method="GET", url=f"https://x/{i}", params={}, http_status=200,
+                        body=f"payload {i}".encode(), content_type="text/plain",
+                        fetched_at=dt.datetime.now(dt.timezone.utc))
+    conn.commit()
+    assert backup.replicate(conn, store, second) == {"copied": 3, "already_present": 0}
+    assert backup.replicate(conn, store, second) == {"copied": 0, "already_present": 3}
+    assert backup.verify(conn, [store, second], seed=1)["checked"] == 3
+    victim = next((tmp_path / "second" / "raw").rglob("*.txt"))
+    victim.write_bytes(b"bit rot")
+    with pytest.raises(IntegrityError):
+        backup.verify(conn, [store, second], seed=1)
+    second.put_named("exports/db/2026-10-11.dump", b"dump")
+    with pytest.raises(AlreadyExists):
+        second.put_named("exports/db/2026-10-11.dump", b"other")       # write-once
+
+
+@pytest.mark.db
+def test_export_produces_a_restorable_dump(conn, tmp_path):
+    import shutil
+
+    from data_platform.core.rawstore import LocalRawStore
+    from data_platform.jobs import backup
+
+    if not shutil.which("pg_dump"):
+        pytest.skip("pg_dump not installed")
+    url = conn.info.dsn
+    out = backup.export(url, [LocalRawStore(tmp_path / "a"), LocalRawStore(tmp_path / "b")], dt.date(2026, 10, 11))
+    dump = (tmp_path / "a" / out["key"]).read_bytes()
+    assert dump.startswith(b"PGDMP") and dump == (tmp_path / "b" / out["key"]).read_bytes()

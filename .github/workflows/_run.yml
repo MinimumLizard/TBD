@@ -1,0 +1,63 @@
+# Shared body of every scheduled job. Called by the small schedule files beside it.
+#
+# Until the owner has created the accounts and added the secrets (docs/architecture.md §19), every job checks for
+# them, says so, and exits successfully, so nothing runs against nothing and no failure emails arrive.
+name: run (shared)
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: python -m <command>
+        required: true
+        type: string
+      timeout:
+        required: false
+        type: number
+        default: 30
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout }}        # a stuck run must never block the queue (audit F15)
+    env:
+      APP_ENV: production
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      RAW_STORE: s3
+      S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      SECONDARY_STORE: s3
+      SECONDARY_S3_ENDPOINT_URL: ${{ secrets.SECONDARY_S3_ENDPOINT_URL }}
+      SECONDARY_S3_BUCKET: ${{ secrets.SECONDARY_S3_BUCKET }}
+      SECONDARY_S3_ACCESS_KEY_ID: ${{ secrets.SECONDARY_S3_ACCESS_KEY_ID }}
+      SECONDARY_S3_SECRET_ACCESS_KEY: ${{ secrets.SECONDARY_S3_SECRET_ACCESS_KEY }}
+      HEALTHCHECKS_BASE_URL: ${{ secrets.HEALTHCHECKS_BASE_URL }}
+    steps:
+      - name: Configured?
+        id: cfg
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$S3_BUCKET" ]; then
+            echo "::notice::Not configured yet (DATABASE_URL / S3_BUCKET secrets missing). Skipping ${{ inputs.command }}."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: astral-sh/setup-uv@v5
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          python-version: "3.12"
+      - if: steps.cfg.outputs.ready == 'true'
+        run: uv sync --frozen --no-dev
+      - name: Database migrations (idempotent)
+        if: steps.cfg.outputs.ready == 'true'
+        run: uv run --no-dev python -m data_platform.jobs.migrate
+      - name: ${{ inputs.command }}
+        if: steps.cfg.outputs.ready == 'true'
+        run: uv run --no-dev python -m ${{ inputs.command }}
