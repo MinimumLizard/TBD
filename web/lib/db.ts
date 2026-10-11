@@ -1,0 +1,89 @@
+// Reads model outputs, and nothing else. The only module that talks to the database.
+//
+// readOutput() takes a `Granted` access from lib/entitlements.ts, so a caller cannot read a model it was not
+// authorised for. It reads only that model's own output tables, never one listed as unpublished, only the current
+// method version, and (for a free preview) only rows dated on or before the preview date.
+import "server-only";
+
+import { Pool, types } from "pg";
+
+import type { Granted } from "./entitlements";
+import { registry } from "./registry";
+
+types.setTypeParser(1082, (v: string) => v); // date -> "YYYY-MM-DD", never shifted by a time zone
+types.setTypeParser(20, (v: string) => Number(v)); // bigint -> number (rupee amounts fit exactly below 2^53)
+
+let pool: Pool | null = null;
+
+function getPool(): Pool {
+  if (!pool) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) throw new Error("DATABASE_URL is not set (see .env.example)");
+    pool = new Pool({ connectionString, max: 5 });
+  }
+  return pool;
+}
+
+const IDENT = /^[a-z_][a-z0-9_]*$/;
+
+// The date column of each output table; a table with none cannot be served as a free preview.
+const DATE_COLUMN: Record<string, string | null> = {
+  "models.bond_reference": null,
+  "models.cse_market_session": "session_date",
+  "models.cse_index_session": "session_date",
+  "models.cse_security_session": "session_date",
+};
+
+export function dateColumn(table: string): string | null {
+  if (table in DATE_COLUMN) return DATE_COLUMN[table];
+  return table.startsWith("models.bond_") ? "obs_date" : null;
+}
+
+export interface ReadOptions {
+  columns?: string[];
+  where?: string; // with ? placeholders, filled from params in order
+  params?: unknown[];
+  orderBy?: string;
+  limit?: number;
+}
+
+export function buildQuery(access: Granted, table: string, opts: ReadOptions = {}): { text: string; values: unknown[] } {
+  const entry = registry.models[access.model];
+  if (!entry.outputs.includes(table)) throw new Error(`${table} is not an output of ${access.model}`);
+  if (registry.unpublished_outputs.includes(table)) throw new Error(`${table} is not published`);
+  const columns = opts.columns ?? ["*"];
+  for (const c of columns) if (c !== "*" && !IDENT.test(c)) throw new Error(`bad column ${c}`);
+  const values: unknown[] = [access.version];
+  const clauses = ["method_version = $1"];
+  if (access.maxDate) {
+    const column = dateColumn(table);
+    if (!column) throw new Error(`${table} has no date, so it cannot be served as a delayed preview`);
+    values.push(access.maxDate);
+    clauses.push(`${column} <= $${values.length}`);
+  }
+  if (opts.where) {
+    let i = 0;
+    const params = opts.params ?? [];
+    const sql = opts.where.replace(/\?/g, () => {
+      if (i >= params.length) throw new Error("too few params");
+      values.push(params[i++]);
+      return `$${values.length}`;
+    });
+    if (i !== params.length) throw new Error("too many params");
+    clauses.push(`(${sql})`);
+  }
+  let text = `select ${columns.join(", ")} from ${table} where ${clauses.join(" and ")}`;
+  if (opts.orderBy) {
+    const parts = opts.orderBy.split(",").map((p) => p.replace(/^\s+|\s+$/g, ""));
+    if (!parts.every((p) => /^[a-z_][a-z0-9_]*( (asc|desc))?$/i.test(p))) throw new Error("bad order by");
+    text += ` order by ${parts.join(", ")}`;
+  }
+  if (opts.limit !== undefined) text += ` limit ${Math.max(0, Math.floor(opts.limit))}`;
+  return { text, values };
+}
+
+export async function readOutput<T = Record<string, unknown>>(access: Granted, table: string, opts: ReadOptions = {}): Promise<T[]> {
+  const { text, values } = buildQuery(access, table, opts);
+  const result = await getPool().query(text, values);
+  return result.rows as T[];
+}

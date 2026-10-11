@@ -1,67 +1,189 @@
 {
+  "calendars": {
+    "cse": {
+      "closures": [
+        "2025-10-20",
+        "2025-11-05",
+        "2025-12-04",
+        "2025-12-25",
+        "2026-01-01",
+        "2026-01-07",
+        "2026-01-15",
+        "2026-02-04",
+        "2026-03-02",
+        "2026-04-01",
+        "2026-04-03",
+        "2026-04-13",
+        "2026-04-14",
+        "2026-05-01",
+        "2026-05-28",
+        "2026-06-29",
+        "2026-07-29",
+        "2026-08-26",
+        "2026-08-27"
+      ],
+      "name": "CSE trading days"
+    },
+    "lk_bond_market": {
+      "closures": [
+        "2025-12-04",
+        "2025-12-25",
+        "2026-01-15",
+        "2026-02-04",
+        "2026-03-02",
+        "2026-04-01",
+        "2026-04-03",
+        "2026-04-13",
+        "2026-04-14",
+        "2026-05-01",
+        "2026-05-28",
+        "2026-06-29",
+        "2026-07-29",
+        "2026-08-26",
+        "2026-08-27"
+      ],
+      "name": "LKR government securities business days"
+    }
+  },
+  "disclaimers": {
+    "data_sources": {
+      "en": "Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka. This service is not affiliated with or endorsed by either."
+    },
+    "general": {
+      "en": "Information and education only. Nothing on this site is investment advice, and nothing here is a recommendation to buy, sell or hold any security. Figures are computed from public sources and may contain errors or delays; check the original source before relying on any number. Past values do not predict future ones."
+    },
+    "model_general": {
+      "en": "This is the output of a stated statistical method applied to published data. It describes how prices and yields relate to each other under that method's assumptions. It is not a forecast and not advice. The method, its assumptions and its limits are on the method page."
+    }
+  },
   "models": {
     "bond_carry": {
       "current_version": "1.1.0",
       "disclaimer_key": "model_general",
       "free_preview": null,
       "market": "lk_bonds",
+      "method_md": "# Carry, rolldown and duration (bond_carry)\n\n## What it shows\n\nFor each quoted bond on each day, two quantities known at the outset, in basis points per year:\n\n- **carry**: the bond's yield minus a funding rate;\n- **rolldown**: the price change from the bond ageing a quarter along an unchanged curve, annualised;\n\nplus the bond's price and modified duration, and carry plus rolldown per year of duration. Carry plus rolldown on\nits own rises almost one for one with duration; per unit of duration the bonds become comparable.\n\n## Inputs\n\nThe day's curve and quote residuals (`bond_ns_curve`), coupons (`bond_identity`), the execution gap\n(`bond_execution_gap`), and executed treasury bill trades from the PDMO trade summary.\n\n## Method (version 1.0.0)\n\n- Entry yield = quoted yield + the day's execution gap (0 when the gap is not reported). The shift is the same for\n  every bond, so it moves levels, not the ordering.\n- Funding rate = the volume-weighted yield of 12-month treasury bills (240 to 380 days left) printed within the 5\n  days to the latest such print in the last 30 days, plus 5 bp.\n- Price and modified duration from the entry yield, semi-annual coupons dated backwards from maturity, flat yield,\n  no day count.\n- Rolldown = duration \u00d7 (curve yield at \u03c4 \u2212 curve yield at \u03c4 \u2212 0.25) / 0.25, with \u03c4 \u2212 0.25 floored at 0.02 years.\n\n## Limits\n\n- The 5 bp spread over the bill is the old tool's personal assumption about one dealer's margin; a reader's own\n  funding cost will differ.\n- Tax is not modelled. Coupon income and price accretion may be taxed differently.\n- The bill rate can be up to 30 days stale; staleness is stored with each day's funding rate.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).\n  Step-coupon bonds, which now reach the curve, are left out here: a level-coupon formula cannot price them.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's `carry.funding_rate()` (209 days) and `carry.profile()` (10,975 bond-days) for\nevery curve day; the largest difference is about 1e-11. Report: `docs/migration/parity-bonds.json`.\n",
       "minimum_tier": "pro",
       "outputs": [
         "models.bond_funding",
         "models.bond_carry"
       ],
       "summary_key": "models.bond_carry.summary",
-      "title_key": "models.bond_carry.title"
+      "title_key": "models.bond_carry.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Same method; reads the version 2 curve (every two-way quote, decision 0014).",
+          "method_version": "1.1.0",
+          "status": "current"
+        }
+      ]
     },
     "bond_execution_gap": {
       "current_version": "1.1.0",
       "disclaimer_key": "model_general",
       "free_preview": null,
       "market": "lk_bonds",
+      "method_md": "# Trades against quotes (bond_execution_gap)\n\n## What it shows\n\nOn days when a bond both quoted and traded, its executed weighted-average yield can be compared with its quoted\nmid. The gap is the median of (traded yield \u2212 quoted mid) in basis points over the last 20 calendar days.\nPositive: trades printed at higher yields, that is lower prices, than the quote screen.\n\n## Inputs\n\nThe quote and trade points of `bond_ns_curve` (the same yields the curve stores).\n\n## Method (version 1.0.0)\n\n- Every bond-day in the 20 calendar days to the day scored on which the bond had both a quote in the curve and a\n  trade.\n- The median of those gaps, reported only when there are at least 8.\n- Not split by maturity: in the old tool's out-of-sample test, maturity buckets predicted the next quarter's gap\n  worse (10.9 bp mean absolute error) than one blended figure (9.2 bp). The 20-day window was chosen the same way.\n\n## Limits\n\nThe gap has ranged over more than 140 bp in this history, and a 20-day median of a few dozen observations moves\nwith it. It describes a recent regime, not a precise level.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).\n  Bonds that only version 2 fits (the restructuring bonds) appear here too.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's `execution.gap()` for every curve day (209 days) exactly. Report:\n`docs/migration/parity-bonds.json`.\n",
       "minimum_tier": "plus",
       "outputs": [
         "models.bond_execution_gap"
       ],
       "summary_key": "models.bond_execution_gap.summary",
-      "title_key": "models.bond_execution_gap.title"
+      "title_key": "models.bond_execution_gap.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Same method; reads the version 2 curve (every two-way quote, decision 0014).",
+          "method_version": "1.1.0",
+          "status": "current"
+        }
+      ]
     },
     "bond_identity": {
       "current_version": "2.0.0",
       "disclaimer_key": "general",
       "free_preview": null,
       "market": "lk_bonds",
+      "method_md": "# Government bond list and daily quotes (bond_identity)\n\n## What it shows\n\nThe PDMO's daily summary lists the dealers' average bid and offer for each treasury bond, but names each bond only\nby a series label such as `10.00%2030A`, never by its ISIN. This model ties each quoted row to a bond, so that a\nbond's quotes, trades, volumes and auction results can be followed over time under one identifier.\n\n## Inputs\n\n- Daily summaries (dealer quotes), volume files, trade summaries, auction results and auction announcements, as\n  published by the PDMO and stored unchanged (`bonds.*` tables).\n- Version 1 only: the old tool's own bond list (`bonds.legacy_reference`), taken from its database at commit\n  1c33084.\n\n## Method (version 1.0.0)\n\nFiles are read in this order: auction announcements, auction results, volume files, trade summaries, then daily\nsummaries; within each kind, oldest posted first, so an amended report replaces its original. The first four\nteach the model each bond's ISIN, maturity, coupon and series label. Each quote row is then matched:\n\n1. by its series label, where an auction document printed that label beside an ISIN;\n2. by the label without its series letter, if that names exactly one bond (the letter is printed inconsistently);\n3. by maturity date, if exactly one bond matures that day with a coupon within 0.005 of the quoted one;\n4. otherwise, if it is a single-coupon bond with a two-way quote between 0 and 50 bp wide, under a key built from\n   its own cash flows: `SYN:<maturity>:<coupon>`. Such a key can split one bond into two, but never merges two.\n\nRows that match none of these are left out. In practice these are the 2023 restructuring bonds (step coupons,\nposted at 13.00/12.00 every day, 100 bp wide) and one-way quotes.\n\n## Method (version 2.0.0, current; decision 0014)\n\nThe same order and the same matching, with two changes:\n\n- **No quote is left out.** A row that matches no released ISIN, including the restructuring bonds and one-way\n  quotes, is keyed on its own cash flows: `SYN:<maturity>:<coupon>`, or for a step-coupon bond every rate in turn\n  (`SYN:2027-12-15:12.000%9.000`). Version 2 holds about 92 quotes a day against version 1's 52.5.\n- **No quote overwrites another.** When two rows resolve to the same bond on the same day, the row identified most\n  directly keeps it (exact label, then label without its letter, then maturity and coupon), and the other is keyed\n  on its own cash flows. This keeps the 13.00%2029A quote that version 1 loses every day.\n\nOne-way quotes are kept with their bid or offer and no mid; the curve cannot fit them (see `bond_ns_curve`).\n\nVersion 1 keeps running beside version 2 as the reference series that matches the old tool.\n\n## Limits\n\n- The old tool learned some labels and coupons from earlier versions of its parsers. Those survive only in its\n  database, which is why version 1 starts from its bond list.\n- A quote for a bond whose coupon is not yet known can be matched by maturity alone. With the old bond list this\n  never happens in the history to date.\n- Two quote rows that resolve to the same bond on the same day overwrite each other; the last one in the file is\n  kept. On every day so far this has lost the 13.00%2029A quote, which the old matcher filed under the 2029B bond\n  (Phase 2 finding V1).\n\n## Parity\n\nVersion 1 reproduces the old tool's `bonds` table (59 bonds) and every quote in its `observations` table (11,146)\nexactly. Measured by `python -m data_platform.migration.parity bonds` (report: `docs/migration/parity-bonds.json`).\n",
       "minimum_tier": "free",
       "outputs": [
         "models.bond_reference",
         "models.bond_quotes"
       ],
       "summary_key": "models.bond_identity.summary",
-      "title_key": "models.bond_identity.title"
+      "title_key": "models.bond_identity.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Keeps every quote row (decision 0014); a row is never overwritten by another resolving to the same bond.",
+          "method_version": "2.0.0",
+          "status": "current"
+        }
+      ]
     },
     "bond_liquidity": {
       "current_version": "1.1.0",
       "disclaimer_key": "general",
       "free_preview": null,
       "market": "lk_bonds",
+      "method_md": "# Bond trading activity (bond_liquidity)\n\n## What it shows\n\nFor each bond, as of each day: its turnover and number of trades over the last 60 days, on how many of those days\nit traded, when it was last auctioned, the bid-to-cover ratio at its last competitive auction, and its last\ntraded yield. Bonds are grouped into three tiers by trading activity:\n\n- **core**: auctioned in the last 120 days (a current benchmark issue) and traded on at least 8 of the last 60\n  days;\n- **active**: traded on at least 10 of the last 60 days;\n- **wider**: quoted, but traded less often than that.\n\n## Inputs\n\nPDMO trade summaries (bonds only), auction results and announcements; the days on which a curve was fitted.\n\n## Method (version 1.0.0)\n\n- Trade files are published a day or more after the quotes, so the 60-day window ends on the last day whose trade\n  file had been published, unless that is more than 7 days before the day scored (then the window ends on the day\n  itself, so a stopped feed cannot keep a bond looking active).\n- A bond auctioned exactly 120 days ago still counts as a benchmark. `post_auction` marks the 14 days after an\n  auction.\n- Nothing uses information published after the day scored.\n\n## Limits\n\nThe thresholds (60, 120, 10, 8, 14 and 7 days) are the old tool's choices, set by inspection of this market's\nhistory, not by a formal test.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).\n  Bonds that only version 2 fits (the restructuring bonds) appear here too.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's `liquidity.profile()` for every curve day (9,150 bond-days) exactly. The old\ntool computed this for its latest day only, so the comparison runs the old code on the old database. Report:\n`docs/migration/parity-bonds.json`.\n",
       "minimum_tier": "free",
       "outputs": [
         "models.bond_liquidity"
       ],
       "summary_key": "models.bond_liquidity.summary",
-      "title_key": "models.bond_liquidity.title"
+      "title_key": "models.bond_liquidity.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Same method; reads the version 2 curve (every two-way quote, decision 0014).",
+          "method_version": "1.1.0",
+          "status": "current"
+        }
+      ]
     },
     "bond_ns_curve": {
       "current_version": "2.0.0",
       "disclaimer_key": "model_general",
       "free_preview": null,
       "market": "lk_bonds",
+      "method_md": "# LKR government bond yield curve (bond_ns_curve)\n\n## What it shows\n\nOne smooth yield curve per day, fitted to the dealers' quoted yields, and each bond's residual: how far its quoted\nyield sits above (positive) or below (negative) the curve, in basis points. Trades are compared with the same\ncurve afterwards, as a daily check on how well quotes describe where business is done.\n\n## Inputs\n\nEach day's resolved quotes (`bond_identity`) and the PDMO trade summary for the same day.\n\n## Method (version 1.0.0)\n\nThe Nelson-Siegel curve gives the yield of a bond with \u03c4 years to maturity as\n\n    y(\u03c4) = \u03b20 + \u03b21\u00b7f1(\u03c4) + \u03b22\u00b7f2(\u03c4),   f1 = (1 \u2212 e^(\u2212\u03c4/\u03bb)) / (\u03c4/\u03bb),   f2 = f1 \u2212 e^(\u2212\u03c4/\u03bb)\n\n\u03b20 is the long-run level, \u03b20 + \u03b21 the very short end, \u03b22 the hump, and \u03bb where the hump sits.\n\n- \u03bb is fixed at 2.82179 years, the value the old tool calibrated once over its whole sample and then held fixed.\n  With \u03bb fixed the curve is a weighted linear regression, which has one exact answer and cannot fail to converge.\n- The fit uses quote mids, (bid + offer) / 2, for bonds with at least 0.08 years (about a month) to maturity.\n  Step-coupon bonds are left out. A day needs at least 6 bonds.\n- Each quote is weighted by 1 / spread\u00b2, where spread is its bid-offer width in bp, floored at 1 bp and capped at\n  300 bp; a missing spread takes the day's median. Weights are scaled to average 1. Wide quotes carry little\n  weight; this choice does more for the fit than any other.\n- \u03c4 is calendar days to maturity / 365.25: the curve is a yield-to-maturity curve, not a cash-flow curve.\n- Trades (weighted-average yields of bonds that traded) are held out of the fit. Each day stores how many there\n  were, their root-mean-square error against the curve, and their median error (the trade bias).\n\n## Method (version 2.0.0, current; decision 0014)\n\nIdentical, except that it fits every two-way quote from `bond_identity` version 2, step-coupon and administered\nbonds included. Each quote keeps its 1/spread\u00b2 weight, so a 100 bp administered quote counts about 1/40th as much\nas a typical 16 bp one: it is in the fit without being able to pull the curve far. One-way quotes have no mid and\ncannot be fitted; the bond page shows them with that note.\n\nMeasured effect over the 210 days both versions fitted (`python -m data_platform.models.bond_ns_curve.compare\n1.0.0 2.0.0`, 2026-10-11):\n\n| | version 1 | version 2 |\n|---|---|---|\n| bonds in the fit, per day (mean) | 52.5 | 92.1 |\n| weighted error on its own quotes (median) | 9.48 bp | 26.32 bp |\n| weighted error on version 1's quotes (median) | 9.48 bp | 9.84 bp |\n| curve move at version 1's bonds | | median 2.7 bp, 95th percentile 7.1 bp |\n| error against executed trades (median) | 21.39 bp | 19.47 bp |\n| trade bias (median) | 16.01 bp | 13.40 bp |\n\nThe error on its own quotes rises because the administered quotes sit far from any curve; on the bonds both versions\nfit, the curve is almost unchanged, and it is slightly closer to where trades actually printed. Version 1 keeps\nrunning beside it as the reference series that matches the old tool.\n\n## Limits\n\n- \u03bb was chosen using the whole sample, including days after any given date. A test of how the residuals behaved\n  over time therefore uses a little information from the future.\n- Quotes are averages across primary dealers of indicative prices; nobody is obliged to deal on them. Executed\n  yields have run above the quote mids for most of the history (see the trade bias and `bond_execution_gap`).\n- Restructuring bonds and one-way quotes are not in the fit (decision 0014 plans a version 2 that includes every\n  two-way quote at its 1/spread\u00b2 weight).\n\n## Parity\n\nVersion 1 reproduces the old tool's `curve_fits` (210 days) and `curve_residuals` (13,414 rows); the largest\ndifference is about 1e-12. Report: `docs/migration/parity-bonds.json`.\n",
       "minimum_tier": "free",
       "outputs": [
         "models.bond_curve_fit",
         "models.bond_curve_point"
       ],
       "summary_key": "models.bond_ns_curve.summary",
-      "title_key": "models.bond_ns_curve.title"
+      "title_key": "models.bond_ns_curve.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Fits every two-way quote, step-coupon and administered bonds included, still weighted 1/spread^2 (decision 0014).",
+          "method_version": "2.0.0",
+          "status": "current"
+        }
+      ]
     },
     "bond_rv_zscores": {
       "current_version": "1.1.0",
@@ -70,6 +192,7 @@
         "delay_days": 5
       },
       "market": "lk_bonds",
+      "method_md": "# Bond residuals against their own history (bond_rv_zscores)\n\n## What it shows\n\nA bond's residual (its distance from the fitted curve) is partly permanent: some bonds always sit a little above\nor below the curve. This model compares each bond's residual with that bond's own recent residuals, and does the\nsame for the residual spread between pairs of nearby bonds. A z-score of +2 means the residual is two standard\ndeviations above that bond's (or pair's) own recent average.\n\nThis is a description of the data under stated assumptions. It is not a forecast, and it is not a suggestion to\ndeal in any bond.\n\n## Inputs\n\nThe quote residuals from `bond_ns_curve`; auction results and announcements (to know which bonds have ever been\nauctioned).\n\n## Method (version 1.0.0)\n\nFor each bond, on each day:\n\n    z = (residual today \u2212 mean of the window) / standard deviation of the window\n\n- The window is the 60 previous observations of that bond, not including the day scored, so no z-score has seen\n  the value it scores. At least 30 are needed. A standard deviation under 0.5 bp gives no z-score.\n- deviation_bp = residual \u2212 window mean: the same comparison in basis points, since a large z on a tiny standard\n  deviation is a small number of basis points.\n\nPairs: the residual spread (bond a minus bond b) is scored the same way. A pair is formed when the two bonds'\nmedian maturities are within 2 years of each other, or when both have ever been auctioned (benchmark issues are\ncompared across the curve). Pairs need at least 31 common days.\n\nThe model also measures, from its own history, how far pair spreads moved back toward their window mean 10\nbusiness days after a z-score of at least 2 and at least 3. These figures are stored for research and are not\nshown on the site (config/entitlements.yaml).\n\n## Limits\n\n- One sample, one market regime. Over a few hundred days a 60-day window is a short history.\n- The residuals inherit the curve's limits, including its whole-sample \u03bb.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).\n  Bonds that only version 2 fits (the restructuring bonds) appear here too.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's per-bond scores (9,285 rows), pair scores (86,829 rows) and both reversion\nfigures; the largest difference is about 1e-12. Report: `docs/migration/parity-bonds.json`.\n",
       "minimum_tier": "plus",
       "outputs": [
         "models.bond_residual_zscore",
@@ -77,32 +200,60 @@
         "models.model_stats"
       ],
       "summary_key": "models.bond_rv_zscores.summary",
-      "title_key": "models.bond_rv_zscores.title"
+      "title_key": "models.bond_rv_zscores.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "Same method; reads the version 2 curve (every two-way quote, decision 0014).",
+          "method_version": "1.1.0",
+          "status": "current"
+        }
+      ]
     },
     "cse_market_tape": {
       "current_version": "1.0.0",
       "disclaimer_key": "general",
       "free_preview": null,
       "market": "cse",
+      "method_md": "# CSE market summary (cse_market_tape)\n\n## What it shows\n\nFor each session of the Colombo Stock Exchange: every index's level and change (ASPI, S&P SL20, their total\nreturn versions and the sector indices), market turnover, volume and number of trades compared with their recent\naverage, foreign purchases and sales, the market's valuation figures as the CSE publishes them, and breadth (how\nmany shares rose, fell or closed unchanged).\n\n## Inputs\n\nThe CSE's daily index values, daily market summary and trade summary, stored as published (`cse.*` tables).\n\n## Method (version 1.0.0)\n\n- Sessions are the days the ASPI has a value.\n- Index change as a fraction: change / (level \u2212 change), from the published level and change.\n- Activity against average: the session's turnover (volume, trades) divided by the mean of the previous 20\n  sessions of the CSE's daily market summary. The average needs 21 sessions of that summary; until then the\n  number of sessions still needed is stored instead. (The summary has been collected daily only since October\n  2026, so this fills in over the first weeks.)\n- Foreign net = foreign purchases \u2212 foreign sales, as the CSE reports them.\n- Breadth counts ordinary voting and non-voting shares (`.N0000`, `.X0000`) that traded in the session, comparing\n  each close with the previous close.\n\n## Limits\n\n- Valuation figures (P/E, P/B, dividend yield) are the CSE's own, unchecked.\n- For sessions before daily collection began, breadth comes from the CSE's chart history and turnover figures\n  are not available.\n\n## Parity\n\nVersion 1 reproduces the old CSE terminal's Panel A for every session it kept raw files for (5 sessions): index\nlevels and changes exactly, total-return changes to 1e-16, the CSE's rounded percentage changes to their rounding\n(0.005 percentage points), and market activity, flows, valuation and breadth exactly. Measured by\n`python -m data_platform.migration.parity cse` (report: `docs/migration/parity-cse.json`).\n",
       "minimum_tier": "free",
       "outputs": [
         "models.cse_market_session",
         "models.cse_index_session"
       ],
       "summary_key": "models.cse_market_tape.summary",
-      "title_key": "models.cse_market_tape.title"
+      "title_key": "models.cse_market_tape.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "current"
+        }
+      ]
     },
     "cse_security_metrics": {
       "current_version": "1.0.0",
       "disclaimer_key": "general",
       "free_preview": null,
       "market": "cse",
+      "method_md": "# CSE share metrics (cse_security_metrics)\n\n## What it shows\n\nFor every listed share, on every session: its close, change, turnover and market capitalisation; where the close\nsits in the 52-week range the CSE publishes; its volume compared with its recent average; and its price return\ncompared with the ASPI over one week, one month and three months.\n\n## Inputs\n\nThe CSE's trade summary and chart history (prices, `cse.prices_daily_current`), its company summaries (52-week\nrange, market capitalisation, beta) and the ASPI.\n\n## Method (version 1.0.0)\n\n- **Range position** = (close \u2212 52-week low) / (52-week high \u2212 52-week low), from the CSE's own, unadjusted high\n  and low.\n- **Volume against average** = the session's volume / the mean volume over the previous 20 sessions, counting a\n  session without a trade as 0. Volume is the regular-market volume on days collected live, and the CSE chart's\n  total (including negotiated crossings) on earlier days, as the old terminal stored it.\n- **Return relative to the ASPI** over 5, 21 and 63 sessions = (P\u2081 / P\u2080 \u2212 1) \u2212 (A\u2081 / A\u2080 \u2212 1), where P is the last\n  traded price on or before each end of the window and A is the ASPI. Price only: dividends are not included.\n- **Flags.** A move of more than 40% between two consecutive traded closes is the usual sign of a split, bonus\n  or rights issue that the CSE's prices do not adjust for. Such a move inside a return window is flagged on that\n  window; inside the last 240 sessions it is flagged on the 52-week range.\n\n## Limits\n\n- Prices are not adjusted for corporate actions; the flags mark where that matters. Adjusted total returns are a\n  separate, later model.\n- A share with no trade in a session carries its last traded price from the CSE's company summary, where the\n  summary was collected; otherwise it has no row for that session.\n\n## Parity\n\nVersion 1 reproduces the old CSE terminal's Panel B for every share on its watchlist on every session it kept raw\nfiles for (200 share-sessions), to 1e-14. Report: `docs/migration/parity-cse.json`.\n",
       "minimum_tier": "free",
       "outputs": [
         "models.cse_security_session"
       ],
       "summary_key": "models.cse_security_metrics.summary",
-      "title_key": "models.cse_security_metrics.title"
+      "title_key": "models.cse_security_metrics.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "current"
+        }
+      ]
     }
   },
   "tiers": [

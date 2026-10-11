@@ -140,12 +140,21 @@ def order(manifests: dict[str, Manifest]) -> list[str]:
     return done
 
 
-def web_export(manifests: dict[str, Manifest]) -> dict:
-    """What the web app needs to authorise and label every model: no parameters, nothing secret."""
+def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
+    """Everything the web app needs, in one generated file, so it never reads outside web/: tiers and each model's
+    minimum tier, labels, current version and method page; the disclaimer texts; the trading calendars (for the
+    freshness check). No parameters, nothing secret."""
     ent = load_entitlements()
+    calendars = {}
+    for path in sorted((REPO_ROOT / "config" / "calendars").glob("*.yaml")):
+        cal = yaml.safe_load(path.read_text())
+        calendars[path.stem] = {"name": cal.get("name"), "closures": sorted(str(d) for d in (cal.get("closures") or {}))}
     return {
         "tiers": ent["tiers"],
         "unpublished_outputs": ent.get("unpublished_outputs", []),
+        "disclaimers": {key: {"en": " ".join(value["en"].split())} for key, value in
+                        yaml.safe_load(DISCLAIMERS.read_text()).items()},
+        "calendars": calendars,
         "models": {
             name: {
                 "market": m.market,
@@ -154,8 +163,11 @@ def web_export(manifests: dict[str, Manifest]) -> dict:
                 "disclaimer_key": m.disclaimer_key,
                 "outputs": m.outputs,
                 "current_version": m.current.method_version,
+                "versions": [{"method_version": v.method_version, "status": v.status, "changes": v.changes}
+                             for v in m.versions],
                 "minimum_tier": ent["models"][name]["minimum_tier"],
                 "free_preview": ent["models"][name].get("free_preview"),
+                "method_md": (root / name / "METHOD.md").read_text(),
             } for name, m in sorted(manifests.items())
         },
     }

@@ -1,0 +1,128 @@
+// THE TIER-LEAK SUITE (docs/architecture.md §8; hard rule 5). Run against a server started on the database seeded
+// by tests/leak/seed.py, with ALLOW_TEST_TIERS=1 so each request can act as a tier:
+//
+//   uv run python web/tests/leak/seed.py           # prints the DATABASE_URL for the server
+//   (cd web && DATABASE_URL=... ALLOW_TEST_TIERS=1 npx next start -p 3100 &) ; cd web && npm run test:leak
+//
+// For every model and every tier, every API route and every page that shows the model is requested, and:
+//   * below the model's tier, none of its marker values appears (raw or formatted), and the page says it is locked;
+//   * with a free preview, only the old date's markers appear, never the recent ones;
+//   * at or above the tier, the markers DO appear (so the test cannot pass by showing nothing).
+// Reference versions and unpublished statistics must never appear for anyone.
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, test } from "vitest";
+
+import { ALL_PAGES, MODEL_ROUTES } from "@/lib/routes";
+import { MODEL_NAMES, TIERS, type ModelName, type Tier, modelEntry } from "@/lib/registry";
+
+const BASE = process.env.LEAK_BASE_URL ?? "http://127.0.0.1:3100";
+const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"), "utf8")) as {
+  models: Record<string, { new: { api: string[]; page: string[] }; old: { api: string[]; page: string[] } }>;
+  never: string[];
+};
+
+async function get(url: string, tier: Tier | null) {
+  const res = await fetch(BASE + url, { headers: tier ? { "x-test-tier": tier } : {} });
+  return { status: res.status, body: await res.text(), cache: res.headers.get("cache-control") ?? "" };
+}
+
+const rank = (t: Tier) => TIERS.indexOf(t);
+
+function expectation(model: ModelName, tier: Tier): "full" | "preview" | "denied" {
+  const entry = modelEntry(model);
+  if (rank(tier) >= rank(entry.minimum_tier)) return "full";
+  return entry.free_preview ? "preview" : "denied";
+}
+
+for (const model of MODEL_NAMES) {
+  const m = markers.models[model];
+  if (!m) continue;
+  describe(model, () => {
+    for (const tier of TIERS) {
+      const mode = expectation(model, tier);
+      test(`as ${tier}: ${mode}`, async () => {
+        for (const api of MODEL_ROUTES[model].api) {
+          const res = await get(api, tier);
+          expect(res.cache).toContain("no-store");
+          const recent = m.new.api;
+          if (mode === "denied") {
+            expect(res.status).toBe(403);
+            for (const v of [...recent, ...m.old.api]) expect(res.body, `${api} leaked ${v}`).not.toContain(v);
+          } else {
+            expect(res.status).toBe(200);
+            if (mode === "full") for (const v of recent) expect(res.body, `${api} is missing ${v}`).toContain(v);
+            if (mode === "preview") {
+              for (const v of recent) expect(res.body, `${api} preview leaked ${v}`).not.toContain(v);
+              for (const v of m.old.api) expect(res.body, `${api} preview is missing ${v}`).toContain(v);
+            }
+          }
+        }
+        for (const page of MODEL_ROUTES[model].pages) {
+          const res = await get(page, tier);
+          expect(res.status).toBe(200);
+          expect(res.cache).not.toContain("public");
+          if (mode === "full") for (const v of m.new.page) expect(res.body, `${page} is missing ${v}`).toContain(v);
+          if (mode !== "full") for (const v of [...m.new.page, ...m.new.api]) expect(res.body, `${page} leaked ${v}`).not.toContain(v);
+          if (mode === "preview") for (const v of m.old.page) expect(res.body, `${page} preview is missing ${v}`).toContain(v);
+          if (mode === "denied") {
+            for (const v of [...m.old.page, ...m.old.api]) expect(res.body, `${page} leaked ${v}`).not.toContain(v);
+            expect(res.body).toContain(`data-locked="${model}"`);
+          }
+        }
+      });
+    }
+  });
+}
+
+describe("everyone", () => {
+  for (const tier of [null, ...TIERS] as (Tier | null)[]) {
+    test(`reference versions and unpublished outputs are never shown (${tier ?? "anonymous"})`, async () => {
+      const urls = [...ALL_PAGES, ...Object.values(MODEL_ROUTES).flatMap((r) => r.api)];
+      for (const url of urls) {
+        const res = await get(url, tier);
+        for (const v of markers.never) expect(res.body, `${url} shows ${v}`).not.toContain(v);
+      }
+    });
+  }
+
+  test("an anonymous visitor is treated as free", async () => {
+    const anonymous = await get("/api/v1/models", null);
+    expect(JSON.parse(anonymous.body).viewer_tier).toBe("free");
+    const carry = await get("/api/v1/bonds/carry", null);
+    expect(carry.status).toBe(modelEntry("bond_carry").minimum_tier === "free" ? 200 : 403);
+  });
+
+  test("a made-up tier is ignored", async () => {
+    const res = await get("/api/v1/models", "superuser" as Tier);
+    expect(JSON.parse(res.body).viewer_tier).toBe("free");
+  });
+});
+
+describe("build output", () => {
+  const next = path.join(__dirname, "..", "..", ".next");
+
+  test("the browser bundle holds no server code, settings or queries", () => {
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.(js|css|json|html)$/.test(e.name)) files.push(p);
+      }
+    };
+    walk(path.join(next, "static"));
+    expect(files.length).toBeGreaterThan(0);
+    const forbidden = ["DATABASE_URL", "ALLOW_TEST_TIERS", "x-test-tier", "method_version = $1", "postgres://", "postgresql://", "web_reader"];
+    for (const f of files) {
+      const text = fs.readFileSync(f, "utf8");
+      for (const s of forbidden) expect(text.includes(s), `${path.relative(next, f)} contains ${s}`).toBe(false);
+    }
+  });
+
+  test("no page that shows model data is built ahead of time", () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(next, "prerender-manifest.json"), "utf8"));
+    const prerendered = Object.keys(manifest.routes ?? {}).filter((r) => r !== "/_not-found" && r !== "/_global-error");
+    expect(prerendered).toEqual([]);
+  });
+});
