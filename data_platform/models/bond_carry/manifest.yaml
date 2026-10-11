@@ -20,7 +20,8 @@ versions:
       tolerance: 1.0e-9
   - method_version: "1.1.0"
     status: current
-    changes: Same method; reads the version 2 curve (every two-way quote, decision 0014).
+    changes: Same method on the version 2 curve (decision 0014); bonds quoted wider than 50 bp (administered) are left out.
     requires_models: { bond_identity: "2.0.0", bond_ns_curve: "2.0.0", bond_execution_gap: "1.1.0" }
     parameters:
       funding_spread_bp: 5.0
+      max_quote_spread_bp: 50.0

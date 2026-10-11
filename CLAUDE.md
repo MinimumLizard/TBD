@@ -14,7 +14,7 @@ language. Prefer boring, well-documented, managed services over clever or self-h
 ## Current phase
 
 **Phases 2, 3 and 4 (free tier) are built and verified locally and in CI; awaiting the owner's approval and
-switch-on.** See `docs/phase3-4-verification.md` (parity results, findings P1–P4, website switch-on steps),
+switch-on.** See `docs/phase3-4-verification.md` (parity results, findings P1–P5, website switch-on steps),
 `docs/phase2-verification.md` (data foundation, findings V1–V7, switch-on §5) and `docs/roadmap.md` (owner's open
 decisions).
 

@@ -109,6 +109,14 @@ def compute(inputs, as_of):
     ws.load_trades(conn, inputs.rows("bonds.trades_current", where=day[0], params=day[1]))
     gaps = {r["obs_date"].isoformat(): r["gap_bp"]
             for r in inputs.rows("models.bond_execution_gap", where=day[0], params=day[1])}
+    # Version 1.1.0: a quote wider than this is administered rather than dealt (the old tool's own threshold for
+    # admitting a quote), so its yield cannot be read as what the bond earns. Version 1 never saw such quotes.
+    max_spread = inputs.params.get("max_quote_spread_bp")
+    too_wide = set()
+    if max_spread is not None:
+        for q in inputs.rows("models.bond_quotes", "obs_date, isin, bid_yield, offer_yield", where=day[0], params=day[1]):
+            if q["bid_yield"] is None or q["offer_yield"] is None or (q["bid_yield"] - q["offer_yield"]) * 100 > max_spread:
+                too_wide.add((q["obs_date"].isoformat(), q["isin"]))
     funding_rows, carry_rows = [], []
     for fit in fits:
         obs_date = fit["obs_date"].isoformat()
@@ -120,6 +128,8 @@ def compute(inputs, as_of):
                                  "n_bills": funding["n_bills"], "window_days": funding["window_days"]})
         entry_gap = gaps.get(obs_date, 0.0)
         for isin, facts in sorted(profile(conn, obs_date, entry_gap, spread_bp).items()):
+            if (obs_date, isin) in too_wide:
+                continue
             carry_rows.append({"obs_date": obs_date, "isin": isin, "entry_gap_bp": entry_gap,
                                **{k: v for k, v in facts.items() if k != "funding"}})
     return {"models.bond_funding": funding_rows, "models.bond_carry": carry_rows}

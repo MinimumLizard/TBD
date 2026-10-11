@@ -159,7 +159,8 @@
     "zscoresLink": "Residuals against their own history",
     "executionLink": "Trades against quotes",
     "carryLink": "Carry, rolldown and duration",
-    "wideQuotes": "Wide or administered quotes (little weight in the fit)"
+    "wideQuotes": "Wide or administered quotes (little weight in the fit)",
+    "wideQuote": "wide quote: little weight in the fit"
   },
   "bond": {
     "yieldChart": "Quoted mid yield",

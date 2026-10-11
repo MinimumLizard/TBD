@@ -35,7 +35,9 @@ The day's curve and quote residuals (`bond_ns_curve`), coupons (`bond_identity`)
 ## Versions
 
 - **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
-  Step-coupon bonds, which now reach the curve, are left out here: a level-coupon formula cannot price them.
+  Two kinds of bond that now reach the curve are left out here: step-coupon bonds (a level-coupon formula cannot
+  price them) and bonds quoted more than 50 bp wide (the 2023 restructuring block, posted at an administered
+  13.00/12.00; its yield is not one anyone deals at). 50 bp is the old tool's own threshold for admitting a quote.
 - **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
 
 ## Parity

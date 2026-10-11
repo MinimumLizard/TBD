@@ -94,6 +94,12 @@ Accounts are stubbed: every visitor is anonymous and on the free tier (decision 
   by roughly 1,000 pair rows a day. Well inside the Supabase Pro plan; retiring the reference versions after the
   parallel run halves it.
 
+- **P5. Including every quote in the curve must not mean pricing administered quotes elsewhere.** Reviewing the
+  site showed carry 1.1.0 giving the sub-1% restructuring bonds (quoted at an administered 13.00/12.00) a
+  meaningless "+436 bp per year of duration". Carry now leaves out quotes wider than 50 bp, the old tool's own
+  threshold; the recompute removed 3,484 rows, each kept in `models.revisions`. The free bond table marks such
+  quotes as wide. The curve itself is unchanged (decision 0014).
+
 ## 6. Switch-on: what is added to the Phase 2 checklist
 
 The Phase 2 steps (`docs/phase2-verification.md` §5) still come first. Then:

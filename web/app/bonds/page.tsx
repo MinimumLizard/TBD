@@ -12,6 +12,7 @@ import { NONE, date, int, lkr, num, percent, signed, tone } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
+const WIDE_QUOTE_BP = 50; // the curve model's own line between a dealt quote and an administered one
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -95,7 +96,15 @@ export default async function BondsPage() {
                       <td className="num">{percent(q.bid_yield, 3)}</td>
                       <td className="num">{percent(q.offer_yield, 3)}</td>
                       <td className="num">{q.mid_yield == null ? <span className="small muted">{t("bonds.oneWay")}</span> : percent(q.mid_yield, 3)}</td>
-                      <td className={`num ${tone(r)}`}>{r == null ? NONE : signed(r, 1)}</td>
+                      <td className={`num ${tone(r)}`}>
+                        {r == null ? NONE : signed(r, 1)}
+                        {q.bid_yield != null && q.offer_yield != null && (q.bid_yield - q.offer_yield) * 100 > WIDE_QUOTE_BP && (
+                          <>
+                            {" "}
+                            <span className="badge">{t("bonds.wideQuote")}</span>
+                          </>
+                        )}
+                      </td>
                       <td>{liquidity.access.allowed ? t(`bonds.tier_${l?.tier ?? "wider"}`) : NONE}</td>
                       <td className="num">{l ? lkr(l.turnover_lkr) : NONE}</td>
                       <td className="num">{l ? int(l.days_traded) : NONE}</td>

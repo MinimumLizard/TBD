@@ -58,3 +58,12 @@ def test_step_coupon_bonds_are_never_priced(bond_models):
                                   join models.bond_reference r on r.isin = c.isin and r.method_version = '2.0.0'
                                   where c.method_version = '1.1.0'""").fetchall()
     assert rows and all(len(series.coupon_steps(r["series_label"])) <= 1 for r in rows)
+
+
+@pytest.mark.db
+def test_administered_quotes_are_never_priced(bond_models):
+    wide = bond_models.execute("""select c.isin from models.bond_carry c
+                                  join models.bond_quotes q on q.isin = c.isin and q.obs_date = c.obs_date
+                                   and q.method_version = '2.0.0'
+                                  where c.method_version = '1.1.0' and (q.bid_yield - q.offer_yield) * 100 > 50""").fetchall()
+    assert wide == []
