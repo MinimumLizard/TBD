@@ -7,7 +7,7 @@
 
 1. **Model outputs are recomputed, not appended, and every change is kept.** Models run in full each time from
    the facts (all history takes under a minute locally: 42 s for bonds, 7 s for the CSE), so a rule change can never leave half the history under old
-   rules. The writer only touches rows whose value changed (to 1e-9, the parity tolerance) and first copies the old
+   rules. The writer only touches rows whose value changed (to 1e-9 relative or 1e-12 absolute, so last-bit differences between machines are not revisions) and first copies the old
    row to `models.revisions`, which the database keeps append-only. A run that saw the same inputs as the last one
    but produced different outputs is flagged as non-deterministic.
 2. **One table per output shape**, each keyed by `method_version` (architecture §5). Versions never mix: the site
@@ -41,6 +41,13 @@
     fundamentals, the risk and portfolio estimates) need facts the platform does not collect yet and owner
     confirmations kept in the old repo; they are listed as the next model work (roadmap). The old terminal's
     personal trade list and live portfolio record are not ported (audit §8).
+
+11. **Before launch, versions are changed in place; from launch, never.** Until the first production run nothing has
+    been published, so fixes found before then (the 2026-10-11 audit: carry's administered-quote filter, the
+    point-in-time pair rows, identity's maturity check) go into the current version number. From the first
+    production run, any change that alters outputs gets a new version, and the old one stays.
+12. **Reference versions do not fill the revision log.** They are shown to nobody and exist to compare with the old
+    tools, which rewrote their own tables in full every day; their rows are still recomputed and compared.
 
 ## Consequences
 

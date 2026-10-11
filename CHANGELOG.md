@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-11 — Audit of Phases 2–4, and fixes
+
+- Four independent review passes; every finding verified, then fixed or recorded
+  (`docs/phase3-4-verification.md` §9).
+- Data safety: scheduled jobs wait for `COLLECTION_ENABLED` (set after "Migrate history"); the PDMO collector
+  survives a dead link and retries failed parses; the CSE collector finishes missing companies; migrations lock
+  correctly; auction views cannot double a file; backups re-run cleanly, read every copy back and verify
+  meaningfully, with a current `pg_dump`.
+- Models: pair z-score rows are point-in-time and never change once computed (no more daily rewrite of history);
+  `--as-of` never writes; one failure no longer stops other models; bond identity v2 checks maturity on letter-free
+  labels; carry uses the absolute spread; method pages corrected.
+- Website: verified TLS and timeouts for the database, grants that can only come from the tier check, 400/404 for
+  bad input, preview-aware freshness, an error page, the z-score page listed by maturity, neutral colours; the
+  leak suite now covers detail pages, `?date=` and the preview's last day (35 tests).
+- Copy lint catches word forms, hyphenated forms, phrases across lines and look-alike characters.
+- Migration 0007. Switch-on checklist rewritten as one ordered list.
+
 ## 2026-10-11 — Phases 3 and 4: models, and the free-tier portal
 
 - Model framework: manifests with several versions (current, reference, retired), inputs restricted to what a

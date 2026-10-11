@@ -12,51 +12,47 @@
 | 4 | Portal: API, auth, entitlements, web app (free tier first) | **Free-tier portal, API, single tier check and tier-leak suite built 2026-10-11. Accounts stubbed (everyone is free) until Supabase exists. Awaiting approval.** |
 | 4b | Accounts, payments, Sinhala and Tamil, deployment on Vercel | Needs the owner's accounts and translators |
 
-## Owner actions, in order of urgency
+## Owner actions, in order of priority (updated after the 2026-10-11 audit)
 
-### 1. Before 1 January 2027: stop the bond collector going silent (audit F1)
+### Done
+- **The bond collector's 2027 rollover (audit F1):** fixed in Nelson-Siegel by PR #17 (`12e1d1c`, 2026-10-11). Check
+  once that the next "Daily PDMO update" run in that repo is green.
 
-This session isn't permitted to change your existing repositories, so this is a change for you to make. It takes
-about two minutes in GitHub's web editor.
-
-Open `pipeline/config.py` in **Nelson-Siegel**, click the pencil icon, and replace the four `*_INDEX_URLS = {…}`
-blocks (the ones listing `2025:` and `2026:`) with:
-
-```python
-import datetime as _dt
-
-# One index page per year, from 2025 to the current year. Derived from today's date, so a new year is
-# picked up automatically: typing the years in would silently stop collection every 1 January.
-_YEARS = range(2025, _dt.date.today().year + 1)
-PDMO_INDEX_URLS = {y: f"{PDMO_BASE}/web/report-daily-report/section/{y}" for y in _YEARS}
-TRADE_SUMMARY_INDEX_URLS = {y: f"{PDMO_BASE}/web/reports-secondary-market-trade-summary/section/{y}" for y in _YEARS}
-BOND_AUCTION_INDEX_URLS = {y: f"{PDMO_BASE}/web/result-treasury-bonds/section/{y}" for y in _YEARS}
-BOND_ISSUANCE_INDEX_URLS = {y: f"{PDMO_BASE}/web/treasury-bonds-issuances/section/{y}" for y in _YEARS}
-```
-
-Leave `PDMO_EXTRA_INDEX_URLS` as it is (only the diagnostics tool uses it). Commit to `main`. Then, in the Actions tab,
-run **Daily PDMO update** once by hand and check that it is green.
-
-Why this is safe in January: the pipeline already treats one empty index page as survivable. Early in January the
-2027 page will be empty, log a warning and the run carries on. `section/2027` already exists today and answers with
-a normal page. If the PDMO changes the address pattern for 2027, the run log will show it.
-
-Alternative: leave the old repo alone, and the new bond collector must be live in parallel by mid-December.
+### 1. Approve (or send back) Phases 2, 3 and 4
+Reports: `docs/phase2-verification.md`, `docs/phase3-4-verification.md` (§9 is the audit). Nothing goes live
+without your approval (hard rule 6).
 
 ### 2. Store the safety copies in two places (decision 0003)
+The three archives handed over on 2026-10-11 exist only where you saved them. Put them in two separate places
+(e.g. an external drive and a cloud drive you control) before anything else changes.
 
-### 3. Switch-on: create the accounts and add the secrets, then run "Migrate history"
+### 3. Decisions that shape the product (each is a short answer)
+- **Tiers** (`config/entitlements.yaml`). Note the audit finding: the Plus models (z-scores, trades against quotes)
+  can be recomputed exactly from the free data. Make them free, take residual history and trade points out of the
+  free tier, or accept it.
+- **Carry's funding assumption** ("12-month bill + 5 bp", your old desk figure). Keep it (stated on the page) or
+  change it?
+- **Reversion statistics** stay hidden from everyone until a legal view. Agree?
+- **Bond volume dating (finding V3):** date the 3 disputed volume files by the PDMO index label instead of the data?
+- **Which remaining CSE model first** (Phase 3b): corporate actions and total returns, ownership, directors'
+  dealings, fundamentals, risk estimates.
+- **A product name**, when you have one (`web/messages/en.json`, `site.name`).
 
-Steps: `docs/phase2-verification.md` §5, then the website steps in `docs/phase3-4-verification.md` §6.
+### 4. Legal review before anything is public
+A Sri Lankan lawyer to read `compliance/disclaimers.yaml`, the method pages and the site's wording against the SEC's
+rules on investment advice; and the CSE's data terms (the licence enquiry is still outstanding: `config/sources.yaml`).
 
-### 4. Decisions on Phases 3 and 4 (docs/phase3-4-verification.md)
+### 5. Switch-on (when approved): `docs/phase3-4-verification.md` §6
+Accounts (Supabase Pro, Cloudflare R2, Backblaze B2, Healthchecks.io), secrets, "Migrate history", then the
+`COLLECTION_ENABLED` variable, then the website on Vercel Pro. About two hours of your time plus the migration run.
 
-- Bond volumes dating (finding V3): date the 3 disputed volume files by the PDMO index label instead of the data?
-- Tiers: is the proposal in `config/entitlements.yaml` right (free: market summary, shares, bond list, curve, bond
-  activity; Plus: z-scores with a 5-day-delayed free preview, trades against quotes; Pro: carry)?
-- The carry page uses the old tool's "bill + 5 bp" funding assumption. Keep it (stated on the page), or change it?
-- The pair reversion statistics are computed but shown to nobody until a legal view. Agree?
-- Which of the remaining CSE models first (Phase 3b)?
-- A product name, when you have one (the site says "TBD" in one place: `web/messages/en.json`, `site.name`).
+### 6. Trading calendars
+`config/calendars/cse.yaml` lists closures only up to August 2026 (inferred from data). Add the CSE's published
+holidays for the rest of 2026 and for 2027, or the site will warn "behind the market calendar" on those days.
 
-### Later: buy GitHub Pro and make all four repos private (decision 0012)
+### Later
+- Buy GitHub Pro and make all four repos private (decision 0012); then add an `OLD_REPOS_TOKEN` secret (read-only)
+  so "Migrate history" can still read the old repos.
+- Translators for Sinhala and Tamil, who also add Sinhala and Tamil banned-phrase lists to
+  `compliance/banned_phrases.yaml`.
+- Choose the payment provider (PayHere expected) for Phase 4b.

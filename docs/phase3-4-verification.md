@@ -17,10 +17,10 @@ the commands in section 7.
 | Six bond models, version 1, against the old tool | **Exact** on every table: 59 bonds, 11,146 quotes, 210 curves, 13,414 residuals, 9,285 bond z-scores, 86,829 pair z-scores, both reversion figures; and, run against the old code on every curve day, 9,150 liquidity profiles, 209 execution gaps, 209 funding rates, 10,975 carry rows. Largest floating-point difference 1.1e-11 (tolerance 1e-9) |
 | Two CSE models, version 1, against the old terminal's code | **Exact** on all 5 sessions it kept raw files for: 120 index levels, 5 market summaries, 200 watchlist share-sessions; the CSE's own rounded percentages agree to their rounding |
 | Bond curve version 2 (decision 0014: every two-way quote) | Built and current. Fits 92 quotes a day instead of 52.5; on the bonds both versions fit, the curve moves a median 2.7 bp; it sits slightly closer to executed trades (section 3) |
-| Model runs | Deterministic: a second run changes nothing and reads identical inputs (same fingerprints) |
+| Model runs | Deterministic: a second run changes nothing and reads identical inputs (same fingerprints). Stable: every current bond model computed with data to 8 October and again with all data agrees on all 230,000 shared rows (§9) |
 | Portal | Every page and API route renders on the real migrated history, at 375 px and desktop widths, with no sideways scrolling |
-| Tier-leak suite | **33 of 33 pass**: every page and route requested as every tier, with the site reading as the restricted `web_reader` role. Shown to **fail** (5 failures) when the tier check was deliberately weakened, then restored |
-| Tests | Python: 138 tests (`pytest --collect-only`): the 134 in the fast suite pass, and the 4 legacy tests (both migrations and both parity checks, from an empty database) pass. Web: 50 unit tests and the leak suite. The fast suite and all web tests also run, green, in GitHub Actions CI |
+| Tier-leak suite | **35 of 35 pass**: every page, detail page and API route requested as every tier, with the site reading as the restricted `web_reader` role, including explicit `?date=` requests and the exact last day of the free preview. Shown to **fail** (5 failures) when the tier check was deliberately weakened, then restored |
+| Tests | Python: 151 tests (`pytest --collect-only`): the 147 in the fast suite pass, and the 4 legacy tests (both migrations and both parity checks, from an empty database) pass. Web: 55 unit tests and the leak suite (35 checks). The fast suite and all web tests also run in GitHub Actions CI |
 | Copy lint | 0 banned phrases, now also scanning the models' code and the web app's code |
 
 Nothing in the three old repositories was changed.
@@ -90,9 +90,10 @@ Accounts are stubbed: every visitor is anonymous and on the free tier (decision 
   old repos at their latest commit but checked the audit's fingerprints, which belong to the audited commits; the
   old repos change daily. It now checks fingerprints at the audited commits, replays history at the latest
   commit, and takes the bond list from the audited database.
-- **P4. Model outputs are larger than the facts.** About 120 MB, 73 MB of it pair z-scores (both versions), growing
-  by roughly 1,000 pair rows a day. Well inside the Supabase Pro plan; retiring the reference versions after the
-  parallel run halves it.
+- **P4. Model outputs are larger than the facts.** About 120 MB, of which pair z-scores are about 100 MB (both
+  versions), growing by about 1,700 pair rows a day (522 for version 1.0.0, 1,172 for 1.1.0; mean per day since
+  1 September, measured with `count(*) ... group by obs_date`). Well inside the Supabase Pro plan; retiring the
+  reference versions after the parallel run removes about a third.
 
 - **P5. Including every quote in the curve must not mean pricing administered quotes elsewhere.** Reviewing the
   site showed carry 1.1.0 giving the sub-1% restructuring bonds (quoted at an administered 13.00/12.00) a
@@ -100,28 +101,65 @@ Accounts are stubbed: every visitor is anonymous and on the free tier (decision 
   threshold; the recompute removed 3,484 rows, each kept in `models.revisions`. The free bond table marks such
   quotes as wide. The curve itself is unchanged (decision 0014).
 
-## 6. Switch-on: what is added to the Phase 2 checklist
+## 6. Switch-on: the complete checklist
 
-The Phase 2 steps (`docs/phase2-verification.md` §5) still come first. Then:
+This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9). Do the steps in this order.
 
-1. **Healthchecks.io:** add a check with slug `models-all`.
-2. After "Migrate history" succeeds it computes every model (a new last step). Check the run's log shows each
-   model with `+` rows and no error.
-3. **The website's database login**, once, in the Supabase SQL editor (the password never goes in git):
+**A. Accounts and storage**
+1. **Supabase:** create an organisation and a **Pro** project `tbd-prod` in **ap-south-1 (Mumbai)**. In Database
+   settings, switch on **Enforce SSL**, and download the **SSL certificate** (you need it in step 10). Note the
+   project's *session pooler* connection string (port 5432) for GitHub, and its *transaction pooler* string (port
+   6543) for the website.
+2. **Cloudflare R2:** create a bucket `tbd-raw`. Add a **bucket lock rule on the prefix `raw/`** with retention
+   "indefinite" (the archive is kept forever), and a **lifecycle rule on the prefix `exports/`** deleting objects
+   after 90 days (database exports). Do not lock the whole bucket. Create an API token with Object Read & Write on
+   that bucket only.
+3. **Backblaze B2:** create a private bucket `tbd-raw-copy` and an application key limited to it.
+4. **Healthchecks.io:** create a project and copy its ping URL (`https://hc-ping.com/<key>`). Create checks with
+   the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history` and `models-all`.
+
+**B. Load the history (nothing runs on a schedule yet)**
+5. **GitHub → this repo → Settings → Secrets and variables → Actions → Secrets:** add `DATABASE_URL` (the session
+   pooler string), `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
+   `SECONDARY_S3_ENDPOINT_URL`, `SECONDARY_S3_BUCKET`, `SECONDARY_S3_ACCESS_KEY_ID`,
+   `SECONDARY_S3_SECRET_ACCESS_KEY`, `HEALTHCHECKS_BASE_URL` (descriptions in `.env.example`). **Do not add the
+   variable in step 7 yet:** until it exists every scheduled job skips itself, so nothing writes to the database
+   while the history is being loaded.
+6. **Actions → "Migrate history (manual)" → Run workflow.** It takes up to four hours. Check that the three reports
+   in the run's artifacts say `"ok": true` and that the last step lists every model with no error.
+
+**C. Switch collection on**
+7. **Same settings page → Variables:** add `COLLECTION_ENABLED` = `true`. From the next scheduled time the
+   collectors, models, gap check and backups run by themselves.
+8. The next morning: Healthchecks shows every check green, and Actions shows the night's runs green, including
+   "Backup: database export".
+
+**D. The website**
+9. **The website's database login**, once, in the Supabase SQL editor (the password never goes in git):
    `alter role web_reader with login password '<a long random password>';`
-4. **Vercel:** create a team on the **Pro** plan (the free plan forbids commercial use), import this repo with root
-   directory `web`, and set two environment variables: `DATABASE_URL` (the session pooler string with the user
-   changed to `web_reader.<project ref>`, as Supabase's pooler names users, and that password) and `APP_ENV=production`. Never set `ALLOW_TEST_TIERS` there.
-5. Open the deployment and check the overview shows yesterday's session.
+10. **Vercel:** create a team on the **Pro** plan (the free plan forbids commercial use). Import this repo with root
+    directory `web` and function region **bom1 (Mumbai)**, next to the database. Set these environment variables
+    for Production only:
+    - `DATABASE_URL`: the *transaction pooler* string (port 6543) with the user changed to
+      `web_reader.<project ref>` and that password;
+    - `DATABASE_CA_CERT`: the text of the certificate from step 1 (the site refuses to connect to a remote
+      database without it);
+    - `APP_ENV=production`.
+    Never set `ALLOW_TEST_TIERS` there.
+11. Open the deployment and check the overview shows the latest session.
 
-Sign-up, log-in and payments come after that, when you choose the payment provider (decision 0016).
+**E. Ongoing**
+- GitHub pauses scheduled workflows in a public repository after 60 days without a commit. Healthchecks will email
+  you if that happens; re-enable them in the Actions tab (or make a commit). This stops once the repo is private.
+- Sign-up, log-in and payments come later, when you choose the payment provider (decision 0016).
 
 ## 7. How to re-run the verification
 
 ```bash
 uv sync
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"
-# parity against the old tool (needs the migrated history in DATABASE_URL and read-only clones of the old repos):
+# parity against the old tool (needs the migrated history in DATABASE_URL and read-only clones of the old repos,
+# checked out at the audited commits: git -C <NS clone> checkout 1c33084; git -C <CSE clone> checkout f263830):
 uv run python -m data_platform.migration.parity bonds --old-db <NS clone>/data/sgcp.sqlite --old-code <NS clone> \
     --report docs/migration/parity-bonds.json
 uv run python -m data_platform.migration.parity cse --old-code <CSE clone> --report docs/migration/parity-cse.json
@@ -130,8 +168,9 @@ LEGACY_NS_DB=... LEGACY_PDMO_ARCHIVE=... LEGACY_CSE_REPO=... LEGACY_CSE_CHART_AR
     uv run pytest -m legacy
 # the website
 cd web && npm ci && npm run typecheck && npm test && npm run build
-uv run python tests/leak/seed.py        # prints the DATABASE_URL to start the server with
-DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100 &  npm run test:leak
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run python tests/leak/seed.py   # prints a URL
+DATABASE_URL=<printed URL> ALLOW_TEST_TIERS=1 npx next start -p 3100 &
+until curl -sf http://127.0.0.1:3100/api/v1/models > /dev/null; do sleep 1; done; npm run test:leak
 ```
 
 ## 8. Not done, deliberately
@@ -143,3 +182,42 @@ DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100 &  npm run test
 - **The old terminal's portfolio lab, live record and trade list:** personal tools, not ported (audit §8).
 - **Accounts, payments, Sinhala and Tamil text, deployment:** need the owner's accounts or translators
   (decision 0016).
+
+## 9. Audit of 2026-10-11
+
+After the build, the whole codebase was reviewed again in four independent passes (collectors and migrations;
+models and parity; the website's security; compliance and documentation), and every finding was checked against
+the code before being fixed. The full suites were re-run afterwards (§1).
+
+**Fixed**
+
+| Area | Problem | Fix |
+|---|---|---|
+| Switch-on | Scheduled jobs would start as soon as the secrets existed, writing live rows while "Migrate history" ran, so its reconciliation would fail and the append-only tables could not be cleaned | Jobs wait for a `COLLECTION_ENABLED` variable, set after the migration succeeds (§6 step 7) |
+| Pair z-scores | Each pair row carried the bonds' median maturity over all history, so every new day rewrote about 280,000 past rows and their revision copies (about 240 MB a day) | Version 1.1.0 uses each bond's maturity on the day and pair membership as known on the day; past rows never change. The reference version no longer fills the revision log |
+| Models job | `--as-of` would have deleted every later row; one failing model stopped all later ones | `--as-of` computes in memory and never writes; failures are recorded, unrelated models carry on, the site's version runs first |
+| Bond identity v2 | A letter-free label match ignored maturity, so 13.00%2029A could be filed under 2029B on a day 2029B was missing | The match must also agree on maturity and coupon (version 2 only; version 1 keeps the old behaviour for parity) |
+| PDMO collector | One dead link stopped every newer file behind it; a failed parse was never retried | Each file is fetched on its own and failures are reported at the end; failed parses are retried |
+| CSE collector | A failure part-way through the per-company calls left those companies missing for the session for good | Each company is stored as it succeeds; a later run that day finishes any company still missing |
+| Backups | A same-day re-run failed; exports were never read back; "verify" passed with nothing to verify; the export needs a `pg_dump` at least as new as Supabase's Postgres | Re-runs complete the day's export; every copy is read back; verify fails on an empty archive or a missing recent export; the export job installs PostgreSQL 18's client |
+| Database | Migrations released their lock before committing (two jobs starting at once could collide); auction views could show a file twice after a parser upgrade; the website's login could read the unpublished statistics | Fixed in code and migration 0007 (which also gives the website's login a 10-second query limit) |
+| Website | No connection timeouts or TLS settings; free previews showed a false "behind" warning; bad dates and odd addresses gave errors instead of 400/404; a grant could in principle be written by hand anywhere in the code | Timeouts, a small pool, verified TLS required for any remote database; preview-aware freshness; 400/404s; grants can only come from the tier check |
+| Wording | The z-score page ranked bonds and pairs by size, like a screen; residuals were coloured green and red | Listed by maturity, pairs shown for one chosen bond; neutral colours; "entry yield" renamed |
+| Copy lint | Missed word forms, hyphenated forms, phrases across line breaks and look-alike characters | All four are caught now, with tests |
+| Docs | Switch-on steps incomplete (TLS, pooler, region, R2 lock prefix, the new variable); re-run commands that would not run; method pages that disagreed with the code | Corrected (§6, §7, the METHOD pages) |
+
+**Open, for the owner** (also in `docs/roadmap.md`)
+
+- **The two Plus models can be recomputed from free data.** The z-scores and the trades-against-quotes gap are
+  exact functions of the residuals and trade points the free tier shows, so a determined user can rebuild them; the
+  5-day preview delay protects nothing. Options: make them free; take the residual history and trade points out of
+  the free tier; or accept it and charge for the convenience.
+- **Trade data is used by the day it describes**, not the day it was published (a day's trade file arrives a day or
+  more after its quotes), so a day's liquidity, execution-gap and carry figures change once when that file arrives.
+  The revision record keeps the first values. Storing when each file first became available would make this
+  point-in-time; it needs the publication dates, which the old tool kept but the migration did not carry over.
+- **Before launch, versions are changed in place** (decision 0015, rule 11). From the first production run, any
+  change that alters outputs gets a new version number.
+- **Not fixed (low impact, documented):** re-running the CSE migration after the old repo moves on adds duplicate
+  catalogue rows (never duplicate facts); a malformed `%` sequence in an address gets a bare 500 from Next.js's own
+  router (no data, no detail).

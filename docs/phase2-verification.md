@@ -121,25 +121,9 @@ All 20 Appendix A fingerprints recompute exactly from the archived bytes.
 
 ## 5. What switch-on needs (owner actions)
 
-Phase 2 is complete as code. To start collecting into the cloud (the 20-trading-day parallel run in
-architecture §14), please do these steps in order. About an hour, once.
-
-1. **Supabase:** create an organisation, then a Pro project named `tbd-prod` in region **ap-south-1 (Mumbai)**.
-   Copy the *session pooler* connection string.
-2. **Cloudflare R2:** create a bucket `tbd-raw`. Add a **bucket lock rule** with no prefix, retention "indefinite".
-   Create an API token with Object Read & Write on that bucket only.
-3. **Backblaze B2:** create a private bucket `tbd-raw-copy` and an application key limited to it.
-4. **Healthchecks.io:** create a project and copy its *ping key* URL (`https://hc-ping.com/<key>`). Create checks
-   with these slugs: `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history`. (Checks must
-   exist before pings register; schedules are in the workflow files.)
-5. **GitHub → this repo → Settings → Secrets and variables → Actions**, add: `DATABASE_URL`, `S3_ENDPOINT_URL`,
-   `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `SECONDARY_S3_ENDPOINT_URL`, `SECONDARY_S3_BUCKET`,
-   `SECONDARY_S3_ACCESS_KEY_ID`, `SECONDARY_S3_SECRET_ACCESS_KEY`, `HEALTHCHECKS_BASE_URL`. The descriptions are in
-   `.env.example`.
-6. **Actions → "Migrate history" → Run workflow.** Check the three reports in the run's artifacts say `"ok": true`.
-7. From then on, the scheduled jobs run by themselves.
-
-Vercel and Resend aren't needed until Phase 4 (the website).
+Superseded by the complete, updated checklist in `docs/phase3-4-verification.md` §6. (The audit of 2026-10-11 changed
+two things here: the R2 bucket lock covers only the `raw/` prefix, so database exports can expire; and scheduled jobs
+wait for a `COLLECTION_ENABLED` variable that is set only after "Migrate history" succeeds.)
 
 ## 6. How to re-run the verification
 
