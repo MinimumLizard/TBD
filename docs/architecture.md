@@ -163,6 +163,9 @@ Schemas (Postgres name-spaces), so the purpose of each table is obvious from its
   and a reason. Views named `*_current` show the latest version, which is what models read.
 - Keys follow the audit's lessons: one row per (security, session, source). Backfill and daily rows are kept apart, as
   the CSE does now.
+- Where a source has two definitions of one quantity, both are stored under explicit names. For example, CSE
+  `volume_regular` (excludes negotiated crossings) and `volume_total` (includes them); the old `prices.csv` mixed the
+  two at 2026-10-02 (audit addendum, item 4).
 
 **Backups.**
 1. Supabase's daily backups.

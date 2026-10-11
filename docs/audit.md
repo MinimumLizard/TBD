@@ -569,3 +569,31 @@ a true row count differ, and Phase 2 will count rows with a CSV parser.
 | CSE | `python -m pytest -q` | 240 passed |
 | Bonds | `pytest -q` | 132 passed |
 | Crypto | `uv run pytest -q` (against the `data` branch snapshot) | 290 passed, 1 skipped (MiniLizard parity: no reference values) |
+
+---
+
+## Addendum (2026-10-11, after Phase 0): what the safety copies revealed
+
+Found while making the read-only safety copies (`scripts/`, CHANGELOG):
+
+1. **The PDMO originals are still served and unchanged.** Re-downloaded files match the SHA-256 the bond database
+   recorded when it first parsed them. The outcome for every file is in the archive's `manifest.csv`.
+2. **The bond database's overwritten values are recovered.** All 62 committed versions (2026-09-01 → 2026-10-10)
+   were rebuilt into one row-history file and verified version by version. 1,112 quote values and 587 curve fits had
+   been superseded in place. Example: LKB00931E153 on 2025-12-08 read 13.00/12.00 (an administered quote attached to
+   the wrong bond) until 2026-09-02, then 10.045/9.9075.
+3. **The CSE's 2026-10-05 session is safe.** The chart endpoint still served it for 277 equities, and the responses
+   are archived.
+4. **New data-quality finding (CSE): volume means two different things in `prices.csv`.** The archived chart history
+   matches 68,135 of the 68,154 overlapping rows exactly, including every backfill row still inside the rolling window. But on 19 *daily* rows the chart endpoint's volume is higher: for
+   example LIOC.N0000 on 2026-10-02 shows 62,740 daily vs 551,334 in the chart. Comparing against the raw
+   `tradeSummary.json`, the chart's volume equals `crossingVolume`, which includes negotiated crossings. The daily
+   job stores `sharevolume`, which excludes them. So backfill rows (to 2026-10-01) hold **total** volume and daily rows
+   (from 2026-10-02) hold **regular-market** volume. This affects:
+   - volume vs average (C2);
+   - `turnover_est` and the liquidity filters (C8);
+   - Amihud (C9).
+   The new schema stores both (`volume_regular`, `volume_total`). Parity tests reproduce the old mixed behaviour as
+   version 1 and fix it as version 2.
+5. **Closed-end fund units** (`.U0000`) are in the daily `tradeSummary` but not served by the chart endpoint. That is
+   expected, and they are outside the equity universe anyway.
