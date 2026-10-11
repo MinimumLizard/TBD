@@ -1,0 +1,17 @@
+# Data never goes in git (decision 0003). Archives belong in R2/B2 and the founders own copies.
+*.sqlite
+*.sqlite.xz
+*.bundle
+*.parquet
+archive/
+repo-backup-*/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python / Node
+__pycache__/
+.venv/
+node_modules/

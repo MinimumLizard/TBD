@@ -13,10 +13,27 @@ language. Prefer boring, well-documented, managed services over clever or self-h
 
 ## Current phase
 
-**Phase 0 (audit) is done; awaiting the owner's approval before Phase 1.** See `docs/roadmap.md`.
+**Phase 1 (architecture proposal) is done; awaiting the owner's approval before Phase 2.** See `docs/roadmap.md`.
 
 - Audit: `docs/audit.md` (findings, fragility register, data rights, questions).
-- Architecture: not yet decided. Phase 1 will write `docs/architecture.md` and `docs/decisions/`.
+- Owner's answers: `docs/decisions/0001-owner-answers-to-phase-0.md`. Read it before asking the owner anything.
+- Architecture: `docs/architecture.md`; one record per decision in `docs/decisions/`.
+- Phase 2 is blocked on owner actions (architecture §19): repos private, accounts created (Supabase, Vercel,
+  Cloudflare R2, Backblaze B2, Healthchecks.io, Resend), keys in GitHub/Vercel secrets.
+
+## Architecture in brief
+
+Raw archive (Cloudflare R2, write-once, copied to Backblaze B2) → Supabase Postgres (Mumbai) → Python collectors
+(one per source; fetch → archive → parse → validate → store; run on GitHub Actions with Healthchecks.io dead-man's
+switches and a daily gap check) → model plug-ins (`data_platform/models/<name>/` with manifest, compute, METHOD.md,
+tests; outputs carry `method_version`) → API as Next.js server routes (`web/lib/entitlements.ts` is the only tier
+check) → Next.js web app on Vercel, all copy in `web/messages/{en,si,ta}.json`.
+
+Data-source rule (owner, decision 0009): use a source only if its terms allow commercial use or are silent. Status
+lives in `config/sources.yaml`. Crypto is deferred: most of its free sources prohibit commercial use.
+
+This session may NOT change the existing repos; push access to them was refused by the environment. Give the owner
+instructions instead.
 
 ## Source repositories (read-only until a migration plan is approved)
 
@@ -54,4 +71,13 @@ this repo.
 
 ## Commands
 
-None yet: no code exists. Phase 1 will define them.
+No product code yet. One-off safety tools (read-only towards the existing repos and sources):
+
+```
+bash scripts/backup_repos.sh <out_dir>                                  # verified bundles of all three repos
+python scripts/bond_db_history.py --repo <Nelson-Siegel clone> --out <file.sqlite>   # row history + self-check
+python scripts/archive_pdmo_files.py --db <sgcp.sqlite> --out <dir>     # PDMO originals, SHA-256 checked
+python scripts/archive_cse_history.py --out <dir>                       # CSE one-year chart history
+```
+
+Write archives to the scratchpad, never into this repo; data does not belong in git.
