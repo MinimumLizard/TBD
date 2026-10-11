@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-11 — Phase 2: data foundation and history migration
+
+- Platform core: content-addressed write-once raw archive (local and S3/R2), Postgres schema with database-enforced
+  append-only fact tables, source register with rights gate, polite HTTP client, collector runner with run log and
+  Healthchecks.io pings.
+- Collectors: PDMO bonds (old parsers ported unchanged; every row stored as published; index years derived from the
+  date), CSE end of day, announcements, and a weekly history job that repairs missed sessions.
+- Migration by replay: all bond facts rebuilt from the 678 PDMO originals and all CSE facts from the old raw
+  responses, reconciled exactly against the old tables; the missed 2026-10-05 CSE session restored; every old file
+  and full-history bundle archived; all 20 audit baselines match from archived bytes; every migration is repeatable.
+- Gap check with inferred trading calendars, backups (replicate, export, verify), copy lint and disclaimer registry,
+  repo rules (no data, no secrets), CI on GitHub Actions (green), scheduled jobs that skip until configured, and a
+  one-click "Migrate history" workflow.
+- Findings: 13.00%2029A lost every day by the old matcher; three mis-dated and two never-published bond-volume days;
+  a PDMO link already removed since it was first fetched (docs/phase2-verification.md §4).
+- Decisions 0012 (Phase 1 approved, build before accounts, repo public for now) and 0013 (Phase 2 choices).
+
 ## 2026-10-11 — Phase 1: architecture proposal, and safety copies of existing data
 
 - Recorded the owner's answers to the audit (`docs/decisions/0001`): the old sites stay personal tools; a source is

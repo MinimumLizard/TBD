@@ -159,8 +159,9 @@ Schemas (Postgres name-spaces), so the purpose of each table is obvious from its
 
 **Rules every fact table follows.**
 - Every row has `source`, `fetched_at`, `raw_object_id` and `ingested_at`.
-- Rows are never updated in place. A correction inserts a new row, and the old one gets `superseded_by`, `superseded_at`
-  and a reason. Views named `*_current` show the latest version, which is what models read.
+- Rows are never updated in place; the database refuses UPDATE and DELETE on fact tables. A correction (an amended
+  file, a fixed parser) inserts new rows that point at their source file and parser version, and views named
+  `*_current` choose the winning version, which is what models read. (As built in Phase 2: decision 0013.)
 - Keys follow the audit's lessons: one row per (security, session, source). Backfill and daily rows are kept apart, as
   the CSE does now.
 - Where a source has two definitions of one quantity, both are stored under explicit names. For example, CSE

@@ -13,13 +13,15 @@ language. Prefer boring, well-documented, managed services over clever or self-h
 
 ## Current phase
 
-**Phase 1 (architecture proposal) is done; awaiting the owner's approval before Phase 2.** See `docs/roadmap.md`.
+**Phase 2 (data foundation + history migration) is built and verified locally; awaiting the owner's approval and
+switch-on.** See `docs/phase2-verification.md` (results, findings V1–V7, the switch-on checklist) and
+`docs/roadmap.md`.
 
-- Audit: `docs/audit.md` (findings, fragility register, data rights, questions).
-- Owner's answers: `docs/decisions/0001-owner-answers-to-phase-0.md`. Read it before asking the owner anything.
-- Architecture: `docs/architecture.md`; one record per decision in `docs/decisions/`.
-- Phase 2 is blocked on owner actions (architecture §19): repos private, accounts created (Supabase, Vercel,
-  Cloudflare R2, Backblaze B2, Healthchecks.io, Resend), keys in GitHub/Vercel secrets.
+- Audit: `docs/audit.md`. Architecture: `docs/architecture.md`. Decisions: `docs/decisions/` (0001 and 0012 are the
+  owner's own answers; read them before asking the owner anything).
+- Switch-on needs the owner's accounts and secrets (phase2-verification §5). Until then every scheduled workflow
+  skips itself. The repo is PUBLIC for now (decision 0012): never commit data or secrets; CI enforces both.
+- Next: Phase 3, model plug-ins, bonds first, each with parity tests against golden outputs in the raw archive.
 
 ## Architecture in brief
 
@@ -71,7 +73,25 @@ this repo.
 
 ## Commands
 
-No product code yet. One-off safety tools (read-only towards the existing repos and sources):
+```
+uv sync                                                        # once (Python 3.12+)
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"   # what CI runs
+uv run python -m data_platform.compliance                      # copy lint
+uv run python -m data_platform.jobs.migrate                    # apply db/migrations (DATABASE_URL)
+uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history
+uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
+uv run python -m data_platform.jobs.backup replicate|export|verify
+uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
+```
+
+Local Postgres in a cloud session: the container has Postgres 16; start it as the `postgres` user
+(`initdb` + `pg_ctl` on port 54321, data under /var/tmp), never as root. Settings come from env vars (`.env.example`).
+
+Layout: `data_platform/core` (archive, db, http, collector runner), `collectors/<source>/` (pure `parse*` functions
+plus a `Collector`), `migration/`, `jobs/`; `db/migrations/NNNN_*.sql` (never edit an applied one; add a new file);
+`config/` (sources, calendars, datasets); `compliance/` (disclaimers, banned phrases).
+
+One-off safety tools (read-only towards the existing repos and sources):
 
 ```
 bash scripts/backup_repos.sh <out_dir>                                  # verified bundles of all three repos

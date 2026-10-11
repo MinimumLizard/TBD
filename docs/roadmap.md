@@ -4,8 +4,9 @@
 |---|---|---|
 | 0 | Audit of the three existing repos (`docs/audit.md`) | Done 2026-10-11; owner answers in decision 0001 |
 | — | Safety copies of existing data (bundles, bond row history, PDMO originals, CSE chart history) | Done 2026-10-11; handed to the owner to store (decision 0003) |
-| 1 | Architecture proposal: `docs/architecture.md`, `docs/decisions/0002–0011` | **Done 2026-10-11. Awaiting approval.** |
-| 2 | Data foundation (raw archive, database, collectors, gap check) and migration of all history, run in parallel with the old sites | Blocked on the owner's accounts (architecture §19) and approval |
+| 1 | Architecture proposal: `docs/architecture.md`, `docs/decisions/0002–0011` | Done; approved 2026-10-11 (decision 0012) |
+| 2 | Data foundation (raw archive, database, collectors, gap check, backups) and migration of all history | **Built and verified 2026-10-11 (`docs/phase2-verification.md`). Awaiting approval and switch-on (owner's accounts).** |
+| 2b | Switch-on: accounts + secrets, run "Migrate history", then 20 trading days in parallel with the old sites | Owner actions in phase2-verification §5 |
 | 3 | Model plug-ins, bonds first, each passing parity tests | Not started |
 | 4 | Portal: API, auth, entitlements, web app (free tier first) | Not started |
 
@@ -42,4 +43,9 @@ Alternative: leave the old repo alone, and the new bond collector must be live i
 
 ### 2. Store the safety copies in two places (decision 0003)
 
-### 3. Make all four repos private (TBD included), then create the accounts in architecture §19
+### 3. Switch-on (docs/phase2-verification.md §5): create the accounts and add the secrets, then run "Migrate history"
+
+### 4. One decision: bond volumes dating (finding V3)
+Date bond volume files by the PDMO index label when it disagrees with the date derived from the data? (3 files.)
+
+### Later: buy GitHub Pro and make all four repos private (decision 0012)
