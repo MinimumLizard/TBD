@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 import sys
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -46,17 +47,37 @@ def load_rules(path: Path = RULES) -> tuple[list[str], list[dict]]:
     return [p.lower() for p in raw["banned"]], raw.get("allow") or []
 
 
+ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad"))
+
+
+def normalise(text: str) -> str:
+    """Fold look-alike characters (full-width letters, ligatures) to plain ones and drop invisible ones, so a banned
+    word cannot be disguised. Case is folded too."""
+    return unicodedata.normalize("NFKC", text).translate(ZERO_WIDTH).casefold()
+
+
+def _pattern(phrase: str) -> re.Pattern:
+    # Whole words: a letter, digit or underscore on either side means it is part of a longer word or identifier.
+    # A hyphen does NOT protect a word ("buy-and-hold" is caught). Words in a phrase may be split by any whitespace,
+    # including a line break, or by hyphens ("top-pick").
+    words = [re.escape(w) for w in phrase.split()]
+    return re.compile(r"(?<!\w)" + r"[\s-]+".join(words) + r"(?!\w)")
+
+
 def scan_text(rel: str, text: str, banned: list[str], allow: list[dict]) -> list[Hit]:
     hits = []
-    for n, line in enumerate(text.splitlines(), 1):
-        low = line.lower()
-        for phrase in banned:
-            if not re.search(r"(?<![\w-])" + re.escape(phrase) + r"(?![\w-])", low):
-                continue
-            allowed = any(a["file"] == rel and a["phrase"].lower() == phrase and a["context"].lower() in low
-                          for a in allow)
+    lines = text.splitlines()
+    folded = normalise(text)
+    starts = [m.start() for m in re.finditer(r"^", folded, re.M)]
+    folded_lines = folded.splitlines()
+    for phrase in banned:
+        for m in _pattern(normalise(phrase)).finditer(folded):
+            n = max(i for i, s in enumerate(starts) if s <= m.start()) + 1
+            context = " ".join(folded_lines[n - 1:n + 1]) if "\n" in m.group(0) else folded_lines[n - 1]
+            allowed = any(a["file"] == rel and normalise(a["phrase"]) == normalise(phrase)
+                          and normalise(a["context"]) in context for a in allow)
             if not allowed:
-                hits.append(Hit(rel, n, phrase, line.strip()[:160]))
+                hits.append(Hit(rel, n, phrase, lines[n - 1].strip()[:160] if n - 1 < len(lines) else ""))
     return hits
 
 

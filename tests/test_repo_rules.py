@@ -81,3 +81,12 @@ def test_env_example_lists_every_setting():
     settings_src = (REPO_ROOT / "data_platform" / "core" / "settings.py").read_text()
     for var in re.findall(r'env\("([A-Z_]+)"', settings_src):
         assert re.search(rf"^{var}=", example, re.M), f"{var} is read in settings.py but missing from .env.example"
+
+
+def test_copy_lint_sees_through_disguises():
+    banned, allow = compliance.load_rules()
+    for text in ["Buy-and-hold works", "a top-pick", "price\ntarget", "We\n   recommend", "ｂｕｙ now", "bu​y now",
+                 "it outperformed", "the cheapest bond", "selling pressure"]:
+        assert compliance.scan_text("x.md", text, banned, allow), text
+    for text in ["foreign_sell column", "threshold", "household", "Foreign sales", "held fixed"]:
+        assert not compliance.scan_text("x.md", text, banned, allow), text

@@ -9,10 +9,20 @@
 # surrounding text that must be present on the same line, and the reason. Adding one is a deliberate, visible
 # change in code review.
 
+# Word forms are listed explicitly (not matched by stem), so the list says exactly what is caught. "held" is not
+# listed: it is ordinary English ("held fixed", "held out of the fit") and has no advice sense on its own.
+#
+# English only. Sinhala and Tamil lists must be added here, by the translators, before si.json / ta.json go live.
+
 banned:
   - buy
+  - buys
+  - buying
   - sell
+  - sells
+  - selling
   - hold
+  - holds
   - strong buy
   - accumulate
   - add to
@@ -26,17 +36,34 @@ banned:
   - fair value of
   - undervalued
   - overvalued
+  - undervaluation
+  - overvaluation
   - cheap
+  - cheaper
+  - cheapest
   - rich
+  - richer
+  - richest
   - bargain
   - top pick
   - top picks
   - our picks
   - you should
   - we recommend
+  - recommend
+  - recommends
   - recommended
+  - recommending
+  - recommendation
+  - recommendations
   - outperform
+  - outperforms
+  - outperformed
+  - outperforming
   - underperform
+  - underperforms
+  - underperformed
+  - underperforming
   - guaranteed
   - sure thing
   - can't lose
@@ -44,6 +71,10 @@ banned:
   - switch candidates
 
 allow:
+  - file: compliance/disclaimers.yaml
+    phrase: recommendation
+    context: "recommendation to buy, sell or hold any security"
+    reason: The disclaimer states what the product does not do.
   - file: compliance/disclaimers.yaml
     phrase: buy
     context: "recommendation to buy, sell or hold any security"
