@@ -105,6 +105,29 @@ def load(conn, store, old_db: Path, pdmo_archive: Path, http: PoliteClient | Non
     return dict(stats)
 
 
+LEGACY_REFERENCE_COLUMNS = ("isin", "coupon_pct", "maturity_date", "tenor_years", "series_label", "issue_date",
+                            "coupon_dates", "first_seen_date", "notes")
+
+
+def load_legacy_reference(conn, old_db: Path, source_sha256: str) -> dict:
+    """Copy the old database's `bonds` table into bonds.legacy_reference (once; repeat runs add nothing) and check
+    the copy row for row. bond_identity version 1 starts from it (decision 0015)."""
+    old = sqlite3.connect(f"file:{old_db}?mode=ro", uri=True)
+    old.row_factory = sqlite3.Row
+    rows = [{c: r[c] for c in LEGACY_REFERENCE_COLUMNS} for r in old.execute("select * from bonds order by isin")]
+    added, conflicts = db.insert_facts(
+        conn, "bonds.legacy_reference", [{**r, "source_sha256": source_sha256} for r in rows],
+        key=("source_sha256", "isin"))
+    conn.commit()
+    stored = {r["isin"]: r for r in conn.execute(
+        "select * from bonds.legacy_reference where source_sha256 = %s", (source_sha256,))}
+    differ = [r["isin"] for r in rows if r["isin"] not in stored
+              or any(str(_d(r[c]) if c.endswith("_date") else r[c]) != str(stored[r["isin"]][c])
+                     for c in LEGACY_REFERENCE_COLUMNS if c not in ("isin",))]
+    return {"old": len(rows), "stored": len(stored), "added_now": added, "conflicts": conflicts,
+            "values_differ": differ[:5], "ok": len(rows) == len(stored) and not differ and not conflicts}
+
+
 # --- reconciliation -------------------------------------------------------------------------------------------
 
 def _f(x):
@@ -236,13 +259,16 @@ def main(argv=None) -> int:
     conn = db.connect(s.database_url)
     db.migrate(conn)
     store = rawstore.from_settings(s)
-    archive_legacy_file(conn, store, args.old_db, "data/sgcp.sqlite")
+    old_db_sha = archive_legacy_file(conn, store, args.old_db, "data/sgcp.sqlite")
     if args.old_history:
         archive_legacy_file(conn, store, args.old_history, "bond_db_history.sqlite (rebuilt from git, verified)")
     conn.commit()
     loaded = load(conn, store, args.old_db, args.pdmo_archive, None if args.no_network else PoliteClient(min_interval=1.5),
                   dt.date.today())
-    report = {"loaded": loaded, "reconciliation": reconcile(conn, args.old_db),
+    reconciliation = reconcile(conn, args.old_db)
+    reconciliation["legacy_reference"] = load_legacy_reference(conn, args.old_db, old_db_sha)
+    reconciliation["ok"] = reconciliation["ok"] and reconciliation["legacy_reference"]["ok"]
+    report = {"loaded": loaded, "reconciliation": reconciliation,
               "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
               "old_db_sha256": rawstore.sha256_of(args.old_db.read_bytes())}
     args.report.parent.mkdir(parents=True, exist_ok=True)

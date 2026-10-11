@@ -44,3 +44,20 @@ def test_cse_history_migrates_and_reconciles_exactly(conn, store):
     before = conn.execute("select count(*) n from ops.raw_fetches").fetchone()["n"]
     cse.load(conn, store, Path(repo), Path(chart))
     assert conn.execute("select count(*) n from ops.raw_fetches").fetchone()["n"] == before   # repeatable
+
+
+@pytest.mark.db
+def test_bond_models_version_1_reproduce_the_old_tool(conn, store):
+    """Phase 3 parity: every bond model's version 1 against the old database, and against the old code for the
+    calculations the old tool never stored. Set LEGACY_NS_CODE to a clone of Nelson-Siegel at 1c33084."""
+    from data_platform.migration import parity
+
+    old_db, archive = os.environ.get("LEGACY_NS_DB"), os.environ.get("LEGACY_PDMO_ARCHIVE")
+    old_code = os.environ.get("LEGACY_NS_CODE")
+    if not (old_db and archive and old_code):
+        pytest.skip("LEGACY_NS_DB / LEGACY_PDMO_ARCHIVE / LEGACY_NS_CODE not set")
+    bonds.load(conn, store, Path(old_db), Path(archive), None, dt.date.today())
+    sha = bonds.archive_legacy_file(conn, store, Path(old_db), "data/sgcp.sqlite")
+    assert bonds.load_legacy_reference(conn, Path(old_db), sha)["ok"]
+    report = parity.bonds_parity(conn, Path(old_db), Path(old_code))
+    assert report["ok"], [c for c in report["checks"] if not c["ok"]]

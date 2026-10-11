@@ -1,0 +1,36 @@
+{
+  "models": {
+    "bond_identity": {
+      "title": "Government bond list and daily quotes",
+      "summary": "Every LKR treasury bond the PDMO publishes a dealer quote for, with each day's average bid and offer yields and prices."
+    },
+    "bond_ns_curve": {
+      "title": "LKR government bond yield curve",
+      "summary": "A Nelson-Siegel curve fitted each day to dealer quotes, and how far each bond's yield sits above or below it."
+    },
+    "bond_liquidity": {
+      "title": "Bond trading activity",
+      "summary": "How much each bond has traded over the last 60 days, when it was last auctioned, and its trading-activity tier."
+    },
+    "bond_rv_zscores": {
+      "title": "Bond residuals against their own history",
+      "summary": "Each bond's distance from the curve, and the spread between neighbouring bonds, compared with their own recent range."
+    },
+    "bond_execution_gap": {
+      "title": "Trades against quotes",
+      "summary": "How far executed trades have printed from the dealers' quoted mid yields over the last 20 days."
+    },
+    "bond_carry": {
+      "title": "Carry, rolldown and duration",
+      "summary": "Each bond's yield over a stated funding rate, its rolldown along an unchanged curve, and both per unit of duration."
+    },
+    "cse_market_tape": {
+      "title": "CSE market summary",
+      "summary": "Index levels and changes, turnover against its 20-session average, breadth, and foreign flows for each session."
+    },
+    "cse_security_metrics": {
+      "title": "CSE share metrics",
+      "summary": "For every listed share and session: price change, position in its 52-week range, volume against average, and return relative to the ASPI."
+    }
+  }
+}

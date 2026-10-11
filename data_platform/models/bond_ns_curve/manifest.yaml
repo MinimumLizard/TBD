@@ -1,0 +1,20 @@
+name: bond_ns_curve
+market: lk_bonds
+title_key: models.bond_ns_curve.title
+summary_key: models.bond_ns_curve.summary
+disclaimer_key: model_general
+requires_datasets:
+  - bonds.trades_current
+outputs:
+  - models.bond_curve_fit
+  - models.bond_curve_point
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models: { bond_identity: "1.0.0" }
+    parameters:
+      # Calibrated once by the old tool over its whole sample (curve_settings.lambda_years) and held fixed.
+      lambda_years: 2.821790673757931
+    parity:
+      reference: "MinimumLizard/Nelson-Siegel@1c33084 curves/fit.py, tables curve_fits and curve_residuals"
+      tolerance: 1.0e-9

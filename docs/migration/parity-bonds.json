@@ -1,0 +1,172 @@
+{
+  "checks": [
+    {
+      "table": "bond_identity: bonds",
+      "old_rows": 59,
+      "new_rows": 59,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_identity: quotes",
+      "old_rows": 11146,
+      "new_rows": 11146,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_ns_curve: curve_fits",
+      "old_rows": 210,
+      "new_rows": 210,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.2434497875801753e-12,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_ns_curve: curve_residuals",
+      "old_rows": 13414,
+      "new_rows": 13414,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.6058265828178264e-12,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_rv_zscores: bond_signals",
+      "old_rows": 9285,
+      "new_rows": 9285,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.453948073049105e-12,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_rv_zscores: switch_signals",
+      "old_rows": 86829,
+      "new_rows": 86829,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 9.201528428093297e-13,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_rv_zscores: signal_stats",
+      "old_rows": 2,
+      "new_rows": 2,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 2.3092638912203256e-14,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_liquidity: liquidity.profile()",
+      "old_rows": 9150,
+      "new_rows": 9150,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_execution_gap: execution.gap()",
+      "old_rows": 209,
+      "new_rows": 209,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_carry: carry.funding_rate()",
+      "old_rows": 209,
+      "new_rows": 209,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    {
+      "table": "bond_carry: carry.profile()",
+      "old_rows": 10975,
+      "new_rows": 10975,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 1.1141310096718371e-11,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "old_code_compared": true,
+  "generated_at": "2026-10-11T12:19:39+00:00"
+}

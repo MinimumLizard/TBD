@@ -1,0 +1,19 @@
+name: bond_rv_zscores
+market: lk_bonds
+title_key: models.bond_rv_zscores.title
+summary_key: models.bond_rv_zscores.summary
+disclaimer_key: model_general
+requires_datasets:
+  - bonds.auction_results_current
+  - bonds.auction_announcements_current
+outputs:
+  - models.bond_residual_zscore
+  - models.bond_pair_zscore
+  - models.model_stats
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models: { bond_ns_curve: "1.0.0" }
+    parity:
+      reference: "MinimumLizard/Nelson-Siegel@1c33084 signals/zscore.py and signals/run.py, tables bond_signals, switch_signals and signal_stats"
+      tolerance: 1.0e-9

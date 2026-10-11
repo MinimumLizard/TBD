@@ -1,0 +1,26 @@
+name: bond_identity
+market: lk_bonds
+title_key: models.bond_identity.title
+summary_key: models.bond_identity.summary
+disclaimer_key: general
+requires_datasets:
+  - bonds.files_latest_parse
+  - bonds.quotes
+  - bonds.volumes
+  - bonds.trades
+  - bonds.auction_results
+  - bonds.auction_announcements
+  - bonds.legacy_reference
+outputs:
+  - models.bond_reference
+  - models.bond_quotes
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parameters:
+      # The old database file (data/sgcp.sqlite at Nelson-Siegel@1c33084), as archived by the history migration.
+      legacy_reference_sha256: 34ec862c837f334d6daf017e538534442e4c7d1ce12161f9e878a1c650537bd9
+    parity:
+      reference: "MinimumLizard/Nelson-Siegel@1c33084 pipeline/ingest.py, tables bonds and observations"
+      tolerance: 0
+      notes: Every bond row and every resolved quote must equal the old database exactly.

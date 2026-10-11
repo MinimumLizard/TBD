@@ -12,6 +12,8 @@ dependencies = [
     "psycopg[binary]==3.2.12",
     "PyYAML==6.0.3",
     "boto3==1.40.70",
+    "numpy==2.5.3",
+    "pandas==3.0.5",
 ]
 
 [dependency-groups]
@@ -28,10 +30,10 @@ build-backend = "hatchling.build"
 packages = ["data_platform"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "data_platform/models"]
 pythonpath = ["."]
 markers = [
     "db: needs a Postgres database (TEST_DATABASE_URL)",
     "legacy: needs local clones of the old repos and the safety archives (slow; run before cut-over)",
 ]
-addopts = "-q"
+addopts = "-q --import-mode=importlib"

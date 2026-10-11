@@ -1,0 +1,30 @@
+# Who sees what (docs/architecture.md §8, decision 0015).
+#
+# PROPOSAL FOR THE OWNER TO EDIT. Which feature sits in which tier is a business decision; this file is the only
+# place it is made. The web app's single tier check (web/lib/entitlements.ts) reads a copy generated from this file
+# (python -m data_platform.models.registry export-web), and CI fails if the copy is out of date.
+#
+# Tiers are ordered: a model is visible to its minimum tier and every tier above it.
+#
+#   free_preview: { delay_days: N }   tiers below the minimum see the same outputs, but only for dates at least
+#                                     N days old. Enforced on the server, like every tier rule.
+
+tiers: [free, plus, pro, professional]
+
+models:
+  # LKR government bonds
+  bond_identity:        { minimum_tier: free }    # bond list, each day's dealer quotes
+  bond_ns_curve:        { minimum_tier: free }    # the fitted yield curve and each bond's distance from it
+  bond_liquidity:       { minimum_tier: free }    # turnover, days traded, auction cycle, liquidity tier
+  bond_rv_zscores:      { minimum_tier: plus, free_preview: { delay_days: 5 } }   # residuals vs own history
+  bond_execution_gap:   { minimum_tier: plus }    # where trades print against the quote screen
+  bond_carry:           { minimum_tier: pro }     # carry, rolldown, duration
+  # Colombo Stock Exchange
+  cse_market_tape:      { minimum_tier: free }    # indices, turnover, breadth, foreign flows
+  cse_security_metrics: { minimum_tier: free }    # per-share price, range, volume and relative-return metrics
+
+# Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
+# statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a
+# performance claim (audit §8), so they need a legal view first.
+unpublished_outputs:
+  - models.model_stats

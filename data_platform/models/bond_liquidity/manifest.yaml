@@ -1,0 +1,18 @@
+name: bond_liquidity
+market: lk_bonds
+title_key: models.bond_liquidity.title
+summary_key: models.bond_liquidity.summary
+disclaimer_key: general
+requires_datasets:
+  - bonds.trades_current
+  - bonds.auction_results_current
+  - bonds.auction_announcements_current
+outputs:
+  - models.bond_liquidity
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models: { bond_ns_curve: "1.0.0" }
+    parity:
+      reference: "MinimumLizard/Nelson-Siegel@1c33084 signals/liquidity.py profile(), run on the old database for every curve day"
+      tolerance: 0

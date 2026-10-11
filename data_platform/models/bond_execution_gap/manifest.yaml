@@ -1,0 +1,14 @@
+name: bond_execution_gap
+market: lk_bonds
+title_key: models.bond_execution_gap.title
+summary_key: models.bond_execution_gap.summary
+disclaimer_key: model_general
+outputs:
+  - models.bond_execution_gap
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models: { bond_ns_curve: "1.0.0" }
+    parity:
+      reference: "MinimumLizard/Nelson-Siegel@1c33084 signals/execution.py gap(), run on the old database for every curve day"
+      tolerance: 1.0e-9
