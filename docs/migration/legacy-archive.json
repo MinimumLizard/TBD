@@ -1,0 +1,119 @@
+{
+  "files_archived": {
+    "CSE": 5139,
+    "Nelson-Siegel": 60,
+    "Crypto (code branch)": 116,
+    "Crypto (data branch)": 587
+  },
+  "bundles_sha256": {
+    "CSE": "ac5cb611d863124549a97d3b47407429dd6b5004be5dca23501854854eaf1df5",
+    "Nelson-Siegel": "b02901cdc32f1c4e3f0e971c4aa9bc9d7089ce3f7bf9a6b84b3e5714c53b540a",
+    "Crypto": "774b8c470bb0c08699fd6a9892d9091bd3ef3f0a520cc0b414a152ad551ac2b4"
+  },
+  "audit_baselines": {
+    "CSE/data/history/prices.csv": {
+      "expected": "7b72e1c8540e3499",
+      "archived": "7b72e1c8540e3499",
+      "ok": true
+    },
+    "CSE/data/history/indices.csv": {
+      "expected": "89dcfd3c8ebff51c",
+      "archived": "89dcfd3c8ebff51c",
+      "ok": true
+    },
+    "CSE/data/history/market.csv": {
+      "expected": "434a3d9b04ca3623",
+      "archived": "434a3d9b04ca3623",
+      "ok": true
+    },
+    "CSE/data/history/announcements.csv": {
+      "expected": "14c3a29dbba276ae",
+      "archived": "14c3a29dbba276ae",
+      "ok": true
+    },
+    "CSE/data/history/corporate_actions.csv": {
+      "expected": "5e057486d5645da8",
+      "archived": "5e057486d5645da8",
+      "ok": true
+    },
+    "CSE/data/dealings/dealings.csv": {
+      "expected": "1ca96bc44597272d",
+      "archived": "1ca96bc44597272d",
+      "ok": true
+    },
+    "CSE/data/fundamentals/latest.csv": {
+      "expected": "d0e765389912a392",
+      "archived": "d0e765389912a392",
+      "ok": true
+    },
+    "CSE/data/fundamentals/reports.csv": {
+      "expected": "5e076da582cc8fbc",
+      "archived": "5e076da582cc8fbc",
+      "ok": true
+    },
+    "CSE/data/ownership/companies.csv": {
+      "expected": "3590633966fb1173",
+      "archived": "3590633966fb1173",
+      "ok": true
+    },
+    "CSE/data/ownership/holdings.csv": {
+      "expected": "8b331e1da828e3f7",
+      "archived": "8b331e1da828e3f7",
+      "ok": true
+    },
+    "CSE/data/ownership/owners.csv": {
+      "expected": "efadefd82ac7c8fa",
+      "archived": "efadefd82ac7c8fa",
+      "ok": true
+    },
+    "CSE/data/raw/ownership/annual_reports.csv": {
+      "expected": "a9853f17ce57eb4b",
+      "archived": "a9853f17ce57eb4b",
+      "ok": true
+    },
+    "CSE/data/raw/ownership/reports.csv": {
+      "expected": "aaa0a57508a82ec2",
+      "archived": "aaa0a57508a82ec2",
+      "ok": true
+    },
+    "CSE/record/holdings.csv": {
+      "expected": "3502b393706d6964",
+      "archived": "3502b393706d6964",
+      "ok": true
+    },
+    "CSE/record/nav.csv": {
+      "expected": "77013c928eb1fae3",
+      "archived": "77013c928eb1fae3",
+      "ok": true
+    },
+    "CSE/record/trades.csv": {
+      "expected": "dbee4fa1712f9e5e",
+      "archived": "dbee4fa1712f9e5e",
+      "ok": true
+    },
+    "CSE/data/runs.csv": {
+      "expected": "389384458ef01f3a",
+      "archived": "389384458ef01f3a",
+      "ok": true
+    },
+    "Nelson-Siegel/data/sgcp.sqlite": {
+      "expected": "34ec862c837f334d",
+      "archived": "34ec862c837f334d",
+      "ok": true
+    },
+    "CSE/data/raw/*": {
+      "expected": "414cd7d24b457932",
+      "archived": "414cd7d24b457932",
+      "files": 4924,
+      "ok": true
+    },
+    "Crypto@data/*": {
+      "expected": "50653dc65730bb56",
+      "archived": "50653dc65730bb56",
+      "files": 585,
+      "ok": true
+    }
+  },
+  "ok": true,
+  "generated_at": "2026-10-11T11:09:31+00:00"
+}
