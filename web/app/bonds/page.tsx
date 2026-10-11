@@ -8,7 +8,7 @@ import ModelFooter from "@/components/ModelFooter";
 import { bondHref, bondName } from "@/lib/bond-display";
 import { LOW_WEIGHT, curveOption, curvePoints } from "@/lib/charts";
 import { bondCurve, bondLiquidity, bondQuotes, bondReference } from "@/lib/data/bonds";
-import { NONE, date, int, lkr, num, percent, signed, tone } from "@/lib/format";
+import { NONE, date, int, lkr, num, percent, signed } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -96,7 +96,7 @@ export default async function BondsPage() {
                       <td className="num">{percent(q.bid_yield, 3)}</td>
                       <td className="num">{percent(q.offer_yield, 3)}</td>
                       <td className="num">{q.mid_yield == null ? <span className="small muted">{t("bonds.oneWay")}</span> : percent(q.mid_yield, 3)}</td>
-                      <td className={`num ${tone(r)}`}>
+                      <td className="num">
                         {r == null ? NONE : signed(r, 1)}
                         {q.bid_yield != null && q.offer_yield != null && (q.bid_yield - q.offer_yield) * 100 > WIDE_QUOTE_BP && (
                           <>

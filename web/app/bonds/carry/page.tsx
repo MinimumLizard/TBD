@@ -7,7 +7,7 @@ import ModelFooter from "@/components/ModelFooter";
 import PreviewNote from "@/components/PreviewNote";
 import { bondHref, bondName } from "@/lib/bond-display";
 import { bondCarry, bondReference } from "@/lib/data/bonds";
-import { date, num, percent, signed, tone } from "@/lib/format";
+import { date, num, percent, signed } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +30,7 @@ export default async function CarryPage() {
       ) : (
         <>
           <PreviewNote access={carry.access} />
-          <AsOf day={carry.data?.date ?? null} calendar="lk_bond_market" />
+          <AsOf day={carry.data?.date ?? null} calendar="lk_bond_market" preview={Boolean(carry.access.allowed && carry.access.maxDate)} />
           {f && <p className="small">{t("carry.funding", { rate: percent(f.rate_pct, 3), bill: percent(f.bill_pct, 3), date: date(f.bill_as_of) })}</p>}
           <div className="table-wrap">
             <table>
@@ -57,10 +57,10 @@ export default async function CarryPage() {
                       <td className="num">{percent(r.entry_yield, 3)}</td>
                       <td className="num">{num(r.price, 2)}</td>
                       <td className="num">{num(r.duration, 2)}</td>
-                      <td className={`num ${tone(r.carry_bp)}`}>{signed(r.carry_bp, 0)}</td>
-                      <td className={`num ${tone(r.roll_bp)}`}>{signed(r.roll_bp, 0)}</td>
-                      <td className={`num ${tone(r.total_bp)}`}>{signed(r.total_bp, 0)}</td>
-                      <td className={`num ${tone(r.per_duration_bp)}`}>{signed(r.per_duration_bp, 1)}</td>
+                      <td className="num">{signed(r.carry_bp, 0)}</td>
+                      <td className="num">{signed(r.roll_bp, 0)}</td>
+                      <td className="num">{signed(r.total_bp, 0)}</td>
+                      <td className="num">{signed(r.per_duration_bp, 1)}</td>
                     </tr>
                   ))}
               </tbody>

@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
@@ -7,16 +8,17 @@ import ModelFooter from "@/components/ModelFooter";
 import { lineOption } from "@/lib/charts";
 import { shareHistory } from "@/lib/data/cse";
 import { NONE, int, lkr, num, pct, ratio, tone } from "@/lib/format";
+import { decodeSegment } from "@/lib/params";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
-  return { title: decodeURIComponent((await params).symbol) };
+  return { title: decodeSegment((await params).symbol) };
 }
 
 export default async function SharePage({ params }: { params: Promise<{ symbol: string }> }) {
-  const symbol = decodeURIComponent((await params).symbol);
+  const symbol = decodeSegment((await params).symbol);
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
   const history = await shareHistory(viewer, symbol);
   if (!history.access.allowed) {
@@ -29,14 +31,7 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
   }
   const rows = history.data ?? [];
   const last = rows[rows.length - 1];
-  if (!last) {
-    return (
-      <>
-        <h1>{symbol}</h1>
-        <p>{t("share.unknown")}</p>
-      </>
-    );
-  }
+  if (!last) notFound();
   const windows = [
     ["w1", last.ret_1w, last.rel_1w, last.flag_1w],
     ["m1", last.ret_1m, last.rel_1m, last.flag_1m],

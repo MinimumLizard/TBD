@@ -35,7 +35,7 @@ export function isTier(value: unknown): value is Tier {
 }
 
 export function isModelName(value: unknown): value is ModelName {
-  return typeof value === "string" && value in registry.models;
+  return typeof value === "string" && Object.hasOwn(registry.models, value);
 }
 
 export function modelEntry(name: ModelName): ModelEntry {

@@ -17,10 +17,20 @@ import { ALL_PAGES, MODEL_ROUTES } from "@/lib/routes";
 import { MODEL_NAMES, TIERS, type ModelName, type Tier, modelEntry } from "@/lib/registry";
 
 const BASE = process.env.LEAK_BASE_URL ?? "http://127.0.0.1:3100";
+interface Markers {
+  api: string[];
+  page: string[];
+}
 const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"), "utf8")) as {
-  models: Record<string, { new: { api: string[]; page: string[] }; old: { api: string[]; page: string[] } }>;
+  new: string;
+  mid: string;
+  old: string;
+  models: Record<string, { new: Markers; old: Markers; mid?: Markers }>;
   never: string[];
 };
+
+// Detail pages and routes with a parameter, for the checks that apply to every page (seeded bond and share).
+const DETAIL = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000", "/api/v1/cse/shares/AAA.N0000"];
 
 async function get(url: string, tier: Tier | null) {
   const res = await fetch(BASE + url, { headers: tier ? { "x-test-tier": tier } : {} });
@@ -53,7 +63,7 @@ for (const model of MODEL_NAMES) {
             expect(res.status).toBe(200);
             if (mode === "full") for (const v of recent) expect(res.body, `${api} is missing ${v}`).toContain(v);
             if (mode === "preview") {
-              for (const v of recent) expect(res.body, `${api} preview leaked ${v}`).not.toContain(v);
+              for (const v of [...recent, ...(m.mid?.api ?? [])]) expect(res.body, `${api} preview leaked ${v}`).not.toContain(v);
               for (const v of m.old.api) expect(res.body, `${api} preview is missing ${v}`).toContain(v);
             }
           }
@@ -63,7 +73,11 @@ for (const model of MODEL_NAMES) {
           expect(res.status).toBe(200);
           expect(res.cache).not.toContain("public");
           if (mode === "full") for (const v of m.new.page) expect(res.body, `${page} is missing ${v}`).toContain(v);
-          if (mode !== "full") for (const v of [...m.new.page, ...m.new.api]) expect(res.body, `${page} leaked ${v}`).not.toContain(v);
+          if (mode !== "full") {
+            for (const v of [...m.new.page, ...m.new.api, ...(m.mid?.page ?? []), ...(m.mid?.api ?? [])]) {
+              expect(res.body, `${page} leaked ${v}`).not.toContain(v);
+            }
+          }
           if (mode === "preview") for (const v of m.old.page) expect(res.body, `${page} preview is missing ${v}`).toContain(v);
           if (mode === "denied") {
             for (const v of [...m.old.page, ...m.old.api]) expect(res.body, `${page} leaked ${v}`).not.toContain(v);
@@ -78,13 +92,35 @@ for (const model of MODEL_NAMES) {
 describe("everyone", () => {
   for (const tier of [null, ...TIERS] as (Tier | null)[]) {
     test(`reference versions and unpublished outputs are never shown (${tier ?? "anonymous"})`, async () => {
-      const urls = [...ALL_PAGES, ...Object.values(MODEL_ROUTES).flatMap((r) => r.api)];
+      const urls = [...ALL_PAGES, ...DETAIL, ...Object.values(MODEL_ROUTES).flatMap((r) => r.api)];
       for (const url of urls) {
         const res = await get(url, tier);
         for (const v of markers.never) expect(res.body, `${url} shows ${v}`).not.toContain(v);
       }
     });
   }
+
+  test("asking for a date cannot get past a preview's delay", async () => {
+    for (const day of [markers.new, markers.mid, "2099-12-31"]) {
+      for (const api of MODEL_ROUTES.bond_rv_zscores.api) {
+        const res = await get(`${api}?date=${day}`, "free");
+        const hidden = [...markers.models.bond_rv_zscores.new.api, ...(markers.models.bond_rv_zscores.mid?.api ?? [])];
+        for (const v of hidden) expect(res.body, `${api}?date=${day} leaked ${v}`).not.toContain(v);
+      }
+    }
+    const boundary = await get(`/api/v1/bonds/zscores?date=${markers.old}`, "free");
+    for (const v of markers.models.bond_rv_zscores.old.api) expect(boundary.body).toContain(v);   // the last allowed day
+  });
+
+  test("detail pages render for a free visitor, and a malformed address is a 404, not an error", async () => {
+    for (const url of DETAIL) expect((await get(url, "free")).status).toBe(200);
+    // (An address with a broken %-sequence is refused by Next.js's own router with a bare 500 before any of our code
+    // runs; it carries no data or detail, so it is not checked here.)
+    for (const url of ["/methods/constructor", "/bonds/NOPE", "/cse/shares/NOPE.N0000", "/api/v1/cse/shares/NOPE.N0000"]) {
+      expect((await get(url, "free")).status, url).toBe(404);
+    }
+    expect((await get("/api/v1/bonds/zscores?date=2026-02-30", "free")).status).toBe(400);
+  });
 
   test("an anonymous visitor is treated as free", async () => {
     const anonymous = await get("/api/v1/models", null);

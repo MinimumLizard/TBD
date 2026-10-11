@@ -27,6 +27,20 @@ export interface Denied {
 
 export type Access = Granted | Denied;
 
+// Grants are issued only by authorize(). lib/db.ts refuses any object not in this set, so a grant cannot be made up
+// as an object literal elsewhere in the code.
+const ISSUED = new WeakSet<Granted>();
+
+export function isGrant(access: unknown): access is Granted {
+  return typeof access === "object" && access !== null && ISSUED.has(access as Granted);
+}
+
+function grant(g: Omit<Granted, "allowed">): Granted {
+  const issued: Granted = Object.freeze({ allowed: true as const, ...g });
+  ISSUED.add(issued);
+  return issued;
+}
+
 export function tierRank(tier: Tier): number {
   return TIERS.indexOf(tier);
 }
@@ -35,11 +49,11 @@ export function authorize(viewer: Viewer, model: ModelName, today: string = toda
   const entry = modelEntry(model);
   const required = entry.minimum_tier;
   if (tierRank(viewer.tier) >= tierRank(required)) {
-    return { allowed: true, model, version: entry.current_version, maxDate: null, delayDays: 0 };
+    return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0 });
   }
   if (entry.free_preview && entry.free_preview.delay_days > 0) {
     const days = entry.free_preview.delay_days;
-    return { allowed: true, model, version: entry.current_version, maxDate: addDays(today, -days), delayDays: days };
+    return grant({ model, version: entry.current_version, maxDate: addDays(today, -days), delayDays: days });
   }
   return { allowed: false, model, requiredTier: required };
 }

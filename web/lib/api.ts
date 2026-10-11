@@ -36,6 +36,7 @@ export function respond<T>(model: ModelName, result: Result<T>): NextResponse {
     method_version: access.version,
     preview: access.maxDate ? { delay_days: access.delayDays, data_to: access.maxDate } : null,
     disclaimer: registry.disclaimers[entry.disclaimer_key].en,
+    attribution: registry.disclaimers.data_sources.en,
     data: result.data,
   });
 }

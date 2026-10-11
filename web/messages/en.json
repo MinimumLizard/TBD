@@ -179,14 +179,16 @@
   "zscores": {
     "title": "Residuals against their own history",
     "intro": "Each bond's distance from the curve, compared with that bond's own previous 60 observations. A z-score of +2 means the residual is two standard deviations above its own recent average. This describes the data; it is not a forecast.",
-    "bondsTitle": "Bonds",
-    "pairsTitle": "Pairs of bonds (largest absolute z-scores)",
-    "pairsNote": "The residual spread between two bonds of similar maturity (or two auctioned bonds), against its own history.",
+    "bondsTitle": "Bonds, by maturity",
+    "pairsTitle": "Pairs with {bond}",
+    "pairsNote": "The residual spread between this bond and each bond of similar maturity (or, for two auctioned bonds, any maturity), against its own history. Choose another bond in the table above.",
     "zscore": "z-score",
     "deviation": "vs own average (bp)",
     "sd": "Std dev (bp)",
     "pair": "Pair",
-    "spread": "Spread (bp)"
+    "spread": "Spread (bp)",
+    "pairsNone": "No pair with enough common history on this date.",
+    "choose": "Pairs"
   },
   "execution": {
     "title": "Trades against quotes",
@@ -198,7 +200,7 @@
     "title": "Carry, rolldown and duration",
     "intro": "What each bond's yield earns over a stated funding rate, plus rolldown along an unchanged curve, per year and per year of duration. The funding rate is the 12-month treasury bill plus 5 bp; your own funding cost will differ.",
     "funding": "Funding rate {rate} (12-month bill {bill} as of {date})",
-    "entry": "Entry yield",
+    "entry": "Yield used (quote + execution gap)",
     "price": "Price",
     "duration": "Duration",
     "carry": "Carry (bp)",
@@ -265,5 +267,9 @@
       "title": "CSE share metrics",
       "summary": "For every listed share and session: price change, position in its 52-week range, volume against average, and return relative to the ASPI."
     }
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "body": "This page could not be loaded. Please try again in a few minutes."
   }
 }

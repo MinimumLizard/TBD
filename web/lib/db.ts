@@ -5,9 +5,9 @@
 // method version, and (for a free preview) only rows dated on or before the preview date.
 import "server-only";
 
-import { Pool, types } from "pg";
+import { Pool, type PoolConfig, types } from "pg";
 
-import type { Granted } from "./entitlements";
+import { type Granted, isGrant } from "./entitlements";
 import { registry } from "./registry";
 
 types.setTypeParser(1082, (v: string) => v); // date -> "YYYY-MM-DD", never shifted by a time zone
@@ -15,12 +15,28 @@ types.setTypeParser(20, (v: string) => Number(v)); // bigint -> number (rupee am
 
 let pool: Pool | null = null;
 
+// Settings for a site that runs as many short-lived serverless functions (Vercel) against Supabase's connection
+// pooler: few connections each, short timeouts so a database problem fails fast instead of hanging a request, and
+// an encrypted connection that verifies the server (DATABASE_CA_CERT: Supabase's certificate, PEM text).
+export function poolConfig(env: NodeJS.ProcessEnv = process.env): PoolConfig {
+  const connectionString = env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not set (see .env.example)");
+  const host = new URL(connectionString.replace(/^postgres(ql)?:/, "http:")).hostname;
+  const local = host === "localhost" || host === "127.0.0.1" || host === "::1";
+  const config: PoolConfig = {
+    connectionString,
+    max: Number(env.DATABASE_POOL_MAX ?? 3),
+    connectionTimeoutMillis: 5_000,
+    idleTimeoutMillis: 10_000,
+    query_timeout: 15_000,
+  };
+  if (env.DATABASE_CA_CERT) config.ssl = { ca: env.DATABASE_CA_CERT, rejectUnauthorized: true };
+  else if (!local) throw new Error("DATABASE_CA_CERT is not set: a remote database is only used over a verified TLS connection");
+  return config;
+}
+
 function getPool(): Pool {
-  if (!pool) {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) throw new Error("DATABASE_URL is not set (see .env.example)");
-    pool = new Pool({ connectionString, max: 5 });
-  }
+  if (!pool) pool = new Pool(poolConfig());
   return pool;
 }
 
@@ -48,6 +64,7 @@ export interface ReadOptions {
 }
 
 export function buildQuery(access: Granted, table: string, opts: ReadOptions = {}): { text: string; values: unknown[] } {
+  if (!isGrant(access)) throw new Error("not a grant issued by authorize()");
   const entry = registry.models[access.model];
   if (!entry.outputs.includes(table)) throw new Error(`${table} is not an output of ${access.model}`);
   if (registry.unpublished_outputs.includes(table)) throw new Error(`${table} is not published`);

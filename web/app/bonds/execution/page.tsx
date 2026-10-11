@@ -31,7 +31,7 @@ export default async function ExecutionPage() {
       ) : (
         <>
           <PreviewNote access={gap.access} />
-          <AsOf day={last?.obs_date ?? null} calendar="lk_bond_market" />
+          <AsOf day={last?.obs_date ?? null} calendar="lk_bond_market" preview={Boolean(gap.access.allowed && gap.access.maxDate)} />
           {last && <p>{t("execution.latest", { gap: signed(last.gap_bp, 1), n: last.n })}</p>}
           <Chart label={t("execution.chart")} option={lineOption([{ name: t("execution.chart"), points: rows.map((r) => [r.obs_date, r.gap_bp]) }], "bp")} />
         </>

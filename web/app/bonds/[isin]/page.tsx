@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
@@ -8,16 +9,17 @@ import { bondName, isSynthetic } from "@/lib/bond-display";
 import { lineOption } from "@/lib/charts";
 import { bondLiquidity, bondQuoteHistory, bondReference, bondResidualHistory } from "@/lib/data/bonds";
 import { NONE, date, percent, ratio } from "@/lib/format";
+import { decodeSegment } from "@/lib/params";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ isin: string }> }) {
-  return { title: decodeURIComponent((await params).isin) };
+  return { title: decodeSegment((await params).isin) };
 }
 
 export default async function BondPage({ params }: { params: Promise<{ isin: string }> }) {
-  const isin = decodeURIComponent((await params).isin);
+  const isin = decodeSegment((await params).isin);
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
   const [ref, quotes, residuals, liquidity] = await Promise.all([
     bondReference(viewer),
@@ -27,14 +29,7 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
   ]);
   const bond = ref.data?.get(isin);
   const title = bondName(isin, ref.data);
-  if (ref.access.allowed && !bond) {
-    return (
-      <>
-        <h1>{isin}</h1>
-        <p>{t("bond.unknown")}</p>
-      </>
-    );
-  }
+  if (ref.access.allowed && !bond) notFound();
   const history = quotes.data ?? [];
   const last = history[history.length - 1];
   const l = liquidity.data?.rows.find((r) => r.isin === isin);

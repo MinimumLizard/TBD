@@ -4,8 +4,9 @@
 
 Creates (or recreates) the database `tbd_leak`, applies every migration, and writes a small, consistent set of
 model outputs in which certain values are MARKERS: numbers that appear nowhere else, so the tests can tell exactly
-which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (ten days ago),
-so a free preview (which may show data only up to 5 days back) can be checked too. Every model also gets rows under
+which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (five days ago,
+the last day a 5-day free preview may show); the preview model also has MID (four days ago), which a preview must
+never show. Every model also gets rows under
 a reference version that the site must never show to anyone.
 
 Prints the database URL the web app should use (as the read-only web_reader role).
@@ -32,7 +33,8 @@ from data_platform.models.registry import load_all  # noqa: E402
 SLT = dt.timezone(dt.timedelta(hours=5, minutes=30))
 TODAY = dt.datetime.now(SLT).date()
 NEW = TODAY - dt.timedelta(days=1)
-OLD = TODAY - dt.timedelta(days=10)
+OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible day (delay 5 days)
+MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
 MARKERS = Path(__file__).with_name("markers.json")
 DB_NAME = "tbd_leak"
 
@@ -69,10 +71,11 @@ def seed(conn) -> dict:
         for d in (OLD, NEW) for isin in bonds])
     put("bond_rv_zscores", "models.bond_residual_zscore", [
         {"obs_date": d, "isin": bonds[0], "residual_bp": 5.0, "mean_bp": 1.0, "sd_bp": 2.0, "deviation_bp": 4.0,
-         "zscore": z, "n_window": 60} for d, z in ((OLD, 6.6641), (NEW, 7.7731))])
+         "zscore": z, "n_window": 60} for d, z in ((OLD, 6.6641), (MID, 2.2221), (NEW, 7.7731))])
     put("bond_rv_zscores", "models.bond_pair_zscore", [
         {"obs_date": d, "isin_a": bonds[0], "isin_b": bonds[1], "tau_a": 4.0, "tau_b": 9.0, "spread_bp": 3.0,
-         "mean_bp": 1.0, "sd_bp": 2.0, "deviation_bp": 2.0, "zscore": z, "n_window": 60} for d, z in ((OLD, 4.4411), (NEW, 5.5521))])
+         "mean_bp": 1.0, "sd_bp": 2.0, "deviation_bp": 2.0, "zscore": z, "n_window": 60}
+        for d, z in ((OLD, 4.4411), (MID, 1.1121), (NEW, 5.5521))])
     put("bond_rv_zscores", "models.model_stats", [{"stat_key": "pair_reversion_10d_z2", "value": 31.4159, "n": 99}])
     put("bond_execution_gap", "models.bond_execution_gap", [
         {"obs_date": d, "gap_bp": g, "n": 9, "window_days": 20} for d, g in ((OLD, 22.27), (NEW, 33.37))])
@@ -105,11 +108,12 @@ def seed(conn) -> dict:
 
     # What each model's data looks like in an API response (raw) and on a page (formatted, as lib/format.ts does).
     return {
-        "today": TODAY.isoformat(), "new": NEW.isoformat(), "old": OLD.isoformat(),
+        "today": TODAY.isoformat(), "new": NEW.isoformat(), "old": OLD.isoformat(), "mid": MID.isoformat(),
         "models": {
             "bond_ns_curve": {"new": {"api": ["12.12", "10.0571"], "page": ["10.0571"]},
                               "old": {"api": ["11.11", "10.0461"], "page": []}},
             "bond_rv_zscores": {"new": {"api": ["7.7731", "5.5521"], "page": ["+7.77", "+5.55"]},
+                                "mid": {"api": ["2.2221", "1.1121"], "page": ["+2.22", "+1.11"]},
                                 "old": {"api": ["6.6641", "4.4411"], "page": ["+6.66", "+4.44"]}},
             "bond_execution_gap": {"new": {"api": ["33.37"], "page": ["+33.4 bp"]}, "old": {"api": ["22.27"], "page": []}},
             "bond_carry": {"new": {"api": ["88.81"], "page": ["+88.8"]}, "old": {"api": ["77.71"], "page": ["+77.7"]}},

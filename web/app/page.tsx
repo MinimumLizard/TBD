@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import AsOf from "@/components/AsOf";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
+import ModelFooter from "@/components/ModelFooter";
 import { LOW_WEIGHT, curveOption, curvePoints, lineOption } from "@/lib/charts";
 import { HEADLINE_INDICES } from "@/lib/cse-display";
 import { bondCurve } from "@/lib/data/bonds";
@@ -102,6 +103,7 @@ export default async function Home() {
           )}
         </section>
       </div>
+      <ModelFooter models={["cse_market_tape", "bond_ns_curve"]} />
     </>
   );
 }

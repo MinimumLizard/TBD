@@ -27,14 +27,17 @@ test("only lib/db.ts talks to the database", () => {
 });
 
 test("only the data layer reads model outputs, and it always goes through the tier check", () => {
-  const readers = files.filter((f) => /from "(@\/lib\/db|\.\.\/db|\.\/db)"/.test(text(f)) && /readOutput/.test(text(f)));
-  for (const f of readers) expect(f.startsWith(path.join("lib", "data"))).toBe(true);
+  // any import of the db module, however the path is written
+  const importsDb = (f: string) => /from ["'][^"']*(\/|^)db["']/.test(text(f)) || /from ["']@\/lib\/db["']/.test(text(f));
+  for (const f of files.filter((f) => importsDb(f) && f !== path.join("lib", "db.ts"))) {
+    expect(f.startsWith(path.join("lib", "data")), `${f} imports the database module`).toBe(true);
+  }
   for (const f of sources(path.join("lib", "data"))) {
     if (f.endsWith("common.ts")) continue;
-    // every exported function returns through withModel(), which calls authorize()
-    const exported = text(f).match(/export async function \w+/g) ?? [];
-    const guarded = text(f).match(/return withModel\(/g) ?? [];
-    expect(guarded.length, f).toBe(exported.length);
+    // every exported value is a function that returns through withModel(), which calls authorize()
+    const exported = (text(f).match(/^export (async )?function \w+|^export const \w+/gm) ?? []).length;
+    const guarded = (text(f).match(/return withModel\(/g) ?? []).length;
+    expect(guarded, f).toBe(exported);
   }
 });
 

@@ -10,9 +10,10 @@ import { isTier } from "./registry";
 export const ANONYMOUS: Viewer = { id: null, tier: "free" };
 
 // The tier-leak tests act as each tier through this header. It works only when ALLOW_TEST_TIERS=1 AND the app is
-// not running as production (APP_ENV / VERCEL_ENV), so it can never be used on the live site.
+// not running as production AND not on Vercel at all (VERCEL is set on every Vercel deployment, previews included),
+// so it can never be used on any deployed site.
 export function testTiersEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.ALLOW_TEST_TIERS === "1" && env.APP_ENV !== "production" && env.VERCEL_ENV !== "production";
+  return env.ALLOW_TEST_TIERS === "1" && env.APP_ENV !== "production" && !env.VERCEL && !env.VERCEL_ENV;
 }
 
 export async function getViewer(): Promise<Viewer> {

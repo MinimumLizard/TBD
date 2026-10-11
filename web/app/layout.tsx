@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [locale, t, viewer] = await Promise.all([getLocale(), getTranslations(), getViewer()]);
+  const [locale, t, viewer, messages] = await Promise.all([getLocale(), getTranslations(), getViewer(), getMessages()]);
   return (
     <html lang={locale}>
       <body>
@@ -22,7 +23,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </a>
         <SiteHeader viewer={viewer} />
         <main id="main" className="container">
-          {children}
+          {/* Only the error page's text goes to the browser; everything else is rendered on the server. */}
+          <NextIntlClientProvider locale={locale} messages={{ errors: messages.errors }}>
+            {children}
+          </NextIntlClientProvider>
         </main>
         <SiteFooter />
       </body>
