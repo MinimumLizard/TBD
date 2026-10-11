@@ -13,15 +13,17 @@ language. Prefer boring, well-documented, managed services over clever or self-h
 
 ## Current phase
 
-**Phase 2 (data foundation + history migration) is built and verified locally; awaiting the owner's approval and
-switch-on.** See `docs/phase2-verification.md` (results, findings V1–V7, the switch-on checklist) and
-`docs/roadmap.md`.
+**Phases 2, 3 and 4 (free tier) are built and verified locally and in CI; awaiting the owner's approval and
+switch-on.** See `docs/phase3-4-verification.md` (parity results, findings P1–P4, website switch-on steps),
+`docs/phase2-verification.md` (data foundation, findings V1–V7, switch-on §5) and `docs/roadmap.md` (owner's open
+decisions).
 
-- Audit: `docs/audit.md`. Architecture: `docs/architecture.md`. Decisions: `docs/decisions/` (0001 and 0012 are the
-  owner's own answers; read them before asking the owner anything).
-- Switch-on needs the owner's accounts and secrets (phase2-verification §5). Until then every scheduled workflow
-  skips itself. The repo is PUBLIC for now (decision 0012): never commit data or secrets; CI enforces both.
-- Next: Phase 3, model plug-ins, bonds first, each with parity tests against golden outputs in the raw archive.
+- Audit: `docs/audit.md`. Architecture: `docs/architecture.md`. Decisions: `docs/decisions/` (0001, 0012 and 0014
+  are the owner's own answers; read them before asking the owner anything).
+- Switch-on needs the owner's accounts and secrets. Until then every scheduled workflow skips itself. The repo is
+  PUBLIC for now (decision 0012): never commit data or secrets; CI enforces both.
+- Next: Phase 3b (remaining CSE models; owner picks the order) and Phase 4b (accounts, payments, Sinhala/Tamil,
+  Vercel), once approved.
 
 ## Architecture in brief
 
@@ -82,14 +84,27 @@ uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cs
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
+uv run python -m data_platform.jobs.models [--market lk_bonds|cse] [--model NAME]   # compute models
+uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
+uv run python -m data_platform.migration.parity bonds|cse ...   # parity with the old tools (see --help)
+cd web && npm ci && npm run typecheck && npm test && npm run build                 # website
+uv run python web/tests/leak/seed.py   # then: DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100; npm run test:leak
 ```
 
 Local Postgres in a cloud session: the container has Postgres 16; start it as the `postgres` user
 (`initdb` + `pg_ctl` on port 54321, data under /var/tmp), never as root. Settings come from env vars (`.env.example`).
 
 Layout: `data_platform/core` (archive, db, http, collector runner), `collectors/<source>/` (pure `parse*` functions
-plus a `Collector`), `migration/`, `jobs/`; `db/migrations/NNNN_*.sql` (never edit an applied one; add a new file);
-`config/` (sources, calendars, datasets); `compliance/` (disclaimers, banned phrases).
+plus a `Collector`), `models/<name>/` (manifest.yaml, compute.py, METHOD.md, tests/; `_lib/` is shared code),
+`migration/` (incl. parity), `jobs/`; `db/migrations/NNNN_*.sql` (never edit an applied one; add a new file; every
+new table must enable row-level security, a test checks); `config/` (sources, calendars, datasets, entitlements =
+the tier proposal); `compliance/` (disclaimers, banned phrases); `web/` (Next.js; `lib/entitlements.ts` is the only
+tier check, `lib/db.ts` the only database access, all text in `messages/`; after changing a manifest, METHOD.md,
+disclaimer, calendar or tier, run `registry export-web`).
+
+Model rules: version 1 of a ported model reproduces the old tool exactly (parity report under docs/migration/);
+improvements are a new version beside it. The copy lint also scans model and web code, so avoid banned words even in
+identifiers and comments (e.g. JavaScript's `.trim()`; use a regex).
 
 One-off safety tools (read-only towards the existing repos and sources):
 

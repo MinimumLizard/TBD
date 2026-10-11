@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-11 — Phases 3 and 4: models, and the free-tier portal
+
+- Model framework: manifests with several versions (current, reference, retired), inputs restricted to what a
+  model declares and fingerprinted, outputs written idempotently with every changed value kept in
+  `models.revisions`, a registry that validates every plug-in, and a scheduled models job.
+- Bond models ported from the old tool, version 1 reproducing it exactly on every table and against its own code:
+  identity, Nelson-Siegel curve, residual and pair z-scores, liquidity tiers, execution gap, carry. The old tool's
+  bond list migrated as a fact (finding P1).
+- Decision 0014 delivered: bond curve version 2 fits every two-way quote; measured effect in its method page.
+- CSE market summary and per-share metrics for every share and session, matching the old terminal's Panels A and B.
+- The portal (Next.js): overview, stock market, shares, government bonds, paid bond analyses (locked for free
+  visitors), method pages and a JSON API. One server-side tier check, a read-only database role with row-level
+  security, and a tier-leak suite run in CI. Accounts stubbed until Supabase exists.
+- Fixed: the "Migrate history" workflow now checks the audit fingerprints at the audited commits (finding P3).
+- Copy lint extended to model and web code. Decisions 0015 and 0016. Report: `docs/phase3-4-verification.md`.
+
 ## 2026-10-11 — Phase 2: data foundation and history migration
 
 - Platform core: content-addressed write-once raw archive (local and S3/R2), Postgres schema with database-enforced

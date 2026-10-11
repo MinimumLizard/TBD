@@ -7,8 +7,10 @@
 | 1 | Architecture proposal: `docs/architecture.md`, `docs/decisions/0002–0011` | Done; approved 2026-10-11 (decision 0012) |
 | 2 | Data foundation (raw archive, database, collectors, gap check, backups) and migration of all history | **Built and verified 2026-10-11 (`docs/phase2-verification.md`). Awaiting approval and switch-on (owner's accounts).** |
 | 2b | Switch-on: accounts + secrets, run "Migrate history", then 20 trading days in parallel with the old sites | Owner actions in phase2-verification §5 |
-| 3 | Model plug-ins, bonds first, each passing parity tests | Not started |
-| 4 | Portal: API, auth, entitlements, web app (free tier first) | Not started |
+| 3 | Model plug-ins, bonds first, each passing parity tests | **Built and verified 2026-10-11 (`docs/phase3-4-verification.md`): all six bond models and the CSE market summary and share metrics, exact parity; bond curve version 2 (decision 0014). Awaiting approval.** |
+| 3b | The other CSE models: corporate actions and total returns, ownership, dealings and flows, fundamentals, risk estimates | Not started; needs new collectors and the owner's order of priority |
+| 4 | Portal: API, auth, entitlements, web app (free tier first) | **Free-tier portal, API, single tier check and tier-leak suite built 2026-10-11. Accounts stubbed (everyone is free) until Supabase exists. Awaiting approval.** |
+| 4b | Accounts, payments, Sinhala and Tamil, deployment on Vercel | Needs the owner's accounts and translators |
 
 ## Owner actions, in order of urgency
 
@@ -43,9 +45,18 @@ Alternative: leave the old repo alone, and the new bond collector must be live i
 
 ### 2. Store the safety copies in two places (decision 0003)
 
-### 3. Switch-on (docs/phase2-verification.md §5): create the accounts and add the secrets, then run "Migrate history"
+### 3. Switch-on: create the accounts and add the secrets, then run "Migrate history"
 
-### 4. One decision: bond volumes dating (finding V3)
-Date bond volume files by the PDMO index label when it disagrees with the date derived from the data? (3 files.)
+Steps: `docs/phase2-verification.md` §5, then the website steps in `docs/phase3-4-verification.md` §6.
+
+### 4. Decisions on Phases 3 and 4 (docs/phase3-4-verification.md)
+
+- Bond volumes dating (finding V3): date the 3 disputed volume files by the PDMO index label instead of the data?
+- Tiers: is the proposal in `config/entitlements.yaml` right (free: market summary, shares, bond list, curve, bond
+  activity; Plus: z-scores with a 5-day-delayed free preview, trades against quotes; Pro: carry)?
+- The carry page uses the old tool's "bill + 5 bp" funding assumption. Keep it (stated on the page), or change it?
+- The pair reversion statistics are computed but shown to nobody until a legal view. Agree?
+- Which of the remaining CSE models first (Phase 3b)?
+- A product name, when you have one (the site says "TBD" in one place: `web/messages/en.json`, `site.name`).
 
 ### Later: buy GitHub Pro and make all four repos private (decision 0012)
