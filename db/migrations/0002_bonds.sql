@@ -152,16 +152,16 @@ create view bonds.files_latest_parse as
 select distinct on (url, raw_sha256) *
 from bonds.source_files
 where parse_status = 'ok'
-order by url, raw_sha256, parser_version desc, ingested_at desc;
+order by url, raw_sha256, parser_version desc, fetch_id desc;
 
--- For each report day and kind, the file that wins: the latest posted (amended reports are posted later),
--- then the latest fetched. Two different files can legitimately cover the same day (e.g. an amendment);
--- only one is current.
+-- For each report day and kind, the file that wins: the latest posted (amended reports are posted later), then
+-- the latest by label date, then the one stored last (fetch order follows the old pipeline's processing order).
+-- Two different files can legitimately cover the same day (e.g. an amendment); only one is current.
 create view bonds.files_current as
 select distinct on (kind, report_date) *
 from bonds.files_latest_parse
 where kind in ('daily_summary', 'volumes', 'trade_summary')
-order by kind, report_date, posted_date desc nulls last, ingested_at desc;
+order by kind, report_date, posted_date desc nulls last, label_date desc nulls last, fetch_id desc;
 
 create view bonds.quotes_current as
 select q.* from bonds.quotes q

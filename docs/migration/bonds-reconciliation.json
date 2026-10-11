@@ -1,0 +1,72 @@
+{
+  "loaded": {
+    "parse_ok": 678,
+    "rows_added": 0
+  },
+  "reconciliation": {
+    "files": {
+      "old": 678,
+      "new_parsed_ok": 678,
+      "missing": [],
+      "n_missing": 0,
+      "report_date_differs": [],
+      "n_date_differs": 0,
+      "ok": true
+    },
+    "trades": {
+      "old": 3204,
+      "new": 3204,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "volumes": {
+      "old": 2698,
+      "new": 2698,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "auctions": {
+      "old": 125,
+      "new": 125,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "examples": {
+        "missing": [],
+        "extra": [],
+        "differ": []
+      },
+      "ok": true
+    },
+    "quotes": {
+      "old_rows": 11146,
+      "new_rows": 19507,
+      "old_rows_not_found_in_new": 0,
+      "examples": [],
+      "new_rows_old_did_not_keep": 8361,
+      "of_which_left_out_by_old_filter": 8151,
+      "of_which_overwritten_in_old_db": 210,
+      "days_with_overwrites": 210,
+      "days_where_counts_differ": 0,
+      "examples_day_mismatch": {},
+      "ok": true
+    },
+    "ok": true
+  },
+  "generated_at": "2026-10-11T10:52:44+00:00",
+  "old_db_sha256": "34ec862c837f334d6daf017e538534442e4c7d1ce12161f9e878a1c650537bd9"
+}
