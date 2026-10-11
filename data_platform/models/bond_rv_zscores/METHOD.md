@@ -26,13 +26,11 @@ For each bond, on each day:
 - deviation_bp = residual − window mean: the same comparison in basis points, since a large z on a tiny standard
   deviation is a small number of basis points.
 
-Pairs: the residual spread (bond a minus bond b) is scored the same way. A pair is formed when the two bonds'
-median maturities are within 2 years of each other, or when both have ever been auctioned (benchmark issues are
-compared across the curve). Pairs need at least 31 common days.
+Pairs: the residual spread (bond a minus bond b) is scored the same way, against the pair's own previous 60
+common observations (at least 30). A pair is shown on a day when, on that day, the two bonds' maturities are within
+2 years of each other, or both had been auctioned by then (benchmark issues are compared across the curve).
 
-The model also measures, from its own history, how far pair spreads moved back toward their window mean 10
-business days after a z-score of at least 2 and at least 3. These figures are stored for research and are not
-shown on the site (config/entitlements.yaml).
+The model also computes some research statistics from its own history. They are not published.
 
 ## Limits
 
@@ -41,9 +39,11 @@ shown on the site (config/entitlements.yaml).
 
 ## Versions
 
-- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
-  Bonds that only version 2 fits (the restructuring bonds) appear here too.
-- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
+- **1.1.0 (current):** reads version 2 of the curve (every two-way quote, decision 0014), so the restructuring
+  bonds appear here too. Every pair row uses only what was known on its day: each bond's maturity on that day,
+  and pair membership as of that day. A row, once computed, never changes when later days arrive.
+- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool, which labelled each pair with the
+  bonds' median maturity over all history and formed pairs from all history; kept running beside 1.1.0.
 
 ## Parity
 

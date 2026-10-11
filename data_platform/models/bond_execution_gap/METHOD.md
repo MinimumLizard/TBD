@@ -20,13 +20,17 @@ The quote and trade points of `bond_ns_curve` (the same yields the curve stores)
 
 ## Limits
 
+- A day's trade file is published a day or more after its quotes; until it arrives, that day's gap is computed
+  without it, and it is recomputed when the file arrives (the earlier value is kept in the revision record).
+
 The gap has ranged over more than 140 bp in this history, and a 20-day median of a few dozen observations moves
 with it. It describes a recent regime, not a precise level.
 
 ## Versions
 
-- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
-  Bonds that only version 2 fits (the restructuring bonds) appear here too.
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014). Its
+  outputs are identical to 1.0.0 so far: the restructuring bonds that only version 2 fits do not trade under a
+  bond ISIN that matches their quotes, so they add no quote-and-trade pairs.
 - **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
 
 ## Parity

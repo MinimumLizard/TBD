@@ -11,7 +11,7 @@ session, from the stored facts:
   corporate action the CSE's unadjusted prices and 52-week range do not reflect;
 - volume against the mean of the previous 20 sessions (sessions without a trade count as 0);
 - price return minus ASPI return over 5, 21 and 63 sessions, from the last traded price on or before each end of
-  the window, flagged when the window holds a move of more than 40%.
+  the window, flagged when the window contains a move of more than 40%.
 
 Prices are unadjusted (no splits, bonuses or rights), as the old terminal's were. See METHOD.md.
 """

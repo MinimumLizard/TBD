@@ -205,3 +205,35 @@ def test_same_inputs_different_outputs_is_flagged_as_nondeterministic(conn, monk
     fw.run_version(conn, m, m.current, code_version="test", owners={})
     last = conn.execute("select message from models.runs order by run_id desc limit 1").fetchone()
     assert last["message"].startswith("NONDETERMINISTIC")
+
+
+@pytest.mark.db
+def test_an_as_of_run_never_writes(conn):
+    m = _manifest()
+    with pytest.raises(ValueError, match="compute-only"):
+        fw.run_version(conn, m, m.current, code_version="test", owners={}, as_of=dt.date(2026, 10, 1))
+    assert conn.execute("select count(*) n from models.runs").fetchone()["n"] == 0
+
+
+@pytest.mark.db
+def test_one_failing_model_does_not_stop_the_others(conn, monkeypatch):
+    from data_platform.jobs import models as job
+
+    def compute_for(name):
+        if name == "bond_identity":
+            def boom(inputs, as_of):
+                raise RuntimeError("identity broke")
+            return boom
+        return original(name)
+
+    original = fw.compute_function
+    monkeypatch.setattr(fw, "compute_function", compute_for)
+    with pytest.raises(job.ModelRunFailed) as caught:
+        job.run(conn, ["bond_identity", "bond_ns_curve", "cse_market_tape"])
+    text = " ".join(caught.value.failures)
+    assert "identity broke" in text and "bond_ns_curve 2.0.0: skipped" in text
+    ran = {(r.model, r.method_version) for r in caught.value.results}
+    assert ("cse_market_tape", "1.0.0") in ran               # an unrelated model still ran
+    order = [r["model"] + " " + r["method_version"] for r in conn.execute(
+        "select model, method_version from models.runs where model = 'bond_identity' order by run_id")]
+    assert order[0] == "bond_identity 2.0.0"                 # the version the site shows runs first

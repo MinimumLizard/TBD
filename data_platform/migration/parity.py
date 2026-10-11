@@ -73,8 +73,11 @@ def compare(name: str, old: dict, new: dict, columns: list[str], tol: float = TO
 
 # --- running the models in memory -----------------------------------------------------------------------------
 
-def run_chain(conn, names: list[str], parameter_overrides: dict[str, dict] | None = None) -> dict[str, list[dict]]:
-    """Run each model's parity version (the one with a `parity` block) in dependency order, in memory."""
+def run_chain(conn, names: list[str], parameter_overrides: dict[str, dict] | None = None, *,
+              as_of=None, pick=None) -> dict[str, list[dict]]:
+    """Run models in dependency order, in memory: nothing is written; each model's outputs go to a temporary table
+    its dependants read instead. By default each model's parity version (the one with a `parity` block); `pick`
+    chooses another (e.g. the current one), `as_of` limits every input to that date."""
     manifests = registry.load_all()
     owners = output_owners()
     relations: dict[str, str] = {}
@@ -83,10 +86,10 @@ def run_chain(conn, names: list[str], parameter_overrides: dict[str, dict] | Non
         if name not in names:
             continue
         m = manifests[name]
-        version = next(v for v in m.versions if v.parity is not None)
+        version = pick(m) if pick else next(v for v in m.versions if v.parity is not None)
         params = {**version.parameters, **(parameter_overrides or {}).get(name, {})}
         version = version.model_copy(update={"parameters": params})
-        outputs = compute_function(name)(Inputs(conn, m, version, owners, relations), None)
+        outputs = compute_function(name)(Inputs(conn, m, version, owners, relations), as_of)
         for table, rows in outputs.items():
             results[table] = rows
             if table == "models.model_stats":

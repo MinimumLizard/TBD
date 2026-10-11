@@ -19,5 +19,7 @@ versions:
       tolerance: 1.0e-9
   - method_version: "1.1.0"
     status: current
-    changes: Same method; reads the version 2 curve (every two-way quote, decision 0014).
+    changes: Reads the version 2 curve (decision 0014); pair rows use each bond's maturity on the day and pair membership as known on the day, so a row never changes once computed.
     requires_models: { bond_ns_curve: "2.0.0" }
+    parameters:
+      point_in_time_pairs: true

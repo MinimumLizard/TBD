@@ -145,7 +145,7 @@ class Inputs:
         self._row_hashes: list[str] = []
 
     def rows(self, dataset: str, columns: str = "*", where: str = "", params: tuple | list = (),
-             order_by: str = "") -> list[dict]:
+             order_by: str = "", group_by: str = "") -> list[dict]:
         """select <columns> from <dataset> [where ...] [order by ...]. For another model's outputs, only the
         version this model pins is visible."""
         clauses, args = [], []
@@ -162,6 +162,8 @@ class Inputs:
         sql = f"select {columns} from {self._relations.get(dataset, dataset)}"
         if clauses:
             sql += " where " + " and ".join(clauses)
+        if group_by:
+            sql += f" group by {group_by}"
         if order_by:
             sql += f" order by {order_by}"
         out = [dict(r) for r in self._conn.execute(sql, args)]
@@ -271,8 +273,11 @@ class DuplicateOutputKey(ValueError):
 
 
 def write_table(conn: psycopg.Connection, table: str, rows: list[dict], *, method_version: str, run_id: int,
-                model: str | None = None) -> WriteCounts:
-    """Make the table's rows for this (model,) method_version equal `rows`, recording every revision."""
+                model: str | None = None, record_revisions: bool = True) -> WriteCounts:
+    """Make the table's rows for this (model,) method_version equal `rows`, recording every revision.
+
+    record_revisions=False is for reference versions only: series shown to nobody, kept to compare with the old
+    tools, which rewrote their own tables in full every day."""
     info = table_info(conn, table)
     scope = {"method_version": method_version}
     if "model" in info.columns:
@@ -314,7 +319,7 @@ def write_table(conn: psycopg.Connection, table: str, rows: list[dict], *, metho
             counts.deleted += 1
     counts.inserted = len(to_insert) - counts.updated
 
-    if revisions:
+    if revisions and record_revisions:
         with conn.cursor() as cur:
             cur.executemany(
                 """insert into models.revisions (run_id, table_name, method_version, row_key, old_row, new_row)
@@ -323,9 +328,16 @@ def write_table(conn: psycopg.Connection, table: str, rows: list[dict], *, metho
                   Jsonb({c: _plain(v) for c, v in old.items()}),
                   Jsonb({c: _plain(v) for c, v in row.items()}) if row is not None else None)
                  for k, old, row in revisions])
-    if to_delete:
+    if to_delete:   # in one statement through a temporary table: a row-by-row delete is far too slow at scale
+        keys = ", ".join(info.key)
         with conn.cursor() as cur:
-            cur.executemany(f"delete from {table} where " + " and ".join(f"{c} = %s" for c in info.key), to_delete)
+            cur.execute(f"create temp table _deleted on commit drop as select {keys} from {table} with no data")
+            with cur.copy(f"copy _deleted ({keys}) from stdin") as cp:
+                for k in to_delete:
+                    cp.write_row(k)
+            cur.execute(f"delete from {table} t using _deleted d where "
+                        + " and ".join(f"t.{c} = d.{c}" for c in info.key))
+            cur.execute("drop table _deleted")
     if to_insert:
         cols = data_cols + ["run_id"]
         with conn.cursor() as cur, cur.copy(f"copy {table} ({', '.join(cols)}) from stdin") as cp:
@@ -347,6 +359,7 @@ class RunResult:
     run_id: int
     counts: WriteCounts = field(default_factory=WriteCounts)
     inputs_sha256: str = ""
+    message: str | None = None
 
 
 def compute_function(name: str):
@@ -355,7 +368,12 @@ def compute_function(name: str):
 
 def run_version(conn: psycopg.Connection, manifest: Manifest, version: Version, *, code_version: str,
                 as_of: dt.date | None = None, owners: dict[str, str] | None = None) -> RunResult:
-    """Compute one version of one model and write its outputs, all in one transaction."""
+    """Compute one version of one model and write its outputs, all in one transaction.
+
+    as_of is refused here: a model computed "as of" a past date returns only rows up to it, and writing that would
+    delete every later row. Use data_platform.jobs.models --as-of, which computes without writing."""
+    if as_of is not None:
+        raise ValueError("as_of runs are compute-only; they never write (python -m data_platform.jobs.models --as-of)")
     run_id = conn.execute(
         """insert into models.runs (model, method_version, code_version, as_of) values (%s, %s, %s, %s)
            returning run_id""", (manifest.name, version.method_version, code_version, as_of)).fetchone()["run_id"]
@@ -369,18 +387,22 @@ def run_version(conn: psycopg.Connection, manifest: Manifest, version: Version, 
                                  f"{sorted(manifest.outputs)}")
         for table in manifest.outputs:
             result.counts += write_table(conn, table, outputs[table], method_version=version.method_version,
-                                         run_id=run_id, model=manifest.name)
+                                         run_id=run_id, model=manifest.name,
+                                         record_revisions=version.status != "reference")
         result.inputs_sha256 = inputs.fingerprint
         c = result.counts
         # Same inputs as the last good run, yet different outputs: the model is not deterministic. That is a bug
         # to fix (it would make published history wobble), so it is recorded on the run for the daily check.
         previous = conn.execute(
-            """select inputs_sha256 from models.runs where model = %s and method_version = %s and status = 'ok'
+            """select inputs_sha256, code_version from models.runs
+               where model = %s and method_version = %s and status = 'ok'
                order by run_id desc limit 1""", (manifest.name, version.method_version)).fetchone()
         message = None
-        if previous and previous["inputs_sha256"] == result.inputs_sha256 and (c.updated or c.deleted):
+        if (previous and previous["inputs_sha256"] == result.inputs_sha256 and previous["code_version"] == code_version
+                and code_version != "unknown" and (c.updated or c.deleted)):
             message = f"NONDETERMINISTIC: same inputs as the previous run, {c.updated + c.deleted} rows changed"
             log.error("%s %s: %s", manifest.name, version.method_version, message)
+        result.message = message
         conn.execute(
             """update models.runs set finished_at = now(), status = 'ok', inputs_sha256 = %s, rows_inserted = %s,
                rows_updated = %s, rows_deleted = %s, rows_unchanged = %s, message = %s where run_id = %s""",

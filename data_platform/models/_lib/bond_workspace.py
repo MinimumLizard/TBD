@@ -193,7 +193,7 @@ def bond_lookup(conn):
     return by_label, stripped, by_maturity
 
 
-def resolve_isin(lookup, quote) -> tuple[str | None, str]:
+def resolve_isin(lookup, quote, strict: bool = False) -> tuple[str | None, str]:
     """Series label first; then the label without its series letter, if that names exactly one bond; then maturity
     plus an agreeing coupon (tolerance 0.005), if exactly one bond. Otherwise unresolved, never guessed."""
     by_label, stripped, by_maturity = lookup
@@ -203,7 +203,12 @@ def resolve_isin(lookup, quote) -> tuple[str | None, str]:
     if label:
         same = stripped.get(label.rstrip(ascii_uppercase), set())
         if len(same) == 1:
-            return next(iter(same)), "label-no-letter"
+            candidate = next(iter(same))
+            # Version 1 trusted the letter-free label alone. strict (version 2) also requires the bond's maturity, and
+            # its coupon where known, to agree: otherwise the 13.00%2029A quote is filed under 2029B on any day the
+            # 2029B row is missing from the file (2026-10-11 audit).
+            if not strict or _agrees(lookup, candidate, quote):
+                return candidate, "label-no-letter"
     coupon = quote["coupon_pct"]
     candidates = by_maturity.get(iso(quote["maturity_date"]), [])
     agreeing = [bond for bond in candidates
@@ -211,6 +216,13 @@ def resolve_isin(lookup, quote) -> tuple[str | None, str]:
     if len(agreeing) == 1:
         return agreeing[0]["isin"], "maturity+coupon"
     return None, "unresolved"
+
+
+def _agrees(lookup, isin: str, quote) -> bool:
+    for bond in lookup[2].get(iso(quote["maturity_date"]), []):
+        if bond["isin"] == isin:
+            return bond["coupon_pct"] is None or quote["coupon_pct"] is None or abs(bond["coupon_pct"] - quote["coupon_pct"]) < 0.005
+    return False
 
 
 MAX_SYNTHETIC_SPREAD_BP = 50.0
@@ -288,7 +300,7 @@ def ingest_daily_summary_all(conn, obs_date: str, rows: list[dict], raw_ref: str
     own cash flows. Rows that resolve to nothing (the restructuring block, one-way quotes) are keyed the same way."""
     clear_quotes(conn, raw_ref)
     lookup = bond_lookup(conn)
-    matches = [(i, q, *resolve_isin(lookup, q)) for i, q in enumerate(rows)]
+    matches = [(i, q, *resolve_isin(lookup, q, strict=True)) for i, q in enumerate(rows)]
     best: dict[str, tuple[int, str]] = {}
     for i, _, key, method in matches:
         if key is not None and (key not in best or PRECEDENCE[method] < PRECEDENCE[best[key][1]]):
@@ -376,8 +388,9 @@ def load_quotes(conn, rows: list[dict]) -> None:
 
 def load_trades(conn, rows: list[dict]) -> None:
     conn.executemany(
-        """INSERT INTO trade_summary (obs_date, isin, security_type, open_yield, high_yield, low_yield, close_yield,
-                                      wavg_yield, volume_lkr, n_trades) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        # OR REPLACE: as the old ingest's upsert, a repeated ISIN in one trade file keeps its last row
+        """INSERT OR REPLACE INTO trade_summary (obs_date, isin, security_type, open_yield, high_yield, low_yield,
+                                      close_yield, wavg_yield, volume_lkr, n_trades) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [(iso(r["obs_date"]), r["isin"], r["security_type"], r["open_yield"], r["high_yield"], r["low_yield"],
           r["close_yield"], r["wavg_yield"], r["volume_lkr"], r["n_trades"]) for r in rows])
 

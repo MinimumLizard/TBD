@@ -75,6 +75,41 @@ def pair_zscores(residuals: pd.DataFrame, auctioned=None) -> pd.DataFrame:
     return pd.concat(out).dropna(subset=["zscore"]).reset_index(drop=True)
 
 
+def pair_zscores_point_in_time(residuals: pd.DataFrame, first_auction: dict) -> pd.DataFrame:
+    """Version 1.1.0 onwards. The same z-score of the pair spread, but every input to a row dated D is as of D:
+
+    * tau_a / tau_b are the two bonds' maturities on D (not their median over all history, which moved every day
+      and so rewrote every past row);
+    * a pair is shown on D if, on D, the two maturities are within 2 years, or both bonds had been auctioned by D.
+
+    So a row, once computed, never changes when later days arrive."""
+    wide = residuals.pivot_table(index="obs_date", columns="isin", values="residual_bp")
+    taus = residuals.pivot_table(index="obs_date", columns="isin", values="tau_years")
+    isins = sorted(wide.columns)
+    out = []
+    for first, second in itertools.combinations(isins, 2):
+        spread = (wide[first] - wide[second]).dropna()
+        if len(spread) < MIN_OBSERVATIONS + 1:
+            continue
+        tau_a, tau_b = taus[first].reindex(spread.index), taus[second].reindex(spread.index)
+        near = (tau_a - tau_b).abs() <= MAX_TAU_GAP_YEARS
+        both_auctioned = pd.Series(
+            [first in first_auction and second in first_auction
+             and max(first_auction[first], first_auction[second]) <= d.date() for d in spread.index],
+            index=spread.index)
+        eligible = (near | both_auctioned).astype(bool)
+        if not eligible.any():
+            continue
+        stats = _rolling_z(spread.reset_index(drop=True))
+        frame = pd.DataFrame({"obs_date": spread.index, "isin_a": first, "isin_b": second,
+                              "spread_bp": spread.values, "tau_a": tau_a.values, "tau_b": tau_b.values,
+                              "eligible": eligible.values}).join(stats)
+        out.append(frame.loc[frame["eligible"].to_numpy(dtype=bool)].drop(columns="eligible"))
+    if not out:
+        return pd.DataFrame()
+    return pd.concat(out).dropna(subset=["zscore"]).reset_index(drop=True)
+
+
 def _forward_change(group) -> list:
     """Change in the pair spread 10 business days later (by date, searching up to 4 days on for a missing day)."""
     by_date = dict(zip(group.obs_date, group.spread_bp))
@@ -124,10 +159,12 @@ def compute(inputs, as_of):
                          where=" and ".join(filter(None, ["source = 'quote'", day_filter[0]])),
                          params=day_filter[1], order_by="isin, obs_date")
     auction_filter = ("auction_date <= %s", (as_of,)) if as_of else ("", ())
-    auctioned = ({r["isin"] for r in inputs.rows("bonds.auction_results_current", "distinct isin",
-                                                  where=auction_filter[0], params=auction_filter[1])}
-                 | {r["isin"] for r in inputs.rows("bonds.auction_announcements_current", "distinct isin",
-                                                    where=auction_filter[0], params=auction_filter[1])})
+    first_auction: dict = {}
+    for view in ("bonds.auction_results_current", "bonds.auction_announcements_current"):
+        for r in inputs.rows(view, "isin, min(auction_date) as first", where=auction_filter[0],
+                             params=auction_filter[1], order_by="isin", group_by="isin"):
+            first_auction[r["isin"]] = min(r["first"], first_auction.get(r["isin"], r["first"]))
+    auctioned = set(first_auction)
     residuals = pd.DataFrame(points, columns=["obs_date", "isin", "residual_bp", "tau_years"])
     if residuals.empty:
         return {"models.bond_residual_zscore": [], "models.bond_pair_zscore": [], "models.model_stats": []}
@@ -135,7 +172,10 @@ def compute(inputs, as_of):
 
     bonds = bond_zscores(residuals)
     bonds["deviation_bp"] = bonds["residual_bp"] - bonds["mean_bp"]
-    pairs = pair_zscores(residuals, auctioned)
+    if inputs.params.get("point_in_time_pairs"):
+        pairs = pair_zscores_point_in_time(residuals, first_auction)
+    else:
+        pairs = pair_zscores(residuals, auctioned)
     if not pairs.empty:
         pairs["deviation_bp"] = pairs["spread_bp"] - pairs["mean_bp"]
 

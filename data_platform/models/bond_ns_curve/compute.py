@@ -98,7 +98,7 @@ def fit_day(conn, obs_date: str, lam: float, max_spread_bp: float = MAX_SPREAD_B
         errors_bp = (trade_obs - trade_fit) * 100.0
         summary["n_trades"] = len(trades)
         summary["trade_rmse_bp"] = float(np.sqrt(np.mean(errors_bp**2)))
-        # A median, not a mean: a day holds 7 to 14 trades, and one booking at an agreed rather than a market
+        # A median, not a mean: a day has 7 to 14 trades, and one booking at an agreed rather than a market
         # level moves a mean of that many a long way (old fit.py, the 2026-09-24 example).
         summary["trade_bias_bp"] = float(np.median(errors_bp))
         points += [_point(obs_date, t, "trade", o, f, None) for t, o, f in zip(trades, trade_obs, trade_fit)]

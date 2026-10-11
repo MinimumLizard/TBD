@@ -8,8 +8,8 @@ evaluated for every day that has a curve. Tiers:
   wider   quoted, rarely traded
 
 Trading facts are counted to the last day whose trade file had been published (trade files arrive a day or more
-after the quotes), unless that is more than 7 days old. Nothing uses information published after the day scored.
-See METHOD.md.
+after the quotes), unless that is more than 7 days old. Trade data is used by the day it describes, so a day is
+recomputed when its trade file arrives (see METHOD.md).
 """
 from __future__ import annotations
 

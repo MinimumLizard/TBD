@@ -22,7 +22,9 @@ PDMO trade summaries (bonds only), auction results and announcements; the days o
   itself, so a stopped feed cannot keep a bond looking active).
 - A bond auctioned exactly 120 days ago still counts as a benchmark. `post_auction` marks the 14 days after an
   auction.
-- Nothing uses information published after the day scored.
+- Trade data is used by the day it describes. A day's trade file is published a day or more after its quotes, so
+  the figures for a day are first computed without that day's trades and recomputed when the file arrives; the
+  earlier values are kept in the revision record.
 
 ## Limits
 
@@ -31,8 +33,9 @@ history, not by a formal test.
 
 ## Versions
 
-- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).
-  Bonds that only version 2 fits (the restructuring bonds) appear here too.
+- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014). Its
+  outputs are identical to 1.0.0 so far: the restructuring bonds that only version 2 fits do not trade under a
+  bond ISIN that matches their quotes.
 - **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.
 
 ## Parity

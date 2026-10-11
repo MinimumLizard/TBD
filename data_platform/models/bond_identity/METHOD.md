@@ -34,7 +34,10 @@ The same order and the same matching, with two changes:
 
 - **No quote is left out.** A row that matches no released ISIN, including the restructuring bonds and one-way
   quotes, is keyed on its own cash flows: `SYN:<maturity>:<coupon>`, or for a step-coupon bond every rate in turn
-  (`SYN:2027-12-15:12.000%9.000`). Version 2 holds about 92 quotes a day against version 1's 52.5.
+  (`SYN:2027-12-15:12.000%9.000`). Version 2 keeps about 92 quotes a day against version 1's 52.5.
+- **A letter-free label must also agree on maturity (and coupon, where known).** Version 1 accepted the label
+  without its series letter alone, which files the 13.00%2029A quote under the 13.00%2029B bond on any day the
+  2029B row is missing.
 - **No quote overwrites another.** When two rows resolve to the same bond on the same day, the row identified most
   directly keeps it (exact label, then label without its letter, then maturity and coupon), and the other is keyed
   on its own cash flows. This keeps the 13.00%2029A quote that version 1 loses every day.

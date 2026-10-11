@@ -115,7 +115,7 @@ def compute(inputs, as_of):
     too_wide = set()
     if max_spread is not None:
         for q in inputs.rows("models.bond_quotes", "obs_date, isin, bid_yield, offer_yield", where=day[0], params=day[1]):
-            if q["bid_yield"] is None or q["offer_yield"] is None or (q["bid_yield"] - q["offer_yield"]) * 100 > max_spread:
+            if q["bid_yield"] is None or q["offer_yield"] is None or abs(q["bid_yield"] - q["offer_yield"]) * 100 > max_spread:
                 too_wide.add((q["obs_date"].isoformat(), q["isin"]))
     funding_rows, carry_rows = [], []
     for fit in fits:

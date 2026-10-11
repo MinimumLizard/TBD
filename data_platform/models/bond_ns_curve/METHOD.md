@@ -58,8 +58,8 @@ running beside it as the reference series that matches the old tool.
   over time therefore uses a little information from the future.
 - Quotes are averages across primary dealers of indicative prices; nobody is obliged to deal on them. Executed
   yields have run above the quote mids for most of the history (see the trade bias and `bond_execution_gap`).
-- Restructuring bonds and one-way quotes are not in the fit (decision 0014 plans a version 2 that includes every
-  two-way quote at its 1/spread² weight).
+- In version 1, restructuring bonds and one-way quotes are not in the fit. Version 2 (current) fits every two-way
+  quote; one-way quotes have no mid and are not fitted in either version.
 
 ## Parity
 

@@ -111,3 +111,15 @@ def test_two_rows_resolving_to_one_bond_do_not_overwrite_each_other():
     assert sorted(k[1] for k in resolved) == ["LKB00529L150", "SYN:2029-12-15:13.000"]
     stored = {r["isin"]: r["bid_yield"] for r in conn.execute("select * from observations")}
     assert stored == {"LKB00529L150": 10.3, "SYN:2029-12-15:13.000": 10.6}
+
+
+def test_version_2_does_not_trust_a_letter_free_label_with_the_wrong_maturity():
+    conn = ws.open_workspace()
+    ws.upsert_bond(conn, "LKB01529E014", 13.0, "2029-05-01", 15, "2026-01-01", series_label="13.00%2029B")
+    lookup = ws.bond_lookup(conn)
+    only_a = _quote("13.00%2029A", "2029-01-01", 13.0)        # the 2029B row is missing from this day's file
+    assert ws.resolve_isin(lookup, only_a) == ("LKB01529E014", "label-no-letter")     # version 1, kept for parity
+    assert ws.resolve_isin(lookup, only_a, strict=True) == (None, "unresolved")
+    resolved = {}
+    ws.ingest_daily_summary_all(conn, "2026-10-01", [only_a], "ref", resolved)
+    assert list(resolved) == [("2026-10-01", "SYN:2029-01-01:13.000")]
