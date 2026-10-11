@@ -206,7 +206,9 @@ def test_export_produces_a_restorable_dump(conn, tmp_path):
 
     if not shutil.which("pg_dump"):
         pytest.skip("pg_dump not installed")
-    url = conn.info.dsn
+    import os
+
+    url = psycopg.conninfo.make_conninfo(os.environ["TEST_DATABASE_URL"], dbname=conn.info.dbname)
     out = backup.export(url, [LocalRawStore(tmp_path / "a"), LocalRawStore(tmp_path / "b")], dt.date(2026, 10, 11))
     dump = (tmp_path / "a" / out["key"]).read_bytes()
     assert dump.startswith(b"PGDMP") and dump == (tmp_path / "b" / out["key"]).read_bytes()
