@@ -19,4 +19,5 @@ jobs:
     with:
       command: data_platform.jobs.backup export
       timeout: 30
+      pg_client: true     # pg_dump refuses to dump a server newer than itself; Supabase runs a recent Postgres
     secrets: inherit

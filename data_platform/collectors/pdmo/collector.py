@@ -111,13 +111,21 @@ class PdmoCollector(Collector):
     def collect(self) -> Result:
         conn = self.ctx.conn
         entries, problems = self.read_indexes()
+        # Done = parsed successfully by the current parser. A file whose parse failed is fetched again on the next run
+        # (the PDMO sometimes serves an error page or a truncated file, then the real one at the same address).
         known = {r["url"] for r in conn.execute(
-            "select distinct url from bonds.source_files where parser_version = %s", (PARSER_VERSION,))}
+            "select distinct url from bonds.source_files where parser_version = %s and parse_status = 'ok'",
+            (PARSER_VERSION,))}
         todo = [(e, y) for e, y in entries if e.url not in known]
         added = parsed_ok = 0
-        failures = []
+        failures, unreachable = [], []
         for entry, year in todo:
-            got = self.fetch("GET", entry.url, note=entry.kind)
+            try:
+                got = self.fetch("GET", entry.url, note=entry.kind)
+            except Exception as exc:  # noqa: BLE001 - one dead link must not block every file listed after it
+                conn.rollback()
+                unreachable.append(f"{entry.url} ({type(exc).__name__}: {exc})"[:300])
+                continue
             status, n = store_file(conn, entry=entry, index_year=year, fetch_id=got.fetch_id, sha256=got.sha256,
                                    fetched_at=got.response.fetched_at, body=got.body)
             conn.commit()
@@ -126,8 +134,9 @@ class PdmoCollector(Collector):
                 parsed_ok += 1
             else:
                 failures.append(entry.url)
-        message = (f"{len(entries)} files listed, {len(todo)} new, {parsed_ok} parsed ok, {len(failures)} failed; "
-                   f"{added} rows added")
-        if problems or failures:
-            raise RuntimeError(message + ". Problems: " + "; ".join(problems + [f"parse failed: {u}" for u in failures]))
+        message = (f"{len(entries)} files listed, {len(todo)} new, {parsed_ok} parsed ok, {len(failures)} failed, "
+                   f"{len(unreachable)} unreachable; {added} rows added")
+        if problems or failures or unreachable:
+            raise RuntimeError(message + ". Problems: " + "; ".join(
+                problems + [f"parse failed: {u}" for u in failures] + [f"download failed: {u}" for u in unreachable]))
         return Result(rows_added=added, message=message, new_data=bool(todo))

@@ -162,3 +162,27 @@ def test_an_unparseable_file_is_recorded_and_fails_the_run(conn, store):
     row = conn.execute("select parse_status, parse_note from bonds.source_files where url like '%sum-0831'").fetchone()
     assert row["parse_status"] == "failed"          # committed before the run failed: nothing is lost
     assert conn.execute("select count(*) n from ops.raw_fetches where url like '%sum-0831'").fetchone()["n"] == 1
+
+
+@pytest.mark.db
+def test_a_dead_link_or_bad_file_never_blocks_the_rest_and_is_retried_next_run(conn, store):
+    http = FakePdmo(broken_file="sum-0831")
+    original = http.request
+
+    def dead_volumes_link(method, url, params=None):
+        if url.endswith("/vol-0828"):
+            raise ConnectionError("connection reset")
+        return original(method, url, params)
+
+    http.request = dead_volumes_link
+    with pytest.raises(RuntimeError, match="download failed.*vol-0828") as caught:
+        run(conn, store, http)
+    assert "parse failed" in str(caught.value)
+    conn.rollback()
+    stored = {r["url"].rsplit("/", 1)[-1] for r in conn.execute("select url from bonds.source_files")}
+    assert {"trd-0828", "auc-0112", "ann-0825"} <= stored     # the files listed after the dead link still came in
+    again = run(conn, store, FakePdmo())                       # the site is fixed: both are fetched again
+    conn.commit()
+    ok = {r["url"].rsplit("/", 1)[-1] for r in conn.execute(
+        "select url from bonds.source_files where parse_status = 'ok'")}
+    assert again.new_data and {"vol-0828", "sum-0831"} <= ok

@@ -187,11 +187,15 @@ def test_replicate_copies_every_object_once_and_verify_detects_damage(conn, stor
     conn.commit()
     assert backup.replicate(conn, store, second) == {"copied": 3, "already_present": 0}
     assert backup.replicate(conn, store, second) == {"copied": 0, "already_present": 3}
-    assert backup.verify(conn, [store, second], seed=1)["checked"] == 3
+    today = dt.date(2026, 10, 11)
+    with pytest.raises(IntegrityError, match="no database export"):
+        backup.verify(conn, [store, second], today, seed=1)            # no recent export: a failure, not a pass
+    backup.export("unused", [store, second], today - dt.timedelta(days=1), dump_fn=lambda url: b"PGDMP dump")
+    assert backup.verify(conn, [store, second], today, seed=1)["checked"] == 3
     victim = next((tmp_path / "second" / "raw").rglob("*.txt"))
     victim.write_bytes(b"bit rot")
     with pytest.raises(IntegrityError):
-        backup.verify(conn, [store, second], seed=1)
+        backup.verify(conn, [store, second], today, seed=1)
     second.put_named("exports/db/2026-10-11.dump", b"dump")
     with pytest.raises(AlreadyExists):
         second.put_named("exports/db/2026-10-11.dump", b"other")       # write-once
@@ -212,3 +216,23 @@ def test_export_produces_a_restorable_dump(conn, tmp_path):
     out = backup.export(url, [LocalRawStore(tmp_path / "a"), LocalRawStore(tmp_path / "b")], dt.date(2026, 10, 11))
     dump = (tmp_path / "a" / out["key"]).read_bytes()
     assert dump.startswith(b"PGDMP") and dump == (tmp_path / "b" / out["key"]).read_bytes()
+
+
+def test_a_same_day_rerun_completes_the_export_without_dumping_again(tmp_path):
+    from data_platform.core.rawstore import LocalRawStore
+    from data_platform.jobs import backup
+
+    a, b = LocalRawStore(tmp_path / "a"), LocalRawStore(tmp_path / "b")
+    day = dt.date(2026, 10, 11)
+    a.put_named(backup.export_key(day), b"PGDMP first")               # first run wrote one store, then failed
+    out = backup.export("unused", [a, b], day, dump_fn=lambda url: pytest.fail("must not dump again"))
+    assert out["reused"] and b.get_named(backup.export_key(day)) == b"PGDMP first"
+
+
+@pytest.mark.db
+def test_an_empty_archive_never_verifies(conn, tmp_path):
+    from data_platform.core.rawstore import LocalRawStore
+    from data_platform.jobs import backup
+
+    with pytest.raises(IntegrityError, match="empty"):
+        backup.verify(conn, [LocalRawStore(tmp_path / "a")], dt.date(2026, 10, 11))

@@ -56,3 +56,50 @@ def test_any_other_role_sees_no_rows_even_if_granted(conn):
         conn.execute("reset role")
         conn.execute("revoke all on models.model_stats from tbd_test_browser")
         conn.execute("revoke all on schema models from tbd_test_browser")
+
+
+def test_unpublished_outputs_are_not_readable_by_the_website_role(conn):
+    import yaml
+
+    from data_platform.core.settings import REPO_ROOT
+    unpublished = yaml.safe_load((REPO_ROOT / "config" / "entitlements.yaml").read_text()).get("unpublished_outputs", [])
+    for table in unpublished:
+        allowed = conn.execute("select has_table_privilege('web_reader', %s, 'select') ok", (table,)).fetchone()["ok"]
+        assert not allowed, f"{table} is unpublished but web_reader can read it: revoke it in a migration"
+
+
+def test_concurrent_migrations_wait_for_each_other():
+    """Two jobs starting at once on an empty database must not both try to apply the same migration."""
+    import os
+    import threading
+    import uuid
+
+    import psycopg
+    from data_platform.core import db as dbmod
+
+    admin = os.environ.get("TEST_DATABASE_URL")
+    if not admin:
+        pytest.skip("TEST_DATABASE_URL not set")
+    name = f"tbd_t_{uuid.uuid4().hex[:10]}"
+    with psycopg.connect(admin, autocommit=True) as a:
+        a.execute(f'create database "{name}"')
+    url = psycopg.conninfo.make_conninfo(admin, dbname=name)
+    errors = []
+
+    def run():
+        try:
+            with dbmod.connect(url) as c:
+                dbmod.migrate(c)
+        except Exception as exc:  # noqa: BLE001
+            errors.append(exc)
+
+    try:
+        threads = [threading.Thread(target=run) for _ in range(2)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        assert errors == []
+    finally:
+        with psycopg.connect(admin, autocommit=True) as a:
+            a.execute(f'drop database "{name}" with (force)')

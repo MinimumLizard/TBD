@@ -91,7 +91,14 @@ class CseEndOfDayCollector(CseCollector):
 
         last = conn.execute("select max(session_date) d from cse.prices_daily where source = 'daily'").fetchone()["d"]
         if last == session:
-            return Result(new_data=False, message=f"no new session (latest stored daily session {last})")
+            # The session's market data is stored. Finish any company summaries an earlier run could not get.
+            stored = conn.execute("select symbol from cse.security_list where session_date = %s", (session,)).fetchall()
+            securities = [s for s in parse.security_list(secs_f.body, session) if s["symbol"] in {r["symbol"] for r in stored}]
+            missing = self.missing_companies(securities, session)
+            if not missing:
+                return Result(new_data=False, message=f"no new session (latest stored daily session {last})")
+            added, failed = self.store_companies(missing, session)
+            return self.finish(f"session {session}: {len(missing)} company summaries completed", added, failed)
         if last and session < last:
             raise RuntimeError(f"API session {session} is older than the last stored session {last}")
         if parse.is_open(status):
@@ -115,20 +122,41 @@ class CseEndOfDayCollector(CseCollector):
                        dms_f.response.fetched_at)
         conn.commit()
 
-        equities = self.companies(securities)
-        for sec in equities:
-            f = self.api("companyInfoSummery", symbol=sec["symbol"])
-            added += store(conn, "cse.company_info_daily", [parse.company_info(f.body, sec["symbol"], session)],
-                           ["session_date", "symbol"], f.fetch_id, f.response.fetched_at)
+        more, failed = self.store_companies(self.missing_companies(securities, session), session)
+        return self.finish(f"session {session}: {len(prices)} prices", added + more, failed)
+
+    def missing_companies(self, securities: list[dict], session) -> list[dict]:
+        have = {r["symbol"] for r in self.ctx.conn.execute(
+            "select symbol from cse.company_info_daily where session_date = %s", (session,))}
+        return [s for s in self.companies(securities) if s["symbol"] not in have]
+
+    def store_companies(self, equities: list[dict], session) -> tuple[int, list[str]]:
+        """Company summary (and, once per listing, profile) for each share. One share failing never stops the rest:
+        each success is committed at once, and the failures are retried by the next run of the day."""
+        conn = self.ctx.conn
+        added, failed = 0, []
         have_profile = {r["symbol"] for r in conn.execute("select distinct symbol from cse.company_profiles")}
         for sec in equities:
-            if sec["symbol"] not in have_profile:    # sector labels: once per listing, refreshed by hand if needed
-                f = self.api("companyProfile", symbol=sec["symbol"])
-                added += store(conn, "cse.company_profiles",
-                               [dict(parse.company_profile(f.body, sec["symbol"]), raw_sha256=f.sha256)],
-                               ["symbol", "raw_sha256"], f.fetch_id, f.response.fetched_at)
-        return Result(rows_added=added, message=f"session {session}: {len(prices)} prices, {added} rows added "
-                                                f"({self.fetches} API calls)")
+            try:
+                f = self.api("companyInfoSummery", symbol=sec["symbol"])
+                added += store(conn, "cse.company_info_daily", [parse.company_info(f.body, sec["symbol"], session)],
+                               ["session_date", "symbol"], f.fetch_id, f.response.fetched_at)
+                if sec["symbol"] not in have_profile:   # sector labels: once per listing, refreshed by hand if needed
+                    f = self.api("companyProfile", symbol=sec["symbol"])
+                    added += store(conn, "cse.company_profiles",
+                                   [dict(parse.company_profile(f.body, sec["symbol"]), raw_sha256=f.sha256)],
+                                   ["symbol", "raw_sha256"], f.fetch_id, f.response.fetched_at)
+                conn.commit()
+            except Exception as exc:  # noqa: BLE001 - recorded and raised at the end of the run
+                conn.rollback()
+                failed.append(f"{sec['symbol']} ({type(exc).__name__}: {exc})"[:200])
+        return added, failed
+
+    def finish(self, what: str, added: int, failed: list[str]) -> Result:
+        message = f"{what}, {added} rows added ({self.fetches} API calls)"
+        if failed:   # everything else is already committed; this makes the run fail loudly and the next one retry
+            raise RuntimeError(f"{message}; {len(failed)} company summaries failed: " + "; ".join(failed[:20]))
+        return Result(rows_added=added, message=message)
 
 
 class CseAnnouncementsCollector(CseCollector):

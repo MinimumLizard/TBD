@@ -39,8 +39,14 @@ def migrate(conn: psycopg.Connection, directory: Path = MIGRATIONS_DIR) -> list[
     Safe to call from every job: a Postgres advisory lock makes concurrent callers wait their turn.
     """
     conn.execute("select pg_advisory_lock(727272)")
+    conn.commit()   # the lock is held by the session; committing here lets each migration be its own transaction
     try:
-        return _migrate(conn, directory)
+        done = _migrate(conn, directory)
+        conn.commit()
+        return done
+    except BaseException:
+        conn.rollback()  # a failed migration's own transaction is already rolled back; discard anything else
+        raise
     finally:
         conn.execute("select pg_advisory_unlock(727272)")
         conn.commit()
@@ -53,6 +59,7 @@ def _migrate(conn: psycopg.Connection, directory: Path) -> list[str]:
                           version text primary key, sha256 text not null,
                           applied_at timestamptz not null default now())""")
     applied = {r["version"]: r["sha256"] for r in conn.execute("select version, sha256 from ops.schema_migrations")}
+    conn.commit()   # end the read's implicit transaction, so each migration below is a real transaction of its own
     done = []
     for path in sorted(directory.glob("[0-9][0-9][0-9][0-9]_*.sql")):
         sql = path.read_text()

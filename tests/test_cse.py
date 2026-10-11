@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -150,3 +151,27 @@ def test_history_job_fills_only_missing_sessions(conn, store):
                           and source = 'backfill' and symbol = any(%s)""", (list(SYMBOLS),)).fetchone()["n"]
     assert first.rows_added > 0 and dup == 0
     assert make(cse.CseHistoryCollector, conn, store, FakeCse()).collect().rows_added == 0
+
+
+@pytest.mark.db
+def test_one_company_failing_never_loses_the_others_and_the_next_run_completes_it(conn, store):
+    http = FakeCse()
+    original = http.request
+    victim = sorted(SYMBOLS)[0]
+
+    def one_broken_company(method, url, params=None):
+        if url.endswith("/companyInfoSummery") and (params or {}).get("symbol") == victim:
+            raise ConnectionError("timed out")
+        return original(method, url, params)
+
+    http.request = one_broken_company
+    with pytest.raises(RuntimeError, match=f"1 company summaries failed: {re.escape(victim)}"):
+        make(cse.CseEndOfDayCollector, conn, store, http).collect()
+    conn.rollback()
+    n = lambda: conn.execute("select count(*) n from cse.company_info_daily").fetchone()["n"]  # noqa: E731
+    assert n() == len(SYMBOLS) - 1 and conn.execute("select count(*) n from cse.prices_daily").fetchone()["n"] == 24
+    again = make(cse.CseEndOfDayCollector, conn, store, FakeCse()).collect()   # same session, later run
+    conn.commit()
+    assert n() == len(SYMBOLS) and "1 company summaries completed" in again.message
+    last = make(cse.CseEndOfDayCollector, conn, store, FakeCse()).collect()
+    assert "no new session" in last.message

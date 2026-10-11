@@ -28,7 +28,9 @@ trap 'rm -rf "$WORK"' EXIT
 for repo in "${REPOS[@]}"; do
   echo "== $repo"
   # --mirror copies every branch and tag, not just the default branch (the crypto history lives on `data`).
-  GIT_LFS_SKIP_SMUDGE=1 git clone --quiet --mirror "https://github.com/$OWNER/$repo.git" "$WORK/$repo.git"
+  # OLD_REPOS_TOKEN (optional): a read-only token, needed once the repos are private.
+  AUTH=""; [ -n "${OLD_REPOS_TOKEN:-}" ] && AUTH="x-access-token:${OLD_REPOS_TOKEN}@"
+  GIT_LFS_SKIP_SMUDGE=1 git clone --quiet --mirror "https://${AUTH}github.com/$OWNER/$repo.git" "$WORK/$repo.git"
   git -C "$WORK/$repo.git" bundle create "$OUT_DIR/$repo.bundle" --all 2>/dev/null
   # Prove the bundle is complete and readable before trusting it.
   git bundle verify "$OUT_DIR/$repo.bundle" >/dev/null

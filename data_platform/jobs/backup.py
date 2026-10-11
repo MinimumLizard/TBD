@@ -5,6 +5,9 @@
     python -m data_platform.jobs.backup verify      # monthly: re-read a random sample from both stores, check hashes
 
 Every copy is verified by fingerprint after it is written. A mismatch is an error, never a warning.
+
+Retention: raw objects (raw/...) are kept forever (R2 bucket lock on the raw/ prefix). Database exports
+(exports/db/...) are kept 90 days by a bucket lifecycle rule, so the lock must not cover them.
 """
 from __future__ import annotations
 
@@ -32,22 +35,48 @@ def replicate(conn, primary, secondary) -> dict:
     return {"copied": copied, "already_present": present}
 
 
-def export(database_url: str, stores: list, today: dt.date) -> dict:
-    """pg_dump in Postgres' custom format (restorable with pg_restore) to exports/db/<date>.dump in every store."""
-    dump = subprocess.run(["pg_dump", "--format=custom", "--no-owner", "--no-privileges", database_url],
-                          check=True, capture_output=True).stdout
-    key = f"exports/db/{today.isoformat()}.dump"
+def export_key(day: dt.date) -> str:
+    return f"exports/db/{day.isoformat()}.dump"
+
+
+def export(database_url: str, stores: list, today: dt.date, dump_fn=None) -> dict:
+    """pg_dump in Postgres' custom format (restorable with pg_restore) to exports/db/<date>.dump in every store.
+
+    Write-once per day. A re-run on the same day (e.g. after the second store failed) does not dump again: it copies
+    the day's existing export to any store still missing it. Every copy is read back and checked."""
+    key = export_key(today)
+    existing = next((s for s in stores if s.has_key(key)), None)
+    if existing is not None:
+        dump = existing.get_named(key)
+    else:
+        dump = (dump_fn or _pg_dump)(database_url)
+    digest = sha256_of(dump)
     for store in stores:
-        store.put_named(key, dump)
-    return {"key": key, "bytes": len(dump), "sha256": sha256_of(dump)}
+        if not store.has_key(key):
+            store.put_named(key, dump)
+        if sha256_of(store.get_named(key)) != digest:
+            raise IntegrityError(f"{key}: a stored copy does not match the export")
+    return {"key": key, "bytes": len(dump), "sha256": digest, "reused": existing is not None}
 
 
-def verify(conn, stores: list, sample: int = 200, seed: int | None = None) -> dict:
+def _pg_dump(database_url: str) -> bytes:
+    return subprocess.run(["pg_dump", "--format=custom", "--no-owner", "--no-privileges", database_url],
+                          check=True, capture_output=True).stdout
+
+
+def verify(conn, stores: list, today: dt.date, sample: int = 200, seed: int | None = None) -> dict:
+    """Re-read a random sample of archived objects from every store, and check each store holds a recent export.
+    An empty archive, or no export in the last two days, is a failure, not a pass."""
     rows = conn.execute("select sha256, ext from ops.raw_objects").fetchall()
+    if not rows:
+        raise IntegrityError("the archive catalogue is empty: nothing to verify")
     picked = random.Random(seed).sample(rows, min(sample, len(rows)))
     for r in picked:
         for store in stores:
             store.get(r["sha256"], r["ext"])                # raises IntegrityError on any mismatch
+    for i, store in enumerate(stores):
+        if not any(store.has_key(export_key(today - dt.timedelta(days=d))) for d in range(3)):
+            raise IntegrityError(f"store {i + 1} holds no database export from the last two days")
     return {"checked": len(picked), "stores": len(stores)}
 
 
@@ -63,7 +92,7 @@ def main(argv=None) -> int:
     elif args.action == "export":
         result = export(s.database_url, [primary, secondary], dt.date.today())
     else:
-        result = verify(conn, [primary, secondary])
+        result = verify(conn, [primary, secondary], dt.date.today())
     print(args.action, result)
     return 0
 

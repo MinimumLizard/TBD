@@ -75,6 +75,7 @@ class RawStore(Protocol):
     def get(self, sha256: str, ext: str) -> bytes: ...
     def exists(self, sha256: str, ext: str) -> bool: ...
     def put_named(self, key: str, data: bytes) -> None: ...
+    def get_named(self, key: str) -> bytes: ...
     def has_key(self, key: str) -> bool: ...
 
 
@@ -116,6 +117,9 @@ class LocalRawStore:
         tmp = path.with_name(path.name + f".{os.getpid()}.part")
         tmp.write_bytes(data)
         os.replace(tmp, path)
+
+    def get_named(self, key: str) -> bytes:
+        return (self.root / key).read_bytes()
 
 
 class S3RawStore:
@@ -165,6 +169,9 @@ class S3RawStore:
             raise AlreadyExists(key)
         self.client.put_object(Bucket=self.bucket, Key=key, Body=data, Metadata={"sha256": sha256_of(data)})
 
+    def get_named(self, key: str) -> bytes:
+        return self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
+
     def put(self, data: bytes, ext: str) -> StoredObject:
         digest = sha256_of(data)
         key = key_for(digest, ext)
@@ -187,6 +194,9 @@ def from_settings(settings, secondary: bool = False) -> RawStore:
     if spec.startswith("local:"):
         return LocalRawStore(spec.removeprefix("local:"))
     if spec == "s3":
+        bucket = settings.secondary_s3_bucket if secondary else settings.s3_bucket
+        if not bucket:
+            raise ValueError("SECONDARY_S3_BUCKET is not set" if secondary else "S3_BUCKET is not set")
         if not secondary:
             return S3RawStore.from_settings(settings)
         import boto3
