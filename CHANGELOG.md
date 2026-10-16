@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-16 — ZinvestIQ, retail-features plan, site preview fixes
+
+- The product is named ZinvestIQ (decision 0017): site, package, collectors' user agent, switch-on account names.
+- `docs/plan-retail-features.md`: weekly emails, feedback, an FD comparison, rebalancing signals and fewer-name model
+  portfolios. What each needs, what waits for a lawyer, the proposed order, and six decisions for the owner.
+  `scripts/research/fewer_names.py` measures 10–25-name versions of the old lab's portfolios.
+- Collectors run against the live sources for the first time since the audit. Fixed: the CSE jobs now snapshot only
+  a closed market; "Regular Trading" used to pass the old guard (finding R1, `docs/phase3-4-verification.md` §10).
+- Site fixes from the first visual review:
+  - no repeated disclaimers;
+  - legends clear of the charts;
+  - sector names instead of codes;
+  - movers laid out to fit;
+  - no "highest turnover" without turnover;
+  - small amounts shown as "< Rs 0.01 mn";
+  - phone-width method pages.
+
 ## 2026-10-11 — Audit of Phases 2–4, and fixes
 
 - Four independent review passes; every finding verified, then fixed or recorded

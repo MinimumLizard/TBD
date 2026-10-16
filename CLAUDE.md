@@ -5,8 +5,8 @@ Handover notes between sessions. Keep this file current: future sessions rely on
 ## What this is
 
 A tiered retail market-information portal, mainly for Sri Lankan investors. It is being built by consolidating
-three existing personal tools (CSE equities, LKR government bonds, crypto) into one platform. Working name: TBD
-(no brand yet).
+three existing personal tools (CSE equities, LKR government bonds, crypto) into one platform. The product is
+**ZinvestIQ** (decision 0017); the repository is still called TBD. The owner works with a partner, Janu.
 
 Owner background: finance, fluent in R, learning Python, not a professional engineer. Explain decisions in plain
 language. Prefer boring, well-documented, managed services over clever or self-hosted ones.
@@ -23,8 +23,13 @@ decisions).
   are the owner's own answers; read them before asking the owner anything).
 - Switch-on needs the owner's accounts and secrets. Until then every scheduled workflow skips itself. The repo is
   PUBLIC for now (decision 0012): never commit data or secrets; CI enforces both.
-- Next: Phase 3b (remaining CSE models; owner picks the order) and Phase 4b (accounts, payments, Sinhala/Tamil,
-  Vercel), once approved.
+- The owner will approve after seeing the site; a screenshot preview was shared on 2026-10-16 (report §10).
+- Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
+  portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
+  lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
+- Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
+  versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
+  Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
 
 ## Architecture in brief
 

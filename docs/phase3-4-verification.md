@@ -106,15 +106,15 @@ Accounts are stubbed: every visitor is anonymous and on the free tier (decision 
 This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9). Do the steps in this order.
 
 **A. Accounts and storage**
-1. **Supabase:** create an organisation and a **Pro** project `tbd-prod` in **ap-south-1 (Mumbai)**. In Database
+1. **Supabase:** create an organisation and a **Pro** project `zinvestiq-prod` in **ap-south-1 (Mumbai)**. In Database
    settings, switch on **Enforce SSL**, and download the **SSL certificate** (you need it in step 10). Note the
    project's *session pooler* connection string (port 5432) for GitHub, and its *transaction pooler* string (port
    6543) for the website.
-2. **Cloudflare R2:** create a bucket `tbd-raw`. Add a **bucket lock rule on the prefix `raw/`** with retention
+2. **Cloudflare R2:** create a bucket `zinvestiq-raw`. Add a **bucket lock rule on the prefix `raw/`** with retention
    "indefinite" (the archive is kept forever), and a **lifecycle rule on the prefix `exports/`** deleting objects
    after 90 days (database exports). Do not lock the whole bucket. Create an API token with Object Read & Write on
    that bucket only.
-3. **Backblaze B2:** create a private bucket `tbd-raw-copy` and an application key limited to it.
+3. **Backblaze B2:** create a private bucket `zinvestiq-raw-copy` and an application key limited to it.
 4. **Healthchecks.io:** create a project and copy its ping URL (`https://hc-ping.com/<key>`). Create checks with
    the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history` and `models-all`.
 
@@ -221,3 +221,56 @@ the code before being fixed. The full suites were re-run afterwards (§1).
 - **Not fixed (low impact, documented):** re-running the CSE migration after the old repo moves on adds duplicate
   catalogue rows (never duplicate facts); a malformed `%` sequence in an address gets a bare 500 from Next.js's own
   router (no data, no detail).
+
+## 10. Refresh of 2026-10-16: the collectors against the live sources, and the site's first look
+
+To show the owner the site with current data, the local copy was brought up to date by the platform's own
+collectors, run against the live sources for the first time since the audit (local database and archive only).
+
+**What ran** (`uv run python -m data_platform.jobs.collect <job>`, then `jobs.models`):
+
+| Job | Result |
+|---|---|
+| `pdmo` | 692 files listed, 15 new, 15 parsed, 0 failed, 0 unreachable; 455 rows |
+| `cse_api:history` | 1,204 backfill rows for 2026-10-12 to 2026-10-15 (the sessions since the migration) |
+| `cse_api:announcements` | 69 new announcements |
+| `cse_api` at 12:30 Sri Lanka time | **Refused, but for the wrong reason** (finding R1) |
+| models | All versions ran; bond_rv_zscores 1.1.0 added 5,157 rows and changed 1 |
+
+**R1. The open-market guard did not recognise the CSE's trading status (fixed).** While the market is open the API's
+status is "Regular Trading". The guard ported from the old tool refused only statuses containing "OPEN" (and not
+"CLOSE"), so it let a mid-session run through. That run stopped only because one share's closing price was still
+zero. On another day it could have stored intraday prices as the session's close. The guard now accepts only a
+closed market (`parse.is_closed`): any other status, including an unknown one, is refused. The history job now
+checks it too, as the old `cse/backfill.py` did. Tests cover both jobs. Scheduled runs start after the close, so this
+was a risk for manual or very late runs. **The old CSE tool has the same guard** (`cse/fetch.py` line 123,
+`cse/backfill.py` line 66). Its scheduled runs are after the close too; the one-line fix is in `docs/roadmap.md`
+for the owner.
+
+**R2. A trade file published a month late changed a month of outputs, as the audit predicted.** The PDMO posted a
+trade summary for 2026-09-15 between 10-11 and 10-16. Because trades are used by the day they describe (§9, "Open"),
+the 09-15 curve fit changed (16 points) and, through rolling windows, these outputs from 09-15 to 10-09 changed too:
+
+| Model | Rows changed |
+|---|---|
+| Liquidity | 373 |
+| Carry | 810 |
+| Execution gap | 15 |
+| Funding | 5 |
+
+Every old value is in `models.revisions`
+(`select table_name, method_version, min(row_key->>'obs_date'), max(row_key->>'obs_date'), count(*) from
+models.revisions where revised_at > ... group by 1, 2`). This is the strongest argument so far for storing when each
+file became available and using data as of that date. It is the owner's call (roadmap item 3, with V3).
+
+**The site, as the owner will see it.** Screenshots of every page, on a computer and a phone, as a free and as a Pro
+visitor, were reviewed before sharing. Fixed:
+
+- the general disclaimer and data line printed twice on model pages;
+- chart legends covering the plot on phones;
+- sector indices shown as codes ("BNK") instead of names;
+- the movers tables squeezed into thirds of the page;
+- a session filled in from the price history (no turnover) listing "highest turnover" alphabetically;
+- "Rs 0.00 mn" for small amounts;
+- a long badge widening the bond table;
+- a method page wider than a phone screen.
