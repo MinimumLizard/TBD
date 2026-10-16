@@ -213,6 +213,15 @@ All of them are measured forward from the day they start, never backfilled.
 4. **Phase 5 (new), retail education:** FD vs bills and bonds; FD vs the market; the calculator.
 5. **After the lawyer:** whichever of P1–P3 is open, and any discussion feature.
 
+## 8a. Small changes to make the existing site friendlier (from the first visual review)
+
+- **Company names beside share codes.** Today it shows "JKH.N0000" alone. The name is collected (`cse.security_list`)
+  but not yet in the share model's output.
+- **Plain-language help** for terms a new investor will not know (basis points, curve residual, breadth, z-score,
+  carry): a short glossary, linked from where each term appears.
+- **A logo and colours** once the name is cleared (§1).
+- **Dividend- and split-adjusted price charts**, which come with corporate actions (Phase 3b, first).
+
 ## 9. Decisions for you and Janu
 
 1. Is the Phase 3b order in §8 right? I can start corporate actions and total returns as soon as you say so.
