@@ -247,6 +247,14 @@ was a risk for manual or very late runs. **The old CSE tool has the same guard**
 `cse/backfill.py` line 66). Its scheduled runs are after the close too; the one-line fix is in `docs/roadmap.md`
 for the owner.
 
+**R3. The CSE publishes the day's market summary hours after the close (fixed).** At 09:10 and again at 10:22 UTC
+(15:52 Sri Lanka time) the market was closed and the day's trades were out, but `dailyMarketSummery` still carried the
+previous session. The collector refused, correctly, to mix the two. Two of the three scheduled runs (10:37 and 13:07
+UTC) would have failed every day, setting off false alarms. The old tool never noticed: GitHub starts its runs
+5–6 hours late, and its commits land at 15:41–20:22 UTC. Now "trades newer than the summary" is a quiet "not
+published yet" (`parse.SummaryNotPublished`, tested), and the runs are at 10:37, 15:37 and 18:07 UTC. If no run
+finds the summary, the gap check still reports the missing session.
+
 **R2. A trade file published a month late changed a month of outputs, as the audit predicted.** The PDMO posted a
 trade summary for 2026-09-15 between 10-11 and 10-16. Because trades are used by the day they describe (§9, "Open"),
 the 09-15 curve fit changed (16 points) and, through rolling windows, these outputs from 09-15 to 10-09 changed too:

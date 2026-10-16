@@ -70,10 +70,17 @@ def security_list(body: bytes, session: dt.date) -> list[dict]:
             for s in secs]
 
 
+class SummaryNotPublished(ValueError):
+    """The session's trades are out but its market summary is not yet: the CSE publishes dailyMarketSummery hours
+    after the close (still the previous session at 15:52 Sri Lanka time on 2026-10-16). Try again later."""
+
+
 def trade_summary(body: bytes, session: dt.date) -> list[dict]:
     """tradeSummary → one 'daily' price row per security that traded. Fails if it is not this session's data."""
     trade = validate(TradeSummary, _json(body), "tradeSummary")
     newest = max(ms_to_date(r.lastTradedTime) for r in trade.reqTradeSummery)
+    if newest > session:
+        raise SummaryNotPublished(f"tradeSummary is for {newest} but dailyMarketSummery still says {session}")
     if newest != session:
         raise ValueError(f"tradeSummary is for {newest} but dailyMarketSummery says {session}")
     return [{

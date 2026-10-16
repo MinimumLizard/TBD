@@ -1,11 +1,11 @@
-# CSE end of day, weekdays 16:07, 18:37 and 22:07 Sri Lanka time. The first run after the API publishes the session stores it; later runs report no new session. The weekly history job repairs any session all three miss (prices only).
+# CSE end of day, weekdays 16:07, 21:07 and 23:37 Sri Lanka time. The CSE publishes the day's market summary hours after the close (not yet at 15:52 on 2026-10-16; the old tool's runs found it from about 21:00), so an early run that finds it missing is a quiet no-op, the first run after it appears stores the session, and later runs report no new session. The weekly history job repairs any session all three miss (prices only).
 name: "Collect: CSE end of day"
 
 on:
   schedule:
     - cron: "37 10 * * 1-5"
-    - cron: "7 13 * * 1-5"
-    - cron: "37 16 * * 1-5"
+    - cron: "37 15 * * 1-5"
+    - cron: "7 18 * * 1-5"
   workflow_dispatch:
 
 permissions:

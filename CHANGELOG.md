@@ -8,6 +8,7 @@
   `scripts/research/fewer_names.py` measures 10–25-name versions of the old lab's portfolios.
 - Collectors run against the live sources for the first time since the audit. Fixed: the CSE jobs now snapshot only
   a closed market; "Regular Trading" used to pass the old guard (finding R1, `docs/phase3-4-verification.md` §10).
+  The CSE end-of-day job treats a market summary that is not out yet as a quiet retry, and runs later in the day (R3).
 - Site fixes from the first visual review:
   - no repeated disclaimers;
   - legends clear of the charts;

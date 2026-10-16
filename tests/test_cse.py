@@ -42,6 +42,8 @@ def test_trade_summary_keeps_both_volume_definitions():
 def test_trade_summary_for_another_session_is_refused():
     with pytest.raises(ValueError, match="tradeSummary is for"):
         parse.trade_summary(body("tradeSummary.json"), dt.date(2026, 10, 5))
+    with pytest.raises(parse.SummaryNotPublished):    # trades already newer than the summary: not out yet
+        parse.trade_summary(body("tradeSummary.json"), dt.date(2026, 10, 1))
 
 
 def test_chart_history_is_unadjusted_and_has_no_turnover():
@@ -187,3 +189,26 @@ def test_one_company_failing_never_loses_the_others_and_the_next_run_completes_i
     assert n() == len(SYMBOLS) and "1 company summaries completed" in again.message
     last = make(cse.CseEndOfDayCollector, conn, store, FakeCse()).collect()
     assert "no new session" in last.message
+
+
+@pytest.mark.db
+def test_a_market_summary_not_yet_published_is_a_quiet_retry_later(conn, store):
+    http = FakeCse()
+    original = http.request
+
+    def summary_still_yesterday(method, url, params=None):
+        res = original(method, url, params)
+        if url.endswith("/dailyMarketSummery"):
+            rows = json.loads(res.body)
+            for group in rows:
+                for r in group:
+                    r["tradeDate"] -= 86_400_000
+            return Response(res.method, res.url, res.params, res.status, json.dumps(rows).encode(),
+                            res.content_type, res.fetched_at)
+        return res
+
+    http.request = summary_still_yesterday
+    result = make(cse.CseEndOfDayCollector, conn, store, http).collect()
+    assert not result.new_data and "not published yet" in result.message
+    conn.rollback()
+    assert conn.execute("select count(*) n from cse.prices_daily").fetchone()["n"] == 0

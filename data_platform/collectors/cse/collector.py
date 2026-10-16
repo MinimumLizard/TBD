@@ -105,7 +105,10 @@ class CseEndOfDayCollector(CseCollector):
             raise RuntimeError(f"market status is {status!r}; refusing to snapshot an open session")
 
         trade_f = self.api("tradeSummary")
-        prices = parse.trade_summary(trade_f.body, session)
+        try:
+            prices = parse.trade_summary(trade_f.body, session)
+        except parse.SummaryNotPublished as exc:   # a later run today stores it; the gap check notices if none does
+            return Result(new_data=False, message=f"not published yet: {exc}")
         sectors_f = self.api("allSectors")
         indices = parse.sectors(sectors_f.body, session)
         for endpoint in ("aspiData", "snpData", "marketSummery"):
