@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-USER_AGENT = "tbd-market-data/0.1 (Sri Lankan market information service; contact via github.com/MinimumLizard)"
+USER_AGENT = "zinvestiq-market-data/0.1 (Sri Lankan market information service; contact via github.com/MinimumLizard)"
 RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
 CHALLENGE_MARKERS = (b"sucuri_cloudproxy", b"You are being redirected", b"Javascript is required",
                      b"cf-browser-verification", b"Just a moment...")

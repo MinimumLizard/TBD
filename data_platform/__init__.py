@@ -1,4 +1,4 @@
-"""Data platform: raw archive, database, collectors and (later) models for the TBD market-information portal.
+"""Data platform: raw archive, database, collectors and (later) models for ZinvestIQ, the market-information portal.
 
 Start with docs/architecture.md. The layers live in:
     core/        shared plumbing: settings, raw store, database, HTTP client, collector runner
