@@ -1,6 +1,6 @@
 {
   "site": {
-    "name": "TBD",
+    "name": "ZinvestIQ",
     "tagline": "Sri Lankan market data, explained",
     "skip": "Skip to content"
   },
@@ -84,8 +84,29 @@
       "ASI": "ASPI",
       "S&P SL20": "S&P SL20",
       "ASTRI": "ASPI total return",
-      "S&P SL20 TRI": "S&P SL20 total return"
-    }
+      "S&P SL20 TRI": "S&P SL20 total return",
+      "EGY": "Energy",
+      "MAT": "Materials",
+      "CG": "Capital goods",
+      "CPS": "Commercial and professional services",
+      "TRP": "Transportation",
+      "A&C": "Automobiles and components",
+      "CDA": "Consumer durables and apparel",
+      "CS": "Consumer services",
+      "RET": "Retailing",
+      "FSR": "Food and staples retailing",
+      "FBT": "Food, beverage and tobacco",
+      "HPP": "Household and personal products",
+      "HES": "Health care equipment and services",
+      "BNK": "Banks",
+      "DF": "Diversified financials",
+      "INS": "Insurance",
+      "S&S": "Software and services",
+      "TEL": "Telecommunication services",
+      "UTI": "Utilities",
+      "RE": "Real estate"
+    },
+    "noTurnover": "The CSE's turnover figures for this session were not collected (the session was filled in from the price history), so the most-traded list and the largest moves are not shown."
   },
   "shares": {
     "title": "Shares",
@@ -140,7 +161,7 @@
     "fitStats": "{n} quotes; fit error {rmse} bp. {trades, plural, =0 {No trades checked yet} one {Checked against # traded bond} other {Checked against # traded bonds}}.",
     "tradeBias": "Trades printed {bias} bp from the curve (median).",
     "tableTitle": "Every quoted bond",
-    "tableNote": "Residual: the quoted mid minus the curve, in basis points. Positive means the bond's quoted yield is above the curve.",
+    "tableNote": "Residual: the quoted mid minus the curve, in basis points. Positive means the bond's quoted yield is above the curve. “Wide”: the dealers' bid and offer are more than 50 bp apart, usually an administered quote, so it has little weight in the curve.",
     "bond": "Bond",
     "maturity": "Maturity",
     "bid": "Bid yield",
@@ -160,7 +181,7 @@
     "executionLink": "Trades against quotes",
     "carryLink": "Carry, rolldown and duration",
     "wideQuotes": "Wide or administered quotes (little weight in the fit)",
-    "wideQuote": "wide quote: little weight in the fit"
+    "wideQuote": "wide"
   },
   "bond": {
     "yieldChart": "Quoted mid yield",
@@ -232,7 +253,7 @@
     "correctionsBody": "Sources are stored exactly as published, and every calculation is versioned. When a source corrects a figure, the correction is applied and the earlier value is kept on record."
   },
   "footer": {
-    "rights": "Working name; no brand yet."
+    "rights": "© ZinvestIQ"
   },
   "models": {
     "bond_identity": {

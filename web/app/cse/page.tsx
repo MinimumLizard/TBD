@@ -36,7 +36,7 @@ export default async function CsePage() {
         <tbody>
           {rows.map((r) => (
             <tr key={r.index_code}>
-              <td>{isHeadline(r.index_code) ? t(`cse.indexNames.${r.index_code}` as never) : r.index_code}</td>
+              <td>{t.has(`cse.indexNames.${r.index_code}` as never) ? t(`cse.indexNames.${r.index_code}` as never) : r.index_code}</td>
               <td className="num">{num(r.value)}</td>
               <td className={`num ${tone(r.change)}`}>{signed(r.change)}</td>
               <td className={`num ${tone(r.pct)}`}>{pct(r.pct)}</td>
@@ -78,6 +78,8 @@ export default async function CsePage() {
   const vsAvg = (value: number | null, avg: number | null) =>
     value != null && avg ? t("cse.vsAverage", { ratio: ratio(value / avg) }) : s?.sessions_needed ? t("cse.averagePending", { count: s.sessions_needed }) : "";
   const traded = (all.data?.rows ?? []).filter((r) => r.traded);
+  // A session filled in from the price history has no turnover; ranking by it would only list shares alphabetically.
+  const withTurnover = traded.filter((r) => r.turnover != null);
   const liquid = traded.filter((r) => (r.turnover ?? 0) >= MOVERS_MIN_TURNOVER && r.pct != null);
 
   return (
@@ -165,21 +167,27 @@ export default async function CsePage() {
         <Locked access={all.access} />
       ) : (
         <>
-          <div className="grid three">
-            <section>
-              <h2>{t("cse.topTurnover")}</h2>
-              {shareRows([...traded].sort((a, b) => (b.turnover ?? 0) - (a.turnover ?? 0)).slice(0, 10))}
-            </section>
-            <section>
-              <h2>{t("cse.largestRises")}</h2>
-              {shareRows(liquid.filter((r) => (r.pct ?? 0) > 0).sort((a, b) => (b.pct ?? 0) - (a.pct ?? 0)).slice(0, 10))}
-            </section>
-            <section>
-              <h2>{t("cse.largestFalls")}</h2>
-              {shareRows(liquid.filter((r) => (r.pct ?? 0) < 0).sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0)).slice(0, 10))}
-            </section>
-          </div>
-          <p className="small muted">{t("cse.moversNote")}</p>
+          {withTurnover.length === 0 ? (
+            <p className="muted">{t("cse.noTurnover")}</p>
+          ) : (
+            <>
+              <section>
+                <h2>{t("cse.topTurnover")}</h2>
+                {shareRows([...withTurnover].sort((a, b) => (b.turnover ?? 0) - (a.turnover ?? 0)).slice(0, 10))}
+              </section>
+              <div className="grid two">
+                <section>
+                  <h2>{t("cse.largestRises")}</h2>
+                  {shareRows(liquid.filter((r) => (r.pct ?? 0) > 0).sort((a, b) => (b.pct ?? 0) - (a.pct ?? 0)).slice(0, 10))}
+                </section>
+                <section>
+                  <h2>{t("cse.largestFalls")}</h2>
+                  {shareRows(liquid.filter((r) => (r.pct ?? 0) < 0).sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0)).slice(0, 10))}
+                </section>
+              </div>
+              <p className="small muted">{t("cse.moversNote")}</p>
+            </>
+          )}
         </>
       )}
       <ModelFooter models={["cse_market_tape", "cse_security_metrics"]} />

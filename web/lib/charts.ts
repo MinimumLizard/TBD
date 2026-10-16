@@ -1,11 +1,17 @@
 // ECharts option builders. Plain data only (no functions), so options can be built on the server and handed to the
 // client Chart component after the tier check.
+
+// The legend stays on one line above the plot (scrolling sideways on a phone), and the plot starts below both the
+// legend and the y-axis name, so neither ever covers the data.
+const LEGEND = { type: "scroll", top: 0 };
+const TOP_WITH_LEGEND = 56;
+
 export function lineOption(series: { name: string; points: [string, number | null][] }[], yName?: string) {
   return {
     animation: false,
     tooltip: { trigger: "axis" },
-    legend: series.length > 1 ? { top: 0 } : undefined,
-    grid: { left: 48, right: 16, top: series.length > 1 ? 32 : 16, bottom: 32 },
+    legend: series.length > 1 ? LEGEND : undefined,
+    grid: { left: 48, right: 16, top: series.length > 1 ? TOP_WITH_LEGEND : yName ? 32 : 16, bottom: 32 },
     xAxis: { type: "time" },
     yAxis: { type: "value", scale: true, name: yName },
     series: series.map((s) => ({ name: s.name, type: "line", showSymbol: false, data: s.points })),
@@ -22,8 +28,8 @@ export function curveOption(args: {
   return {
     animation: false,
     tooltip: { trigger: "item" },
-    legend: { top: 0 },
-    grid: { left: 48, right: 16, top: 32, bottom: 40 },
+    legend: LEGEND,
+    grid: { left: 48, right: 16, top: TOP_WITH_LEGEND, bottom: 40 },
     xAxis: { type: "value", name: args.names.years, nameLocation: "middle", nameGap: 26, min: 0 },
     yAxis: { type: "value", name: args.names.yield, scale: true },
     series: [

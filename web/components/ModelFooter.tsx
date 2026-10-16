@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import Disclaimer from "./Disclaimer";
+import Disclaimer, { SITE_WIDE_DISCLAIMERS } from "./Disclaimer";
 import { type ModelName, modelEntry } from "@/lib/registry";
 
-// Under every model's output: its method page, its version, and its disclaimer.
+// Under every model's output: its method page, its version, and its own disclaimer (the site-wide ones are in the
+// footer of every page, so they are not repeated here).
 export default async function ModelFooter({ models }: { models: ModelName[] }) {
   const t = await getTranslations();
-  const keys = Array.from(new Set(models.map((m) => modelEntry(m).disclaimer_key)));
+  const keys = Array.from(new Set(models.map((m) => modelEntry(m).disclaimer_key))).filter(
+    (k) => !SITE_WIDE_DISCLAIMERS.includes(k),
+  );
   return (
     <>
       <p className="small muted">
@@ -19,7 +22,7 @@ export default async function ModelFooter({ models }: { models: ModelName[] }) {
           </span>
         ))}
       </p>
-      <Disclaimer keys={[...keys, "data_sources"]} />
+      <Disclaimer keys={keys} />
     </>
   );
 }

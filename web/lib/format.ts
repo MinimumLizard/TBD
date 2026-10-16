@@ -37,6 +37,7 @@ export function lkr(v: number | null | undefined, locale = "en"): string {
   const sign = v < 0 ? MINUS : "";
   const a = Math.abs(v);
   if (a >= 1e9) return `${sign}Rs ${num(a / 1e9, 2, locale)} bn`;
+  if (a > 0 && a < 5e3) return `${sign}< Rs 0.01 mn`; // would otherwise print as a misleading "Rs 0.00 mn"
   return `${sign}Rs ${num(a / 1e6, a >= 1e7 ? 1 : 2, locale)} mn`;
 }
 
