@@ -108,10 +108,22 @@ def test_end_of_day_stores_the_session_once(conn, store):
     assert not again.new_data and "no new session" in again.message
 
 
+def test_only_a_closed_market_counts_as_closed():
+    for status in ("Market Closed", "MARKET CLOSED", "Closed"):
+        assert parse.is_closed(status), status
+    for status in ("Regular Trading", "Market Open", "Pre-Open", "Open Auction", "Close Auction", "", "Halted"):
+        assert not parse.is_closed(status), status
+
+
 @pytest.mark.db
-def test_an_open_market_is_never_snapshotted(conn, store):
+@pytest.mark.parametrize("status", ["Market Open", "Regular Trading"])
+def test_an_open_market_is_never_snapshotted(conn, store, status):
     with pytest.raises(RuntimeError, match="open session"):
-        make(cse.CseEndOfDayCollector, conn, store, FakeCse(status="Market Open")).collect()
+        make(cse.CseEndOfDayCollector, conn, store, FakeCse(status=status)).collect()
+    with pytest.raises(RuntimeError, match="after the close"):
+        make(cse.CseHistoryCollector, conn, store, FakeCse(status=status)).collect()
+    conn.rollback()
+    assert conn.execute("select count(*) n from cse.prices_daily").fetchone()["n"] == 0
 
 
 @pytest.mark.db

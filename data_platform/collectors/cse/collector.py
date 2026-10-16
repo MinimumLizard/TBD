@@ -101,7 +101,7 @@ class CseEndOfDayCollector(CseCollector):
             return self.finish(f"session {session}: {len(missing)} company summaries completed", added, failed)
         if last and session < last:
             raise RuntimeError(f"API session {session} is older than the last stored session {last}")
-        if parse.is_open(status):
+        if not parse.is_closed(status):
             raise RuntimeError(f"market status is {status!r}; refusing to snapshot an open session")
 
         trade_f = self.api("tradeSummary")
@@ -204,6 +204,9 @@ class CseHistoryCollector(CseCollector):
 
     def collect(self) -> Result:
         conn = self.ctx.conn
+        status = parse.market_status(self.api("marketStatus").body)
+        if not parse.is_closed(status):   # as the old cse/backfill.py: a session's bars are final only after the close
+            raise RuntimeError(f"market status is {status!r}; run the history job after the close")
         secs_f = self.api("allSecurityCode")
         securities = parse.security_list(secs_f.body, self.ctx.today_slt)
         added = 0

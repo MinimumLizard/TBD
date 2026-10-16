@@ -28,9 +28,13 @@ def market_status(body: bytes) -> str:
     return validate(MarketStatus, _json(body), "marketStatus").status
 
 
-def is_open(status: str) -> bool:
+def is_closed(status: str) -> bool:
+    """True only when the status says the market is closed ("Market Closed"). Anything else, including an unknown
+    status, counts as open: while trading, the API says "Regular Trading" (seen 2026-10-16), which the old tool's
+    test (contains OPEN and not CLOSE) let through, so a run during the session could have stored intraday prices
+    as the close. An auction ("Close Auction") is still part of the session."""
     s = status.upper()
-    return "OPEN" in s and "CLOSE" not in s
+    return "CLOSE" in s and not any(word in s for word in ("TRADING", "AUCTION", "OPEN"))
 
 
 def session_and_market(body: bytes) -> tuple[dt.date, list[dict], list[dict]]:
