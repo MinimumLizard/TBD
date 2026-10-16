@@ -180,7 +180,7 @@
     "zscoresLink": "Residuals against their own history",
     "executionLink": "Trades against quotes",
     "carryLink": "Carry, rolldown and duration",
-    "wideQuotes": "Wide or administered quotes (little weight in the fit)",
+    "wideQuotes": "Wide quotes (little weight)",
     "wideQuote": "wide"
   },
   "bond": {

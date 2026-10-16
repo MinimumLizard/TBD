@@ -236,6 +236,7 @@ collectors, run against the live sources for the first time since the audit (loc
 | `cse_api:announcements` | 69 new announcements |
 | `cse_api` at 12:30 Sri Lanka time | **Refused, but for the wrong reason** (finding R1) |
 | models | All versions ran; bond_rv_zscores 1.1.0 added 5,157 rows and changed 1 |
+| `cse_api` at 16:11 UTC | Session 2026-10-16 stored: 279 prices, 936 rows (310 API calls); models recomputed. No published z-score row changed (the one update each run is the unpublished reversion statistic, as designed) |
 
 **R1. The open-market guard did not recognise the CSE's trading status (fixed).** While the market is open the API's
 status is "Regular Trading". The guard ported from the old tool refused only statuses containing "OPEN" (and not
@@ -282,3 +283,4 @@ visitor, were reviewed before sharing. Fixed:
 - "Rs 0.00 mn" for small amounts;
 - a long badge widening the bond table;
 - a method page wider than a phone screen.
+- a legend label so long that the overview's curve legend had to page (shortened to "Wide quotes (little weight)").

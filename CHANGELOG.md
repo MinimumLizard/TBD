@@ -16,7 +16,9 @@
   - movers laid out to fit;
   - no "highest turnover" without turnover;
   - small amounts shown as "< Rs 0.01 mn";
-  - phone-width method pages.
+  - phone-width method pages;
+  - a shorter legend label for wide bond quotes.
+- The owner's visual preview of every page (computer and phone, free and Pro) was published, on data to the 2026-10-16 close.
 
 ## 2026-10-11 — Audit of Phases 2–4, and fixes
 
