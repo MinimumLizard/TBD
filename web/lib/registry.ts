@@ -5,7 +5,7 @@ import registryJson from "./generated/registry.json";
 export type Tier = "free" | "plus" | "pro" | "professional";
 
 export interface ModelEntry {
-  market: "lk_bonds" | "cse";
+  market: "lk_bonds" | "cse" | "crypto";
   title_key: string;
   summary_key: string;
   disclaimer_key: string;
@@ -22,7 +22,7 @@ interface Registry {
   tiers: Tier[];
   unpublished_outputs: string[];
   disclaimers: Record<string, { en: string }>;
-  calendars: Record<string, { name: string; closures: string[] }>;
+  calendars: Record<string, { name: string; every_day?: boolean; closures: string[] }>;
   models: Record<string, ModelEntry>;
 }
 

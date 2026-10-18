@@ -11,7 +11,10 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
   bond_carry: { api: ["/api/v1/bonds/carry"], pages: ["/bonds/carry"] },
   cse_market_tape: { api: ["/api/v1/cse/market"], pages: ["/", "/cse"] },
   cse_security_metrics: { api: ["/api/v1/cse/shares"], pages: ["/cse", "/cse/shares"] },
+  crypto_market: { api: ["/api/v1/crypto/market"], pages: ["/crypto"] },
+  crypto_cycle: { api: ["/api/v1/crypto/cycle"], pages: ["/crypto"] },
+  crypto_fair_value: { api: ["/api/v1/crypto/fair-value"], pages: ["/crypto/btc"] },
 };
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/plans", "/methods", "/about"];
+export const ALL_PAGES = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/crypto", "/crypto/btc", "/crypto/eth", "/crypto/ethbtc", "/learn", "/plans", "/methods", "/about"];

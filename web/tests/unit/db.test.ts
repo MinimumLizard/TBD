@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { buildQuery, dateColumn, poolConfig } from "@/lib/db";
 import { type Granted, authorize } from "@/lib/entitlements";
-import { modelEntry } from "@/lib/registry";
+import { MODEL_NAMES, modelEntry, registry } from "@/lib/registry";
 
 const TODAY = "2026-10-12";
 const version = modelEntry("bond_rv_zscores").current_version;
@@ -50,6 +50,21 @@ describe("buildQuery", () => {
     expect(dateColumn("models.bond_reference")).toBeNull();
     expect(dateColumn("models.bond_residual_zscore")).toBe("obs_date");
     expect(dateColumn("models.cse_security_session")).toBe("session_date");
+    expect(dateColumn("models.crypto_cycle_monthly")).toBe("day");
+  });
+
+  test("every output of a model with a preview or a recent window has a date to limit it by", () => {
+    for (const name of MODEL_NAMES) {
+      const entry = modelEntry(name);
+      if (!entry.free_preview && !entry.recent_window) continue;
+      for (const table of entry.outputs) {
+        if (registry.unpublished_outputs.includes(table)) continue;
+        expect(dateColumn(table), `${name}: ${table}`).not.toBeNull();
+      }
+    }
+    const preview7 = authorize({ id: null, tier: "free" }, "crypto_cycle", TODAY) as Granted;
+    expect(buildQuery(preview7, "models.crypto_cycle_anchor").text).toContain("day <= $2");
+    expect(preview7.maxDate).toBe("2026-10-05");
   });
 
   test("identifiers and placeholders are checked", () => {

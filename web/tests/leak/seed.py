@@ -6,7 +6,7 @@ Creates (or recreates) the database `tbd_leak`, applies every migration, and wri
 model outputs in which certain values are MARKERS: numbers that appear nowhere else, so the tests can tell exactly
 which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (five days ago,
 the last day a 5-day free preview may show); the preview model also has MID (four days ago), which a preview must
-never show; the yield curve also has ANCIENT (40 days ago), beyond the 30-day recent window a free visitor sees. Every model also gets rows under
+never show (the crypto cycle model, with a 7-day preview, has OLD7 and MID7 likewise); the yield curve also has ANCIENT (40 days ago), beyond the 30-day recent window a free visitor sees. Every model also gets rows under
 a reference version that the site must never show to anyone.
 
 Prints the database URL the web app should use (as the read-only web_reader role).
@@ -36,6 +36,8 @@ NEW = TODAY - dt.timedelta(days=1)
 OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible day (delay 5 days)
 MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
 ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only the window's full-history tier sees it
+OLD7 = TODAY - dt.timedelta(days=7)   # the crypto cycle preview's last visible day (delay 7 days)
+MID7 = TODAY - dt.timedelta(days=6)   # inside that delay: never visible to a free visitor
 MARKERS = Path(__file__).with_name("markers.json")
 DB_NAME = "tbd_leak"
 
@@ -102,12 +104,36 @@ def seed(conn) -> dict:
         {"session_date": d, "symbol": s, "traded": True, "close": c, "change": 1.0, "pct": 0.01, "turnover": 5_000_000.0,
          "volume": 1000.0, "range_flag": False} for d in (OLD, NEW) for s, c in (("AAA.N0000", 55.5), ("BBB.N0000", 66.6))])
 
+    # Crypto: prices (free), cycles (Plus, a 7-day free preview), trend bands (Pro).
+    def market(day, close):
+        return {"day": day, "close": close, "ret_1d": 0.01, "ret_7d": 0.02, "ret_30d": 0.03, "ret_1y": 0.04,
+                "ath_close": 150000.0, "ath_day": "2025-10-06", "drawdown": close / 150000.0 - 1, "days_since_ath": 300,
+                "vol_30d": 0.4, "vol_90d": 0.5}
+    put("crypto_market", "models.crypto_market_daily", [
+        {"pair": "btcusd", **market(d, c)} for d, c in ((OLD7, 66666.21), (MID7, 67676.21), (NEW, 77777.31))] + [
+        {"pair": "ethusd", **market(d, c)} for d, c in ((OLD7, 2222.41), (NEW, 2323.41))])
+    put("crypto_cycle", "models.crypto_cycle_daily", [
+        {"pair": "btcusd", "day": d, "close": c, "sma_50": 70000.0, "sma_200": 71000.0, "mayer": 1.1, "sma_200w": w,
+         "sma_200w_chg_4w": 0.02, "sma_20w": 72000.0, "ema_21w": 73000.0, "dist_20w": 0.05, "last_halving": "2024-04-20",
+         "days_since_halving": 900, "roi_since_halving": 0.2, "ret_mtd": 0.01}
+        for d, c, w in ((OLD7, 66666.21, 33333.19), (MID7, 67676.21, 44444.13), (NEW, 77777.31, 55555.17))])
+    put("crypto_cycle", "models.crypto_cycle_anchor", [
+        {"pair": "btcusd", "day": d, "kind": "halving", "epoch": 4, "anchor_day": "2024-04-20", "anchor_close": a,
+         "roi": 0.1, "days_since": 900, "provisional": False}
+        for d, a in ((OLD7, 61616.11), (MID7, 62626.11), (NEW, 63636.11))])
+    put("crypto_fair_value", "models.crypto_trend_band", [
+        {"pair": "btcusd", "day": d, "fit": fit, "intercept": -16.2, "slope": 5.6, "n_obs": 5000, "resid_sd": 0.28,
+         "close": 77777.31, "fitted": f, "lower_1": f / 2, "upper_1": f * 2, "lower_2": f / 4, "upper_2": f * 4,
+         "position": 0.4}
+        for d, f in ((OLD7, 98765.43), (NEW, 123456.78)) for fit in ("power_law", "log_regression")])
+
     # A reference version beside each current one: the site shows only current versions, to everyone.
     put("bond_ns_curve", "models.bond_curve_fit", [
         {"obs_date": NEW, "beta0": 12.0, "beta1": -3.0, "beta2": 1.0, "lambda_years": 2.82, "n_quotes": 2,
          "rmse_bp": 97.79, "n_trades": 0}], version="0.9.0")
     put("bond_execution_gap", "models.bond_execution_gap", [
         {"obs_date": NEW, "gap_bp": 96.69, "n": 9, "window_days": 20}], version="0.9.0")
+    put("crypto_market", "models.crypto_market_daily", [{"pair": "btcusd", **market(NEW, 97979.79)}], version="0.9.0")
     conn.commit()
 
     # What each model's data looks like in an API response (raw) and on a page (formatted, as lib/format.ts does).
@@ -126,12 +152,23 @@ def seed(conn) -> dict:
             "bond_carry": {"new": {"api": ["88.81"], "page": ["+88.8"]}, "old": {"api": ["77.71"], "page": ["+77.7"]}},
             "cse_market_tape": {"new": {"api": ["222000000"], "page": ["Rs 222.0 mn"]}, "old": {"api": ["111000000"], "page": []}},
             "cse_security_metrics": {"new": {"api": ["66.6"], "page": ["66.60"]}, "old": {"api": [], "page": []}},
+            "crypto_market": {"new": {"api": ["77777.31"], "page": ["$77,777.31"]}, "old": {"api": [], "page": []}},
+            "crypto_cycle": {"new": {"api": ["55555.17", "63636.11"], "page": ["$55,555.17"]},
+                             "mid": {"api": ["44444.13", "62626.11"], "page": ["$44,444.13"]},
+                             "old": {"api": ["33333.19", "61616.11"], "page": ["$33,333.19"]}},
+            "crypto_fair_value": {"new": {"api": ["123456.78"], "page": ["$123,456.78"]},
+                                  "old": {"api": ["98765.43"], "page": ["$98,765.43"]}},
         },
+        # bitcoin's own page (formatted as that page shows it): each part only to the tiers that include it
+        "crypto_page": {"crypto_market": {"new": ["$77,777.31"], "old": []},
+                        "crypto_cycle": {"new": ["$55,555.17", "$63,636.11"], "mid": ["$44,444.13", "$62,626.11"],
+                                         "old": ["$33,333.19", "$61,616.11"]},
+                        "crypto_fair_value": {"new": ["$123,456.78"], "old": ["$98,765.43"]}},
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
                       "bond_rv_zscores": {"new": ["+7.77"], "mid": ["+2.22"], "old": ["+6.66"]}},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "97979.79", "$97,979.79"],
     }
 
 
