@@ -11,7 +11,7 @@
 | 3b | The other CSE models. Proposed order (`docs/plan-retail-features.md` §8): corporate actions and total returns; risk estimates and the portfolio lab, internal only, with 10- and 15-name versions; fundamentals; ownership, dealings and flows | Not started; waiting for the owner's go-ahead on the order |
 | 4 | Portal: API, auth, entitlements, web app (free tier first) | **Free-tier portal, API, single tier check and tier-leak suite built 2026-10-11. Accounts stubbed (everyone is free) until Supabase exists. Awaiting approval.** |
 | 4b | Accounts, payments, weekly email updates, a feedback feature, Sinhala and Tamil, deployment on Vercel | Needs the owner's accounts and translators |
-| 5 | Retail education (new, 2026-10-16): FD vs bills and bonds, FD vs the market, a calculator; model portfolios published only in the form the lawyer allows | Proposed in `docs/plan-retail-features.md` |
+| 5 | Retail education (new, 2026-10-16): FD vs bills and bonds, FD vs the market, a calculator; model portfolios published only in the form the lawyer allows | **FD vs treasury bills vs inflation, with a calculator, built 2026-10-18 (approved that day): collectors `cbsl` and `dcs_cpi`, model `lk_savings_compare` 1.0.0, page `/learn/savings`. Awaiting review; one question on bill yields below.** FD vs bonds and FD vs the market not started (the market needs the CSE's permission) |
 
 ## Owner actions, in order of priority (updated after the 2026-10-11 audit)
 
@@ -48,6 +48,15 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
 - **Bond volume dating (finding V3):** date the 3 disputed volume files by the PDMO index label instead of the data?
 - **The retail features (2026-10-16):** six short decisions in `docs/plan-retail-features.md` §9, including the
   Phase 3b order (proposed: corporate actions and total returns first).
+
+### 3a. The fixed deposit page: one question that changes its answer
+The CBSL's monthly table prints 12-month bill yields for May 2002 to March 2018 after the 10% withholding tax of
+those years (measured: 0.900 of the auction file's "before tax" yields in 2013 to March 2018, and no break when the
+tax ended). The model adds the tax back so deposits and bills are compared before tax. It matters: over ten-year
+periods the deposit ended higher in about one period in eight with the adjustment and about half without it.
+Please confirm the reading with the CBSL (the draft letter to the CBSL can carry the question), and say whether the
+page should also show the "as printed" view. Also: the advance income tax is modelled from 2023 only; if you know
+an official source for the earlier withholding rates on deposit interest (2002 to 2019), they can be added.
 
 ### 4. Legal review before anything is public
 A Sri Lankan lawyer to read `compliance/disclaimers.yaml`, the method pages and the site's wording against the SEC's

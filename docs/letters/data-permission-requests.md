@@ -63,6 +63,11 @@ comparison of fixed deposits, treasury bills and other investments, on a website
 The CBSL site carries an "All Rights Reserved" notice but no reuse terms. Could you confirm whether this use is
 acceptable, and how you would like the data to be credited?
 
+We would also be grateful for a clarification on table 4.04. For May 2002 to March 2018, when a 10% withholding tax
+applied to treasury bill interest, are the 12-month primary market yields in table 4.04 shown after that tax? (From
+2013 to March 2018 they equal 0.9 times the "before tax" yields in the weekly auction file, and for 2003 to 2012 the
+two agree.) We want to compare bills and fixed deposits on the same basis.
+
 Yours faithfully, [name]
 
 ---

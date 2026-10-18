@@ -88,6 +88,12 @@ year ago" would be a backtest built with hindsight: today's choice of shares, te
 from. That overstates returns, and showing it to retail investors would be misleading. Regulators treat
 hypothetical performance shown to the public seriously.
 
+**Built 2026-10-18 (owner's approval of that day):** the fixed deposit vs treasury bills vs inflation part of item 1
+and its calculator, at `/learn/savings`, from the CBSL's monthly interest-rate table (2003 to date) and the CCPI
+(collectors `cbsl` and `dcs_cpi`; model `lk_savings_compare`, method in its METHOD.md). Taxes: the advance income tax
+on deposit interest from 2023; bill interest taxed at each person's rate, so bills are shown before tax. Government
+bonds and the share market are not in it yet.
+
 **What can be built (proposal, a new "Phase 5: retail education"):**
 
 1. **FD vs treasury bills vs government bonds**, from the CBSL's published rates (if its terms allow) and our own

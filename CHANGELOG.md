@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-18 — Fixed deposits, treasury bills and inflation (Phase 5, first part)
+
+- Two new collectors, both rights "silent" and switched on, weekly, waiting for `COLLECTION_ENABLED`:
+  - `cbsl`: the Central Bank's interest-rate tables 4.04 (monthly, January 2003 to August 2026) and 4.03 (annual,
+    1990 to 2025), and the weekly treasury bill auction file (1996 to November 2025). Links are read from the
+    statistical-tables pages (file names carry the update date); columns are found by their headers.
+  - `dcs_cpi`: the Colombo Consumer Price Index from the DCS's PDF tables, base years 2021, 2013, 2006/07 and 2002
+    (January 2003 to September 2026). Every index number is checked against the changes printed beside it.
+- New schema `rates` (migration 0011): facts as published, append-only, `*_current` views, row-level security.
+- New model `lk_savings_compare` 1.0.0 (free): Rs 100,000 in a 12-month fixed deposit renewed yearly and in 12-month
+  bills rolled yearly, before and after the advance income tax, and after inflation, for every start month and 1 to
+  10 years, with a summary for 1, 3, 5 and 10 years. Point in time (tested). The CBSL prints bill yields for May
+  2002 to March 2018 after a 10% withholding tax; the model adds it back (a question for the owner, roadmap 3a).
+- New page `/learn/savings` with a calculator that works without JavaScript; five glossary terms; linked from Learn
+  and the home page. A new `savings` disclaimer; the site-wide data-sources line names the CBSL and the DCS.
+- `openpyxl` added to read .xlsx files.
+
 ## 2026-10-16 — ZinvestIQ, retail-features plan, site preview fixes
 
 - The product is named ZinvestIQ (decision 0017): site, package, collectors' user agent, switch-on account names.

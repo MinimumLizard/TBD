@@ -51,7 +51,10 @@ table 4.04 with the last 364-day auction of each month in the CBSL's weekly auct
 So the model divides table 4.04's yields for May 2002 to March 2018 by 0.9, and both instruments are compared
 **before tax**. This is an inference from the published tables, not a statement by the CBSL, and is to be confirmed
 with it. Without the adjustment, the bills' before-tax growth in those years would be understated by about a tenth
-of their interest.
+of their interest, and the choice matters for the counts: on the data to August 2026, the fixed deposit ended higher
+in about one ten-year period in eight with the adjustment, and in about half of them without it (measured by
+computing the model with `bill_withholding_added_back` set to none). If the CBSL says otherwise, the correction is
+a new method version.
 
 **Growth.** Interest is added once a year, at maturity, and reinvested in full:
 
