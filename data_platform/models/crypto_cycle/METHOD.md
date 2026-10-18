@@ -2,7 +2,7 @@
 
 ## What it shows
 
-For bitcoin and ether in US dollars: long moving averages of the price, how far the price is from them, two pairs
+For bitcoin, ether and the other crypto-assets in US dollars: long moving averages of the price, how far the price is from them, two pairs
 of lines known publicly as the Pi cycle indicators and the days they crossed, the bitcoin halvings, the peaks and
 lows of each four-year epoch between halvings, the change since each, and the return of every calendar month.
 
@@ -11,9 +11,11 @@ what happened, a handful of times, and not evidence that it will happen again. N
 
 ## Inputs
 
-Bitstamp's daily closes for BTC/USD (from 2011-09-14) and ETH/USD (from 2017-08-16): `crypto.ohlc_daily`. The close is
-the last trade of the UTC day. **The history starts where Bitstamp's does**, so the 2011 bitcoin high (June 2011) and
-anything before 2011-09-14 are not in it, and ether starts in August 2017.
+Bitstamp's daily closes for every US-dollar pair collected (`crypto.ohlc_daily`; BTC/USD from 2011-09-14, ETH/USD
+from 2017-08-16, the others later: see the crypto prices method). The close is the last trade of the UTC day. **The
+history starts where Bitstamp's does**, so the 2011 bitcoin high (June 2011) and anything before 2011-09-14 are not in
+it, and every other asset starts at its Bitstamp listing. The halvings are bitcoin events; for other assets the epochs
+between them are used as the same calendar periods. The Pi cycle settings were published for bitcoin.
 
 ## Method (version 1.0.0)
 
@@ -80,6 +82,8 @@ Crossing days, once recorded, never change for the same reason.
 
 - One exchange; closes, not intraday prices. Highs and lows on other venues, or intraday, differ in date and level
   (`docs/research/crypto-crosscheck.md`).
+- For assets other than bitcoin, the halvings are only calendar markers, and the Pi cycle settings were never
+  chosen for them.
 - Four halvings and four cycles are a very small sample. The cycle table describes them; it does not establish a
   rule.
 - The Pi cycle settings were fitted to past data by their author, so their record on that same data is not a test.
