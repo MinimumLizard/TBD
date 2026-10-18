@@ -1,0 +1,23 @@
+name: crypto_cycle
+market: crypto
+title_key: models.crypto_cycle.title
+summary_key: models.crypto_cycle.summary
+disclaimer_key: crypto_risk
+requires_datasets:
+  - crypto.ohlc_daily
+outputs:
+  - models.crypto_cycle_daily
+  - models.crypto_cycle_event
+  - models.crypto_cycle_anchor
+  - models.crypto_cycle_monthly
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parameters:
+      pairs: [btcusd, ethusd, xrpusd, ltcusd, solusd, adausd, linkusd, dogeusd, avaxusd, dotusd]   # every USD pair
+      pi_top_short: 111            # days, simple average
+      pi_top_long: 350             # days, simple average ...
+      pi_top_multiple: 2           # ... times 2
+      pi_bottom_ema: 150           # days, exponential average
+      pi_bottom_long: 471          # days, simple average ...
+      pi_bottom_multiple: 0.745    # ... times 0.745

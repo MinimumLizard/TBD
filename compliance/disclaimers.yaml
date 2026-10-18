@@ -17,5 +17,13 @@ model_general:
 
 data_sources:
   en: >-
-    Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka. This service is
-    not affiliated with or endorsed by either.
+    Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka; Bitstamp (crypto
+    prices). This service is not affiliated with or endorsed by any of them.
+
+crypto_risk:
+  en: >-
+    Crypto-assets are not legal tender in Sri Lanka. The Central Bank of Sri Lanka (CBSL) has not licensed any
+    entity to operate crypto schemes, and in 2023 the CBSL said that crypto is not recognised as an asset class in
+    Sri Lanka. Crypto prices can fall sharply and quickly, and holdings can be lost entirely. This section shows
+    global market prices in US dollars for information and education only. It does not offer, promote or help with
+    dealing in any crypto-asset.

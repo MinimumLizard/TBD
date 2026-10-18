@@ -86,7 +86,7 @@ def compute_as_of(conn, as_of: dt.date, names: list[str] | None = None, market: 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--model", action="append", help="run only this model (repeatable)")
-    ap.add_argument("--market", choices=["lk_bonds", "cse"])
+    ap.add_argument("--market", choices=["lk_bonds", "cse", "crypto"])
     ap.add_argument("--as-of", type=dt.date.fromisoformat,
                     help="compute the current versions with data up to this date, in memory, and print row counts "
                          "(never writes: writing would delete every later row)")

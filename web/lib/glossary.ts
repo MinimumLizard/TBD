@@ -2,6 +2,6 @@
 export const GLOSSARY = [
   "aspi", "spsl20", "turnover", "breadth", "foreign", "pe", "pbv", "dividendYield", "marketCap", "range52",
   "relative", "beta", "yield", "bp", "curve", "residual", "zscore", "liquidity", "bidOffer", "duration",
-  "convexity", "carry", "rolldown", "methodVersion",
+  "convexity", "carry", "rolldown", "movingAverage", "drawdown", "volatility", "halving", "powerLaw", "methodVersion",
 ] as const;
 export type GlossaryTerm = (typeof GLOSSARY)[number];

@@ -1,0 +1,14 @@
+name: crypto_market
+market: crypto
+title_key: models.crypto_market.title
+summary_key: models.crypto_market.summary
+disclaimer_key: crypto_risk
+requires_datasets:
+  - crypto.ohlc_daily
+outputs:
+  - models.crypto_market_daily
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parameters:
+      annualisation_days: 365      # crypto trades every day of the year
