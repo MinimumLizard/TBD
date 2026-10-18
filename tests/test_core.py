@@ -75,6 +75,13 @@ x:
         sources.load(bad)
 
 
+def test_a_source_needing_permission_runs_but_blocks_launch():
+    """The CSE's terms (found 2026-10-18) need its written permission for commercial use: the collector may run
+    for development, but the source is listed as a launch blocker until the permission is on file."""
+    assert "cse_api" in sources.launch_blockers()
+    assert sources.require_runnable("cse_api").rights.status == "permission_required"
+
+
 def test_disabled_source_is_not_runnable():
     with pytest.raises(sources.SourceNotRunnable):
         sources.require_runnable("coinmetrics_community")

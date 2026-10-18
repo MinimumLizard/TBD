@@ -37,7 +37,7 @@ jobs:
       - name: Copy lint (banned advice language in user-facing text)
         run: uv run python -m data_platform.compliance
       - name: Source register (no prohibited source enabled)
-        run: uv run python -c "from data_platform.core import sources; print(len(sources.load()), 'sources valid')"
+        run: uv run python -c "from data_platform.core import sources; print(len(sources.load()), 'sources valid; launch blockers (need written permission):', sources.launch_blockers())"
 
   web:
     # The website: type check, unit tests, production build, and the tier-leak suite against a seeded database,

@@ -2,6 +2,11 @@
 
 The rights rule (decision 0009, the owner's rule): a source is used only if its terms allow commercial use or say
 nothing about it. A source marked `prohibited` cannot run, and validate_all() fails CI if one is enabled.
+
+`permission_required` is a source whose terms forbid commercial use unless the publisher gives written permission
+(the CSE's terms, found 2026-10-18, are the first). It may run for development and the owners' private preview,
+but it blocks launch: launch_blockers() lists it, and the switch-on checklist stops on it, until the permission
+is on file and the status becomes `allowed`.
 """
 from __future__ import annotations
 
@@ -19,7 +24,7 @@ SOURCES_FILE = REPO_ROOT / "config" / "sources.yaml"
 
 class Rights(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    status: Literal["allowed", "silent", "prohibited"]
+    status: Literal["allowed", "silent", "permission_required", "prohibited"]
     evidence: str
     url: HttpUrl
     checked: dt.date
@@ -66,3 +71,8 @@ def stale_rights_checks(today: dt.date, max_age_days: int = 183, path: Path = SO
     """Sources whose terms were last checked more than ~6 months ago (decision 0009)."""
     return [sid for sid, s in load(path).items()
             if s.enabled and (today - s.rights.checked).days > max_age_days]
+
+
+def launch_blockers(path: Path = SOURCES_FILE) -> list[str]:
+    """Enabled sources that need the publisher's written permission before the product goes public."""
+    return [sid for sid, s in load(path).items() if s.enabled and s.rights.status == "permission_required"]

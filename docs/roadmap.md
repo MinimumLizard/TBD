@@ -21,6 +21,13 @@
   (`git log origin/main` of a fresh clone).
 - **The name:** ZinvestIQ (decision 0017).
 
+### 0. Ask the CSE for permission to use its data (new, 2026-10-18: a launch blocker)
+The CSE's terms, at https://www.cse.lk/disclaimer, forbid commercial use of cse.lk data without the CEO's written
+permission (`docs/research/data-sources-2026-10-18.md`). Development and our private preview can continue, but the
+site cannot launch with CSE data until permission or a market-data licence is on file. A draft letter is in
+`docs/letters/data-permission-requests.md`, with drafts for Bitstamp (crypto prices), the CBSL (FD rates) and the
+statistics department (inflation).
+
 ### 1. Look at the site, then approve (or send back) Phases 2, 3 and 4
 You asked to see the site before approving. A visual preview (every page, on a computer and a phone, free and paid
 views) was published on 2026-10-16 from a local copy with real data; the real site needs the switch-on (item 5).
