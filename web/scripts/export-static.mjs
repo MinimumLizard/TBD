@@ -1,7 +1,7 @@
 // A static, clickable copy of the running site, for the owner's private preview (an Artifact on claude.ai).
 //
 //   DATABASE_URL=... ALLOW_TEST_TIERS=1 npx next start -p 3100 &      # the site, on the data to show
-//   node scripts/export-static.mjs <out_dir> [--as-of "16 Oct 2026"]
+//   node scripts/export-static.mjs <out_dir> [--as-of "16 Oct 2026"] [--pro-details N]
 //
 // It crawls every page a visitor can reach (free tier), and the bond and crypto pages again as a Pro subscriber, then for each
 // page: removes the app's scripts (the copy is plain HTML), inlines the stylesheet, loads the heading font from
@@ -14,7 +14,11 @@ import { createHash } from "node:crypto";
 
 const BASE = process.env.BASE ?? "http://127.0.0.1:3100";
 const OUT = process.argv[2];
-const AS_OF = process.argv.includes("--as-of") ? process.argv[process.argv.indexOf("--as-of") + 1] : "";
+const arg = (name) => (process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : undefined);
+const AS_OF = arg("--as-of") ?? "";
+// A published preview holds at most 511 files, so the Pro copy can be limited to the first N bond pages (the other
+// bond pages then show the Pro view greyed out in the banner). Unset: every bond page gets a Pro copy.
+const PRO_DETAILS = arg("--pro-details") === undefined ? Infinity : Number(arg("--pro-details"));
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>]");
 mkdirSync(OUT, { recursive: true });
 
@@ -61,7 +65,12 @@ while (queue.length) {
   for (const p of links(html)) if (!pages.has(p) && !queue.includes(p)) queue.push(p);
 }
 const proPages = new Map();
-for (const path of pages.keys()) if (proPage(path)) proPages.set(path, await get(path, "pro"));
+let bondDetails = 0;
+for (const path of pages.keys()) {
+  if (!proPage(path)) continue;
+  if (/^\/bonds\/(?!zscores$|execution$|carry$)[^/]+$/.test(path) && ++bondDetails > PRO_DETAILS) continue;
+  proPages.set(path, await get(path, "pro"));
+}
 
 // 2. The stylesheet, once, without the self-hosted font faces (Google Fonts serves the same face to the copy).
 const cssHref = [...pages.get("/").matchAll(/<link rel="stylesheet" href="([^"]+\.css)"[^>]*>/g)].map((m) => m[1]);

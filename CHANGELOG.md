@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-18 — Feedback, the weekly e-mail, calendars to 2027, data rights
+
+- Feedback (Phase 4b, no accounts needed): "Was this page useful?" on every page and a short form at `/feedback`.
+  The website can only call `community.submit_feedback()` (migration 0012), which checks every field and limits
+  senders (30 a sender an hour, 5 messages; 2,000 an hour in all); it cannot read the table. Addresses are never
+  stored, only a keyed hash (`FEEDBACK_KEY_SECRET`) kept seven days. The owner reads it with
+  `python -m data_platform.jobs.feedback`.
+- The weekly e-mail per market, built once per tier through the tier check (`web/lib/email/`), with HTML and plain
+  text; preview at `/email/cse` and `/email/bonds`; the leak suite checks the bond e-mail. Sending waits for accounts.
+- Both trading calendars list every bank holiday to the end of 2027 from the CBSL's published lists; every past
+  closure was checked against the data by query. 1 and 7 January 2026 (CSE only) stay unexplained.
+- The CSE's terms re-read in a browser: both clauses quoted in `config/sources.yaml`; the lawyer's list and the
+  roadmap cover why a third-party copy (e.g. TradingView) does not help, the licence fallback and a bonds-first launch.
+- The static preview exporter can limit the Pro copies of bond pages (`--pro-details N`), so the preview fits the
+  511-file limit of a published page; republished 2026-10-19 with every section (439 pages).
+
 ## 2026-10-18 — Crypto section (prototype, decision 0019)
 
 - Bitstamp collector: daily candles for ten US-dollar pairs and ETH/BTC, full backfill from 2011-09-14 (29,329
