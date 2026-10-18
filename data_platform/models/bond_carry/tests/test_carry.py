@@ -67,3 +67,17 @@ def test_administered_quotes_are_never_priced(bond_models):
                                    and q.method_version = '2.0.0'
                                   where c.method_version = '1.1.0' and (q.bid_yield - q.offer_yield) * 100 > 50""").fetchall()
     assert wide == []
+
+
+def test_convexity_matches_repricing():
+    """price change / price is about -D dy + C dy^2 / 2: checked against a full repricing at +-100 bp."""
+    from data_platform.models.bond_carry.compute import convexity, price_and_duration
+    y, coupon, tau = 11.5, 10.0, 7.3
+    p0, d = price_and_duration(y, coupon, tau)
+    c = convexity(y, coupon, tau)
+    for dy in (0.01, -0.01):
+        exact = price_and_duration(y + dy * 100, coupon, tau)[0] / p0 - 1
+        approx = -d * dy + 0.5 * c * dy * dy
+        assert abs(exact - approx) < 2e-4               # third-order error only
+        assert abs(exact - (-d * dy)) > abs(exact - approx)   # and better than duration alone
+    assert c > 0

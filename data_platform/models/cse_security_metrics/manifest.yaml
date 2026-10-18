@@ -7,8 +7,11 @@ requires_datasets:
   - cse.indices_daily_current
   - cse.prices_daily_current
   - cse.company_info_daily
+  - cse.security_list
+  - cse.company_profiles
 outputs:
   - models.cse_security_session
+  - models.cse_security_reference
 versions:
   - method_version: "1.0.0"
     status: current

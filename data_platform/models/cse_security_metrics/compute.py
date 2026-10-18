@@ -133,4 +133,20 @@ def compute(inputs, as_of):
                 row[f"rel_{label}"] = (p1 / p0 - 1) - (a1 / a0 - 1)
                 row[f"flag_{label}"] = JUMP_FLAG if history.has_jump(start, session) else None
             rows.append(row)
-    return {"models.cse_security_session": rows}
+    return {"models.cse_security_session": rows, "models.cse_security_reference": reference(inputs, where, params, as_of)}
+
+
+def reference(inputs, where: str, params: tuple, as_of=None) -> list[dict]:
+    """Each share's latest name in the CSE's security list, and its sector label from its company profile (both
+    as of the run's date). Display facts only; nothing is computed from them."""
+    latest: dict[str, dict] = {}
+    for r in inputs.rows("cse.security_list", "session_date, symbol, name", where=where, params=params,
+                         order_by="session_date"):
+        latest[r["symbol"]] = r
+    sectors: dict[str, str] = {}
+    for r in inputs.rows("cse.company_profiles", "symbol, sector_label", order_by="fetched_at",
+                         where="fetched_at < (%s::date + 1)" if as_of else "", params=(as_of,) if as_of else ()):
+        if r["sector_label"]:
+            sectors[r["symbol"]] = r["sector_label"]
+    return [{"symbol": s, "name": r["name"], "sector_label": sectors.get(s), "last_session": r["session_date"]}
+            for s, r in sorted(latest.items())]

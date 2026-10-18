@@ -71,6 +71,21 @@ def price_and_duration(yield_pct: float, coupon_pct: float, tau_years: float) ->
     return price, weighted / price / (1.0 + rate)
 
 
+def convexity(yield_pct: float, coupon_pct: float, tau_years: float) -> float:
+    """Modified convexity (years squared) at a flat yield, on the same cash flows as price_and_duration, so that
+    price change / price is about -duration x dy + convexity x dy^2 / 2 (dy as a decimal). Version 1.1.0 only."""
+    periods = max(int(math.ceil(tau_years * COUPON_FREQUENCY - 1e-9)), 1)
+    times = [t for t in (tau_years - k / COUPON_FREQUENCY for k in range(periods - 1, -1, -1)) if t > 1e-9]
+    rate = yield_pct / 100.0 / COUPON_FREQUENCY
+    price = curvature = 0.0
+    for index, time_years in enumerate(times):
+        flow = coupon_pct / COUPON_FREQUENCY + (100.0 if index == len(times) - 1 else 0.0)
+        present = flow / (1.0 + rate) ** (time_years * COUPON_FREQUENCY)
+        price += present
+        curvature += present * time_years * (time_years + 1.0 / COUPON_FREQUENCY)
+    return curvature / price / (1.0 + rate) ** 2
+
+
 def profile(conn, obs_date: str, entry_gap_bp: float = 0.0, spread_bp: float = FUNDING_SPREAD_BP) -> dict:
     fit = conn.execute("SELECT * FROM curve_fits WHERE obs_date = ?", (obs_date,)).fetchone()
     funding = funding_rate(conn, obs_date, spread_bp)
@@ -94,6 +109,7 @@ def profile(conn, obs_date: str, entry_gap_bp: float = 0.0, spread_bp: float = F
         carry_bp = (entry - funding["rate_pct"]) * 100.0
         total = carry_bp + roll_bp
         out[row["isin"]] = {"entry_yield": entry, "price": price, "duration": duration, "carry_bp": carry_bp,
+                            "coupon_pct": row["coupon_pct"], "tau_years": tau,
                             "roll_bp": roll_bp, "total_bp": total,
                             "per_duration_bp": total / duration if duration > 0 else 0.0, "funding": funding}
     return out
@@ -130,6 +146,9 @@ def compute(inputs, as_of):
         for isin, facts in sorted(profile(conn, obs_date, entry_gap, spread_bp).items()):
             if (obs_date, isin) in too_wide:
                 continue
-            carry_rows.append({"obs_date": obs_date, "isin": isin, "entry_gap_bp": entry_gap,
-                               **{k: v for k, v in facts.items() if k != "funding"}})
+            row = {"obs_date": obs_date, "isin": isin, "entry_gap_bp": entry_gap,
+                   **{k: v for k, v in facts.items() if k not in ("funding", "coupon_pct", "tau_years")}}
+            if inputs.params.get("with_convexity"):
+                row["convexity"] = convexity(facts["entry_yield"], facts["coupon_pct"], facts["tau_years"])
+            carry_rows.append(row)
     return {"models.bond_funding": funding_rows, "models.bond_carry": carry_rows}
