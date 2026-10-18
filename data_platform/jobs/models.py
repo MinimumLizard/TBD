@@ -5,6 +5,9 @@ can never leave half the history under old rules). The writer only touches rows 
 the old value in models.revisions. Models run in dependency order; every active version runs (the current one
 the site shows, and any reference version kept beside it).
 
+Before computing, the owner's corporate-action confirmations (config/corporate_actions_review.yaml) are stored in
+the database if they changed (data_platform.jobs.reviews): models read only the database.
+
 Scheduled after the collectors. A failure exits non-zero and pings Healthchecks.io's fail URL.
 """
 from __future__ import annotations
@@ -18,6 +21,7 @@ from ..core import db, settings as settings_mod
 from ..core.collector import code_version, ping
 from ..models import registry
 from ..models.framework import output_owners, run_version
+from . import reviews
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +32,7 @@ def run(conn, names: list[str] | None = None, market: str | None = None, version
     then fails at the end, naming every failure."""
     manifests = registry.load_all()
     registry.publish(conn, manifests)
+    reviews.sync(conn)          # the owner's corporate-action confirmations, as the repository has them now
     owners = output_owners()
     chosen = [n for n in registry.order(manifests)
               if (not names or n in names) and (not market or manifests[n].market == market)]

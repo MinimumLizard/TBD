@@ -356,6 +356,14 @@
     "cse_security_metrics": {
       "title": "CSE share metrics",
       "summary": "For every listed share and session: price change, position in its 52-week range, volume against average, and return relative to the ASPI."
+    },
+    "cse_corporate_actions": {
+      "title": "CSE dividends and other corporate actions",
+      "summary": "Cash dividends, share sub-divisions, scrip dividends and rights issues, read from the CSE's own announcement records, each marked confirmed or awaiting confirmation."
+    },
+    "cse_total_returns": {
+      "title": "CSE total returns",
+      "summary": "Each share's return with its confirmed dividends, sub-divisions, scrip and rights issues taken into account, beside its price-only return."
     }
   },
   "errors": {

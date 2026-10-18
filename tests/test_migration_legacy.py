@@ -75,3 +75,31 @@ def test_cse_models_version_1_reproduce_the_old_terminal(conn, store):
     cse.load(conn, store, Path(repo), Path(chart))
     report = parity_cse.cse_parity(conn, Path(repo))
     assert report["ok"], [c for c in report["checks"] if not c["ok"]]
+
+
+@pytest.mark.db
+def test_cse_corporate_action_facts_reconcile_and_the_models_reproduce_the_old_terminal(conn, store):
+    """Phase 3b: the corporate-action caches load from the archive and reconcile with the old folders (repeatably);
+    cse_corporate_actions reproduces corporate_actions.csv and the old code; cse_total_returns reproduces the old
+    build_tris. Set LEGACY_CA_REPORT to a path to also write the counts-only parity report there."""
+    import json
+
+    from data_platform.migration import cse, cse_corporate_actions as ca, parity_cse_corporate_actions as pca
+
+    repo, chart = os.environ.get("LEGACY_CSE_REPO"), os.environ.get("LEGACY_CSE_CHART_ARCHIVE")
+    if not (repo and chart):
+        pytest.skip("LEGACY_CSE_REPO / LEGACY_CSE_CHART_ARCHIVE not set")
+    cse.load(conn, store, Path(repo), Path(chart))
+    ca.archive_cache(conn, store, Path(repo))
+    first = ca.load_from_archive(conn, store)
+    assert first["detail_rows_added"] > 0
+    rec = ca.reconcile(conn, Path(repo))
+    assert rec["ok"], rec
+    again = ca.load_from_archive(conn, store)
+    assert again["list_rows_added"] == 0 and again["detail_rows_added"] == 0      # repeatable
+    report = pca.ca_parity(conn, Path(repo))
+    conn.rollback()
+    if os.environ.get("LEGACY_CA_REPORT"):
+        Path(os.environ["LEGACY_CA_REPORT"]).write_text(json.dumps(
+            {"reconciliation": rec, "parity": report}, indent=2, default=str) + "\n")
+    assert report["ok"], [c for c in report["checks"] if not c["ok"]]

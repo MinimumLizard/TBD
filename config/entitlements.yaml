@@ -27,6 +27,10 @@ models:
   # Colombo Stock Exchange
   cse_market_tape:      { minimum_tier: free }    # indices, turnover, breadth, foreign flows
   cse_security_metrics: { minimum_tier: free }    # per-share price, range, volume and relative-return metrics
+  cse_corporate_actions: { minimum_tier: free }   # dividends, splits, scrip and rights issues: facts the CSE
+                                                  # published, read from its own announcement records
+  cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
+                                                  # published facts, combined by a stated formula)
 
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a

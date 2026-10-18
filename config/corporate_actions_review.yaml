@@ -1,0 +1,23 @@
+# The owner's decisions on corporate actions marked `needs_review` (model cse_corporate_actions; a share's page lists
+# them as "awaiting confirmation", with a link to the announcement's PDF).
+#
+# Same format as the old terminal's file (MinimumLizard/CSE config/corporate_actions_review.yaml, copied unchanged
+# from f263830, where it was still empty; the latest commit checked, e05c6f3, has the same file).
+#
+# confirm: accept a row, optionally correcting fields (same names as the old CSV's columns: ex_date,
+#          amount_per_share, ratio_new, ratio_held, factor, subscription_price, ...).
+# reject:  ignore a row entirely.
+# Rows not listed here stay unused, so total returns never use an unconfirmed amount. A rights issue needs
+# ratio_new, ratio_held and subscription_price; a dividend needs amount_per_share; every row needs an ex_date.
+#
+# The models job stores each new version of this file in the database before it runs (data_platform.jobs.reviews),
+# so a change here changes the outputs on the next run, and every earlier version stays on record.
+#
+# Example:
+# confirm:
+#   "35920:HAYL.N0000": {subscription_price: 200}           # accept, adding the price from the PDF
+#   "12345:ABC.N0000": {ratio_new: 1, ratio_held: 10}       # accept with a correction
+# reject:
+#   - "99999:XYZ.N0000"
+confirm: {}
+reject: []

@@ -217,7 +217,7 @@ def bonds_parity(conn, old_db: Path, old_code_dir: Path | None) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("market", choices=["bonds", "cse"])
+    ap.add_argument("market", choices=["bonds", "cse", "cse_corporate_actions"])
     ap.add_argument("--old-db", type=Path, help="bonds: the old sgcp.sqlite")
     ap.add_argument("--old-code", type=Path, help="a read-only clone of the old repo at the audited commit")
     ap.add_argument("--report", type=Path, required=True)
@@ -225,17 +225,20 @@ def main(argv: list[str] | None = None) -> int:
     conn = db.connect(settings_mod.load().database_url)
     if args.market == "bonds":
         report = bonds_parity(conn, args.old_db, args.old_code)
-    else:
+    elif args.market == "cse":
         from .parity_cse import cse_parity
         report = cse_parity(conn, args.old_code)
+    else:
+        from .parity_cse_corporate_actions import ca_parity
+        report = ca_parity(conn, args.old_code)
     conn.rollback()
     report["generated_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, default=str) + "\n")
     for c in report["checks"]:
-        print(f"{'ok  ' if c['ok'] else 'FAIL'} {c['table']}: old {c['old_rows']}, new {c['new_rows']}, "
-              f"missing {c['missing_in_new']}, extra {c['extra_in_new']}, differ {c['values_differ']}, "
-              f"max |diff| {c['max_abs_difference']:.3g}")
+        print(f"{'ok  ' if c['ok'] else 'FAIL'} {c['table']}: old {c.get('old_rows')}, new {c.get('new_rows')}, "
+              f"missing {c.get('missing_in_new')}, extra {c.get('extra_in_new')}, differ {c.get('values_differ')}, "
+              f"max |diff| {c.get('max_abs_difference', 0.0):.3g}")
     return 0 if report["ok"] else 1
 
 

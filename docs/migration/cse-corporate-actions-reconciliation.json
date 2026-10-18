@@ -1,0 +1,62 @@
+{
+  "loaded": {
+    "list_files": 281,
+    "list_rows_added": 0
+  },
+  "reconciliation": {
+    "details_cache_getAnnouncementById": {
+      "old_files": 483,
+      "old_with_detail": 437,
+      "facts_matching": 483,
+      "facts_with_detail": 437,
+      "missing_in_new": 0,
+      "old_sha256": "694302f0e7912ec1b967e5c4b20d144810102121ef20b550d5dd0e02d84e4a4b",
+      "new_sha256": "694302f0e7912ec1b967e5c4b20d144810102121ef20b550d5dd0e02d84e4a4b",
+      "ok": true
+    },
+    "details_cache_getGeneralAnnouncementById": {
+      "old_files": 46,
+      "old_with_detail": 46,
+      "facts_matching": 46,
+      "facts_with_detail": 46,
+      "missing_in_new": 0,
+      "old_sha256": "171947728874c7f582f8361f33d3d3243d7e2c969801a379cc174e7202ad51dd",
+      "new_sha256": "171947728874c7f582f8361f33d3d3243d7e2c969801a379cc174e7202ad51dd",
+      "ok": true
+    },
+    "details_session_folders_getAnnouncementById": {
+      "old_files": 115,
+      "old_with_detail": 115,
+      "facts_matching": 115,
+      "facts_with_detail": 115,
+      "missing_in_new": 0,
+      "old_sha256": "056c031ea9eeab1e17961b3d7e73a2424d5e81cb19e3a8068b9e94923826b243",
+      "new_sha256": "056c031ea9eeab1e17961b3d7e73a2424d5e81cb19e3a8068b9e94923826b243",
+      "ok": true
+    },
+    "details_session_folders_getGeneralAnnouncementById": {
+      "old_files": 77,
+      "old_with_detail": 77,
+      "facts_matching": 77,
+      "facts_with_detail": 77,
+      "missing_in_new": 0,
+      "old_sha256": "edd90f13fa66b23f8acd5ad0c94cc4a59375fa2909d6ae4939fd122f9ccd581b",
+      "new_sha256": "edd90f13fa66b23f8acd5ad0c94cc4a59375fa2909d6ae4939fd122f9ccd581b",
+      "ok": true
+    },
+    "company_lists": {
+      "old_files": 281,
+      "old_rows": 6211,
+      "old_corporate_action_rows": 483,
+      "new_rows_matching": 6211,
+      "missing_in_new": 0,
+      "values_differ": 0,
+      "old_sha256": "f59631ede88bf14ace2e68f0695feba90deccb7ad686524205b0f71df362d870",
+      "new_sha256": "f59631ede88bf14ace2e68f0695feba90deccb7ad686524205b0f71df362d870",
+      "ok": true
+    },
+    "value_conflicts": 0,
+    "ok": true
+  },
+  "generated_at": "2026-10-18T13:25:00+00:00"
+}
