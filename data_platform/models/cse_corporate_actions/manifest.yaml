@@ -1,0 +1,27 @@
+name: cse_corporate_actions
+market: cse
+title_key: models.cse_corporate_actions.title
+summary_key: models.cse_corporate_actions.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.company_announcements        # each company's announcement list
+  - cse.announcement_details         # the typed and "(DATES)" detail records
+  - cse.announcements                # the CSE's daily list, for announcements no company list has
+  - cse.security_list                # which ordinary shares (voting, non-voting) each company has
+  - cse.company_info_daily           # shares issued, for the scrip share-count check
+  - cse.prices_daily_current         # ... and the trade summary's market cap / close
+  - cse.corporate_action_reviews     # the owner's confirmations (config/corporate_actions_review.yaml)
+outputs:
+  - models.cse_corporate_action
+  - models.cse_corporate_action_used
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parity:
+      reference: "MinimumLizard/CSE@f263830 cse/corpactions.py (load_records, parse, effective) and data/history/corporate_actions.csv"
+      tolerance: 0
+      notes: >-
+        Every row of the old CSV, every column, as text. The old CSV is append-only and keeps the first version of
+        a row: 21 rights-issue rows written by an earlier version of the old code lack the note's closing words
+        "; terms in announcement N", which the old code at the audited commit writes. Those notes are compared to
+        the old code instead; everything else equals the CSV exactly.

@@ -198,7 +198,38 @@
     "unknown": "No data for this symbol.",
     "sector": "Sector",
     "company": "Company",
-    "about": "{name} · {sector}"
+    "about": "{name} · {sector}",
+    "chart": "Price and total return",
+    "priceSeries": "Closing price (unadjusted)",
+    "totalReturnSeries": "Total return (dividends and share changes included)",
+    "chartNote": "Both lines start at the close on {date}. The total-return line adds back the share's confirmed dividends and corrects for its sub-divisions, scrip dividends and rights issues, so it shows the value of the shares owned on the first day, with their dividends kept in the shares. The price line is the CSE's published price, which drops at each of those events.",
+    "totalReturn": "Total return",
+    "totalReturnAsOf": "Total return to {date}, the last session this share traded.",
+    "actions": "Dividends and other corporate actions",
+    "actionsNote": "Read from the CSE's own announcement records. A figure awaiting confirmation was read from the announcement's text, or is incomplete; it is not used in the total return until it has been checked against the announcement.",
+    "noActions": "No dividends or other corporate actions found in the CSE's records for this share since June 2025.",
+    "exDate": "Ex-date",
+    "type": "Type",
+    "amount": "Amount or ratio",
+    "status": "Status",
+    "source": "Announcement",
+    "pdf": "PDF",
+    "confirmed": "Confirmed",
+    "awaiting": "Awaiting confirmation",
+    "notYetKnown": "not yet announced",
+    "types": {
+      "cash_dividend": "Cash dividend",
+      "subdivision": "Share sub-division",
+      "scrip": "Scrip dividend",
+      "rights": "Rights issue"
+    },
+    "amounts": {
+      "dividend": "Rs {amount} per share",
+      "split": "each share became {factor}",
+      "scrip": "1 new share for every {existing}",
+      "rights": "{new} new for every {existing} at Rs {price}",
+      "rightsNoPrice": "{new} new for every {existing}, price to be confirmed"
+    }
   },
   "bonds": {
     "title": "Government bonds",
@@ -366,6 +397,14 @@
     "lk_savings_compare": {
       "title": "Fixed deposits, treasury bills and inflation",
       "summary": "What Rs 100,000 grew to in a 12-month fixed deposit renewed yearly and in 12-month treasury bills rolled yearly, before and after tax and after inflation, for every start month since 2003."
+    },
+    "cse_corporate_actions": {
+      "title": "CSE dividends and other corporate actions",
+      "summary": "Cash dividends, share sub-divisions, scrip dividends and rights issues, read from the CSE's own announcement records, each marked confirmed or awaiting confirmation."
+    },
+    "cse_total_returns": {
+      "title": "CSE total returns",
+      "summary": "Each share's return with its confirmed dividends, sub-divisions, scrip and rights issues taken into account, beside its price-only return."
     }
   },
   "errors": {
@@ -562,6 +601,16 @@
         "name": "AWFDR and AWNFDR",
         "short": "Average fixed deposit rates the Central Bank computes each month across licensed commercial banks.",
         "long": "The AWFDR (average weighted fixed deposit rate) averages the rates on all fixed deposits that banks have taken, including those placed years ago. The AWNFDR (average weighted new fixed deposit rate, published from April 2014) averages only the deposits taken during the month, so it follows current rates more closely. Both cover all terms, not only 12 months, and neither is the rate of any one bank."
+      },
+      "exDate": {
+        "name": "Ex-date",
+        "short": "The first session in which a share trades without its next dividend or other entitlement.",
+        "long": "Someone who acquires the share on or after the ex-date does not receive that dividend, new shares or rights; the seller does. The price usually drops on the ex-date by about the value of what was paid out, which is not a loss for the shareholder, because they keep the dividend or the new shares."
+      },
+      "totalReturn": {
+        "name": "Total return",
+        "short": "The price change plus dividends, with splits, scrip and rights issues taken into account.",
+        "long": "A share's published price falls when it pays a dividend or splits, even though its owners lose nothing. The total return adds the dividends back and corrects for changes in the number of shares, so it measures what the shares owned at the start would be worth with their dividends kept in the shares. Past returns do not predict future ones."
       }
     },
     "guidesTitle": "Guides",

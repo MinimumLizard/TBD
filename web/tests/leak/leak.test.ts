@@ -13,7 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
-import { ALL_PAGES, MODEL_ROUTES } from "@/lib/routes";
+import { ALL_PAGES, DETAIL_PAGES, MODEL_ROUTES } from "@/lib/routes";
 import { MODEL_NAMES, TIERS, type ModelName, type Tier, modelEntry } from "@/lib/registry";
 
 const BASE = process.env.LEAK_BASE_URL ?? "http://127.0.0.1:3100";
@@ -34,7 +34,7 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
 };
 
 // Detail pages and routes with a parameter, for the checks that apply to every page (seeded bond and share).
-const DETAIL = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000", "/api/v1/cse/shares/AAA.N0000"];
+const DETAIL = [...DETAIL_PAGES, "/api/v1/cse/shares/AAA.N0000"];
 
 async function get(url: string, tier: Tier | null) {
   const res = await fetch(BASE + url, { headers: tier ? { "x-test-tier": tier } : {} });

@@ -2,7 +2,7 @@
 
     TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:5432/postgres uv run python web/tests/leak/seed.py
 
-Creates (or recreates) the database `tbd_leak`, applies every migration, and writes a small, consistent set of
+Creates (or recreates) the database `tbd_leak` (or $LEAK_DB_NAME), applies every migration, and writes a small, consistent set of
 model outputs in which certain values are MARKERS: numbers that appear nowhere else, so the tests can tell exactly
 which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (five days ago,
 the last day a 5-day free preview may show); the preview model also has MID (four days ago), which a preview must
@@ -37,7 +37,7 @@ OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible 
 MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
 ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only the window's full-history tier sees it
 MARKERS = Path(__file__).with_name("markers.json")
-DB_NAME = "tbd_leak"
+DB_NAME = os.environ.get("LEAK_DB_NAME", "tbd_leak")   # another name lets two checkouts test at once
 
 
 def seed(conn) -> dict:
@@ -101,6 +101,17 @@ def seed(conn) -> dict:
     put("cse_security_metrics", "models.cse_security_session", [
         {"session_date": d, "symbol": s, "traded": True, "close": c, "change": 1.0, "pct": 0.01, "turnover": 5_000_000.0,
          "volume": 1000.0, "range_flag": False} for d in (OLD, NEW) for s, c in (("AAA.N0000", 55.5), ("BBB.N0000", 66.6))])
+    action = {"symbol": "AAA.N0000", "action_type": "cash_dividend", "ex_date": NEW, "amount_per_share": 8.7654,
+              "status": "confirmed", "note": "", "source_url": "https://cdn.cse.lk/x.pdf", "announced_date": OLD}
+    put("cse_corporate_actions", "models.cse_corporate_action", [
+        {**action, "action_id": "1:AAA.N0000", "announcement_id": 1, "use_status": "used"},
+        {"action_id": "2:AAA.N0000", "symbol": "AAA.N0000", "action_type": "rights", "ex_date": None, "ratio_new": 3.0,
+         "ratio_held": 50.0, "status": "needs_review", "note": "", "source_url": "", "announcement_id": 2,
+         "announced_date": OLD, "use_status": "awaiting_confirmation"}])
+    put("cse_corporate_actions", "models.cse_corporate_action_used", [{**action, "action_id": "1:AAA.N0000"}])
+    put("cse_total_returns", "models.cse_total_return", [
+        {"symbol": "AAA.N0000", "session_date": d, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
+         "tri": tri, "tr_1w": w} for d, tri, w in ((OLD, 1.0, None), (NEW, 1.2345, 0.031415))])
 
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
@@ -125,6 +136,9 @@ def seed(conn) -> dict:
     put("bond_ns_curve", "models.bond_curve_fit", [
         {"obs_date": NEW, "beta0": 12.0, "beta1": -3.0, "beta2": 1.0, "lambda_years": 2.82, "n_quotes": 2,
          "rmse_bp": 97.79, "n_trades": 0}], version="0.9.0")
+    put("cse_total_returns", "models.cse_total_return", [
+        {"symbol": "AAA.N0000", "session_date": NEW, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
+         "tri": 1.0, "tr_1w": 0.9561}], version="0.9.0")
     put("bond_execution_gap", "models.bond_execution_gap", [
         {"obs_date": NEW, "gap_bp": 96.69, "n": 9, "window_days": 20}], version="0.9.0")
     conn.commit()
@@ -148,6 +162,9 @@ def seed(conn) -> dict:
             # free education: everyone sees it (the latest deposit rate, and a count in the summary table)
             "lk_savings_compare": {"new": {"api": ["13.5791", "123456.789"], "page": ["13.58%", "61 of 97"]},
                                    "old": {"api": [], "page": []}},
+            "cse_corporate_actions": {"new": {"api": ["8.7654"], "page": ["Rs 8.7654 per share"]},
+                                      "old": {"api": [], "page": []}},
+            "cse_total_returns": {"new": {"api": ["0.031415"], "page": ["+3.14%"]}, "old": {"api": [], "page": []}},
         },
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
@@ -156,7 +173,7 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
     }
 
 

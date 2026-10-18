@@ -11,9 +11,9 @@ import json
 import re
 from urllib.parse import quote
 
-from .models import (AnnouncementDetail, ApprovedAnnouncements, CompanyInfo, CompanyProfile, DailyMarketSummary,
-                     FinancialAnnouncements, IndexChart, MarketStatus, SectorList, SecurityList, StockChart,
-                     TradeSummary, ms_to_date, validate)
+from .models import (AnnouncementDetail, ApprovedAnnouncements, CompanyAnnouncements, CompanyInfo, CompanyProfile,
+                     DailyMarketSummary, FinancialAnnouncements, IndexChart, MarketStatus, SectorList, SecurityList,
+                     StockChart, TradeSummary, ms_to_date, validate)
 
 CDN = "https://cdn.cse.lk/"
 EQUITY_SUFFIXES = (".N0000", ".X0000")          # voting, non-voting (audit §2: API_NOTES §3)
@@ -195,3 +195,71 @@ def financial_announcements(body: bytes, by_name: dict[str, str]) -> list[dict]:
              "symbol": f.symbol or by_name.get(norm_name(f.name)) or None, "company": f.name.strip(),
              "title": f.fileText.strip(), "category": "FINANCIAL REPORT",
              "document_url": CDN + quote(f.path.lstrip("/"), safe="/")} for f in fin.reqFinancialAnnouncemnets]
+
+
+# --- corporate actions (the old terminal's cse/corpactions.py collection; audit C6) ----------------------------
+
+# Announcement categories that can carry a corporate action (old cse/corpactions.py CA_KEYWORDS). The collector
+# fetches details only for these; the cse_corporate_actions model applies the same test to the stored lists.
+CA_KEYWORDS = ("DIVIDEND", "SUB-DIVISION", "SUBDIVISION", "SUB DIVISION", "RIGHTS", "SCRIP", "CAPITALI",
+               "CONSOLIDATION", "BONUS")
+DETAIL_ENDPOINTS = ("getAnnouncementById", "getGeneralAnnouncementById")
+
+
+def is_ca_category(category: str | None) -> bool:
+    c = (category or "").upper()
+    return any(k in c for k in CA_KEYWORDS) and "DEBENTURE" not in c
+
+
+def announcement_date(v) -> dt.date | None:
+    """The CSE's announcement dates: '01 Jul 2026' text, or epoch milliseconds (old cse/corpactions.parse_date)."""
+    if v in (None, ""):
+        return None
+    if isinstance(v, (int, float)):
+        return ms_to_date(int(v))
+    for fmt in ("%d %b %Y", "%d-%b-%Y", "%Y-%m-%d"):
+        try:
+            return dt.datetime.strptime(str(v).strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def company_symbols(securities: list[dict]) -> list[str]:
+    """The symbol to ask getAnnouncementByCompany for, one per company: its voting line where it has one (old
+    cse/corpactions.collect)."""
+    by_code: dict[str, str] = {}
+    for s in sorted(securities, key=lambda s: (not s["symbol"].endswith(".N0000"), s["symbol"])):
+        if s["symbol"].endswith(EQUITY_SUFFIXES):
+            by_code.setdefault(s["symbol"].split(".")[0], s["symbol"])
+    return [by_code[c] for c in sorted(by_code)]
+
+
+def company_announcements(body: bytes, symbol: str) -> list[dict]:
+    """getAnnouncementByCompany → one row per announcement in the list (every category; the model filters).
+    An empty body or `{}` is a company with no announcements in the window."""
+    data = _json(body) if body.strip() else {}
+    rows = validate(CompanyAnnouncements, data or {}, f"getAnnouncementByCompany {symbol}").reqCompanyAnnouncement
+    out: dict[int, dict] = {}
+    for a in rows:                          # the same announcement listed twice: the later row counts (as the old)
+        out[a.announcementId] = {
+            "symbol": symbol, "announcement_id": a.announcementId, "list_row_id": a.id,
+            "announced_date": announcement_date(a.dateOfAnnouncement),
+            "date_text": None if a.dateOfAnnouncement is None else str(a.dateOfAnnouncement),
+            "category": a.announcementCategory.strip(), "company": (a.company or "").strip() or None}
+    return list(out.values())
+
+
+def detail_fact(body: bytes, endpoint: str, aid) -> dict:
+    """A detail response as a fact row: the typed fields exactly as served (`base`), or has_detail = False for the
+    204 / `{}` answers that mean "the other endpoint serves this one". A detail of the wrong shape fails."""
+    if endpoint not in DETAIL_ENDPOINTS:
+        raise ValueError(f"not a detail endpoint: {endpoint}")
+    data = _json(body) if body.strip() else None
+    base = data.get("reqBaseAnnouncement") if isinstance(data, dict) else None
+    if not base:
+        return {"announcement_id": int(aid), "endpoint": endpoint, "has_detail": False, "d_type": None,
+                "symbol": None, "base": None, "docs": None}
+    validate(AnnouncementDetail, data, f"{endpoint} {aid}")
+    return {"announcement_id": int(aid), "endpoint": endpoint, "has_detail": True, "d_type": base.get("dType"),
+            "symbol": base.get("symbol"), "base": base, "docs": data.get("reqAnnouncementDocs")}

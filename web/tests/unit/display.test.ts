@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { companyName } from "@/lib/cse-display";
+import { actionAmount, companyName } from "@/lib/cse-display";
 import { sparkline } from "@/lib/sparkline";
 
 describe("companyName", () => {
@@ -12,6 +12,23 @@ describe("companyName", () => {
   test("a name already in mixed case is kept as published", () => {
     expect(companyName("Assetline Finance PLC")).toBe("Assetline Finance PLC");
     expect(companyName(null)).toBeNull();
+  });
+});
+
+describe("actionAmount", () => {
+  const blank = { amount_per_share: null, ratio_new: null, ratio_held: null, factor: null, subscription_price: null };
+  test("each kind of corporate action reads in words, with the figures the CSE gave", () => {
+    expect(actionAmount({ ...blank, action_type: "cash_dividend", amount_per_share: 0.5 })).toEqual({ key: "dividend", values: { amount: "0.50" } });
+    expect(actionAmount({ ...blank, action_type: "cash_dividend", amount_per_share: 0.0625 })!.values.amount).toBe("0.0625");
+    expect(actionAmount({ ...blank, action_type: "subdivision", factor: 5, ratio_new: 4, ratio_held: 1 })).toEqual({ key: "split", values: { factor: "5" } });
+    expect(actionAmount({ ...blank, action_type: "scrip", ratio_new: 1, ratio_held: 108.2352945432 })!.values.existing).toBe("108.2353");
+    expect(actionAmount({ ...blank, action_type: "rights", ratio_new: 3, ratio_held: 50, subscription_price: 200 }))
+      .toEqual({ key: "rights", values: { new: "3", existing: "50", price: "200.00" } });
+    expect(actionAmount({ ...blank, action_type: "rights", ratio_new: 3, ratio_held: 50 })!.key).toBe("rightsNoPrice");
+  });
+  test("nothing is shown that the record does not give", () => {
+    expect(actionAmount({ ...blank, action_type: "scrip" })).toBeNull();
+    expect(actionAmount({ ...blank, action_type: "rights", ratio_new: 3 })).toBeNull();
   });
 });
 

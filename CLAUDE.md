@@ -90,10 +90,10 @@ uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cs
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
-uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
+uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions ...  # history migration + reconciliation
 uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
-uv run python -m data_platform.migration.parity bonds|cse ...   # parity with the old tools (see --help)
+uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions ...   # parity with the old tools
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website
 TEST_DATABASE_URL=... uv run python web/tests/leak/seed.py   # then: DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100; wait for it; npm run test:leak
 ```

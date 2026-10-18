@@ -1,0 +1,24 @@
+name: cse_total_returns
+market: cse
+title_key: models.cse_total_returns.title
+summary_key: models.cse_total_returns.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.prices_daily_current         # unadjusted closes (daily rows preferred, as the old terminal)
+  - cse.indices_daily_current        # the ASPI's sessions, for the 1-week, 1-month and 3-month windows
+outputs:
+  - models.cse_total_return
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models:
+      cse_corporate_actions: "1.0.0"
+    parameters:
+      dividend_withholding: 0.0      # the old terminal's config/portfolio.yaml value: dividends counted in full
+      history_adjusted: false        # the CSE's price history is unadjusted (proven at CIC's 1:5 split)
+    parity:
+      reference: "MinimumLizard/CSE@f263830 cse/estimates.py build_tris and cse/returns.py total_returns, run on the old prices.csv and corporate_actions.csv"
+      tolerance: 1.0e-9
+      notes: >-
+        Compared for every ordinary share the old terminal listed and every traded close. 2026-10-05 is left out on
+        the new side for the comparison only: the old terminal never had that session (Phase 2 restored it).

@@ -1,0 +1,109 @@
+{
+  "checks": [
+    {
+      "table": "cse_corporate_actions: old corporate_actions.csv",
+      "old_rows": 392,
+      "new_rows": 392,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "notes_exact": 371,
+      "notes_explained": 21,
+      "notes_unexplained": 0,
+      "ok": true
+    },
+    {
+      "table": "cse_corporate_actions: old code (load_records + parse)",
+      "old_rows": 392,
+      "new_rows": 392,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "notes_exact": 392,
+      "notes_explained": 0,
+      "notes_unexplained": 0,
+      "ok": true
+    },
+    {
+      "table": "cse_corporate_actions: actions in use (old effective())",
+      "old_rows": 363,
+      "new_rows": 363,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "notes_exact": 363,
+      "notes_explained": 0,
+      "notes_unexplained": 0,
+      "ok": true
+    },
+    {
+      "table": "cse_corporate_actions: awaiting confirmation (old pending_review())",
+      "old_rows": 28,
+      "new_rows": 28,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "ok": true
+    },
+    {
+      "table": "cse_total_returns: old build_tris",
+      "old_rows": 69300,
+      "new_rows": 69300,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "ok": true,
+      "shares": 294,
+      "shares_only_in_new": 0,
+      "sessions_with_actions": 280,
+      "old_error": null
+    },
+    {
+      "table": "illustrative review: actions in use",
+      "old_rows": 382,
+      "new_rows": 382,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "notes_exact": 363,
+      "notes_explained": 19,
+      "notes_unexplained": 0,
+      "ok": true,
+      "confirmed": 22,
+      "rejected": 3,
+      "rights_in_use": 21
+    },
+    {
+      "table": "illustrative review: awaiting confirmation",
+      "old_rows": 6,
+      "new_rows": 6,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "ok": true
+    },
+    {
+      "table": "illustrative review: total returns",
+      "old_rows": 69300,
+      "new_rows": 69300,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "values_differ": 0,
+      "max_abs_difference": 0.0,
+      "ok": true,
+      "shares": 294,
+      "shares_only_in_new": 0,
+      "sessions_with_actions": 295,
+      "old_error": null
+    }
+  ],
+  "ok": true,
+  "old_code_compared": true,
+  "excluded_sessions_new_side": [
+    "2026-10-05"
+  ],
+  "generated_at": "2026-10-18T13:24:27+00:00"
+}

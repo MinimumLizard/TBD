@@ -242,6 +242,21 @@ class ApprovedAnnouncements(Model):
     approvedAnnouncements: list[AnnouncementRow]
 
 
+class CompanyAnnouncementRow(Model):
+    """TBD: one row of getAnnouncementByCompany (same shape as approvedAnnouncement's rows; the date is kept as
+    served and read by the parser, as the old cse/corpactions.py did)."""
+    id: int | None = None
+    announcementId: int
+    dateOfAnnouncement: str | int | None = None
+    announcementCategory: str = ""
+    company: str | None = None
+
+
+class CompanyAnnouncements(Model):
+    """TBD: getAnnouncementByCompany. `{}` (e.g. for an unknown symbol) means no announcements."""
+    reqCompanyAnnouncement: list[CompanyAnnouncementRow] = Field(default_factory=list)
+
+
 class AnnouncementDoc(Model):
     fileUrl: str
     baseUrl: str | None = None

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-18 — Phase 3b, part 1: CSE corporate actions and total returns
+
+- New facts: each company's announcement list and every corporate-action detail record, kept as the CSE served
+  them (migration 0009). New daily collector job `cse_api:corporate_actions` (the last 92 days of every company's
+  announcements; each new detail fetched once), scheduled weekdays at 21:37 Sri Lanka time behind
+  `COLLECTION_ENABLED`; the 2-hourly announcements job now keeps its detail responses as facts too.
+- The old terminal's caches load from the raw archive and reconcile with its folders exactly: 281 company lists
+  (6,211 rows), 529 cached and 192 session-folder detail files, same SHA-256 each side
+  (`python -m data_platform.migration.cse_corporate_actions --old-repo <clone at f263830>`; report
+  `docs/migration/cse-corporate-actions-reconciliation.json`). Added to "Migrate history".
+- The owner's confirmations stay in `config/corporate_actions_review.yaml` (copied from the old repo, same format);
+  the models job stores each new version in the database before it runs (`python -m data_platform.jobs.reviews`).
+- Model `cse_corporate_actions` 1.0.0 reproduces the old `corporate_actions.csv` (392 rows at f263830, 395 at
+  e05c6f3), every column; 21 notes the old append-only file kept from an earlier version of its code match the old
+  code instead. Model `cse_total_returns` 1.0.0 reproduces the old `build_tris` for 294 shares and every traded close
+  (69,300 at f263830, 70,416 at e05c6f3) with no difference at all, also under an illustrative set of confirmations
+  that puts the rights issues in use (`python -m data_platform.migration.parity cse_corporate_actions --old-code
+  <clone>`; reports `docs/migration/parity-cse-corporate-actions*.json`). Both free. Decision 0018.
+- Share pages: a table of dividends and other corporate actions (confirmed or awaiting confirmation, with the PDF),
+  a total-return line beside the price, and total returns in the returns table; JSON routes for both models;
+  glossary entries for "ex-date" and "total return". Leak suite: 45 tests pass.
+
 ## 2026-10-18 — Fixed deposits, treasury bills and inflation (Phase 5, first part)
 
 - Two new collectors, both rights "silent" and switched on, weekly, waiting for `COLLECTION_ENABLED`:

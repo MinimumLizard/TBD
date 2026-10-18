@@ -3,6 +3,8 @@
     python -m data_platform.jobs.collect cse_api                 # end of day: the session's prices, indices, market
     python -m data_platform.jobs.collect cse_api:announcements   # disclosures (every couple of hours)
     python -m data_platform.jobs.collect cse_api:history         # weekly: one-year chart history, fills any missed day
+    python -m data_platform.jobs.collect cse_api:corporate_actions   # daily: each company's announcements (92 days)
+                                                                     # and the details of its corporate actions
 
 Rules carried over from the old terminal (audit §2.1), all enforced here:
   * the session date comes from the API (dailyMarketSummery), never from the clock;
@@ -17,6 +19,8 @@ What is new:
 from __future__ import annotations
 
 import datetime as dt
+
+from psycopg.types.json import Jsonb
 
 from ...core import db
 from ...core.collector import Collector, Fetched, Result
@@ -60,6 +64,23 @@ def store_indices(conn, rows: list[dict], fetch_id: int, fetched_at: dt.datetime
 def store(conn, table: str, rows: list[dict], key: list[str], fetch_id: int, fetched_at: dt.datetime) -> int:
     added, _ = db.insert_facts(conn, table, _with_fetch(rows, fetch_id, fetched_at), key=key, fetch_id=fetch_id)
     return added
+
+
+def store_company_announcements(conn, rows: list[dict], fetch_id: int, fetched_at: dt.datetime) -> int:
+    """A company's announcement list. Re-reading a rolling window lists the same announcements again: they are
+    already stored and add nothing (a changed category or date is recorded as a conflict, never overwritten)."""
+    return store(conn, "cse.company_announcements", rows, ["symbol", "announcement_id"], fetch_id, fetched_at)
+
+
+def store_detail(conn, body: bytes, endpoint: str, aid, sha256: str, fetch_id: int, fetched_at: dt.datetime) -> dict:
+    """One detail response (shared with the migration). Returns the fact row. The same response stored again adds
+    nothing: the key includes the response's SHA-256, so a changed response is a new row beside the old one."""
+    row = dict(parse.detail_fact(body, endpoint, aid), raw_sha256=sha256, fetch_id=fetch_id, fetched_at=fetched_at)
+    stored = dict(row, base=Jsonb(row["base"]) if row["base"] is not None else None,
+                  docs=Jsonb(row["docs"]) if row["docs"] is not None else None)
+    db.insert_facts(conn, "cse.announcement_details", [stored], key=["announcement_id", "endpoint", "raw_sha256"],
+                    compare_ignore=("fetch_id", "fetched_at", "ingested_at", "base", "docs"), fetch_id=fetch_id)
+    return row
 
 
 # --- collectors --------------------------------------------------------------------------------------------------
@@ -184,6 +205,7 @@ class CseAnnouncementsCollector(CseCollector):
             detail, detail_f, endpoint = None, None, None
             for ep in ("getAnnouncementById", "getGeneralAnnouncementById"):
                 f = self.api(ep, announcementId=a.announcementId)
+                store_detail(conn, f.body, ep, aid, f.sha256, f.fetch_id, f.response.fetched_at)   # typed fields
                 detail = parse.announcement_detail(f.body, ep, aid)
                 if detail:
                     detail_f, endpoint = f, ep
@@ -200,6 +222,65 @@ class CseAnnouncementsCollector(CseCollector):
                                  fetched_at=fin_f.response.fetched_at))
         added, _ = db.insert_facts(conn, "cse.announcements", rows, key=["announcement_id"])
         return Result(rows_added=added, new_data=bool(added), message=f"{added} new announcements")
+
+
+class CseCorporateActionsCollector(CseCollector):
+    """Every company's announcement list over a rolling window, and the details of the corporate-action
+    announcements in it (old cse/corpactions.collect, which the old terminal ran once over 2025-06-01..2026-10-04).
+
+    The 2-hourly announcements job already fetches the details of every announcement in the CSE's recent list; this
+    daily sweep catches what that list missed (it covers only about six days) and is the source of record for the
+    cse_corporate_actions model. A detail is fetched once per announcement: typed record first, then the general
+    one if the typed endpoint has none, exactly as the old tool cached them. One company failing never stops the
+    others; the run fails at the end, naming it, and the next run retries it."""
+    job = "corporate_actions"
+    window_days = 92
+
+    def collect(self) -> Result:
+        conn = self.ctx.conn
+        to_date = self.ctx.today_slt
+        from_date = to_date - dt.timedelta(days=self.window_days)
+        secs_f = self.api("allSecurityCode")
+        symbols = parse.company_symbols(self.companies(parse.security_list(secs_f.body, to_date)))
+        asked: dict[int, set[str]] = {}
+        for r in conn.execute("select announcement_id, endpoint, bool_or(has_detail) d from cse.announcement_details "
+                              "group by 1, 2"):
+            asked.setdefault(r["announcement_id"], set()).add("detail" if r["d"] else r["endpoint"])
+        added = details = 0
+        failed: list[str] = []
+        for symbol in symbols:
+            try:
+                f = self.api("getAnnouncementByCompany", symbol=symbol, fromDate=from_date.isoformat(),
+                             toDate=to_date.isoformat())
+                rows = parse.company_announcements(f.body, symbol)
+                added += store_company_announcements(conn, rows, f.fetch_id, f.response.fetched_at)
+                for row in rows:
+                    if parse.is_ca_category(row["category"]):
+                        details += self.fetch_detail(row["announcement_id"], asked)
+                conn.commit()
+            except Exception as exc:  # noqa: BLE001 - recorded and raised at the end of the run
+                conn.rollback()
+                failed.append(f"{symbol} ({type(exc).__name__}: {exc})"[:200])
+        message = (f"{len(symbols)} companies, {from_date}..{to_date}: {added} new list rows, {details} detail "
+                   f"responses ({self.fetches} API calls)")
+        if failed:
+            raise RuntimeError(f"{message}; {len(failed)} companies failed: " + "; ".join(failed[:20]))
+        return Result(rows_added=added, new_data=bool(added or details), message=message)
+
+    def fetch_detail(self, aid: int, asked: dict[int, set[str]]) -> int:
+        """Typed detail, then the general one if there is no typed detail; never one already asked for."""
+        done = asked.setdefault(aid, set())
+        n = 0
+        for ep in parse.DETAIL_ENDPOINTS:
+            if "detail" in done:
+                break
+            if ep in done:
+                continue
+            f = self.api(ep, announcementId=aid)
+            row = store_detail(self.ctx.conn, f.body, ep, str(aid), f.sha256, f.fetch_id, f.response.fetched_at)
+            done.add("detail" if row["has_detail"] else ep)
+            n += 1
+        return n
 
 
 class CseHistoryCollector(CseCollector):

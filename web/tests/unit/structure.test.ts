@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
 
-import { ALL_PAGES, MODEL_ROUTES } from "@/lib/routes";
+import { ALL_PAGES, DETAIL_PAGES, MODEL_ROUTES } from "@/lib/routes";
 import { MODEL_NAMES } from "@/lib/registry";
 
 const ROOT = path.join(__dirname, "..", "..");
@@ -54,7 +54,7 @@ test("browser components never import server code", () => {
 
 test("every model has its routes listed, and every listed page is checked", () => {
   expect(Object.keys(MODEL_ROUTES).sort()).toEqual([...MODEL_NAMES].sort());
-  for (const r of Object.values(MODEL_ROUTES)) for (const p of r.pages) expect(ALL_PAGES).toContain(p);
+  for (const r of Object.values(MODEL_ROUTES)) for (const p of r.pages) expect([...ALL_PAGES, ...DETAIL_PAGES]).toContain(p);
 });
 
 test("no user-facing text is written in pages and components (it lives in messages/)", () => {

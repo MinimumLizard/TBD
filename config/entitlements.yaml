@@ -27,6 +27,10 @@ models:
   # Colombo Stock Exchange
   cse_market_tape:      { minimum_tier: free }    # indices, turnover, breadth, foreign flows
   cse_security_metrics: { minimum_tier: free }    # per-share price, range, volume and relative-return metrics
+  cse_corporate_actions: { minimum_tier: free }   # dividends, splits, scrip and rights issues: facts the CSE
+                                                  # published, read from its own announcement records
+  cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
+                                                  # published facts, combined by a stated formula)
   # Savings education
   lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
 

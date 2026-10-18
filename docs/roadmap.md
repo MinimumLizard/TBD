@@ -8,7 +8,7 @@
 | 2 | Data foundation (raw archive, database, collectors, gap check, backups) and migration of all history | **Built and verified 2026-10-11 (`docs/phase2-verification.md`). Awaiting approval and switch-on (owner's accounts).** |
 | 2b | Switch-on: accounts + secrets, run "Migrate history", then 20 trading days in parallel with the old sites | Owner actions in phase2-verification §5 |
 | 3 | Model plug-ins, bonds first, each passing parity tests | **Built and verified 2026-10-11 (`docs/phase3-4-verification.md`): all six bond models and the CSE market summary and share metrics, exact parity; bond curve version 2 (decision 0014). Awaiting approval.** |
-| 3b | The other CSE models. Proposed order (`docs/plan-retail-features.md` §8): corporate actions and total returns; risk estimates and the portfolio lab, internal only, with 10- and 15-name versions; fundamentals; ownership, dealings and flows | Not started; waiting for the owner's go-ahead on the order |
+| 3b | The other CSE models. Proposed order (`docs/plan-retail-features.md` §8): corporate actions and total returns; risk estimates and the portfolio lab, internal only, with 10- and 15-name versions; fundamentals; ownership, dealings and flows | **Part 1 built 2026-10-18: corporate actions and total returns** (collector, facts from the old caches, both models with exact parity, shown on the share pages; decision 0018). Awaiting approval. Next: risk estimates and the portfolio lab (internal) |
 | 4 | Portal: API, auth, entitlements, web app (free tier first) | **Free-tier portal, API, single tier check and tier-leak suite built 2026-10-11. Accounts stubbed (everyone is free) until Supabase exists. Awaiting approval.** |
 | 4b | Accounts, payments, weekly email updates, a feedback feature, Sinhala and Tamil, deployment on Vercel | Needs the owner's accounts and translators |
 | 5 | Retail education (new, 2026-10-16): FD vs bills and bonds, FD vs the market, a calculator; model portfolios published only in the form the lawyer allows | **FD vs treasury bills vs inflation, with a calculator, built 2026-10-18 (approved that day): collectors `cbsl` and `dcs_cpi`, model `lk_savings_compare` 1.0.0, page `/learn/savings`. Awaiting review; one question on bill yields below.** FD vs bonds and FD vs the market not started (the market needs the CSE's permission) |
@@ -73,6 +73,13 @@ user discussion, the name, and personal data. The answer decides how much of the
 ### 5. Switch-on (when approved): `docs/phase3-4-verification.md` §6
 Accounts (Supabase Pro, Cloudflare R2, Backblaze B2, Healthchecks.io), secrets, "Migrate history", then the
 `COLLECTION_ENABLED` variable, then the website on Vercel Pro. About two hours of your time plus the migration run.
+
+### 5b. Corporate actions awaiting your confirmation (new, 2026-10-18)
+Rights issues, and dividends or scrip issues whose figures came from text, are listed on each share's page as
+"awaiting confirmation" and are left out of its total return. To use one, add its id to
+`config/corporate_actions_review.yaml` under `confirm` (with any correction from the PDF, e.g. a rights issue's
+`subscription_price`), or under `reject`. 30 rows were waiting in the old terminal's file at e05c6f3 (25 of them
+rights issues), and the file there is still empty. Should the old repo's file stay the one you edit until cut-over?
 
 ### 6. Trading calendars (mostly done 2026-10-18)
 Both calendars now list every bank holiday to the end of 2027, from the Central Bank's published lists; every past

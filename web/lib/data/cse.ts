@@ -125,3 +125,59 @@ export async function securityNames(viewer: Viewer): Promise<Result<Map<string, 
     return new Map(rows.map((r) => [r.symbol, r]));
   });
 }
+
+export interface CorporateAction {
+  action_id: string;
+  symbol: string;
+  action_type: string; // cash_dividend | subdivision | scrip | rights
+  ex_date: string | null;
+  amount_per_share: number | null;
+  ratio_new: number | null;
+  ratio_held: number | null;
+  factor: number | null;
+  subscription_price: number | null;
+  source_url: string;
+  announced_date: string | null;
+  confirmed: boolean; // true: in use for total returns; false: awaiting confirmation, not used
+}
+
+const ACTION_COLUMNS = ["action_id", "symbol", "action_type", "ex_date", "amount_per_share", "ratio_new", "ratio_held",
+  "factor", "subscription_price", "source_url", "announced_date"];
+
+/** A share's corporate actions: those in use (confirmed, with the owner's corrections applied) and those awaiting
+ * confirmation, newest first. Rejected, superseded and replaced rows are not shown. */
+export async function corporateActions(viewer: Viewer, symbol: string): Promise<Result<CorporateAction[]>> {
+  return withModel(viewer, "cse_corporate_actions", async (g) => {
+    const [used, awaiting] = await Promise.all([
+      readOutput<Omit<CorporateAction, "confirmed">>(g, "models.cse_corporate_action_used", { columns: ACTION_COLUMNS, where: "symbol = ?", params: [symbol] }),
+      readOutput<Omit<CorporateAction, "confirmed">>(g, "models.cse_corporate_action", {
+        columns: ACTION_COLUMNS, where: "symbol = ? and use_status = ?", params: [symbol, "awaiting_confirmation"],
+      }),
+    ]);
+    const rows = [...used.map((r) => ({ ...r, confirmed: true })), ...awaiting.map((r) => ({ ...r, confirmed: false }))];
+    const key = (r: CorporateAction) => r.ex_date ?? r.announced_date ?? "";
+    return rows.sort((a, b) => key(b).localeCompare(key(a)) || a.action_id.localeCompare(b.action_id));
+  });
+}
+
+export interface TotalReturnSession {
+  session_date: string;
+  close: number;
+  price_return: number | null;
+  total_return: number | null;
+  tri: number;
+  tr_1w: number | null;
+  tr_1m: number | null;
+  tr_3m: number | null;
+  events: string;
+}
+
+/** A share's total return for every session it traded in, oldest first. */
+export async function totalReturns(viewer: Viewer, symbol: string): Promise<Result<TotalReturnSession[]>> {
+  return withModel(viewer, "cse_total_returns", (g) =>
+    readOutput<TotalReturnSession>(g, "models.cse_total_return", {
+      columns: ["session_date", "close", "price_return", "total_return", "tri", "tr_1w", "tr_1m", "tr_3m", "events"],
+      where: "symbol = ?", params: [symbol], orderBy: "session_date",
+    }),
+  );
+}

@@ -52,6 +52,9 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_index_session": "session_date",
   "models.cse_security_session": "session_date",
   "models.cse_security_reference": null,
+  "models.cse_corporate_action": "announced_date", // when the CSE announced it (an ex-date can be missing)
+  "models.cse_corporate_action_used": "announced_date",
+  "models.cse_total_return": "session_date",
   "models.savings_rates": "month",
   "models.savings_growth": "start_month",
   "models.savings_summary": null,
