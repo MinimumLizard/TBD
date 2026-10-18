@@ -25,8 +25,10 @@ like to:
 - keep a history of those figures and compute simple statistics from them (returns, ranges, averages);
 - offer the site free, with some deeper analysis in a paid subscription.
 
-Could you tell us whether the CSE can grant this permission, or whether a market-data licence (directly or through
-an authorised vendor) is the right route, and on what terms?
+We use end-of-day figures only: no real-time or intraday prices. Could you tell us whether the CSE can grant this
+permission, or whether a market-data licence (directly or through an authorised vendor) is the right route? If it is
+a licence, could you send the CSE's market-data policy and its fees for end-of-day data used on a website, including
+any fee for keeping history and computing statistics from it?
 
 Yours faithfully,
 [name], [title], ZinvestIQ — [email], [phone]
