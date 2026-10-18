@@ -219,6 +219,14 @@ All of them are measured forward from the day they start, never backfilled.
 4. Does hosting user discussion (§3 C) expose the company, and what moderation would be expected?
 5. The disclaimers, the method pages, the email templates and the name.
 6. The Personal Data Protection Act for accounts and email.
+7. Market data (added 2026-10-18). The CSE's website terms (www.cse.lk/disclaimer) limit its data to personal,
+   non-commercial use without the CEO's written permission. How enforceable are website terms of this kind in Sri
+   Lanka, and do bare facts such as a day's closing price have any protection beyond them? Whatever the answer, the
+   plan is to ask the CSE for permission or buy a licence (roadmap item 0); this question is about the risk while
+   that is pending. Taking the same prices from a third party such as TradingView does not help: its own terms
+   allow display-only, personal use, forbid "creating products or services based on TradingView content", and it
+   receives the CSE's data under its own agreement with the exchange. Its free embeddable chart widgets are the one
+   use it offers websites; confirm their terms for a paid site before using them.
 
 ## 8. Proposed order of work
 

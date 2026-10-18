@@ -28,6 +28,12 @@ site cannot launch with CSE data until permission or a market-data licence is on
 `docs/letters/data-permission-requests.md`, with drafts for Bitstamp (crypto prices), the CBSL (FD rates) and the
 statistics department (inflation).
 
+Ask in the same letter for the CSE's market-data policy and fees for **end-of-day** data (all this product uses;
+usually the cheapest category). If the CSE says no or the fee is too high, the fallback is a vendor already licensed
+to redistribute CSE data (ICE, LSEG). Re-routing the same data through TradingView or another site does not avoid the
+terms (`docs/plan-retail-features.md` §7, question 7). If permission takes time, the bond pages and the FD comparison
+can launch first: their sources (PDMO, CBSL) carry no such restriction.
+
 ### 1. Look at the site, then approve (or send back) Phases 2, 3 and 4
 You asked to see the site before approving. A visual preview (every page, on a computer and a phone, free and paid
 views) was published on 2026-10-16 from a local copy with real data; the real site needs the switch-on (item 5).
