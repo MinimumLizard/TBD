@@ -27,6 +27,8 @@ models:
   # Colombo Stock Exchange
   cse_market_tape:      { minimum_tier: free }    # indices, turnover, breadth, foreign flows
   cse_security_metrics: { minimum_tier: free }    # per-share price, range, volume and relative-return metrics
+  # Savings education
+  lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
 
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a

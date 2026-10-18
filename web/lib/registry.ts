@@ -5,7 +5,7 @@ import registryJson from "./generated/registry.json";
 export type Tier = "free" | "plus" | "pro" | "professional";
 
 export interface ModelEntry {
-  market: "lk_bonds" | "cse";
+  market: "lk_bonds" | "cse" | "lk_savings";
   title_key: string;
   summary_key: string;
   disclaimer_key: string;
