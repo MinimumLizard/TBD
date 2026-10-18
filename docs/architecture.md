@@ -293,6 +293,14 @@ variable on Vercel only).
 - Assert the browser bundle contains no privileged keys.
 - Assert that statically generated pages contain only free data. Paid pages must render on the server per request.
 
+**E-mail follows the same rule.** The weekly e-mail (`web/lib/email/`) is built by the same data functions, once per
+market and tier, so it is never personalised and never carries another tier's numbers; the tier-leak tests check its
+preview page (`/email/bonds`) like any other.
+
+**The website's one write.** Visitors' feedback (migration 0012) is the only thing the site writes. Its database
+login cannot touch the feedback table; it can only call `community.submit_feedback()`, which checks every field and
+limits how often one sender writes. Nothing visitors write is shown on the site.
+
 **Tiers** (`config/entitlements.yaml`): `free < plus < pro < professional`. They are ordered, so "minimum tier" is a
 single comparison. Which features sit in which tier is a business decision, so the file starts with a proposal for you
 to edit.

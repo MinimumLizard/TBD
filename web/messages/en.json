@@ -12,7 +12,9 @@
     "methods": "Methods",
     "about": "About",
     "learn": "Learn",
-    "plans": "Plans"
+    "plans": "Plans",
+    "feedback": "Feedback",
+    "weekly": "Weekly e-mail"
   },
   "tiers": {
     "free": "Free",
@@ -528,6 +530,104 @@
         "short": "Every calculation has a version number.",
         "long": "When we change how something is calculated, the version changes and the earlier version stays on record, so a figure can always be traced to the method that produced it."
       }
+    }
+  },
+  "feedback": {
+    "title": "Tell us what you think",
+    "intro": "ZinvestIQ is new, and what you tell us decides what we build next. Your message goes to the two of us who run the site; it is never shown on the site.",
+    "topic": "What is it about?",
+    "topics": {
+      "data_error": "A number looks wrong or out of date",
+      "unclear": "Something is hard to understand",
+      "idea": "An idea or a request for a feature",
+      "other": "Something else"
+    },
+    "message": "Your message",
+    "messageHelp": "Between {min} and {max} characters. Please leave out your name, phone number and other personal details: we do not need them.",
+    "about": "About the page",
+    "send": "Send",
+    "privacy": "We keep your message and the page it is about. We do not keep your name, e-mail or network address; a scrambled form of the address is kept for seven days only, to stop floods of messages. Ask us and we will delete your message.",
+    "notAdvice": "We cannot answer questions about what you personally should do with your money: ZinvestIQ gives information and education only.",
+    "vote": {
+      "question": "Was this page useful?",
+      "yes": "Yes",
+      "no": "No",
+      "more": "Tell us more"
+    },
+    "thanks": {
+      "title": "Thank you",
+      "ok": "Your feedback has been received. We read every message.",
+      "limited": "You have sent a lot in the last hour, so this one was not stored. Please try again later.",
+      "invalid": "Something was missing, so nothing was stored. Please choose a topic and write a few words.",
+      "unavailable": "Feedback is not switched on yet on this copy of the site, so nothing was stored.",
+      "back": "Back to the page you were on",
+      "again": "Send another message"
+    }
+  },
+  "email": {
+    "preview": {
+      "title": "This week's e-mail",
+      "intro": "Subscribers will get this e-mail every Saturday morning, one per market. Everyone on the same plan gets the same e-mail: it is built once per plan, through the same tier rules as the site. Below is the version for your plan ({tier}).",
+      "markets": "Markets",
+      "notSent": "E-mails are not being sent yet: they start when accounts open.",
+      "subject": "Subject"
+    },
+    "markets": {
+      "cse": "Colombo Stock Exchange",
+      "bonds": "Government bonds"
+    },
+    "subject": "ZinvestIQ weekly · {market} · week to {date}",
+    "subjectNoData": "ZinvestIQ weekly · {market}",
+    "eyebrow": "Weekly update · {tier} plan",
+    "heading": "{market}: the week to {date}",
+    "headingNoData": "{market}: no data this week",
+    "noData": "There was no new data this week.",
+    "unsubscribe": "Stop these e-mails",
+    "footer": "You get this because you asked for weekly updates on {market}. We send one e-mail per market each week, the same to everyone on your plan.",
+    "cse": {
+      "preheader": "ASPI {aspi} over the week; {sessions, plural, one {# session} other {# sessions}}, {turnover} traded.",
+      "numbers": "The week in numbers",
+      "index": "{name}, week change",
+      "level": "at {value}",
+      "turnover": "Turnover this week",
+      "turnoverNote": "{sessions, plural, one {# session} other {# sessions}}",
+      "foreign": "Foreign investors, net this week",
+      "foreignNote": "purchases minus sales",
+      "breadth": "Shares up / down on the last day",
+      "rises": "Largest rises over the week",
+      "falls": "Largest falls over the week",
+      "moversIntro": "Price change over the last five sessions, among shares with at least Rs 1 mn traded on the last day. Dividends are not included.",
+      "share": "Share",
+      "close": "Close",
+      "week": "Week",
+      "none": "No share met the turnover floor this week.",
+      "link": "The full market page"
+    },
+    "bonds": {
+      "preheader": "The 10-year point of the curve moved {change} over the week.",
+      "curve": "The yield curve",
+      "curveIntro": "Fitted yield at each maturity, and its change since a week earlier.",
+      "tenor": "{years}-year yield",
+      "change": "{change} on the week",
+      "sinceNote": "compared with {date}",
+      "residuals": "Furthest from the curve",
+      "residualsIntro": "Bonds whose quoted yield sits furthest above or below the fitted curve on the last day. Above means a higher yield than the curve.",
+      "bond": "Bond",
+      "yield": "Yield",
+      "distance": "From curve",
+      "zscores": "Unusual against their own history",
+      "zscoresIntro": "Bonds whose distance from the curve is at least two standard deviations from its own average.",
+      "zscoresCount": "{count, plural, =0 {No bond is} one {# bond is} other {# bonds are}} two or more standard deviations from its average.",
+      "zscore": "z-score",
+      "zLocked": "How far each bond sits from its own history is part of Plus.",
+      "carry": "Carry and rolldown",
+      "carryIntro": "What each bond's yield earns per year above the funding rate, plus rolldown along an unchanged curve (bp per year). Your own funding cost will differ.",
+      "carryRange": "Carry plus rolldown, range across {count} bonds",
+      "carryFunding": "Funding rate used",
+      "carryLocked": "Carry, rolldown and duration for every bond are part of Pro.",
+      "seePlans": "See the plans",
+      "link": "The full bond pages",
+      "carryRangeValue": "{low} to {high} bp"
     }
   }
 }

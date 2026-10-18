@@ -34,6 +34,11 @@ test("only the data layer reads model outputs, and it always goes through the ti
   }
   for (const f of sources(path.join("lib", "data"))) {
     if (f.endsWith("common.ts")) continue;
+    if (f.endsWith("feedback.ts")) {
+      // the one write: it may call submitFeedback and nothing that reads
+      expect(text(f), f).not.toMatch(/readOutput|buildQuery/);
+      continue;
+    }
     // every exported value is a function that returns through withModel(), which calls authorize()
     const exported = (text(f).match(/^export (async )?function \w+|^export const \w+/gm) ?? []).length;
     const guarded = (text(f).match(/return withModel\(/g) ?? []).length;

@@ -116,6 +116,9 @@ footer.site .cols { display: grid; gap: var(--s5); grid-template-columns: 1fr; m
 @media (min-width: 720px) { footer.site .cols { grid-template-columns: 2fr 1fr 1fr; } }
 footer.site .cols h3 { color: #ffffff; margin-top: 0; font-size: 0.9rem; }
 footer.site .cols ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s1); }
+footer.site .vote { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding: var(--s3) 0; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+footer.site .vote button { font: inherit; font-weight: 600; color: #ffffff; background: transparent; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; padding: 2px 14px; cursor: pointer; }
+footer.site .vote button:hover { background: rgba(255, 255, 255, 0.12); }
 footer.site .disclaimer { color: #a9b6c8; border-top-color: rgba(255, 255, 255, 0.12); }
 
 .lead { color: var(--muted); max-width: 70ch; font-size: 1.02rem; }
@@ -239,3 +242,20 @@ dl.facts dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
 @media (prefers-reduced-motion: no-preference) {
   .learn-cards a.card, nav a, tbody tr td { transition: background-color 120ms ease, border-color 120ms ease; }
 }
+
+/* Feedback form */
+.feedback-form { display: grid; gap: var(--s4); max-width: 640px; }
+.feedback-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s2); }
+.feedback-form legend { font-weight: 700; margin-bottom: var(--s2); }
+.feedback-form .choice { display: flex; gap: var(--s2); align-items: baseline; }
+.feedback-form .field { display: grid; gap: var(--s1); font-weight: 700; }
+.feedback-form textarea { font: inherit; font-weight: 400; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: var(--s2) var(--s3); resize: vertical; }
+.feedback-form .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.button { justify-self: start; font: inherit; font-weight: 700; color: #ffffff; background: var(--accent); border: 0; border-radius: 999px; padding: var(--s2) var(--s5); cursor: pointer; }
+.button:hover { filter: brightness(1.08); }
+
+/* The weekly e-mail preview */
+.tabs { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s4) 0; }
+.tabs a { padding: var(--s1) var(--s4); border-radius: 999px; border: 1px solid var(--border); text-decoration: none; font-weight: 600; }
+.tabs a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+.email-frame { border-radius: var(--radius); overflow: hidden; margin-top: var(--s3); color-scheme: light; }

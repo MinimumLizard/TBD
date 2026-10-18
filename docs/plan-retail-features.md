@@ -55,6 +55,16 @@ new dividends and disclosures. It links back to the pages.
 
 **Effort:** about a week once accounts exist.
 
+**Built so far (2026-10-18), without accounts:** the e-mail itself. `web/lib/email/weekly.ts` builds each market's
+e-mail for one tier through the same data functions and tier check as the pages; `web/lib/email/digest.ts` turns it
+into the HTML and plain-text bodies (tables and inline styles, which e-mail programs show reliably). A visitor can
+see this week's e-mail for their own plan at `/email/cse` and `/email/bonds`, and the tier-leak tests check that the
+bond e-mail carries Plus and Pro numbers only to those tiers (with no delayed preview: an e-mail dated this week
+should not carry last week's figures). What remains needs accounts: the subscriber list, consent and unsubscribe
+links, the e-mail service and its domain records, and one scheduled sender (a Vercel cron route protected by
+`CRON_SECRET` that builds the 8 versions in-process and hands each to the e-mail service with its subscribers; no
+address of the site will ever take a tier as a parameter).
+
 ## 3. Community interaction and feedback
 
 There are three levels, with very different risk:
@@ -67,6 +77,19 @@ There are three levels, with very different risk:
 
 Option A is small to build on the database we already have: one table and one form. Signed-in users only, which
 limits spam. Moderated before anything is shown publicly.
+
+**Built (2026-10-18):** option A without the vote page (that needs accounts). Every page's footer asks "Was this
+page useful? Yes / No" and links to `/feedback`, a short form (topic and message; no name or e-mail). Both are plain
+forms that work without JavaScript. Nothing anyone writes is shown on the site. Safeguards:
+
+- The website's database login still cannot read anything but model outputs: it can only call one function,
+  `community.submit_feedback()` (migration 0012), which checks every field and refuses more than 30 votes or 5
+  messages an hour from one sender, or 2,000 an hour from everyone.
+- The sender's network address is never stored, only a scrambled form of it (keyed with `FEEDBACK_KEY_SECRET`),
+  deleted after seven days. Posts from other websites are refused, and a hidden field catches simple bots.
+- You read it with `uv run python -m data_platform.jobs.feedback summary | list | mark | delete` (delete is for
+  a request under the Personal Data Protection Act).
+- Until accounts exist anyone can send feedback; when they do, messages can be limited to signed-in users.
 
 ## 4. "FD vs the market" comparison
 

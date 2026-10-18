@@ -130,6 +130,9 @@ def seed(conn) -> dict:
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
                       "bond_rv_zscores": {"new": ["+7.77"], "mid": ["+2.22"], "old": ["+6.66"]}},
+        # the weekly bond e-mail (as /email/bonds shows it): Plus's z-scores (no delayed preview in an e-mail) and
+        # Pro's carry range and funding rate
+        "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
         "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42"],
     }

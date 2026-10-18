@@ -1,4 +1,5 @@
-// Reads model outputs, and nothing else. The only module that talks to the database.
+// Reads model outputs, and (one write) passes visitors' feedback to the database's checked submit function. The
+// only module that talks to the database.
 //
 // readOutput() takes a `Granted` access from lib/entitlements.ts, so a caller cannot read a model it was not
 // authorised for. It reads only that model's own output tables, never one listed as unpublished, only the current
@@ -9,6 +10,7 @@ import "server-only";
 import { Pool, type PoolConfig, types } from "pg";
 
 import { type Granted, isGrant } from "./entitlements";
+import type { FeedbackInput, Outcome } from "./feedback";
 import { registry } from "./registry";
 
 types.setTypeParser(1082, (v: string) => v); // date -> "YYYY-MM-DD", never shifted by a time zone
@@ -111,4 +113,16 @@ export async function readOutput<T = Record<string, unknown>>(access: Granted, t
   const { text, values } = buildQuery(access, table, opts);
   const result = await getPool().query(text, values);
   return result.rows as T[];
+}
+
+// The website's only write. Its database role cannot read or change the feedback table; it can only call this
+// function, which checks every field again and limits how often one sender can write (migration 0012).
+export async function submitFeedback(input: FeedbackInput, viewerTier: string, senderKey: string): Promise<Outcome> {
+  const vote = input.kind === "page_vote";
+  const result = await getPool().query("select community.submit_feedback($1, $2, $3, $4, $5, $6, $7) as r", [
+    input.page, input.kind, vote ? input.useful : null, vote ? null : input.topic, vote ? null : input.message,
+    viewerTier, senderKey,
+  ]);
+  const r = result.rows[0]?.r;
+  return r === "ok" || r === "limited" ? r : "invalid";
 }

@@ -89,6 +89,7 @@ uv run python -m data_platform.jobs.migrate                    # apply db/migrat
 uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
+uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
 uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
 uv run python -m data_platform.jobs.models [--market lk_bonds|cse] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy

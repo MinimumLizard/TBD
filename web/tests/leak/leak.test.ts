@@ -29,6 +29,7 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
   models: Record<string, { new: Markers; old: Markers; mid?: Markers }>;
   recent_window: Record<string, Markers>;
   bond_page: Record<string, { new: string[]; old: string[]; mid?: string[] }>;
+  email_bonds: Record<string, string[]>;
   never: string[];
 };
 
@@ -149,6 +150,21 @@ describe("everyone", () => {
             for (const v of m.old) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${model} ${v}`).not.toContain(v);
             expect(page.body).toContain(`data-locked="${model}"`);
           }
+        }
+      }
+    }
+  });
+
+  test("the weekly e-mail carries each tier's numbers only to that tier and above, with no delayed preview", async () => {
+    for (const tier of TIERS) {
+      const page = await get("/email/bonds", tier);
+      expect(page.status).toBe(200);
+      expect(page.cache).not.toContain("public");
+      for (const [model, values] of Object.entries(markers.email_bonds)) {
+        const full = expectation(model as ModelName, tier) === "full";
+        for (const v of full ? values.slice(0, 1) : values) {
+          if (full) expect(page.body, `/email/bonds as ${tier} is missing ${model} ${v}`).toContain(v);
+          else expect(page.body, `/email/bonds as ${tier} leaked ${model} ${v}`).not.toContain(v);
         }
       }
     }

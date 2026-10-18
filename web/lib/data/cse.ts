@@ -84,6 +84,13 @@ export async function marketTape(viewer: Viewer, date?: string): Promise<Result<
   });
 }
 
+/** Market sessions after `after` (exclusive), oldest first: a week's turnover and foreign flows. */
+export async function marketSessionsSince(viewer: Viewer, after: string): Promise<Result<MarketSession[]>> {
+  return withModel(viewer, "cse_market_tape", (g) =>
+    readOutput<MarketSession>(g, "models.cse_market_session", { where: "session_date > ?", params: [after], orderBy: "session_date" }),
+  );
+}
+
 export async function indexHistory(viewer: Viewer, indexCode: string): Promise<Result<IndexSession[]>> {
   return withModel(viewer, "cse_market_tape", (g) =>
     readOutput<IndexSession>(g, "models.cse_index_session", { where: "index_code = ?", params: [indexCode], orderBy: "session_date" }),

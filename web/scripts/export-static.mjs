@@ -18,8 +18,8 @@ const AS_OF = process.argv.includes("--as-of") ? process.argv[process.argv.index
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/plans", "/methods", "/about"];
-const proPage = (path) => path === "/bonds" || path.startsWith("/bonds/");  // the pages a Pro subscriber sees differently
+const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
+const proPage = (path) => path === "/bonds" || path.startsWith("/bonds/") || path === "/email/bonds";  // the pages a Pro subscriber sees differently
 const ECHARTS = "https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js";
 const FONTS = "https://fonts.googleapis.com/css2?family=Manrope:wght@500..800&display=swap";
 
@@ -110,7 +110,9 @@ function rewrite(html, path, tier) {
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
     .replace(/<link\b[^>]*rel="(?:preload|modulepreload|icon|apple-touch-icon|manifest)"[^>]*>/g, "")
     .replace(/<link rel="stylesheet" href="[^"]+\.css"[^>]*>/g, "")
-    .replace(/<meta name="next-size-adjust"[^>]*>/g, "");
+    .replace(/<meta name="next-size-adjust"[^>]*>/g, "")
+    // the copy has no server behind it: its forms (feedback) do nothing when sent
+    .replace(/<form\b([^>]*?)action="[^"]*"/g, '<form$1action="#" onsubmit="return false"');
   out = out.replace(/href="(\/[^"#?]*)((?:\?[^"#]*)?)((?:#[^"]*)?)"/g, (m, p, _q, hash) => {
     if (p.startsWith("/api")) return 'href="#"';
     const target = p.replace(/\/$/, "") || "/";
