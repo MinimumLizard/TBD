@@ -17,6 +17,8 @@ export interface Granted {
   version: string; // the current method version: the only series the site shows
   maxDate: string | null; // free preview: only rows dated on or before this; null = no limit
   delayDays: number; // 0 unless this is a free preview
+  minDate: string | null; // recent window: only rows dated on or after this; null = the whole history
+  fullHistoryTier: Tier | null; // the tier that would see the whole history, when this grant is a recent window
 }
 
 export interface Denied {
@@ -49,11 +51,17 @@ export function authorize(viewer: Viewer, model: ModelName, today: string = toda
   const entry = modelEntry(model);
   const required = entry.minimum_tier;
   if (tierRank(viewer.tier) >= tierRank(required)) {
-    return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0 });
+    const window = entry.recent_window;
+    if (window && tierRank(viewer.tier) < tierRank(window.full_history_tier)) {
+      return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0,
+                     minDate: addDays(today, -window.days), fullHistoryTier: window.full_history_tier });
+    }
+    return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0, minDate: null, fullHistoryTier: null });
   }
   if (entry.free_preview && entry.free_preview.delay_days > 0) {
     const days = entry.free_preview.delay_days;
-    return grant({ model, version: entry.current_version, maxDate: addDays(today, -days), delayDays: days });
+    return grant({ model, version: entry.current_version, maxDate: addDays(today, -days), delayDays: days,
+                   minDate: null, fullHistoryTier: null });
   }
   return { allowed: false, model, requiredTier: required };
 }

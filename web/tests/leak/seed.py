@@ -6,7 +6,7 @@ Creates (or recreates) the database `tbd_leak`, applies every migration, and wri
 model outputs in which certain values are MARKERS: numbers that appear nowhere else, so the tests can tell exactly
 which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (five days ago,
 the last day a 5-day free preview may show); the preview model also has MID (four days ago), which a preview must
-never show. Every model also gets rows under
+never show; the yield curve also has ANCIENT (40 days ago), beyond the 30-day recent window a free visitor sees. Every model also gets rows under
 a reference version that the site must never show to anyone.
 
 Prints the database URL the web app should use (as the read-only web_reader role).
@@ -35,6 +35,7 @@ TODAY = dt.datetime.now(SLT).date()
 NEW = TODAY - dt.timedelta(days=1)
 OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible day (delay 5 days)
 MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
+ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only the window's full-history tier sees it
 MARKERS = Path(__file__).with_name("markers.json")
 DB_NAME = "tbd_leak"
 
@@ -60,11 +61,13 @@ def seed(conn) -> dict:
     put("bond_identity", "models.bond_quotes", quotes)
     put("bond_ns_curve", "models.bond_curve_fit", [
         {"obs_date": d, "beta0": 12.0, "beta1": -3.0, "beta2": 1.0, "lambda_years": 2.82, "n_quotes": 2,
-         "rmse_bp": rmse, "n_trades": 0} for d, rmse in ((OLD, 11.11), (NEW, 12.12))])
+         "rmse_bp": rmse, "n_trades": 0} for d, rmse in ((ANCIENT, 13.1313), (OLD, 11.11), (NEW, 12.12))])
+    # ANCIENT is older than the yield curve's 30-day recent window: Plus and above see it, free visitors never do.
     put("bond_ns_curve", "models.bond_curve_point", [
         {"obs_date": d, "isin": isin, "source": "quote", "tau_years": 4.0 + 5 * i,
-         "observed_yield": (10.0571 if d == NEW else 10.0461) + i, "fitted_yield": 10.0 + i, "residual_bp": 5.0,
-         "weight": 1.0} for d in (OLD, NEW) for i, isin in enumerate(bonds)])
+         "observed_yield": {NEW: 10.0571, OLD: 10.0461, ANCIENT: 10.0391}[d] + i, "fitted_yield": 10.0 + i,
+         "residual_bp": 63.9 if d == ANCIENT else 5.0, "weight": 1.0}
+        for d in (ANCIENT, OLD, NEW) for i, isin in enumerate(bonds)])
     put("bond_liquidity", "models.bond_liquidity", [
         {"obs_date": d, "isin": isin, "turnover_lkr": 1_000_000_000, "n_trades": 3, "days_traded": 12, "is_benchmark": False,
          "post_auction": False, "tier": "active", "trades_through": d, "trade_data_lag_days": 0}
@@ -109,6 +112,9 @@ def seed(conn) -> dict:
     # What each model's data looks like in an API response (raw) and on a page (formatted, as lib/format.ts does).
     return {
         "today": TODAY.isoformat(), "new": NEW.isoformat(), "old": OLD.isoformat(), "mid": MID.isoformat(),
+        "ancient": ANCIENT.isoformat(),
+        # the yield curve's history beyond its 30-day recent window (API: the fit's error; page: the residual)
+        "recent_window": {"bond_ns_curve": {"api": ["13.1313", "10.0391"], "page": ["63.9"]}},
         "models": {
             "bond_ns_curve": {"new": {"api": ["12.12", "10.0571"], "page": ["10.0571"]},
                               "old": {"api": ["11.11", "10.0461"], "page": []}},

@@ -23,8 +23,17 @@ describe("buildQuery", () => {
     expect(q.values).toEqual([version, "2026-10-07", "2026-10-09"]);
   });
 
+  test("a recent window can never read before its first day", () => {
+    const recent = authorize({ id: null, tier: "free" }, "bond_ns_curve", TODAY) as Granted;
+    const q = buildQuery(recent, "models.bond_curve_point", { where: "isin = ?", params: ["LKB01"] });
+    expect(q.text).toContain("obs_date >= $2");
+    expect(q.values).toEqual([modelEntry("bond_ns_curve").current_version, "2026-09-12", "LKB01"]);
+    const plus = authorize({ id: null, tier: "plus" }, "bond_ns_curve", TODAY) as Granted;
+    expect(buildQuery(plus, "models.bond_curve_point").text).not.toContain(">=");
+  });
+
   test("a grant cannot be made up: only authorize() issues them", () => {
-    const forged = { allowed: true, model: "bond_carry", version: "1.1.0", maxDate: null, delayDays: 0 } as Granted;
+    const forged = { allowed: true, model: "bond_carry", version: "1.1.0", maxDate: null, delayDays: 0, minDate: null, fullHistoryTier: null } as Granted;
     expect(() => buildQuery(forged, "models.bond_carry")).toThrow(/not a grant/);
     expect(() => buildQuery({ ...full }, "models.bond_residual_zscore")).toThrow(/not a grant/);
     expect(Object.isFrozen(full)).toBe(true);

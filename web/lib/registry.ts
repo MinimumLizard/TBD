@@ -14,6 +14,7 @@ export interface ModelEntry {
   versions: { method_version: string; status: string; changes: string | null }[];
   minimum_tier: Tier;
   free_preview: { delay_days: number } | null;
+  recent_window: { days: number; full_history_tier: Tier } | null;
   method_md: string;
 }
 

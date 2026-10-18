@@ -68,6 +68,7 @@
         "models.bond_funding",
         "models.bond_carry"
       ],
+      "recent_window": null,
       "summary_key": "models.bond_carry.summary",
       "title_key": "models.bond_carry.title",
       "versions": [
@@ -93,6 +94,7 @@
       "outputs": [
         "models.bond_execution_gap"
       ],
+      "recent_window": null,
       "summary_key": "models.bond_execution_gap.summary",
       "title_key": "models.bond_execution_gap.title",
       "versions": [
@@ -119,6 +121,7 @@
         "models.bond_reference",
         "models.bond_quotes"
       ],
+      "recent_window": null,
       "summary_key": "models.bond_identity.summary",
       "title_key": "models.bond_identity.title",
       "versions": [
@@ -144,6 +147,7 @@
       "outputs": [
         "models.bond_liquidity"
       ],
+      "recent_window": null,
       "summary_key": "models.bond_liquidity.summary",
       "title_key": "models.bond_liquidity.title",
       "versions": [
@@ -170,6 +174,10 @@
         "models.bond_curve_fit",
         "models.bond_curve_point"
       ],
+      "recent_window": {
+        "days": 30,
+        "full_history_tier": "plus"
+      },
       "summary_key": "models.bond_ns_curve.summary",
       "title_key": "models.bond_ns_curve.title",
       "versions": [
@@ -199,6 +207,7 @@
         "models.bond_pair_zscore",
         "models.model_stats"
       ],
+      "recent_window": null,
       "summary_key": "models.bond_rv_zscores.summary",
       "title_key": "models.bond_rv_zscores.title",
       "versions": [
@@ -225,6 +234,7 @@
         "models.cse_market_session",
         "models.cse_index_session"
       ],
+      "recent_window": null,
       "summary_key": "models.cse_market_tape.summary",
       "title_key": "models.cse_market_tape.title",
       "versions": [
@@ -245,6 +255,7 @@
       "outputs": [
         "models.cse_security_session"
       ],
+      "recent_window": null,
       "summary_key": "models.cse_security_metrics.summary",
       "title_key": "models.cse_security_metrics.title",
       "versions": [

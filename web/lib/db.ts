@@ -2,7 +2,8 @@
 //
 // readOutput() takes a `Granted` access from lib/entitlements.ts, so a caller cannot read a model it was not
 // authorised for. It reads only that model's own output tables, never one listed as unpublished, only the current
-// method version, and (for a free preview) only rows dated on or before the preview date.
+// method version, (for a free preview) only rows dated on or before the preview date, and (for a recent window)
+// only rows dated on or after the window's first day.
 import "server-only";
 
 import { Pool, type PoolConfig, types } from "pg";
@@ -77,6 +78,12 @@ export function buildQuery(access: Granted, table: string, opts: ReadOptions = {
     if (!column) throw new Error(`${table} has no date, so it cannot be served as a delayed preview`);
     values.push(access.maxDate);
     clauses.push(`${column} <= $${values.length}`);
+  }
+  if (access.minDate) {
+    const column = dateColumn(table);
+    if (!column) throw new Error(`${table} has no date, so it cannot be served as a recent window`);
+    values.push(access.minDate);
+    clauses.push(`${column} >= $${values.length}`);
   }
   if (opts.where) {
     let i = 0;

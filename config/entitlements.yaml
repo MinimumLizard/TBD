@@ -8,13 +8,18 @@
 #
 #   free_preview: { delay_days: N }   tiers below the minimum see the same outputs, but only for dates at least
 #                                     N days old. Enforced on the server, like every tier rule.
+#   recent_window: { days: N, full_history_tier: T }
+#                                     tiers from the minimum up to (not including) T see only the last N days of the
+#                                     model's outputs; T and above see the whole history. Enforced on the server.
 
 tiers: [free, plus, pro, professional]
 
 models:
   # LKR government bonds
   bond_identity:        { minimum_tier: free }    # bond list, each day's dealer quotes
-  bond_ns_curve:        { minimum_tier: free }    # the fitted yield curve and each bond's distance from it
+  bond_ns_curve:        { minimum_tier: free, recent_window: { days: 30, full_history_tier: plus } }
+                        # the fitted yield curve and each bond's distance from it: free sees the last 30 days,
+                        # Plus and above the whole history (a bond's own analysis is tiered; owner, 2026-10-18)
   bond_liquidity:       { minimum_tier: free }    # turnover, days traded, auction cycle, liquidity tier
   bond_rv_zscores:      { minimum_tier: plus, free_preview: { delay_days: 5 } }   # residuals vs own history
   bond_execution_gap:   { minimum_tier: plus }    # where trades print against the quote screen

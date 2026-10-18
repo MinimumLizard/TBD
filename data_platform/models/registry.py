@@ -105,6 +105,13 @@ def check(root: Path = MODELS_DIR) -> list[str]:
             problems.append(f"{name}: config/entitlements.yaml gives it no valid minimum_tier")
         elif entry.get("free_preview") and int(entry["free_preview"].get("delay_days", 0)) <= 0:
             problems.append(f"{name}: free_preview.delay_days must be a positive number of days")
+        elif entry.get("recent_window"):
+            rw = entry["recent_window"]
+            if int(rw.get("days", 0)) <= 0:
+                problems.append(f"{name}: recent_window.days must be a positive number of days")
+            if rw.get("full_history_tier") not in tiers or \
+                    tiers.index(rw.get("full_history_tier")) <= tiers.index(entry["minimum_tier"]):
+                problems.append(f"{name}: recent_window.full_history_tier must be a tier above the minimum tier")
 
     for name, m in manifests.items():
         for v in m.versions:
@@ -167,6 +174,7 @@ def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
                              for v in m.versions],
                 "minimum_tier": ent["models"][name]["minimum_tier"],
                 "free_preview": ent["models"][name].get("free_preview"),
+                "recent_window": ent["models"][name].get("recent_window"),
                 "method_md": (root / name / "METHOD.md").read_text(),
             } for name, m in sorted(manifests.items())
         },

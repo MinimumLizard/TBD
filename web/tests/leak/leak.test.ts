@@ -25,7 +25,9 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
   new: string;
   mid: string;
   old: string;
+  ancient: string;
   models: Record<string, { new: Markers; old: Markers; mid?: Markers }>;
+  recent_window: Record<string, Markers>;
   never: string[];
 };
 
@@ -110,6 +112,25 @@ describe("everyone", () => {
     }
     const boundary = await get(`/api/v1/bonds/zscores?date=${markers.old}`, "free");
     for (const v of markers.models.bond_rv_zscores.old.api) expect(boundary.body).toContain(v);   // the last allowed day
+  });
+
+  test("a recent window hides older history from the tiers below its full-history tier", async () => {
+    for (const [model, m] of Object.entries(markers.recent_window)) {
+      const entry = modelEntry(model as ModelName);
+      const full = entry.recent_window!.full_history_tier;
+      for (const tier of TIERS) {
+        if (rank(tier) < rank(entry.minimum_tier)) continue;
+        const api = await get(`${MODEL_ROUTES[model as ModelName].api[0]}?date=${markers.ancient}`, tier);
+        const page = await get(DETAIL[0], tier);
+        if (rank(tier) >= rank(full)) {
+          for (const v of m.api) expect(api.body, `${model} as ${tier} is missing ${v}`).toContain(v);
+          for (const v of m.page) expect(page.body, `${DETAIL[0]} as ${tier} is missing ${v}`).toContain(v);
+        } else {
+          for (const v of m.api) expect(api.body, `${model} as ${tier} leaked ${v}`).not.toContain(v);
+          for (const v of m.page) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${v}`).not.toContain(v);
+        }
+      }
+    }
   });
 
   test("detail pages render for a free visitor, and a malformed address is a 404, not an error", async () => {
