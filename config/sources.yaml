@@ -31,12 +31,18 @@ cse_api:
   rights:
     status: permission_required
     evidence: >-
-      The CSE's terms are at /disclaimer (the footer's "Terms & Conditions"; the 2026-10-11 search looked for
-      /terms-of-use, which does not exist). They say: "Access to and use of the Data and Information in the
-      Website is for personal and non-commercial use. No part of the Data or information ... may be copied,
+      The CSE's terms are at https://www.cse.lk/disclaimer (the Colombo Stock Exchange, World Trade Center,
+      Colombo 01; the footer's "Terms & Conditions"; the 2026-10-11 search looked for /terms-of-use, which does not
+      exist). Two sections apply. "Using the Contents": you may only view and print one copy "of your own personal,
+      noncommercial use", and may not copy, store, publish, reproduce, create a derivative work from, display or
+      distribute any of the Contents "whether for direct or indirect commercial or monetary gain or otherwise
+      without the prior written permission of CSE. Requests for such permission ... should be sent to the Chief
+      Executive Officer of the CSE." "Market Data Subscription": "Access to and use of the Data and Information in
+      the Website is for personal and non-commercial use. No part of the Data or information ... may be copied,
       reproduced, republished, downloaded, posted, broadcasted, transmitted, adapted, disseminated, exploited or
-      modified in any way ... for any commercial purpose and/or for profit", and that permission requests "should
-      be sent to the Chief Executive Officer of the CSE". A copy was saved on 2026-10-18 (sha256 4b9dd9f0...).
+      modified in any way, including but not limited to, through the use of any artificial intelligence systems
+      ... for any commercial purpose and/or for profit". The page also says "CSE prohibits caching". Re-read in a
+      browser on 2026-10-18 13:15 UTC (the page is drawn by JavaScript; text saved, sha256 5b390a8f...).
       So the product cannot launch on this source without the CSE's written permission or a market-data licence
       (the CSE also licenses data through vendors such as ICE). Development and the owners' private preview only.
     url: https://www.cse.lk/disclaimer
