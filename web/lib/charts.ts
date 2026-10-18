@@ -6,15 +6,20 @@
 const LEGEND = { type: "scroll", top: 0 };
 const TOP_WITH_LEGEND = 56;
 
-export function lineOption(series: { name: string; points: [string, number | null][] }[], yName?: string) {
+export function lineOption(series: { name: string; points: [string, number | null][] }[], yName?: string, opts: { area?: boolean; zeroLine?: boolean } = {}) {
   return {
     animation: false,
     tooltip: { trigger: "axis" },
     legend: series.length > 1 ? LEGEND : undefined,
-    grid: { left: 48, right: 16, top: series.length > 1 ? TOP_WITH_LEGEND : yName ? 32 : 16, bottom: 32 },
+    grid: { left: 52, right: 16, top: series.length > 1 ? TOP_WITH_LEGEND : yName ? 32 : 16, bottom: 32 },
     xAxis: { type: "time" },
     yAxis: { type: "value", scale: true, name: yName },
-    series: series.map((s) => ({ name: s.name, type: "line", showSymbol: false, data: s.points })),
+    series: series.map((s, i) => ({
+      name: s.name, type: "line", showSymbol: false, data: s.points, lineStyle: { width: 2 },
+      // a soft fill under a single price line; a zero line where the series is a difference
+      ...(opts.area && i === 0 && series.length === 1 ? { areaStyle: { opacity: 0.12 } } : {}),
+      ...(opts.zeroLine && i === 0 ? { markLine: { silent: true, symbol: "none", label: { show: false }, data: [{ yAxis: 0 }] } } : {}),
+    })),
   };
 }
 

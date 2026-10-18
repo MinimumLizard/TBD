@@ -4,7 +4,9 @@ import { getTranslations } from "next-intl/server";
 import AsOf from "@/components/AsOf";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
-import { type ShareSession, shares } from "@/lib/data/cse";
+import Term from "@/components/Term";
+import { companyName } from "@/lib/cse-display";
+import { type ShareSession, securityNames, shares } from "@/lib/data/cse";
 import { NONE, lkr, num, pct, ratio, tone } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
@@ -28,7 +30,7 @@ export default async function SharesPage({ searchParams }: { searchParams: Promi
   const sort: Sort = (SORTS as readonly string[]).includes(params.sort ?? "") ? (params.sort as Sort) : "turnover";
   const onlyTraded = params.all !== "1";
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
-  const result = await shares(viewer);
+  const [result, names] = await Promise.all([shares(viewer), securityNames(viewer)]);
   const flag = (r: ShareSession) => {
     const notes = [];
     if ([r.flag_1w, r.flag_1m, r.flag_3m].some((f) => f && f.startsWith("unadjusted"))) notes.push(t("shares.flagJump"));
@@ -83,9 +85,10 @@ export default async function SharesPage({ searchParams }: { searchParams: Promi
                         <tr key={r.symbol}>
                           <td>
                             <Link href={`/cse/shares/${encodeURIComponent(r.symbol)}`}>{r.symbol}</Link>
+                            <span className="sub">{companyName(names.data?.get(r.symbol)?.name)}</span>
                           </td>
                           <td className="num">{num(r.close)}</td>
-                          <td className={`num ${tone(r.pct)}`}>{r.traded ? pct(r.pct) : NONE}</td>
+                          <td className="num">{r.traded ? <span className={`chip ${tone(r.pct)}`}>{pct(r.pct)}</span> : NONE}</td>
                           <td className="num">{lkr(r.turnover)}</td>
                           <td className="num">{r.range_pos == null ? NONE : `${num(r.range_pos * 100, 0)}%`}</td>
                           <td className="num">{ratio(r.vol_ratio)}</td>
@@ -100,7 +103,7 @@ export default async function SharesPage({ searchParams }: { searchParams: Promi
                 </table>
               </div>
               <p className="small muted">
-                {t("shares.rangePosHelp")} {t("shares.relHelp")} ⚑ {t("shares.flagJump")}
+                <Term id="range52" />: {t("shares.rangePosHelp")} <Term id="relative" />: {t("shares.relHelp")} ⚑ {t("shares.flagJump")}
               </p>
             </>
           );

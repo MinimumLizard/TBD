@@ -6,7 +6,10 @@ import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import { lineOption } from "@/lib/charts";
-import { shareHistory } from "@/lib/data/cse";
+import StatTile from "@/components/StatTile";
+import Term from "@/components/Term";
+import { companyName } from "@/lib/cse-display";
+import { securityNames, shareHistory } from "@/lib/data/cse";
 import { NONE, int, lkr, num, pct, ratio, tone } from "@/lib/format";
 import { decodeSegment } from "@/lib/params";
 import { getViewer } from "@/lib/viewer";
@@ -20,7 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ symbol: s
 export default async function SharePage({ params }: { params: Promise<{ symbol: string }> }) {
   const symbol = decodeSegment((await params).symbol);
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
-  const history = await shareHistory(viewer, symbol);
+  const [history, names] = await Promise.all([shareHistory(viewer, symbol), securityNames(viewer)]);
+  const ref = names.data?.get(symbol);
   if (!history.access.allowed) {
     return (
       <>
@@ -39,33 +43,40 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
   ] as const;
   return (
     <>
-      <h1>{symbol}</h1>
+      <h1>{companyName(ref?.name) ?? symbol}</h1>
+      <p className="lead">
+        {symbol}
+        {ref?.sector_label ? ` · ${ref.sector_label}` : ""}
+      </p>
       <AsOf day={last.session_date} calendar="cse" />
-      <div className="grid three">
-        <div className="card stat">
-          <span className="label">{t("share.latest")}</span>
-          <span className="value">{num(last.close)}</span>
-          <span className={tone(last.pct)}>{last.traded ? pct(last.pct) : t("common.notTraded")}</span>
-        </div>
-        <div className="card stat">
-          <span className="label">{t("share.range52")}</span>
+      <div className="tiles">
+        <StatTile label={t("share.latest")} value={num(last.close)} change={last.traded ? last.pct : null}
+                  note={last.traded ? null : t("common.notTraded")}
+                  spark={rows.filter((r) => r.traded).slice(-120).map((r) => r.close)} />
+        <div className="tile stat">
+          <span className="label"><Term id="range52">{t("share.range52")}</Term></span>
           <span className="value">
             {num(last.low_52w)} – {num(last.high_52w)}
           </span>
-          <span className="muted small">{last.range_pos == null ? NONE : `${num(last.range_pos * 100, 0)}%`}</span>
+          {last.range_pos != null && (
+            <>
+              <div className="breadth" aria-hidden="true"><span className="b-up" style={{ width: `${Math.max(0, Math.min(1, last.range_pos)) * 100}%`, opacity: 0.55 }} /></div>
+              <span className="sub">{`${num(last.range_pos * 100, 0)}%`}</span>
+            </>
+          )}
         </div>
-        <div className="card stat">
-          <span className="label">{t("share.marketCap")}</span>
+        <div className="tile stat">
+          <span className="label"><Term id="marketCap">{t("share.marketCap")}</Term></span>
           <span className="value">{lkr(last.market_cap)}</span>
-          <span className="muted small">
-            {t("share.beta")}: {num(last.beta)}
+          <span className="sub">
+            <Term id="beta">{t("share.beta")}</Term>: {num(last.beta)}
           </span>
         </div>
       </div>
       <h2>{t("share.priceChart")}</h2>
       <Chart
         label={t("share.priceChart")}
-        option={lineOption([{ name: symbol, points: rows.filter((r) => r.traded).map((r) => [r.session_date, r.close]) }])}
+        option={lineOption([{ name: symbol, points: rows.filter((r) => r.traded).map((r) => [r.session_date, r.close]) }], undefined, { area: true })}
       />
       <h2>{t("share.returns")}</h2>
       <div className="table-wrap">
@@ -74,7 +85,7 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
             <tr>
               <th>{t("share.window")}</th>
               <th className="num">{t("share.price")}</th>
-              <th className="num">{t("share.relative")}</th>
+              <th className="num"><Term id="relative">{t("share.relative")}</Term></th>
               <th>{t("shares.flag")}</th>
             </tr>
           </thead>

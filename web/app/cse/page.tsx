@@ -2,12 +2,15 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import BreadthBar from "@/components/BreadthBar";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import { lineOption } from "@/lib/charts";
 import { MOVERS_MIN_TURNOVER, isHeadline } from "@/lib/cse-display";
-import { type IndexSession, type ShareSession, indexHistory, marketTape, shares } from "@/lib/data/cse";
+import Term from "@/components/Term";
+import { companyName } from "@/lib/cse-display";
+import { type IndexSession, type ShareSession, indexHistory, marketTape, securityNames, shares } from "@/lib/data/cse";
 import { int, lkr, num, pct, percent, ratio, signed, tone } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
@@ -20,7 +23,7 @@ export async function generateMetadata() {
 
 export default async function CsePage() {
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
-  const [tape, aspi, all] = await Promise.all([marketTape(viewer), indexHistory(viewer, "ASI"), shares(viewer)]);
+  const [tape, aspi, all, names] = await Promise.all([marketTape(viewer), indexHistory(viewer, "ASI"), shares(viewer), securityNames(viewer)]);
 
   const indexRows = (rows: IndexSession[]) => (
     <div className="table-wrap">
@@ -63,9 +66,10 @@ export default async function CsePage() {
             <tr key={r.symbol}>
               <td>
                 <Link href={`/cse/shares/${encodeURIComponent(r.symbol)}`}>{r.symbol}</Link>
+                <span className="sub">{companyName(names.data?.get(r.symbol)?.name)}</span>
               </td>
               <td className="num">{num(r.close)}</td>
-              <td className={`num ${tone(r.pct)}`}>{pct(r.pct)}</td>
+              <td className="num"><span className={`chip ${tone(r.pct)}`}>{pct(r.pct)}</span></td>
               <td className="num">{lkr(r.turnover)}</td>
             </tr>
           ))}
@@ -94,26 +98,26 @@ export default async function CsePage() {
           {s && (
             <>
               <h2>{t("cse.activity")}</h2>
-              <div className="grid three">
-                <div className="card stat">
-                  <span className="label">{t("cse.turnover")}</span>
+              <div className="tiles">
+                <div className="tile stat">
+                  <span className="label"><Term id="turnover">{t("cse.turnover")}</Term></span>
                   <span className="value">{lkr(s.turnover)}</span>
                   <span className="muted small">{vsAvg(s.turnover, s.turnover_avg20)}</span>
                 </div>
-                <div className="card stat">
+                <div className="tile stat">
                   <span className="label">{t("cse.volume")}</span>
                   <span className="value">{int(s.volume)}</span>
                   <span className="muted small">{vsAvg(s.volume, s.volume_avg20)}</span>
                 </div>
-                <div className="card stat">
+                <div className="tile stat">
                   <span className="label">{t("cse.trades")}</span>
                   <span className="value">{int(s.trades)}</span>
                   <span className="muted small">{vsAvg(s.trades, s.trades_avg20)}</span>
                 </div>
               </div>
-              <div className="grid three">
-                <section>
-                  <h2>{t("cse.foreign")}</h2>
+              <div className="grid three" style={{ marginTop: 8 }}>
+                <section className="card">
+                  <h2><Term id="foreign">{t("cse.foreign")}</Term></h2>
                   <dl className="facts">
                     <dt>{t("cse.foreignPurchases")}</dt>
                     <dd>{lkr(s.foreign_buy)}</dd>
@@ -123,31 +127,25 @@ export default async function CsePage() {
                     <dd className={tone(s.foreign_net)}>{lkr(s.foreign_net)}</dd>
                   </dl>
                 </section>
-                <section>
-                  <h2>{t("cse.breadth")}</h2>
-                  <dl className="facts">
-                    <dt>{t("cse.rose")}</dt>
-                    <dd className="up">{int(s.equities_up)}</dd>
-                    <dt>{t("cse.fell")}</dt>
-                    <dd className="down">{int(s.equities_down)}</dd>
-                    <dt>{t("cse.unchanged")}</dt>
-                    <dd>{int(s.equities_flat)}</dd>
-                  </dl>
+                <section className="card">
+                  <h2><Term id="breadth">{t("cse.breadth")}</Term></h2>
+                  <BreadthBar up={s.equities_up} flat={s.equities_flat} down={s.equities_down}
+                              labels={{ up: t("cse.rose"), flat: t("cse.unchanged"), down: t("cse.fell") }} />
                   <p className="small muted">{t("cse.breadthNote")}</p>
                   {s.listed != null && s.traded_all != null && (
                     <p className="small muted">{t("cse.listedTraded", { traded: s.traded_all, listed: s.listed })}</p>
                   )}
                 </section>
-                <section>
+                <section className="card">
                   <h2>{t("cse.valuation")}</h2>
                   <dl className="facts">
-                    <dt>{t("cse.per")}</dt>
+                    <dt><Term id="pe">{t("cse.per")}</Term></dt>
                     <dd>{num(s.per, 1)}</dd>
-                    <dt>{t("cse.pbv")}</dt>
+                    <dt><Term id="pbv">{t("cse.pbv")}</Term></dt>
                     <dd>{num(s.pbv, 1)}</dd>
-                    <dt>{t("cse.dy")}</dt>
+                    <dt><Term id="dividendYield">{t("cse.dy")}</Term></dt>
                     <dd>{percent(s.dy, 1)}</dd>
-                    <dt>{t("cse.marketCap")}</dt>
+                    <dt><Term id="marketCap">{t("cse.marketCap")}</Term></dt>
                     <dd>{lkr(s.market_cap)}</dd>
                   </dl>
                 </section>
@@ -157,7 +155,7 @@ export default async function CsePage() {
           <h2>{t("cse.headline")}</h2>
           {indexRows((tape.data?.indices ?? []).filter((r) => isHeadline(r.index_code)))}
           {aspi.data && aspi.data.length > 1 && (
-            <Chart label={t("cse.aspiChart")} option={lineOption([{ name: "ASPI", points: aspi.data.map((r) => [r.session_date, r.value]) }])} />
+            <Chart label={t("cse.aspiChart")} option={lineOption([{ name: "ASPI", points: aspi.data.map((r) => [r.session_date, r.value]) }], undefined, { area: true })} />
           )}
           <h2>{t("cse.sectors")}</h2>
           {indexRows((tape.data?.indices ?? []).filter((r) => !isHeadline(r.index_code)))}

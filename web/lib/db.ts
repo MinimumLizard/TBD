@@ -49,6 +49,7 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_market_session": "session_date",
   "models.cse_index_session": "session_date",
   "models.cse_security_session": "session_date",
+  "models.cse_security_reference": null,
 };
 
 export function dateColumn(table: string): string | null {

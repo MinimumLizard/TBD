@@ -109,6 +109,7 @@ export interface Carry {
   roll_bp: number;
   total_bp: number;
   per_duration_bp: number;
+  convexity: number | null;
 }
 
 async function latestDate(granted: Parameters<typeof readOutput>[0], table: string, onOrBefore?: string): Promise<string | null> {
@@ -195,4 +196,24 @@ export async function bondCarry(viewer: Viewer, date?: string): Promise<Result<{
     const rows = await readOutput<Carry>(g, "models.bond_carry", { where: "obs_date = ?", params: [day], orderBy: "isin" });
     return { date: day, funding: funding ?? null, rows };
   });
+}
+
+// One bond's own analysis, each part under its own model's tier rule.
+
+export async function bondTradeHistory(viewer: Viewer, isin: string): Promise<Result<CurvePoint[]>> {
+  return withModel(viewer, "bond_ns_curve", (g) =>
+    readOutput<CurvePoint>(g, "models.bond_curve_point", { where: "isin = ? and source = 'trade'", params: [isin], orderBy: "obs_date" }),
+  );
+}
+
+export async function bondZHistory(viewer: Viewer, isin: string): Promise<Result<ResidualZ[]>> {
+  return withModel(viewer, "bond_rv_zscores", (g) =>
+    readOutput<ResidualZ>(g, "models.bond_residual_zscore", { where: "isin = ?", params: [isin], orderBy: "obs_date" }),
+  );
+}
+
+export async function bondCarryHistory(viewer: Viewer, isin: string): Promise<Result<Carry[]>> {
+  return withModel(viewer, "bond_carry", (g) =>
+    readOutput<Carry>(g, "models.bond_carry", { where: "isin = ?", params: [isin], orderBy: "obs_date" }),
+  );
 }

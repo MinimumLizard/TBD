@@ -28,6 +28,7 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
   ancient: string;
   models: Record<string, { new: Markers; old: Markers; mid?: Markers }>;
   recent_window: Record<string, Markers>;
+  bond_page: Record<string, { new: string[]; old: string[]; mid?: string[] }>;
   never: string[];
 };
 
@@ -128,6 +129,26 @@ describe("everyone", () => {
         } else {
           for (const v of m.api) expect(api.body, `${model} as ${tier} leaked ${v}`).not.toContain(v);
           for (const v of m.page) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${v}`).not.toContain(v);
+        }
+      }
+    }
+  });
+
+  test("a bond's own page shows each part of its analysis only to the tiers that include it", async () => {
+    for (const tier of TIERS) {
+      const page = await get(DETAIL[0], tier);
+      expect(page.status).toBe(200);
+      for (const [model, m] of Object.entries(markers.bond_page)) {
+        const mode = expectation(model as ModelName, tier);
+        if (mode === "full") {
+          for (const v of m.new) expect(page.body, `${DETAIL[0]} as ${tier} is missing ${model} ${v}`).toContain(v);
+        } else {
+          for (const v of [...m.new, ...(m.mid ?? [])]) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${model} ${v}`).not.toContain(v);
+          if (mode === "preview") for (const v of m.old) expect(page.body, `${DETAIL[0]} preview is missing ${v}`).toContain(v);
+          if (mode === "denied") {
+            for (const v of m.old) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${model} ${v}`).not.toContain(v);
+            expect(page.body).toContain(`data-locked="${model}"`);
+          }
         }
       }
     }

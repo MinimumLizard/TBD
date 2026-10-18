@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "ZinvestIQ",
-    "tagline": "Sri Lankan market data, explained",
+    "tagline": "Sri Lanka's markets, made clear",
     "skip": "Skip to content"
   },
   "nav": {
@@ -10,7 +10,9 @@
     "shares": "Shares",
     "bonds": "Government bonds",
     "methods": "Methods",
-    "about": "About"
+    "about": "About",
+    "learn": "Learn",
+    "plans": "Plans"
   },
   "tiers": {
     "free": "Free",
@@ -29,19 +31,61 @@
     "sources": "Sources",
     "units_bp": "bp",
     "notTraded": "not traded this session",
-    "showing": "Showing {count} of {total}"
+    "showing": "Showing {count} of {total}",
+    "whatIsThis": "What is this?"
   },
   "locked": {
     "title": "Part of the {tier} tier",
     "body": "This information is included in the {tier} tier and above. Accounts and subscriptions are not open yet.",
-    "preview": "Free preview, shown with a {days}-day delay: data to {date}. Current values are part of the {tier} tier."
+    "preview": "Free preview, shown with a {days}-day delay: data to {date}. Current values are part of the {tier} tier.",
+    "plans": "See what each plan includes"
   },
   "home": {
     "title": "Markets overview",
     "intro": "Daily figures for the Colombo Stock Exchange and LKR government bonds, computed from public sources, with every method explained.",
     "cseTitle": "Stock market",
     "bondsTitle": "Government bond yield curve",
-    "more": "More"
+    "more": "More",
+    "eyebrow": "Today in Sri Lankan markets",
+    "heroTitle": "Sri Lanka's markets, made clear",
+    "heroSub": "Share prices, government bond yields and what they mean, from public sources, in plain words.",
+    "when": "Stock market data for {cse}; government bonds for {bonds}.",
+    "snapshot": "Market snapshot",
+    "aspiTile": "ASPI",
+    "spTile": "S&P SL20",
+    "turnoverTile": "Turnover",
+    "breadthTile": "Shares that rose and fell",
+    "yieldTile": "{years}-year government yield",
+    "yieldNote": "on the fitted curve",
+    "trend30": "last 30 days",
+    "trendYear": "last year",
+    "learnTitle": "Learn the basics",
+    "learnAll": "All explanations",
+    "learn1Kicker": "Shares",
+    "learn1Title": "What the ASPI tells you",
+    "learn1Body": "The CSE's broadest index, what moves it, and how to read a day's breadth and turnover.",
+    "learn2Kicker": "Bonds",
+    "learn2Title": "How bond yields work",
+    "learn2Body": "Why a bond's price and its yield move in opposite directions, and what the yield curve shows.",
+    "learn3Kicker": "Our methods",
+    "learn3Title": "How every number is made",
+    "learn3Body": "Each figure comes from a published method with a version number, so you can check how it was computed.",
+    "plansTitle": "Free to start, with more in Plus and Pro",
+    "plansBody": "The market data and today's yield curve are free. Deeper analysis of each bond is part of the paid plans, once accounts open.",
+    "plansLink": "Compare plans",
+    "summary": {
+      "aspiUp": "The ASPI rose {pct} to {value}.",
+      "aspiDown": "The ASPI fell {pct} to {value}.",
+      "aspiFlat": "The ASPI was unchanged at {value}.",
+      "breadth": "{up} shares rose and {down} fell; {flat} were unchanged.",
+      "turnover": "Shares worth {value} changed hands.",
+      "turnoverAvg": "Shares worth {value} changed hands, {ratio} the average of the last 20 sessions.",
+      "foreignIn": "Foreign investors' purchases were {value} more than their sales.",
+      "foreignOut": "Foreign investors' sales were {value} more than their purchases.",
+      "bonds": "On the fitted government yield curve, 1 year yields {y1}, 5 years {y5} and 10 years {y10}."
+    },
+    "today": "today",
+    "vsPrevDay": "vs the previous day"
   },
   "cse": {
     "title": "Stock market",
@@ -146,7 +190,10 @@
     "range52": "52-week low and high",
     "volume": "Volume",
     "volAverage": "20-session average volume",
-    "unknown": "No data for this symbol."
+    "unknown": "No data for this symbol.",
+    "sector": "Sector",
+    "company": "Company",
+    "about": "{name} · {sector}"
   },
   "bonds": {
     "title": "Government bonds",
@@ -195,7 +242,26 @@
     "bidToCover": "Bid-to-cover at the last auction",
     "lastTrade": "Last trade",
     "synthetic": "No PDMO release names this bond with an ISIN; it is identified by its maturity and coupon.",
-    "unknown": "No data for this bond."
+    "unknown": "No data for this bond.",
+    "analysisTitle": "This bond's analysis",
+    "historyWindow": "Free access shows the last 30 days; {tier} and above show the full history.",
+    "zTitle": "How unusual is its position today?",
+    "zBody": "Its distance from the curve, compared with its own last 60 days. 0 is typical; beyond ±2 is rare.",
+    "zLatest": "Latest z-score",
+    "tradesTitle": "Its recent trades",
+    "tradesNone": "No trades in this bond in the period shown.",
+    "tradeDate": "Date",
+    "tradeYield": "Traded yield",
+    "tradeResidual": "Against the curve",
+    "carryTitle": "Income and price sensitivity",
+    "scenarioTitle": "If yields changed",
+    "scenarioNote": "Estimated from the bond's duration and convexity at today's yield; actual prices also depend on the curve's shape and on trading.",
+    "shift": "Yield change",
+    "estPrice": "Estimated price",
+    "priceChange": "Price change",
+    "price": "Price (per 100)",
+    "duration": "Duration",
+    "convexity": "Convexity"
   },
   "zscores": {
     "title": "Residuals against their own history",
@@ -253,7 +319,10 @@
     "correctionsBody": "Sources are stored exactly as published, and every calculation is versioned. When a source corrects a figure, the correction is applied and the earlier value is kept on record."
   },
   "footer": {
-    "rights": "© ZinvestIQ"
+    "rights": "© ZinvestIQ",
+    "tagline": "Information, tools and education for Sri Lankan investors. Not investment advice.",
+    "markets": "Markets",
+    "company": "ZinvestIQ"
   },
   "models": {
     "bond_identity": {
@@ -292,5 +361,173 @@
   "errors": {
     "title": "Something went wrong",
     "body": "This page could not be loaded. Please try again in a few minutes."
+  },
+  "plans": {
+    "title": "Plans",
+    "intro": "Most of ZinvestIQ is free. The paid plans add deeper analysis. Accounts and subscriptions are not open yet; these are the planned tiers.",
+    "includes": "What it includes",
+    "models": "Calculations in this plan",
+    "current": "You are viewing as: {tier}",
+    "soon": "Opening soon",
+    "free": {
+      "tagline": "Daily market data, explained",
+      "features": [
+        "Stock market summary: indices, turnover, breadth and foreign flows",
+        "Every listed share: price, 52-week range and returns against the ASPI",
+        "Government bond quotes and today's yield curve",
+        "Each bond's last 30 days against the curve",
+        "Plain-language explanations and a method page for every number"
+      ]
+    },
+    "plus": {
+      "tagline": "Each bond's full story",
+      "features": [
+        "Everything in Free",
+        "Each bond's full history against the curve",
+        "How unusual each bond's position is today (z-scores)",
+        "Where trades print against dealer quotes"
+      ]
+    },
+    "pro": {
+      "tagline": "Bond income and price sensitivity",
+      "features": [
+        "Everything in Plus",
+        "Carry, rolldown, duration and convexity for every bond",
+        "Each bond's yield-change table"
+      ]
+    },
+    "professional": {
+      "tagline": "For firms and heavy users",
+      "features": [
+        "Everything in Pro",
+        "Data downloads and the API (planned)"
+      ]
+    }
+  },
+  "learn": {
+    "title": "Learn the basics",
+    "intro": "Plain-language explanations of the terms used on ZinvestIQ.",
+    "terms": {
+      "aspi": {
+        "name": "ASPI (All Share Price Index)",
+        "short": "The CSE's broadest index: the combined price of every listed company's shares.",
+        "long": "The All Share Price Index adds up the market value of every company listed on the Colombo Stock Exchange and compares it with a base value. When most large companies' share prices rise, the ASPI rises. It measures prices only; the ASPI total return index also counts dividends."
+      },
+      "spsl20": {
+        "name": "S&P SL20",
+        "short": "An index of 20 of the CSE's largest and most traded companies.",
+        "long": "Calculated with S&P Dow Jones Indices, the S&P SL20 follows 20 large, frequently traded companies, so it shows how the market's biggest names moved, separately from the many small ones in the ASPI."
+      },
+      "turnover": {
+        "name": "Turnover",
+        "short": "The rupee value of all shares that changed hands in a session.",
+        "long": "Turnover is the total value of the day's trades. High turnover means many investors were active; the site also compares it with the average of the last 20 sessions."
+      },
+      "breadth": {
+        "name": "Market breadth",
+        "short": "How many shares rose, fell or did not change.",
+        "long": "Breadth shows whether a move was shared by most companies or driven by a few. An index can rise while more shares fall than rise, if a few large companies move up."
+      },
+      "foreign": {
+        "name": "Foreign purchases and sales",
+        "short": "Trades by investors based outside Sri Lanka, as the CSE reports them.",
+        "long": "The CSE publishes the value of shares foreign investors purchased and disposed of each day. The difference is their net flow for the day."
+      },
+      "pe": {
+        "name": "Price / earnings (P/E)",
+        "short": "Share price divided by the company's profit per share over the last year.",
+        "long": "A P/E of 10 means the price equals ten years of the company's current yearly profit. Comparing P/Es only makes sense between similar companies, and profits change over time."
+      },
+      "pbv": {
+        "name": "Price / book (P/BV)",
+        "short": "Share price compared with the company's net assets per share.",
+        "long": "Book value is what the company owns minus what it owes, per share, as shown in its accounts. A P/BV of 1 means the market price equals that accounting value."
+      },
+      "dividendYield": {
+        "name": "Dividend yield",
+        "short": "Dividends paid over the last year as a percentage of the share price.",
+        "long": "If a share costs Rs 100 and paid Rs 5 in dividends over the last year, its dividend yield is 5%. Past dividends are not a promise of future ones."
+      },
+      "marketCap": {
+        "name": "Market capitalisation",
+        "short": "The value of all of a company's shares at today's price.",
+        "long": "Shares in issue multiplied by the share price. It shows a company's size as the market values it today."
+      },
+      "range52": {
+        "name": "52-week range",
+        "short": "The lowest and highest prices of the past year, and where today's price sits between them.",
+        "long": "0% means today's price is at the year's low and 100% at its high. The CSE publishes these prices unadjusted, so a split or bonus issue can distort them."
+      },
+      "relative": {
+        "name": "Return against the ASPI",
+        "short": "A share's price change minus the index's over the same period.",
+        "long": "Positive means the share's price moved up more, or down less, than the market as a whole over that period; negative means the opposite."
+      },
+      "beta": {
+        "name": "Beta",
+        "short": "How much a share has tended to move when the market moves.",
+        "long": "A beta of 1 means it has moved roughly in step with the market, above 1 by more, below 1 by less. It is measured on past prices (here as the CSE publishes it) and changes over time."
+      },
+      "yield": {
+        "name": "Yield",
+        "short": "The yearly return built into a bond's price today, if it is kept until it matures.",
+        "long": "A bond pays fixed coupons and repays its face value at maturity. When its price falls, the same payments are a larger return on the price, so the yield rises: price and yield always move in opposite directions."
+      },
+      "bp": {
+        "name": "Basis point (bp)",
+        "short": "One hundredth of a percentage point: 0.25% is 25 bp.",
+        "long": "Bond yields move in small steps, so they are measured in basis points. A yield rising from 11.00% to 11.25% has risen by 25 bp."
+      },
+      "curve": {
+        "name": "Yield curve",
+        "short": "Government bond yields lined up by how many years each bond has left.",
+        "long": "The curve shows what the government pays to borrow for different lengths of time. It usually slopes upward, because lenders expect more for lending longer. We fit a smooth Nelson-Siegel curve through the dealers' quotes each day."
+      },
+      "residual": {
+        "name": "Distance from the curve",
+        "short": "How far a bond's quoted yield sits above (+) or below (−) the fitted curve, in bp.",
+        "long": "A bond far from the curve is quoted differently from bonds of similar maturity. Reasons include how often it trades, its coupon and recent auctions; it is a description, not a forecast."
+      },
+      "zscore": {
+        "name": "Z-score",
+        "short": "How unusual today's value is compared with its own recent history.",
+        "long": "A z-score of 0 means a typical day; +2 or −2 means a value seen only rarely in the last 60 observations. It says nothing about what happens next."
+      },
+      "liquidity": {
+        "name": "Trading activity",
+        "short": "How often and how much a bond trades: benchmark, active or less traded.",
+        "long": "A bond that trades often has firmer prices. Less traded bonds' quotes can sit further from where business would actually be done."
+      },
+      "bidOffer": {
+        "name": "Bid and offer",
+        "short": "The yields dealers quote for purchasing (bid) and for disposing of (offer) a bond.",
+        "long": "The mid is halfway between them. A wide gap between bid and offer means the quote is less firm."
+      },
+      "duration": {
+        "name": "Duration",
+        "short": "How sensitive a bond's price is to a change in yields.",
+        "long": "With a duration of 4, a 1 percentage point rise in yield lowers the price by about 4%, and a fall raises it by about 4%. Longer bonds have longer durations."
+      },
+      "convexity": {
+        "name": "Convexity",
+        "short": "The bend in the price–yield relationship.",
+        "long": "Because of convexity, a bond's price rises a little more when yields fall than it drops when yields rise by the same amount. It matters most for large moves and long bonds."
+      },
+      "carry": {
+        "name": "Carry",
+        "short": "What a bond's yield earns above a stated funding rate, per year.",
+        "long": "Here the funding rate is the 12-month treasury bill plus 5 bp. Your own costs will differ, so carry is a reference point, not a return you would get."
+      },
+      "rolldown": {
+        "name": "Rolldown",
+        "short": "The price change from a bond getting shorter along an unchanged curve.",
+        "long": "As time passes a bond's remaining life shortens; on an upward-sloping curve its yield then moves toward the lower yields of shorter bonds, which raises its price, if the curve stays the same."
+      },
+      "methodVersion": {
+        "name": "Method version",
+        "short": "Every calculation has a version number.",
+        "long": "When we change how something is calculated, the version changes and the earlier version stays on record, so a figure can always be traced to the method that produced it."
+      }
+    }
   }
 }

@@ -103,3 +103,18 @@ export async function shareHistory(viewer: Viewer, symbol: string): Promise<Resu
     readOutput<ShareSession>(g, "models.cse_security_session", { where: "symbol = ?", params: [symbol], orderBy: "session_date" }),
   );
 }
+
+export interface SecurityRef {
+  symbol: string;
+  name: string | null;
+  sector_label: string | null;
+  last_session: string | null;
+}
+
+/** Each share's company name and the CSE's sector label (display facts published by cse_security_metrics). */
+export async function securityNames(viewer: Viewer): Promise<Result<Map<string, SecurityRef>>> {
+  return withModel(viewer, "cse_security_metrics", async (g) => {
+    const rows = await readOutput<SecurityRef>(g, "models.cse_security_reference", { orderBy: "symbol" });
+    return new Map(rows.map((r) => [r.symbol, r]));
+  });
+}

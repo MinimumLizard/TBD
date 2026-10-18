@@ -87,7 +87,8 @@ def seed(conn) -> dict:
          "window_days": 5} for d in (OLD, NEW)])
     put("bond_carry", "models.bond_carry", [
         {"obs_date": d, "isin": bonds[0], "entry_gap_bp": 0.0, "entry_yield": 10.05, "price": 100.0, "duration": 3.0,
-         "carry_bp": 100.0, "roll_bp": 20.0, "total_bp": 120.0, "per_duration_bp": p} for d, p in ((OLD, 77.71), (NEW, 88.81))])
+         "carry_bp": 100.0, "roll_bp": 20.0, "total_bp": 120.0, "per_duration_bp": p, "convexity": c}
+        for d, p, c in ((OLD, 77.71, 36.21), (NEW, 88.81, 47.31))])
 
     put("cse_market_tape", "models.cse_market_session", [
         {"session_date": d, "turnover": t, "volume": 1000.0, "trades": 100.0, "sessions_needed": 3, "foreign_buy": 10.0,
@@ -126,6 +127,9 @@ def seed(conn) -> dict:
             "cse_market_tape": {"new": {"api": ["222000000"], "page": ["Rs 222.0 mn"]}, "old": {"api": ["111000000"], "page": []}},
             "cse_security_metrics": {"new": {"api": ["66.6"], "page": ["66.60"]}, "old": {"api": [], "page": []}},
         },
+        # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
+        "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
+                      "bond_rv_zscores": {"new": ["+7.77"], "mid": ["+2.22"], "old": ["+6.66"]}},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
         "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42"],
     }
