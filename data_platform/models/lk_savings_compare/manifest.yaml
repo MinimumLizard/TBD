@@ -1,0 +1,32 @@
+name: lk_savings_compare
+market: lk_savings
+title_key: models.lk_savings_compare.title
+summary_key: models.lk_savings_compare.summary
+disclaimer_key: savings
+requires_datasets:
+  - rates.cbsl_monthly_current
+  - rates.cpi_monthly_current
+outputs:
+  - models.savings_rates
+  - models.savings_growth
+  - models.savings_summary
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parameters:
+      amount: 100000
+      horizons: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]   # years; the calculator offers each of them
+      summary_horizons: [1, 3, 5, 10]
+      # The rate standing for a 12-month fixed deposit placed in a month: the first of these the CBSL publishes for
+      # that month (AWNFDR from April 2014; AWFDR before).
+      fd_series_order: [AWNFDR, AWFDR]
+      bill_series: TB_12M
+      # Table 4.04 prints bill yields after this withholding tax for bills bought in these months; it is added back
+      # so both instruments are compared before tax. Dates: CBSL, Treasury_Bill_Auctions_20251224_e.xlsx note *.
+      bill_withholding_added_back: { from: 2002-05-01, to: 2018-03-31, pct: 10 }
+      # Advance income tax on deposit interest, by the date the interest is paid (Inland Revenue; not a final tax).
+      fd_advance_tax:
+        - { from: 2023-01-01, pct: 5 }
+        - { from: 2025-04-01, pct: 10 }
+      # CCPI base years, oldest first; linked at the first month of each newer base (METHOD.md).
+      cpi_bases: ["2002", "2006/07", "2013", "2021"]

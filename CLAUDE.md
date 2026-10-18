@@ -86,12 +86,12 @@ uv sync                                                        # once (Python 3.
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"   # what CI runs
 uv run python -m data_platform.compliance                      # copy lint
 uv run python -m data_platform.jobs.migrate                    # apply db/migrations (DATABASE_URL)
-uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history
+uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | cbsl | dcs_cpi
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
 uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
-uv run python -m data_platform.jobs.models [--market lk_bonds|cse] [--model NAME]   # compute models (--as-of D: in memory only)
+uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
 uv run python -m data_platform.migration.parity bonds|cse ...   # parity with the old tools (see --help)
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website

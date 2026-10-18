@@ -17,5 +17,16 @@ model_general:
 
 data_sources:
   en: >-
-    Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka. This service is
-    not affiliated with or endorsed by either.
+    Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka; Central Bank of
+    Sri Lanka; Department of Census and Statistics, Sri Lanka. This service is not affiliated with or endorsed by
+    any of them.
+
+savings:
+  en: >-
+    The deposit rates are averages that the Central Bank of Sri Lanka computes across licensed commercial banks,
+    not any bank's offer: the rate a person is offered depends on the bank, the amount and the term. Treasury bill
+    yields are the Central Bank's published primary market yields. The tax shown is the advance income tax
+    deducted from deposit interest, which is not a final tax; treasury bill interest is taxed at each person's own
+    income tax rate, so no after-tax figure is shown for bills. Inflation is the Colombo Consumer Price Index.
+    Deposit insurance covers up to Rs 1,100,000 per depositor at each licensed bank or finance company. Past rates
+    and past inflation do not predict future ones. This is education, not advice about any person's savings.

@@ -102,7 +102,26 @@ def seed(conn) -> dict:
         {"session_date": d, "symbol": s, "traded": True, "close": c, "change": 1.0, "pct": 0.01, "turnover": 5_000_000.0,
          "volume": 1000.0, "range_flag": False} for d in (OLD, NEW) for s, c in (("AAA.N0000", 55.5), ("BBB.N0000", 66.6))])
 
+    # Savings education (monthly data): the latest complete month is the first of last month.
+    month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
+    put("lk_savings_compare", "models.savings_rates", [
+        {"month": month, "fd_rate_pct": 13.5791, "fd_series": "AWNFDR", "bill_published_pct": 9.5, "bill_rate_pct": 9.5,
+         "cpi": 400.0, "cpi_base": "2021", "inflation_yoy": 0.05, "fd_tax_pct": 10.0}])
+    summary = []
+    for instrument, ahead in (("fd", 61), ("tbill", 36)):
+        for basis in (("nominal", "nominal_after_tax", "real", "real_after_tax") if instrument == "fd" else ("nominal", "real")):
+            summary.append({"horizon_years": 1, "instrument": instrument, "basis": basis, "n_periods": 97,
+                            "first_start": "2003-01-01", "last_start": "2011-01-01",
+                            "n_ahead": None if "after_tax" in basis else ahead, "n_above_start": 50,
+                            "median_value": 108000.0, "best_value": 123456.789, "best_start": "2005-01-01",
+                            "worst_value": 95000.0, "worst_start": "2008-01-01", "median_annual": 0.08,
+                            "best_annual": 0.23456789, "worst_annual": -0.05})
+    put("lk_savings_compare", "models.savings_summary", summary)
+
     # A reference version beside each current one: the site shows only current versions, to everyone.
+    put("lk_savings_compare", "models.savings_rates", [
+        {"month": month, "fd_rate_pct": 97.79, "fd_series": "AWNFDR", "bill_published_pct": 96.69, "bill_rate_pct": 96.69,
+         "cpi": 400.0, "cpi_base": "2021", "inflation_yoy": 0.05, "fd_tax_pct": 10.0}], version="0.9.0")
     put("bond_ns_curve", "models.bond_curve_fit", [
         {"obs_date": NEW, "beta0": 12.0, "beta1": -3.0, "beta2": 1.0, "lambda_years": 2.82, "n_quotes": 2,
          "rmse_bp": 97.79, "n_trades": 0}], version="0.9.0")
@@ -126,6 +145,9 @@ def seed(conn) -> dict:
             "bond_carry": {"new": {"api": ["88.81"], "page": ["+88.8"]}, "old": {"api": ["77.71"], "page": ["+77.7"]}},
             "cse_market_tape": {"new": {"api": ["222000000"], "page": ["Rs 222.0 mn"]}, "old": {"api": ["111000000"], "page": []}},
             "cse_security_metrics": {"new": {"api": ["66.6"], "page": ["66.60"]}, "old": {"api": [], "page": []}},
+            # free education: everyone sees it (the latest deposit rate, and a count in the summary table)
+            "lk_savings_compare": {"new": {"api": ["13.5791", "123456.789"], "page": ["13.58%", "61 of 97"]},
+                                   "old": {"api": [], "page": []}},
         },
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},

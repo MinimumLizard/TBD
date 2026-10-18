@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { GLOSSARY } from "@/lib/glossary";
@@ -14,6 +15,13 @@ export default async function LearnPage() {
     <>
       <h1>{t("learn.title")}</h1>
       <p className="lead">{t("learn.intro")}</p>
+      <h2>{t("learn.guidesTitle")}</h2>
+      <div className="guides">
+        <Link href="/learn/savings" className="card">
+          <strong className="display">{t("learn.savingsGuide")}</strong>
+          <span className="muted small">{t("learn.savingsGuideBody")}</span>
+        </Link>
+      </div>
       <div className="letters" aria-label={t("learn.title")}>
         {GLOSSARY.map((id) => (
           <a key={id} href={`#${id}`}>{t(`learn.terms.${id}.name` as never)}</a>

@@ -224,10 +224,25 @@ a.term:hover { text-decoration: none; border-bottom-color: var(--accent); color:
 .learn-grid .card { scroll-margin-top: 90px; }
 .learn-grid .card:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow); }
 .learn-cards { display: grid; gap: var(--s4); grid-template-columns: 1fr; }
-@media (min-width: 720px) { .learn-cards { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 720px) { .learn-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .learn-cards { grid-template-columns: repeat(4, 1fr); } }
 .learn-cards a.card { color: var(--text); display: grid; gap: var(--s1); }
 .learn-cards a.card:hover { text-decoration: none; border-color: var(--accent); }
 .learn-cards .kicker { color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* The savings calculator: a plain GET form, so it works without JavaScript. */
+.calc-form { display: grid; gap: var(--s3); grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; margin: var(--s3) 0 var(--s4); }
+.calc-form .wide { grid-column: 1 / -1; }
+@media (min-width: 720px) { .calc-form { grid-template-columns: 1.4fr 1fr 1.2fr 0.8fr auto; } .calc-form .wide { grid-column: auto; } }
+.calc-form label { display: grid; gap: var(--s1); font-size: 0.82rem; color: var(--muted); font-weight: 500; min-width: 0; }
+.calc-form input, .calc-form select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; width: 100%; min-width: 0; }
+.calc-form button { font: inherit; font-weight: 700; color: #ffffff; background: var(--accent); border: 0; border-radius: var(--radius-sm); padding: 9px 18px; cursor: pointer; }
+.calc-form button:hover { background: var(--accent-strong); }
+@media (prefers-color-scheme: dark) { .calc-form button { color: var(--navy); } }
+ul.assumptions { margin: 0 0 var(--s3); padding-left: 1.2em; display: grid; gap: var(--s2); max-width: 80ch; }
+.guides { display: grid; gap: var(--s4); grid-template-columns: 1fr; margin: var(--s4) 0 var(--s5); }
+.guides a.card { color: var(--text); display: grid; gap: var(--s1); }
+.guides a.card:hover { text-decoration: none; border-color: var(--accent); }
 
 .method { max-width: 75ch; }
 .method table { margin: var(--s3) 0; display: block; max-width: 100%; overflow-x: auto; } /* method pages are Markdown: a wide table scrolls on its own */

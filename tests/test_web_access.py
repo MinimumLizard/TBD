@@ -9,7 +9,7 @@ pytestmark = pytest.mark.db
 def test_every_platform_table_has_row_level_security(conn):
     missing = conn.execute("""select n.nspname || '.' || c.relname as t from pg_class c
                               join pg_namespace n on n.oid = c.relnamespace
-                              where c.relkind = 'r' and n.nspname in ('ops', 'bonds', 'cse', 'models', 'community')
+                              where c.relkind = 'r' and n.nspname in ('ops', 'bonds', 'cse', 'models', 'community', 'rates')
                                 and not c.relrowsecurity""").fetchall()
     assert missing == []           # a new table in a later migration must enable it too
 
@@ -28,6 +28,7 @@ def test_the_website_role_reads_outputs_only_and_writes_nothing(conn):
     try:
         conn.execute("select count(*) from models.bond_curve_fit").fetchone()
         for forbidden in ("select * from bonds.quotes", "select * from ops.raw_fetches", "select * from models.runs",
+                          "select * from rates.cbsl_monthly", "select * from rates.cpi_monthly_current",
                           "insert into models.model_stats values ('x', '1.0.0', 'k', 1, 1, 1)"):
             with pytest.raises(Exception, match="permission denied"):
                 conn.execute("savepoint s")

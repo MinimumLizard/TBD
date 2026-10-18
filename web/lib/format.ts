@@ -41,6 +41,17 @@ export function lkr(v: number | null | undefined, locale = "en"): string {
   return `${sign}Rs ${num(a / 1e6, a >= 1e7 ? 1 : 2, locale)} mn`;
 }
 
+/** Whole rupees: 110870.15 -> "Rs 110,870". */
+export function rupees(v: number | null | undefined, locale = "en"): string {
+  return finite(v) ? `Rs ${int(v, locale)}` : NONE;
+}
+
+/** A month: "2026-08-01" -> "Aug 2026". */
+export function monthYear(iso: string | null | undefined, locale = "en"): string {
+  if (!iso) return NONE;
+  return new Intl.DateTimeFormat(locale, { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
+}
+
 export function ratio(v: number | null | undefined, locale = "en"): string {
   return finite(v) ? `${num(v, 2, locale)}×` : NONE;
 }

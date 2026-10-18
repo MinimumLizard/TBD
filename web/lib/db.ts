@@ -52,6 +52,9 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_index_session": "session_date",
   "models.cse_security_session": "session_date",
   "models.cse_security_reference": null,
+  "models.savings_rates": "month",
+  "models.savings_growth": "start_month",
+  "models.savings_summary": null,
 };
 
 export function dateColumn(table: string): string | null {

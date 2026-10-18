@@ -1,0 +1,23 @@
+# Weekly, Monday 08:07 Sri Lanka time: the Department of Census and Statistics' CCPI tables (one PDF per base year).
+# The CCPI for a month is published on its last working day; a run that finds no changed PDF is a quiet success.
+name: "Collect: DCS consumer prices (CCPI)"
+
+on:
+  schedule:
+    - cron: "37 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-dcs-cpi
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect dcs_cpi
+      timeout: 20
+    secrets: inherit

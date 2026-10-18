@@ -1,0 +1,65 @@
+MOVEMENTS OF THE CCPI (Base : 2021 = 100)
+% Change Inflation %
+Year Month Index Number
+12 month Moving
+Month to Month Year on Year
+Average
+2022 January 124.3
+February 125.8 1.2
+March 129.7 3.1
+April 142.1 9.6
+May 153.6 8.1
+June 171.7 11.8
+July 178.9 4.2
+August 182.8 2.2
+September 189.3 3.6
+October 188.5 -0.4
+November 187.1 -0.7
+December 187.6 0.3
+2023 January 188.6 0.5
+February 189.5 0.5 50.6
+March 195.0 2.9 50.3
+April 192.3 -1.4 35.3
+May 192.3 0.0 25.2
+June 192.3 0.0 12.0
+July 190.2 -1.1 6.3
+August 190.1 -0.1 4.0
+September 191.8 0.9 1.3
+October 191.4 -0.2 1.5
+November 193.4 1.0 3.4
+December 195.1 0.9 4.0 17.4
+2024 January 200.7 2.9 6.4 14.2
+February 200.6 0.0 5.9 11.3
+March 196.7 -1.9 0.9 8.0
+April 195.2 -0.8 1.5 5.7
+May 194.1 -0.6 0.9 3.9
+June 195.6 0.8 1.7 3.1
+July 194.7 -0.5 2.4 2.8
+August 191.1 -1.8 0.5 2.5
+September 190.9 -0.1 -0.5 2.4
+October 189.9 -0.5 -0.8 2.2
+November 189.4 -0.3 -2.1 1.7
+December 191.7 1.2 -1.7 1.2
+2025 January 192.6 0.5 -4.0 0.4
+February 192.2 -0.2 -4.2 -0.5
+March 191.6 -0.3 -2.6 -0.8
+April 191.2 -0.2 -2.0 -1.1
+May 192.8 0.8 -0.7 -1.2
+June 194.5 0.9 -0.6 -1.4
+July 194.1 -0.2 -0.3 -1.6
+August 193.3 -0.4 1.2 -1.5
+September 193.7 0.2 1.5 -1.4
+October 193.8 0.1 2.1 -1.2
+November 193.4 -0.2 2.1 -0.8
+December 195.8 1.2 2.1 -0.5
+2026 January 197.0 0.6 2.3 0.0
+February 195.3 -0.9 1.6 0.5
+March 195.8 0.3 2.2 0.9
+April 201.6 3.0 5.4 1.6
+May 203.4 0.9 5.5 2.1
+June 207.7 2.1 6.8 2.7
+July 208.2 0.2 7.3 3.3
+August 208.8 0.3 8.0 3.9
+September 209.1 0.1 8.0 4.5
+Source: Prices & Wages Division
+Department of Census & Statistics

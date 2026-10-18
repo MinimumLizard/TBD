@@ -87,7 +87,10 @@
       "bonds": "On the fitted government yield curve, 1 year yields {y1}, 5 years {y5} and 10 years {y10}."
     },
     "today": "today",
-    "vsPrevDay": "vs the previous day"
+    "vsPrevDay": "vs the previous day",
+    "learn4Kicker": "Savings",
+    "learn4Title": "Fixed deposits, bills and inflation",
+    "learn4Body": "What Rs 100,000 grew to in a fixed deposit and in treasury bills since 2003, before and after tax and inflation."
   },
   "cse": {
     "title": "Stock market",
@@ -307,14 +310,15 @@
     "status_reference": "kept running for comparison",
     "status_retired": "no longer computed",
     "market_lk_bonds": "Government bonds",
-    "market_cse": "Stock market"
+    "market_cse": "Stock market",
+    "market_lk_savings": "Savings and inflation"
   },
   "about": {
     "title": "About",
     "what": "What this is",
     "whatBody": "A market-information service for Sri Lankan investors: data from public sources, the methods applied to it, and the limits of both. It offers information, tools and education only.",
     "sources": "Data sources",
-    "sourcesBody": "Share prices, indices and market statistics: Colombo Stock Exchange. Government bond quotes, trades, volumes and auctions: Public Debt Management Office, Ministry of Finance. Data is used only where the source's terms allow it.",
+    "sourcesBody": "Share prices, indices and market statistics: Colombo Stock Exchange. Government bond quotes, trades, volumes and auctions: Public Debt Management Office, Ministry of Finance. Interest rates and treasury bill yields: Central Bank of Sri Lanka. Consumer prices: Department of Census and Statistics, Sri Lanka. Data is used only where the source's terms allow it.",
     "tiers": "Access",
     "tiersBody": "Most of the site is free. Some analysis will be part of paid tiers (Plus, Pro, Professional) once accounts open. The tier rules are applied on our server: information outside your tier is never sent to your browser.",
     "corrections": "Corrections",
@@ -358,6 +362,10 @@
     "cse_security_metrics": {
       "title": "CSE share metrics",
       "summary": "For every listed share and session: price change, position in its 52-week range, volume against average, and return relative to the ASPI."
+    },
+    "lk_savings_compare": {
+      "title": "Fixed deposits, treasury bills and inflation",
+      "summary": "What Rs 100,000 grew to in a 12-month fixed deposit renewed yearly and in 12-month treasury bills rolled yearly, before and after tax and after inflation, for every start month since 2003."
     }
   },
   "errors": {
@@ -529,8 +537,36 @@
         "name": "Method version",
         "short": "Every calculation has a version number.",
         "long": "When we change how something is calculated, the version changes and the earlier version stays on record, so a figure can always be traced to the method that produced it."
+      },
+      "fixedDeposit": {
+        "name": "Fixed deposit",
+        "short": "Money placed with a bank or finance company for a fixed term, at an interest rate agreed at the start.",
+        "long": "The interest is paid at the end of the term (or monthly, at a slightly lower rate), and the money cannot usually be withdrawn early without losing some interest. Deposits at licensed banks and finance companies are insured up to Rs 1,100,000 per depositor at each institution."
+      },
+      "treasuryBill": {
+        "name": "Treasury bill",
+        "short": "A short-term loan to the Government of Sri Lanka, for 91, 182 or 364 days.",
+        "long": "A bill pays no coupon: it is issued below its face value and repaid at face value, and the difference is the interest. The yield is set at the weekly auctions run by the Public Debt Management Office. Since April 2018 nothing is deducted from bill interest; it is taxed at each person's own income tax rate."
+      },
+      "inflation": {
+        "name": "Inflation",
+        "short": "How fast prices rise, usually measured over the last 12 months.",
+        "long": "In Sri Lanka the headline measure is the Colombo Consumer Price Index (CCPI), published monthly by the Department of Census and Statistics. When prices rise 10% in a year, Rs 110 at the end pays for what Rs 100 paid for at the start."
+      },
+      "realReturn": {
+        "name": "Real return",
+        "short": "Growth after inflation: what the money is worth in the prices of the day it was saved.",
+        "long": "A deposit that earns 10% in a year when prices rise 6% has grown by about 4% in real terms. When inflation is higher than the interest rate, the real return is negative: the money pays for less at the end than at the start, even though there are more rupees."
+      },
+      "awfdr": {
+        "name": "AWFDR and AWNFDR",
+        "short": "Average fixed deposit rates the Central Bank computes each month across licensed commercial banks.",
+        "long": "The AWFDR (average weighted fixed deposit rate) averages the rates on all fixed deposits that banks have taken, including those placed years ago. The AWNFDR (average weighted new fixed deposit rate, published from April 2014) averages only the deposits taken during the month, so it follows current rates more closely. Both cover all terms, not only 12 months, and neither is the rate of any one bank."
       }
-    }
+    },
+    "guidesTitle": "Guides",
+    "savingsGuide": "Fixed deposits, treasury bills and inflation",
+    "savingsGuideBody": "How Rs 100,000 would have grown in each since 2003, with a calculator."
   },
   "feedback": {
     "title": "Tell us what you think",
@@ -629,5 +665,80 @@
       "link": "The full bond pages",
       "carryRangeValue": "{low} to {high} bp"
     }
+  },
+  "savings": {
+    "title": "Fixed deposits, treasury bills and inflation",
+    "lead": "What Rs 100,000 would have grown to in a 12-month fixed deposit and in 12-month treasury bills, before and after tax, and after inflation, in every period since 2003. A look at the past from published averages: not a forecast and not advice.",
+    "latest": "Latest month with every figure published: {month}.",
+    "fdRateTile": "Average rate on new fixed deposits",
+    "fdRateNote": "AWNFDR, {month}",
+    "billTile": "12-month treasury bill yield",
+    "billNote": "Primary market, end of {month}",
+    "inflationTile": "Inflation, last 12 months",
+    "inflationNote": "CCPI, {month}",
+    "taxTile": "Tax deducted from deposit interest",
+    "taxNote": "Advance income tax, not a final tax",
+    "plainTitle": "In plain words",
+    "plain1": "A fixed deposit and a treasury bill both pay a fixed rate for a fixed time. Here, each is renewed every year at whatever the rate was then, and the interest is reinvested.",
+    "plain2": "Inflation is what decides whether the money grew in what it can pay for. A real figure below Rs 100,000 means the savings paid for less at the end than at the start, even with the interest added.",
+    "plain3": "The rates are averages across banks and auctions, so a particular deposit or bill may have earned more or less. Periods that start a month apart overlap almost entirely, so the counts below are not separate experiments.",
+    "chartTitle": "Rs 100,000 over the latest ten years",
+    "chartNote": "Started in {start}, renewed every year, to {end}.",
+    "chartNominal": "In rupees",
+    "chartReal": "After inflation, in rupees of {start}",
+    "seriesFd": "Fixed deposit",
+    "seriesFdTax": "Fixed deposit after tax",
+    "seriesBill": "Treasury bills",
+    "seriesFdRate": "Fixed deposit rate (AWNFDR; AWFDR before April 2014)",
+    "seriesBillRate": "12-month bill yield, before tax",
+    "seriesInflation": "Inflation, last 12 months",
+    "summaryTitle": "Across every period since {first}",
+    "summaryNote": "One period starts in each month. For each length of time, how often each came out ahead, and how often it kept ahead of inflation (ended above Rs 100,000 in real terms).",
+    "period": "Period",
+    "years": "{count, plural, one {# year} other {# years}}",
+    "periods": "Periods",
+    "fdAhead": "Fixed deposit ended higher",
+    "billAhead": "Bills ended higher",
+    "fdAboveInflation": "Fixed deposit kept ahead of inflation",
+    "fdTaxAboveInflation": "… after tax",
+    "billAboveInflation": "Bills kept ahead of inflation",
+    "countOf": "{count} of {total}",
+    "rangeTitle": "Yearly growth after inflation: worst, median and best",
+    "rangeNote": "Per year, after inflation. The start month of the worst and best period is shown under each.",
+    "instrument": "Saved in",
+    "worst": "Worst",
+    "median": "Median",
+    "best": "Best",
+    "startedIn": "from {month}",
+    "calcTitle": "Calculator",
+    "calcIntro": "Choose an amount, a start month and a number of years. The figures come from the same published averages; nothing is sent anywhere.",
+    "amount": "Amount (Rs)",
+    "startYear": "Start year",
+    "startMonth": "Start month",
+    "calcYears": "Years",
+    "calcSubmit": "Show",
+    "calcResult": "Rs {amount} from {start}, for {years}, to {end}",
+    "calcFd": "Fixed deposit",
+    "calcFdTax": "Fixed deposit after tax",
+    "calcBill": "Treasury bills, before tax",
+    "calcReal": "{value} after inflation",
+    "calcRate": "{rate} a year",
+    "calcAwfdr": "Uses the AWFDR (all outstanding deposits) for the years before April 2014.",
+    "calcTooLate": "That period would end after {month}, the latest month with every figure published. Choose an earlier start or fewer years.",
+    "calcTooEarly": "The figures start in {month}.",
+    "calcInvalid": "Some of the choices could not be read, so the defaults are shown.",
+    "ratesTitle": "Rates and inflation since 2003",
+    "ratesNote": "Each month's average rate on fixed deposits, the 12-month treasury bill yield before tax, and inflation over the previous 12 months.",
+    "assumptionsTitle": "What these figures assume",
+    "assume1": "The deposit rate is the Central Bank's average for new fixed deposits (AWNFDR) from April 2014, and its average for all outstanding fixed deposits (AWFDR) before then. Both are averages across banks and deposit terms, not any bank's 12-month offer.",
+    "assume2": "The bill yield is the Central Bank's 12-month primary market yield. From May 2002 to March 2018 a 10% withholding tax was deducted from bill interest and the Central Bank's table shows yields after it; the tax is added back here so both are compared before tax.",
+    "assume3": "Tax: since January 2023 an advance income tax is deducted from deposit interest (5%, and 10% from April 2025). It counts towards income tax and is not final; a person below the tax-free allowance can avoid it with a self-declaration. Earlier rules are not modelled. Bill interest is taxed at each person's own rate, so no after-tax figure is shown for bills.",
+    "assume4": "Inflation is the Colombo Consumer Price Index, joined across its base years (2002, 2006/07, 2013, 2021).",
+    "assume5": "Deposit insurance covers up to Rs 1,100,000 per depositor at each licensed bank or finance company; above that, a deposit depends on the institution. Treasury bills are owed by the Government of Sri Lanka. Neither risk, nor any fee or early withdrawal, is included.",
+    "assume6": "The share market is not included: long index history comes from the Colombo Stock Exchange, whose permission is needed to use it.",
+    "assume7": "This describes the past, from averages. It is not advice about anyone's savings.",
+    "sourceCbsl": "Source: Central Bank of Sri Lanka",
+    "sourceDcs": "Source: Department of Census and Statistics, Sri Lanka",
+    "sourcesBoth": "Sources: Central Bank of Sri Lanka (interest rates); Department of Census and Statistics, Sri Lanka (CCPI)."
   }
 }

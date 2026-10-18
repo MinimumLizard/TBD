@@ -52,6 +52,41 @@ cse_api:
              cse.company_info_daily, cse.company_profiles]
   calendar: cse
 
+cbsl:
+  name: Central Bank of Sri Lanka statistical tables (interest rates incl. AWFDR, treasury bill yields)
+  homepage: https://www.cbsl.gov.lk/
+  enabled: true
+  rights:
+    status: silent
+    evidence: >-
+      No terms of use, disclaimer or copyright page (all return 404); only a privacy statement and the footer
+      "© Central Bank of Sri Lanka ... All Rights Reserved". No rights note in the xlsx files. Silent under
+      decision 0009, with that notice: a written enquiry to cbslgen@cbsl.lk is advisable before paid use.
+    url: https://www.cbsl.gov.lk/en/statistics/statistical-tables/monetary-sector
+    checked: 2026-10-18
+    attribution: "Source: Central Bank of Sri Lanka"
+  datasets: [rates.cbsl_monthly, rates.cbsl_annual, rates.tbill_auctions]
+  notes: >-
+    Table 4.04 (monthly rates, 2003 to date), 4.03 (annual, 1990 to date) and the weekly treasury bill auction file
+    (1996 to November 2025; not updated since 24 December 2025), for the fixed deposit and treasury bill comparison
+    (lk_savings_compare). File names carry the update date, so links are read from the statistical-tables pages.
+
+dcs_cpi:
+  name: Department of Census and Statistics, consumer price indices (CCPI)
+  homepage: https://www.statistics.gov.lk/
+  enabled: true
+  rights:
+    status: silent
+    evidence: >-
+      Footer "All Rights Reserved"; the only policy (microdata dissemination) does not cover published tables.
+      PDF only; several base years to splice. Enquiry: information@statistics.gov.lk.
+    url: https://www.statistics.gov.lk/InflationAndPrices/StaticalInformation/MonthlyCCPI
+    checked: 2026-10-18
+    attribution: "Source: Department of Census and Statistics, Sri Lanka"
+  datasets: [rates.cpi_monthly]
+  notes: >-
+    "Movements of the CCPI" PDFs for bases 2021, 2013, 2006/07 and 2002 (2003 to date). The NCPI is not collected.
+
 # --- Not used by the product (kept so the decision and its evidence stay on record) -----------------------------
 
 coinmetrics_community:
@@ -175,34 +210,4 @@ alternative_me_fng:
     url: https://alternative.me/crypto/fear-and-greed-index/
     checked: 2026-10-18
     attribution: "Source: alternative.me Crypto Fear & Greed Index"
-  datasets: []
-
-cbsl:
-  name: Central Bank of Sri Lanka statistical tables (interest rates incl. AWFDR, treasury bill yields)
-  homepage: https://www.cbsl.gov.lk/
-  enabled: false
-  rights:
-    status: silent
-    evidence: >-
-      No terms of use, disclaimer or copyright page (all return 404); only a privacy statement and the footer
-      "© Central Bank of Sri Lanka ... All Rights Reserved". No rights note in the xlsx files. Silent under
-      decision 0009, with that notice: a written enquiry to cbslgen@cbsl.lk is advisable before paid use.
-    url: https://www.cbsl.gov.lk/en/statistics/statistical-tables/monetary-sector
-    checked: 2026-10-18
-    attribution: "Source: Central Bank of Sri Lanka"
-  datasets: []
-  notes: Table 4.04 (monthly rates, 2003 to date) and 4.03 (annual, 1990 to date) for the FD comparison.
-
-dcs_cpi:
-  name: Department of Census and Statistics, consumer price indices (CCPI, NCPI)
-  homepage: https://www.statistics.gov.lk/
-  enabled: false
-  rights:
-    status: silent
-    evidence: >-
-      Footer "All Rights Reserved"; the only policy (microdata dissemination) does not cover published tables.
-      PDF only; several base years to splice. Enquiry: information@statistics.gov.lk.
-    url: https://www.statistics.gov.lk/InflationAndPrices/StaticalInformation/MonthlyCCPI
-    checked: 2026-10-18
-    attribution: "Source: Department of Census and Statistics, Sri Lanka"
   datasets: []
