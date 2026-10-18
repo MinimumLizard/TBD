@@ -74,3 +74,11 @@ bonds.volumes:
     2026-05-11: >-
       Never published: the PDMO index row for this day links a re-posted copy of the 2026-05-08 volume file
       (different bytes, identical figures).
+
+crypto.ohlc_daily:
+  table: crypto.ohlc_daily
+  date_column: day
+  calendar: crypto
+  starts: 2011-09-14          # Bitstamp BTC/USD; the check counts a day present if any pair has it
+  grace_days: 1               # collected at 00:17 UTC; the gap check runs at 03:23 UTC
+  witnesses: []

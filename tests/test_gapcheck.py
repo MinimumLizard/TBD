@@ -17,6 +17,29 @@ def test_calendar_skips_weekends_and_closures(tmp_path):
     assert cal.back(dt.date(2026, 10, 7), 1) == dt.date(2026, 10, 5)      # skips the closure
 
 
+def test_a_market_that_never_closes_counts_weekends(tmp_path):
+    (tmp_path / "c.yaml").write_text("name: C\nstarts: 2026-10-01\nevery_day: true\nclosures: {}\n")
+    cal = gapcheck.load_calendar("c", tmp_path)
+    assert len(cal.business_days(dt.date(2026, 10, 1), dt.date(2026, 10, 7))) == 7
+    assert cal.back(dt.date(2026, 10, 5), 1) == dt.date(2026, 10, 4)      # a Sunday
+
+
+@pytest.mark.db
+def test_a_missing_crypto_day_is_missing_not_a_holiday(conn, store, tmp_path):
+    (tmp_path / "crypto.yaml").write_text("name: C\nstarts: 2026-10-01\nevery_day: true\nclosures: {}\n")
+    now = dt.datetime.now(dt.timezone.utc)
+    fetch_id, sha = db.record_fetch(conn, store, source_id="bitstamp", method="GET", url="https://x/", params={},
+                                    http_status=200, body=b"{}", content_type=None, fetched_at=now)
+    for d in (1, 2, 3, 5):                                                # the 4th (a Sunday) is missing
+        conn.execute("""insert into crypto.ohlc_daily (pair, day, open, high, low, close, volume, raw_sha256, fetch_id,
+                        fetched_at) values ('btcusd', %s, 1, 1, 1, 1, 0, %s, %s, %s)""",
+                     (dt.date(2026, 10, d), sha, fetch_id, now))
+    datasets = {"c": {"table": "crypto.ohlc_daily", "date_column": "day", "calendar": "crypto",
+                      "starts": dt.date(2026, 10, 1), "grace_days": 1}}
+    found = gapcheck.check(conn, dt.date(2026, 10, 6), datasets, tmp_path)
+    assert [(f["day"].day, f["status"]) for f in found] == [(4, "missing")]
+
+
 @pytest.mark.db
 def test_gap_classification(conn, store, tmp_path):
     (tmp_path / "cse.yaml").write_text("name: CSE\nstarts: 2026-10-01\nclosures: {}\n")

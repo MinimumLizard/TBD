@@ -35,11 +35,15 @@ class Calendar:
     name: str
     starts: dt.date
     closures: dict[dt.date, dict]
+    every_day: bool = False           # a market that never closes (crypto): weekends are sessions too
+
+    def is_session(self, d: dt.date) -> bool:
+        return (self.every_day or d.weekday() < 5) and d not in self.closures
 
     def business_days(self, start: dt.date, end: dt.date) -> list[dt.date]:
         days, d = [], max(start, self.starts)
         while d <= end:
-            if d.weekday() < 5 and d not in self.closures:
+            if self.is_session(d):
                 days.append(d)
             d += dt.timedelta(days=1)
         return days
@@ -49,14 +53,15 @@ class Calendar:
         d = end
         while n > 0:
             d -= dt.timedelta(days=1)
-            if d.weekday() < 5 and d not in self.closures:
+            if self.is_session(d):
                 n -= 1
         return d
 
 
 def load_calendar(name: str, directory: Path = CONFIG / "calendars") -> Calendar:
     raw = yaml.safe_load((directory / f"{name}.yaml").read_text())
-    return Calendar(raw["name"], raw["starts"], {d: v for d, v in (raw.get("closures") or {}).items()})
+    return Calendar(raw["name"], raw["starts"], {d: v for d, v in (raw.get("closures") or {}).items()},
+                    bool(raw.get("every_day", False)))
 
 
 def load_datasets(path: Path = CONFIG / "datasets.yaml") -> dict:
@@ -90,6 +95,8 @@ def check(conn, today: dt.date, datasets: dict | None = None, calendars_dir: Pat
                 status, detail = "acknowledged", acknowledged[day]
             elif day in witnessed:
                 status, detail = "missing", "a same-market dataset has this day, so it was a session"
+            elif cal.every_day:
+                status, detail = "missing", "this market trades every day, so every day should have data"
             else:
                 status, detail = "unconfirmed_closure", f"no data anywhere; if it was a holiday, add it to config/calendars/{cfg['calendar']}.yaml"
             findings.append({"dataset": key, "day": day, "status": status, "detail": detail})
