@@ -7,7 +7,8 @@
 #   2. re-downloads every PDMO original and checks each against the old database's recorded SHA-256
 #   3. rebuilds the bond database's row history from its git versions (self-verified)
 #   4. saves the CSE's one-year chart history (fills the missed 2026-10-05 session)
-#   5. replays bonds and CSE through the new parsers and reconciles with the old tables
+#   5. replays bonds and CSE through the new parsers and reconciles with the old tables (incl. the CSE
+#      corporate-action caches)
 #   6. archives every file of every old repo (at the audited commits, checked against the audit baselines, and at
 #      their latest commits) plus full-history bundles
 # The old repos keep collecting until cut-over, so steps 2-5 use their LATEST state (all history to date), while the
@@ -78,6 +79,10 @@ jobs:
         run: >-
           uv run --no-dev python -m data_platform.migration.cse --old-repo "$WORK/CSE" --chart-archive "$WORK/cse_chart"
           --report reports/cse.json
+      - name: Load the CSE corporate-action caches (from the archive) and reconcile them
+        run: >-
+          uv run --no-dev python -m data_platform.migration.cse_corporate_actions --old-repo "$WORK/CSE" --archive
+          --report reports/cse-corporate-actions.json
       - name: Archive every old file and check the audit baselines
         run: >-
           uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"

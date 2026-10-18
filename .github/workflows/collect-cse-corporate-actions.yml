@@ -1,0 +1,23 @@
+# Weekdays at 21:37 Sri Lanka time: every company's announcement list for the last 92 days, and the details of any
+# dividend, sub-division, scrip or rights announcement not stored yet (about 300 requests, one a second).
+name: "Collect: CSE corporate actions"
+
+on:
+  schedule:
+    - cron: "7 16 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-cse-corporate-actions
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect cse_api:corporate_actions
+      timeout: 60
+    secrets: inherit
