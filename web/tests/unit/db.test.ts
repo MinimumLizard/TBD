@@ -50,6 +50,8 @@ describe("buildQuery", () => {
     expect(dateColumn("models.bond_reference")).toBeNull();
     expect(dateColumn("models.bond_residual_zscore")).toBe("obs_date");
     expect(dateColumn("models.cse_security_session")).toBe("session_date");
+    expect(dateColumn("models.cse_total_return")).toBe("session_date");
+    expect(dateColumn("models.cse_corporate_action")).toBe("announced_date");
   });
 
   test("identifiers and placeholders are checked", () => {
