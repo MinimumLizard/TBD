@@ -27,6 +27,10 @@ decisions).
 - Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
   portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
   lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
+- Crypto section (decision 0018, built 2026-10-18 at the owner's request): Bitstamp collector, models `crypto_market`
+  (free), `crypto_cycle` (Plus, 7-day preview), `crypto_fair_value` (Pro), pages /crypto and /crypto/<asset>.
+  Cross-checks: `docs/research/crypto-crosscheck.md`. Neutral names only; never imitate a paid crypto-research
+  service (`docs/research/crypto-itc-review.md`). Not public before the Bitstamp licence and a lawyer's view.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
@@ -40,7 +44,9 @@ tests; outputs carry `method_version`) → API as Next.js server routes (`web/li
 check) → Next.js web app on Vercel, all copy in `web/messages/{en,si,ta}.json`.
 
 Data-source rule (owner, decision 0009): use a source only if its terms allow commercial use or are silent. Status
-lives in `config/sources.yaml`. Crypto is deferred: most of its free sources prohibit commercial use.
+lives in `config/sources.yaml`. Crypto (decision 0018) runs on Bitstamp prices only, as a prototype: its Data License
+Agreement is unsigned, so `bitstamp` is `permission_required` (a launch blocker); most other crypto sources prohibit
+commercial use.
 
 This session may NOT change the existing repos; push access to them was refused by the environment. Give the owner
 instructions instead.
@@ -86,11 +92,12 @@ uv sync                                                        # once (Python 3.
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"   # what CI runs
 uv run python -m data_platform.compliance                      # copy lint
 uv run python -m data_platform.jobs.migrate                    # apply db/migrations (DATABASE_URL)
-uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history
+uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | bitstamp
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.migration.bonds|cse|legacy ...  # history migration + reconciliation (see --help)
-uv run python -m data_platform.jobs.models [--market lk_bonds|cse] [--model NAME]   # compute models (--as-of D: in memory only)
+uv run python -m data_platform.jobs.models [--market lk_bonds|cse|crypto] [--model NAME]   # compute models (--as-of D: in memory only)
+uv run python -m data_platform.jobs.crosscheck_crypto           # crypto vs public reference points (docs/research/crypto-crosscheck.md)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
 uv run python -m data_platform.migration.parity bonds|cse ...   # parity with the old tools (see --help)
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website

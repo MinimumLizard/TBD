@@ -34,7 +34,8 @@ https://help.intothecryptoverse.com/support/solutions/articles/69000833996 (2025
 
 - **Pi Cycle Top** (P. Swift, 2019): the 111-day SMA crosses above 2 × the 350-day SMA.
   https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/
-- **Pi Cycle Bottom:** the 150-day EMA below 0.745 × the 471-day SMA (only 2015 and 2018 so far).
+- **Pi Cycle Bottom:** the 150-day EMA below 0.745 × the 471-day SMA (only 2015 and 2018 so far; correction
+  2026-10-18: a third crossing in July 2022 was reported at the time and is in our data, see `crypto-crosscheck.md`).
 - **200-week MA heatmap** (Plan B, 2019): the 200-week MA's month-on-month change. Colour cut-offs are not published.
 - **20W SMA / 21W EMA band:** on weekly closes.
 - **MVRV Z-score:** (market cap − realized cap) / σ(market cap), with σ over all history to date (Glassnode).
