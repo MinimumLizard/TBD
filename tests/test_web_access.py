@@ -9,7 +9,7 @@ pytestmark = pytest.mark.db
 def test_every_platform_table_has_row_level_security(conn):
     missing = conn.execute("""select n.nspname || '.' || c.relname as t from pg_class c
                               join pg_namespace n on n.oid = c.relnamespace
-                              where c.relkind = 'r' and n.nspname in ('ops', 'bonds', 'cse', 'models', 'community', 'rates')
+                              where c.relkind = 'r' and n.nspname in ('ops', 'bonds', 'cse', 'models', 'community', 'rates', 'crypto')
                                 and not c.relrowsecurity""").fetchall()
     assert missing == []           # a new table in a later migration must enable it too
 

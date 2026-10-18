@@ -18,7 +18,7 @@ model_general:
 data_sources:
   en: >-
     Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka; Central Bank of
-    Sri Lanka; Department of Census and Statistics, Sri Lanka. This service is not affiliated with or endorsed by
+    Sri Lanka; Department of Census and Statistics, Sri Lanka; Bitstamp (crypto prices). This service is not affiliated with or endorsed by
     any of them.
 
 savings:
@@ -30,3 +30,11 @@ savings:
     income tax rate, so no after-tax figure is shown for bills. Inflation is the Colombo Consumer Price Index.
     Deposit insurance covers up to Rs 1,100,000 per depositor at each licensed bank or finance company. Past rates
     and past inflation do not predict future ones. This is education, not advice about any person's savings.
+
+crypto_risk:
+  en: >-
+    Crypto-assets are not legal tender in Sri Lanka. The Central Bank of Sri Lanka (CBSL) has not licensed any
+    entity to operate crypto schemes, and in 2023 the CBSL said that crypto is not recognised as an asset class in
+    Sri Lanka. Crypto prices can fall sharply and quickly, and holdings can be lost entirely. This section shows
+    global market prices in US dollars for information and education only. It does not offer, promote or help with
+    dealing in any crypto-asset.

@@ -22,6 +22,7 @@ export default async function SiteFooter() {
               <li><Link href="/cse">{t("nav.cse")}</Link></li>
               <li><Link href="/cse/shares">{t("nav.shares")}</Link></li>
               <li><Link href="/bonds">{t("nav.bonds")}</Link></li>
+              <li><Link href="/crypto">{t("nav.crypto")}</Link></li>
             </ul>
           </div>
           <div>

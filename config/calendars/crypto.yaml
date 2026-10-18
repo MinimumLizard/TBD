@@ -1,0 +1,7 @@
+# Crypto markets trade every day. A "session" is a UTC day (00:00 to 24:00 UTC), the day Bitstamp's daily candle
+# covers. Bitstamp has had a BTC/USD candle for every day since 2011-09-14 (measured 2026-10-18), so a missing day is
+# a collection failure, never a closure.
+name: Crypto markets (every UTC day)
+starts: 2011-09-14
+every_day: true
+closures: {}

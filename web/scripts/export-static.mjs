@@ -3,7 +3,7 @@
 //   DATABASE_URL=... ALLOW_TEST_TIERS=1 npx next start -p 3100 &      # the site, on the data to show
 //   node scripts/export-static.mjs <out_dir> [--as-of "16 Oct 2026"]
 //
-// It crawls every page a visitor can reach (free tier), and the bond pages again as a Pro subscriber, then for each
+// It crawls every page a visitor can reach (free tier), and the bond and crypto pages again as a Pro subscriber, then for each
 // page: removes the app's scripts (the copy is plain HTML), inlines the stylesheet, loads the heading font from
 // Google Fonts, rewrites links to the copy's flat file names, draws charts from their data-chart attribute with
 // ECharts from cdnjs, and adds a banner saying what this is. The Pro pages are for the owners' eyes only: the copy
@@ -18,8 +18,9 @@ const AS_OF = process.argv.includes("--as-of") ? process.argv[process.argv.index
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
-const proPage = (path) => path === "/bonds" || path.startsWith("/bonds/") || path === "/email/bonds";  // the pages a Pro subscriber sees differently
+const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/crypto", "/learn", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
+// the pages a Pro subscriber sees differently
+const proPage = (path) => path === "/bonds" || path.startsWith("/bonds/") || path === "/email/bonds" || path === "/crypto" || path.startsWith("/crypto/");
 const ECHARTS = "https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js";
 const FONTS = "https://fonts.googleapis.com/css2?family=Manrope:wght@500..800&display=swap";
 

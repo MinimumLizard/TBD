@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-18 — Crypto section (prototype, decision 0019)
+
+- Bitstamp collector: daily candles for ten US-dollar pairs and ETH/BTC, full backfill from 2011-09-14 (29,329
+  candles, 66 requests), finished UTC days only, append-only, a daily schedule gated on `COLLECTION_ENABLED`.
+  The source stays `permission_required` (a launch blocker) until its Data License Agreement is signed.
+- Migration 0010: the `crypto` schema and the crypto model outputs, all with row-level security.
+- Models: `crypto_market` (returns, drawdown from the high, volatility), `crypto_cycle` (long averages, Mayer
+  multiple, Pi cycle lines and crossings, halvings, the cycle table, monthly returns), `crypto_trend_bands` (log
+  regression and power law, re-fitted point in time, with bands). Every row is point-in-time (tested).
+- Cross-checks against public reference points: 30 checks, all met (`docs/research/crypto-crosscheck.md`).
+- Website: /crypto and /crypto/<asset>, three API routes, Crypto in the navigation, five glossary terms, a
+  `crypto_risk` notice citing the CBSL at the top of every crypto page; the leak suite covers it (51 tests).
+- The gap check understands a market that trades every day (`config/calendars/crypto.yaml`).
+
 ## 2026-10-18 — Phase 3b, part 1: CSE corporate actions and total returns
 
 - New facts: each company's announcement list and every corporate-action detail record, kept as the CSE served

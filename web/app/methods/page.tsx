@@ -10,7 +10,7 @@ export async function generateMetadata() {
 
 export default async function MethodsPage() {
   const t = await getTranslations();
-  const markets = ["cse", "lk_bonds", "lk_savings"] as const;
+  const markets = ["cse", "lk_bonds", "lk_savings", "crypto"] as const;
   return (
     <>
       <h1>{t("methods.title")}</h1>

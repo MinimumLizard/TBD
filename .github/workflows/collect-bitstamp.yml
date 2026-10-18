@@ -1,0 +1,26 @@
+# Daily at 00:17 UTC (05:47 Sri Lanka time), after the UTC day closes: Bitstamp's final candle for yesterday, for
+# every pair in data_platform/collectors/bitstamp/parse.py. A second run at 06:17 UTC repairs a missed or failed
+# first run (the collector always fetches every day after the last one stored, so a skipped run is never a gap).
+# Development and the owners' preview only until Bitstamp's Data License Agreement is signed (config/sources.yaml).
+name: "Collect: Bitstamp crypto"
+
+on:
+  schedule:
+    - cron: "17 0 * * *"
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-bitstamp
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect bitstamp
+      timeout: 30
+    secrets: inherit

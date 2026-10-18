@@ -14,7 +14,8 @@
     "learn": "Learn",
     "plans": "Plans",
     "feedback": "Feedback",
-    "weekly": "Weekly e-mail"
+    "weekly": "Weekly e-mail",
+    "crypto": "Crypto"
   },
   "tiers": {
     "free": "Free",
@@ -342,7 +343,8 @@
     "status_retired": "no longer computed",
     "market_lk_bonds": "Government bonds",
     "market_cse": "Stock market",
-    "market_lk_savings": "Savings and inflation"
+    "market_lk_savings": "Savings and inflation",
+    "market_crypto": "Crypto (global prices, in US dollars)"
   },
   "about": {
     "title": "About",
@@ -405,6 +407,18 @@
     "cse_total_returns": {
       "title": "CSE total returns",
       "summary": "Each share's return with its confirmed dividends, sub-divisions, scrip and rights issues taken into account, beside its price-only return."
+    },
+    "crypto_market": {
+      "title": "Crypto prices, returns and drawdowns",
+      "summary": "Daily closing prices in US dollars for bitcoin, ether and other large crypto-assets, with returns, the fall from the highest close and realised volatility."
+    },
+    "crypto_cycle": {
+      "title": "Crypto cycles and long averages",
+      "summary": "Long moving averages, the Pi cycle lines and the days they crossed, the bitcoin halvings, each cycle's peak and low, and monthly returns."
+    },
+    "crypto_trend_bands": {
+      "title": "Bitcoin long-run trend bands",
+      "summary": "Two trend lines through bitcoin's price history on log-log axes, re-fitted every day, with bands around them and where the price sits between the bands."
     }
   },
   "errors": {
@@ -425,6 +439,7 @@
         "Every listed share: price, 52-week range and returns against the ASPI",
         "Government bond quotes and today's yield curve",
         "Each bond's last 30 days against the curve",
+        "Crypto prices in US dollars: returns, the fall from the high and volatility",
         "Plain-language explanations and a method page for every number"
       ]
     },
@@ -434,7 +449,8 @@
         "Everything in Free",
         "Each bond's full history against the curve",
         "How unusual each bond's position is today (z-scores)",
-        "Where trades print against dealer quotes"
+        "Where trades print against dealer quotes",
+        "Crypto cycles: long averages, Pi cycle lines, halvings and monthly returns (free a week late)"
       ]
     },
     "pro": {
@@ -442,7 +458,8 @@
       "features": [
         "Everything in Plus",
         "Carry, rolldown, duration and convexity for every bond",
-        "Each bond's yield-change table"
+        "Each bond's yield-change table",
+        "Bitcoin's long-run trend bands, re-fitted every day"
       ]
     },
     "professional": {
@@ -611,6 +628,31 @@
         "name": "Total return",
         "short": "The price change plus dividends, with splits, scrip and rights issues taken into account.",
         "long": "A share's published price falls when it pays a dividend or splits, even though its owners lose nothing. The total return adds the dividends back and corrects for changes in the number of shares, so it measures what the shares owned at the start would be worth with their dividends kept in the shares. Past returns do not predict future ones."
+      },
+      "movingAverage": {
+        "name": "Moving average",
+        "short": "The average price over a fixed number of recent days or weeks, recomputed every day.",
+        "long": "A 200-day average is the mean of the last 200 daily closes. It smooths out day-to-day moves, so it shows the longer direction of the price. An exponential average weights recent days more. Averages describe the past; they do not predict."
+      },
+      "drawdown": {
+        "name": "Drawdown",
+        "short": "How far the price is below its highest close so far.",
+        "long": "A drawdown of −50% means the price is half its highest close to date. It returns to 0 only on a day the price sets a new high. Here the high is the highest close in the data, which starts in 2011 for bitcoin."
+      },
+      "volatility": {
+        "name": "Realised volatility",
+        "short": "How much the price has been moving, as a yearly percentage.",
+        "long": "The standard deviation of daily price changes over the last 30 or 90 days, scaled to a year (√365, because crypto trades every day). 80% means typical yearly swings of that size. It measures the past, not risk to come."
+      },
+      "halving": {
+        "name": "Halving",
+        "short": "The day the number of new bitcoins created with each block halves, every 210,000 blocks (about four years).",
+        "long": "Halvings so far: 28 November 2012, 9 July 2016, 11 May 2020 and 20 April 2024. The periods between them are often called epochs. Past prices around them are shown as history, not as a pattern that must repeat."
+      },
+      "powerLaw": {
+        "name": "Power law",
+        "short": "A straight-line trend on a chart whose both axes are logarithmic.",
+        "long": "Here: log price against log of the days since bitcoin's first block (3 January 2009). The line summarises how fast the price has grown so far. It is a description of the past, not a value the price should have."
       }
     },
     "guidesTitle": "Guides",
@@ -789,5 +831,128 @@
     "sourceCbsl": "Source: Central Bank of Sri Lanka",
     "sourceDcs": "Source: Department of Census and Statistics, Sri Lanka",
     "sourcesBoth": "Sources: Central Bank of Sri Lanka (interest rates); Department of Census and Statistics, Sri Lanka (CCPI)."
+  },
+  "crypto": {
+    "title": "Crypto markets",
+    "intro": "Global crypto-asset prices in US dollars, from Bitstamp's daily closes, with the history and long averages that describe them.",
+    "prototype": "Prototype: the data licence for this section is pending. Until Bitstamp's data agreement is signed, these pages are for the owners' private preview only.",
+    "history": "Price history starts where Bitstamp's does: 14 September 2011 for bitcoin, and later for every other asset. Earlier prices, including bitcoin's 2011 high, are not included.",
+    "utcDay": "Each day is a UTC day (00:00 to 24:00 UTC, which is 05:30 to 05:30 Sri Lanka time); its price is the day's last trade on Bitstamp.",
+    "assetsTitle": "Prices",
+    "fromHigh": "{pct} from its highest close",
+    "atHigh": "at its highest close",
+    "last90": "last 90 days",
+    "btcTitle": "Bitcoin and its 200-week average",
+    "btcChart": "Bitcoin's price and its 200-week average (weekly points, log scale)",
+    "price": "Price",
+    "sma200w": "200-week average",
+    "sma200wTile": "Bitcoin's 200-week average",
+    "sma200wChange": "{pct} over the last four weeks",
+    "priceVs200w": "Price against the 200-week average",
+    "tableTitle": "All assets",
+    "asset": "Asset",
+    "close": "Close",
+    "d1": "1 day",
+    "d7": "7 days",
+    "d30": "30 days",
+    "y1": "1 year",
+    "drawdown": "From the high",
+    "vol30": "Volatility, 30 days",
+    "details": "Details",
+    "assets": {
+      "btc": "Bitcoin",
+      "eth": "Ether",
+      "xrp": "XRP",
+      "ltc": "Litecoin",
+      "sol": "Solana",
+      "ada": "Cardano",
+      "link": "Chainlink",
+      "doge": "Dogecoin",
+      "avax": "Avalanche",
+      "dot": "Polkadot",
+      "ethbtc": "Ether in bitcoin"
+    }
+  },
+  "cryptoAsset": {
+    "pairLine": "{pair} on Bitstamp · history from {date}",
+    "latest": "Latest close",
+    "returns": "Returns",
+    "window": "Period",
+    "change": "Change",
+    "high": "Highest close so far",
+    "highOn": "on {date}, {days} days ago",
+    "drawdown": "Fall from the highest close",
+    "vol30": "Volatility, 30 days",
+    "vol90": "Volatility, 90 days",
+    "volNote": "annualised",
+    "priceChart": "Price with its 50-day and 200-day averages",
+    "priceOnly": "Price (weekly points, log scale)",
+    "sma50": "50-day average",
+    "sma200": "200-day average",
+    "drawdownChart": "Fall from the highest close to date",
+    "volChart": "Realised volatility, annualised",
+    "cycleTitle": "Cycles and long averages",
+    "mayer": "Mayer multiple",
+    "mayerNote": "price ÷ 200-day average",
+    "dist20w": "Distance from the 20-week average",
+    "sma200wNote": "{pct} over four weeks",
+    "halving": "Since the latest halving",
+    "halvingNote": "{days} days since {date}",
+    "bandChart": "Price with the 20-week and 21-week averages, and the 200-week average",
+    "sma20w": "20-week simple average",
+    "ema21w": "21-week exponential average",
+    "piChart": "Pi cycle lines",
+    "piTop": "111-day average",
+    "piTop2": "2 × 350-day average",
+    "piBottom": "150-day exponential average",
+    "piBottom2": "0.745 × 471-day average",
+    "crossings": "Days the Pi cycle lines crossed",
+    "crossTop": "111-day rose above 2 × 350-day",
+    "crossBottom": "150-day fell below 0.745 × 471-day",
+    "crossingsNone": "The lines have not crossed in this asset's Bitstamp history.",
+    "crossingsNote": "Listed as facts about past data. The settings of these lines were chosen by their author to fit past highs and lows, so their record is not a test, and it says nothing about what happens next.",
+    "cycleTable": "Halvings, cycle peaks and cycle lows",
+    "cycleTableNote": "A cycle's peak and low are the two ends of the largest fall between two halvings, on Bitstamp closes. Provisional: the epoch has not ended, so the date can still move.",
+    "event": "Event",
+    "kind_halving": "Halving {n}",
+    "kind_cycle_peak": "Cycle peak (epoch {n})",
+    "kind_cycle_low": "Cycle low (epoch {n})",
+    "date": "Date",
+    "closeAt": "Close",
+    "fromPrior": "Change from the event before",
+    "daysFromPrior": "Days from the event before",
+    "since": "Change since, to the latest close",
+    "provisional": "provisional",
+    "monthly": "Monthly returns",
+    "year": "Year",
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "monthlyNote": "Each completed month's last close against the previous month's. This month so far: {pct}.",
+    "trendTitle": "Long-run trend bands",
+    "trendNote": "Two straight lines through bitcoin's whole Bitstamp history on log-log axes, re-fitted every day on the data to that day, with bands one and two standard deviations either side. They summarise past growth; they are not a value the price should have, and not a forecast.",
+    "position": "Position between the fitted bands",
+    "positionNote": "0 at the lower outer band, 1 at the upper",
+    "fitted": "Fitted line",
+    "inner": "±1 standard deviation",
+    "outer": "±2 standard deviations",
+    "fit_log_regression": "Log regression",
+    "fit_log_regression_note": "every stretch of log-time weighted equally",
+    "fit_power_law": "Power law",
+    "fit_power_law_note": "every day weighted equally",
+    "coefficients": "Fit on {date}: exponent {slope}, {n} closes",
+    "trendBtcOnly": "The trend bands are computed for bitcoin only.",
+    "ethbtc": "Ether priced in bitcoin"
   }
 }

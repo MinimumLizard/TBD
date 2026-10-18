@@ -1,5 +1,10 @@
 {
   "calendars": {
+    "crypto": {
+      "closures": [],
+      "every_day": true,
+      "name": "Crypto markets (every UTC day)"
+    },
     "cse": {
       "closures": [
         "2025-10-20",
@@ -44,6 +49,7 @@
         "2027-10-28",
         "2027-12-13"
       ],
+      "every_day": false,
       "name": "CSE trading days"
     },
     "lk_bond_market": {
@@ -85,12 +91,16 @@
         "2027-10-28",
         "2027-12-13"
       ],
+      "every_day": false,
       "name": "LKR government securities business days"
     }
   },
   "disclaimers": {
+    "crypto_risk": {
+      "en": "Crypto-assets are not legal tender in Sri Lanka. The Central Bank of Sri Lanka (CBSL) has not licensed any entity to operate crypto schemes, and in 2023 the CBSL said that crypto is not recognised as an asset class in Sri Lanka. Crypto prices can fall sharply and quickly, and holdings can be lost entirely. This section shows global market prices in US dollars for information and education only. It does not offer, promote or help with dealing in any crypto-asset."
+    },
     "data_sources": {
-      "en": "Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka; Central Bank of Sri Lanka; Department of Census and Statistics, Sri Lanka. This service is not affiliated with or endorsed by any of them."
+      "en": "Data: Colombo Stock Exchange; Public Debt Management Office, Ministry of Finance, Sri Lanka; Central Bank of Sri Lanka; Department of Census and Statistics, Sri Lanka; Bitstamp (crypto prices). This service is not affiliated with or endorsed by any of them."
     },
     "general": {
       "en": "Information and education only. Nothing on this site is investment advice, and nothing here is a recommendation to buy, sell or hold any security. Figures are computed from public sources and may contain errors or delays; check the original source before relying on any number. Past values do not predict future ones."
@@ -265,6 +275,74 @@
         {
           "changes": "Reads the version 2 curve (decision 0014); pair rows use each bond's maturity on the day and pair membership as known on the day, so a row never changes once computed.",
           "method_version": "1.1.0",
+          "status": "current"
+        }
+      ]
+    },
+    "crypto_cycle": {
+      "current_version": "1.0.0",
+      "disclaimer_key": "crypto_risk",
+      "free_preview": {
+        "delay_days": 7
+      },
+      "market": "crypto",
+      "method_md": "# Crypto cycles and long averages (crypto_cycle)\n\n## What it shows\n\nFor bitcoin, ether and the other crypto-assets in US dollars: long moving averages of the price, how far the price is from them, two pairs\nof lines known publicly as the Pi cycle indicators and the days they crossed, the bitcoin halvings, the peaks and\nlows of each four-year epoch between halvings, the change since each, and the return of every calendar month.\n\nAll of these describe the past. Some of these lines crossed close to past highs and lows; that is a description of\nwhat happened, a handful of times, and not evidence that it will happen again. Nothing here is a forecast.\n\n## Inputs\n\nBitstamp's daily closes for every US-dollar pair collected (`crypto.ohlc_daily`; BTC/USD from 2011-09-14, ETH/USD\nfrom 2017-08-16, the others later: see the crypto prices method). The close is the last trade of the UTC day. **The\nhistory starts where Bitstamp's does**, so the 2011 bitcoin high (June 2011) and anything before 2011-09-14 are not in\nit, and every other asset starts at its Bitstamp listing. The halvings are bitcoin events; for other assets the epochs\nbetween them are used as the same calendar periods. The Pi cycle settings were published for bitcoin.\n\n## Method (version 1.0.0)\n\nNotation: P(D) is the close on day D; SMA_n is the simple average of the last n daily closes (none until n exist);\nEMA_n is the exponential average with \u03b1 = 2 / (n + 1), started from the simple average of the first n closes.\n\n**Daily averages**\n- SMA_50 and SMA_200.\n- **Mayer multiple** = P(D) / SMA_200(D) (Trace Mayer, 2013).\n\n**Weekly averages** (weeks run Monday to Sunday, UTC; a week's close is its Sunday close). On day D the latest week is\nthe one D falls in, with P(D) as its close so far, as a weekly chart shows it:\n- SMA_nw(D) = (P(D) + the n \u2212 1 previous Sunday closes) / n, for n = 200 and 20.\n- EMA_21w(D) = \u03b1\u00b7P(D) + (1 \u2212 \u03b1)\u00b7(the weekly EMA at the previous Sunday), \u03b1 = 2 / 22, started from the simple\n  average of the first 21 weekly closes.\n- **Change of the 200-week average over four weeks** = SMA_200w(D) / SMA_200w(D \u2212 28) \u2212 1 (its month-on-month\n  change, the quantity behind Plan B's 2019 \"200-week moving average heatmap\"; no colour scale is applied here).\n- **Distance from the 20-week average** = P(D) / SMA_20w(D) \u2212 1. The 20-week SMA and 21-week EMA are shown together\n  as a band.\n\n**Pi cycle lines** (Philip Swift, 2019, published as the \"Pi Cycle Top\" and \"Pi Cycle Bottom\" indicators):\n- first pair: SMA_111 and 2 \u00d7 SMA_350. A **crossing** is a day on which SMA_111 > 2 \u00d7 SMA_350 while the day before it\n  was not (both lines defined on both days);\n- second pair: EMA_150 and 0.745 \u00d7 SMA_471. A **crossing** is a day on which EMA_150 < 0.745 \u00d7 SMA_471 while the day\n  before it was not.\nThe multipliers (2 and 0.745) and windows are the published ones; they were chosen by their author from the\nhistory, which is why past crossings line up with past highs and lows.\n\n**Halvings** (the bitcoin block reward halves every 210,000 blocks). The UTC dates of blocks 210,000, 420,000,\n630,000 and 840,000, read from the block headers on a public block explorer (blockstream.info, 2026-10-18):\n\n| Halving | Block | Date (UTC) |\n|---|---|---|\n| 1 | 210,000 | 2012-11-28 15:24 |\n| 2 | 420,000 | 2016-07-09 16:46 |\n| 3 | 630,000 | 2020-05-11 19:23 |\n| 4 | 840,000 | 2024-04-20 00:09 |\n\n- Days since the latest halving, and the change since it: P(D) / P(halving day) \u2212 1, where P(halving day) is the\n  close of the UTC day of the halving. For ether, a halving before its Bitstamp history has no close and no change.\n\n**Epochs, cycle peaks and cycle lows.** Epoch k runs from halving k to the day before halving k + 1 (epoch 0: from the\nfirst close to the day before the first halving). As known on day D:\n- an epoch's **cycle peak** and **cycle low** are the two ends of its largest fall so far: the pair of days, peak\n  before low, inside the epoch and up to D, with the lowest ratio P(low) / P(peak). Before any fall the peak is the\n  highest close so far and there is no low;\n- epoch 0 has no peak (Bitstamp's history starts after the June 2011 high); its low is its lowest close so far;\n- the highest close of an epoch is *not* used as its peak: in epoch 3 that close came on 2024-03-13, five weeks before\n  the next halving, while the epoch's large fall ran from the November 2021 high to the November 2022 low;\n- a peak or low in an epoch that has not ended yet can still move. It is marked **provisional**.\n\nFor every anchor (halving, peak, low) known on D: the change since it, P(D) / P(anchor) \u2212 1, and the days since it.\nIn cycle order (low 0, halving 1, peak 1, low 1, halving 2, ...) each anchor also carries its change from the\nprevious anchor and the days between them.\n\n**Months.** For each calendar month whose last day is in the data: the month's last close and its change from the\nprevious month's last close. The current month is shown only as the change so far: P(D) / (the previous month's\nlast close) \u2212 1.\n\nEvery value for day D uses closes up to D only, so a day's row does not change when later days arrive (tested).\nCrossing days, once recorded, never change for the same reason.\n\n## Limits\n\n- One exchange; closes, not intraday prices. Highs and lows on other venues, or intraday, differ in date and level\n  (`docs/research/crypto-crosscheck.md`).\n- For assets other than bitcoin, the halvings are only calendar markers, and the Pi cycle settings were never\n  chosen for them.\n- Four halvings and four cycles are a very small sample. The cycle table describes them; it does not establish a\n  rule.\n- The Pi cycle settings were fitted to past data by their author, so their record on that same data is not a test.\n\n## Sources\n\n- Bitstamp OHLC data: https://www.bitstamp.net/api/ . Commercial use needs a signed Data License Agreement, which\n  is pending; until it is signed this section is a prototype for the owners' preview.\n- Pi cycle indicators: P. Swift (2019), https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/\n- 200-week average and its monthly change: Plan B (2019).\n- Mayer multiple: T. Mayer (2013).\n- Halving blocks: block headers, https://blockstream.info/\n",
+      "minimum_tier": "plus",
+      "outputs": [
+        "models.crypto_cycle_daily",
+        "models.crypto_cycle_event",
+        "models.crypto_cycle_anchor",
+        "models.crypto_cycle_monthly"
+      ],
+      "recent_window": null,
+      "summary_key": "models.crypto_cycle.summary",
+      "title_key": "models.crypto_cycle.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "current"
+        }
+      ]
+    },
+    "crypto_market": {
+      "current_version": "1.0.0",
+      "disclaimer_key": "crypto_risk",
+      "free_preview": null,
+      "market": "crypto",
+      "method_md": "# Crypto prices, returns and drawdowns (crypto_market)\n\n## What it shows\n\nFor bitcoin, ether and other large crypto-assets, priced in US dollars, and for ether priced in bitcoin (ETH/BTC):\neach day's closing price, how much it has changed over a day, a week, a month and a year, how far it is below the\nhighest close so far, how long ago that high was, and how much the price has been moving (realised volatility).\n\nThese are descriptions of past prices. They are not forecasts and say nothing about what prices will do.\n\n## Inputs\n\nBitstamp's daily candles (`crypto.ohlc_daily`), one per pair per UTC day (00:00 to 24:00 UTC). The close is the last\ntraded price of the UTC day on Bitstamp. Only finished days are stored.\n\n| Pair | Bitstamp history from |\n|---|---|\n| BTC/USD | 2011-09-14 |\n| XRP/USD | 2016-12-16 |\n| LTC/USD | 2017-06-16 |\n| ETH/USD, ETH/BTC | 2017-08-16 |\n| LINK/USD | 2020-10-19 |\n| ADA/USD | 2021-11-17 |\n| AVAX/USD | 2022-03-08 |\n| SOL/USD, DOT/USD | 2022-08-18 |\n| DOGE/USD | 2022-12-21 |\n\n**History starts where Bitstamp's does.** Bitcoin traded before 2011-09-14 (the 2011 high in June is not in this\ndata), and every asset traded elsewhere before Bitstamp listed it. So \"the highest close so far\" means the highest\nBitstamp close since that date.\n\n## Method (version 1.0.0)\n\nFor a pair with daily closes P, on day D:\n\n- **Returns** over k days, for k = 1, 7, 30 and 365: P(D) / P(D \u2212 k) \u2212 1, where P(D \u2212 k) is the close k calendar\n  days earlier (the last close on or before that day, should a day ever be missing). None until the pair has k\n  days of history.\n- **Highest close to date**: H(D) = the largest close from the pair's first day to D, and the first day it was\n  reached. **Drawdown** = P(D) / H(D) \u2212 1 (0 on a day that sets a new high). **Days since the high** = D minus that\n  day.\n- **Realised volatility** over n = 30 and 90 days: the sample standard deviation (n \u2212 1 in the denominator) of the\n  last n daily log returns r = ln(P(t) / P(t \u2212 1)), multiplied by \u221a365, because crypto trades every day of the year.\n  None until n returns exist.\n- **ETH/BTC** is Bitstamp's own ETH/BTC market, not a ratio of the two dollar prices. It is treated as any other\n  pair; its close is in bitcoin.\n\nEvery value for day D uses closes up to D only, so a day's row does not change when later days arrive (tested).\n\n## Limits\n\n- One exchange. Prices on other venues differ, by a little most of the time and by more in fast markets.\n- Closes, not intraday highs: the highest close is lower than the highest traded price.\n- Price only: nothing here measures market size, holders, or any on-chain activity.\n\n## Sources\n\nBitstamp, https://www.bitstamp.net/api/ (OHLC data). Bitstamp's commercial terms need a signed Data License\nAgreement, which is pending; until it is signed this section is a prototype for the owners' preview.\n",
+      "minimum_tier": "free",
+      "outputs": [
+        "models.crypto_market_daily"
+      ],
+      "recent_window": null,
+      "summary_key": "models.crypto_market.summary",
+      "title_key": "models.crypto_market.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "current"
+        }
+      ]
+    },
+    "crypto_trend_bands": {
+      "current_version": "1.0.0",
+      "disclaimer_key": "crypto_risk",
+      "free_preview": null,
+      "market": "crypto",
+      "method_md": "# Bitcoin long-run trend bands (crypto_trend_bands)\n\n## What it shows\n\nTwo straight-line trends through bitcoin's whole price history drawn on logarithmic axes, with bands around each\nat one and two standard deviations of the price's distance from the line. The **position between the fitted bands**\nis where today's close sits between the lower and upper outer band: 0 at the lower band, 1 at the upper, 0.5 on\nthe line (below 0 or above 1 when the price is outside the bands).\n\nThe lines summarise how the price has grown so far. They are not a value the price should have, they are not a\nforecast, and a position near 0 or 1 is not a signal of anything. The fitted lines move as each day is added.\n\n## Inputs\n\nBitstamp's daily BTC/USD closes, from 2011-09-14 (`crypto.ohlc_daily`). **The history starts where Bitstamp's does**:\nbitcoin's prices from 2010 to September 2011, which published versions of these fits include, are not in it.\n\n## Method (version 1.0.0)\n\nt is the number of days from the genesis block (2009-01-03) to the day of the close, P the close.\n\n| Fit | Line | Weights | Units of intercept, slope and \u03c3 |\n|---|---|---|---|\n| **Log regression** | ln P = a + b\u00b7ln t | each day weighted 1/t | natural logs |\n| **Power law** | log\u2081\u2080 P = A + B\u00b7log\u2081\u2080 t | every day weighted equally | base-10 logs |\n\nBoth are least-squares fits of log price on log time, so both are straight lines on log-log axes (and b and B are\nboth the exponent of t: a power law). They differ in how much each part of the history counts:\n\n- **power law** (the form published by G. Santostasi, with A \u2248 \u221217.01 and B \u2248 5.82 on data from 2010): ordinary\n  least squares, every day counts once. Because there are many more recent days than early ones, recent years\n  dominate the fit;\n- **log regression**: weighted least squares with weight 1/t, which gives every equal stretch of log-time the same\n  total weight, so the early years count as much as the recent ones.\n\n**Re-fitted point in time.** On each day D both fits use only the closes from 2011-09-14 to D, and that day's\ncoefficients are stored with it. Day D's row therefore never changes when later days arrive (tested); the fit is\ncomputed from running sums of the weighted x, y, x\u00b2, xy and y\u00b2, and equals a direct least-squares fit of the same\ncloses (tested). No fit is made before 365 closes exist (the first is on 2012-09-12).\n\n**Bands.** \u03c3(D) is the residual standard deviation of that day's fit: \u221a(\u03a3w\u00b7e\u00b2 / \u03a3w \u00d7 n / (n \u2212 2)), with e the\nresiduals in the fit's log units (equal weights give the usual \u221a(\u03a3e\u00b2 / (n \u2212 2))). With m(D) the fitted log price:\n\n- fitted line: m(D); bands at m(D) \u00b1 1\u03c3 and m(D) \u00b1 2\u03c3, converted back to US dollars;\n- **position between the fitted bands** = (log P(D) \u2212 (m(D) \u2212 2\u03c3)) / (4\u03c3).\n\n## Limits\n\n- One exchange's closes, and a history that starts in September 2011.\n- A straight line on log-log axes is a summary of the past. Its slope has drifted as the history grew, and it can\n  keep drifting; the bands assume the distances from the line behave alike over time, which they have not exactly.\n- The two lines differ mainly in how they weight the early years; their gap is itself a measure of how uncertain\n  any such line is.\n\n## Sources\n\n- Bitstamp OHLC data: https://www.bitstamp.net/api/ . Commercial use needs a signed Data License Agreement, which\n  is pending; until it is signed this section is a prototype for the owners' preview.\n- Power law: G. Santostasi, \"The Bitcoin Power Law Theory\" (2024 and earlier public posts).\n- Weighted least squares: any regression text (e.g. Weisberg, *Applied Linear Regression*, ch. 7).\n",
+      "minimum_tier": "pro",
+      "outputs": [
+        "models.crypto_trend_band"
+      ],
+      "recent_window": null,
+      "summary_key": "models.crypto_trend_bands.summary",
+      "title_key": "models.crypto_trend_bands.title",
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
           "status": "current"
         }
       ]

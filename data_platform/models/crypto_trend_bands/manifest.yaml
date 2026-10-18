@@ -1,0 +1,17 @@
+name: crypto_trend_bands
+market: crypto
+title_key: models.crypto_trend_bands.title
+summary_key: models.crypto_trend_bands.summary
+disclaimer_key: crypto_risk
+requires_datasets:
+  - crypto.ohlc_daily
+outputs:
+  - models.crypto_trend_band
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parameters:
+      pairs: [btcusd]
+      min_observations: 365        # no fit before a year of closes
+      inner_band_sd: 1
+      outer_band_sd: 2             # the position is measured between the outer bands

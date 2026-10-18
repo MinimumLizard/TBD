@@ -14,10 +14,13 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
   cse_corporate_actions: { api: ["/api/v1/cse/shares/AAA.N0000/corporate-actions"], pages: ["/cse/shares/AAA.N0000"] },
   cse_total_returns: { api: ["/api/v1/cse/shares/AAA.N0000/total-return"], pages: ["/cse/shares/AAA.N0000"] },
   lk_savings_compare: { api: ["/api/v1/savings"], pages: ["/learn/savings"] },
+  crypto_market: { api: ["/api/v1/crypto/market"], pages: ["/crypto"] },
+  crypto_cycle: { api: ["/api/v1/crypto/cycle"], pages: ["/crypto"] },
+  crypto_trend_bands: { api: ["/api/v1/crypto/trend-bands"], pages: ["/crypto/btc"] },
 };
 
 // Detail pages, at the bond and share the tier-leak seed writes (web/tests/leak/seed.py).
 export const DETAIL_PAGES = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000"];
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
+export const ALL_PAGES = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/crypto", "/crypto/btc", "/crypto/eth", "/crypto/ethbtc", "/learn", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];

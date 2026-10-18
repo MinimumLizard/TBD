@@ -157,7 +157,7 @@ coingecko_free:
 bitstamp:
   name: Bitstamp exchange market data (OHLC from 2011-09-14)
   homepage: https://www.bitstamp.net/
-  enabled: false
+  enabled: true        # development and the owners' private preview only; a launch blocker until the agreement is signed
   rights:
     status: permission_required
     evidence: >-
@@ -168,8 +168,12 @@ bitstamp:
     url: https://www.bitstamp.net/api/
     checked: 2026-10-18
     attribution: "Source: Bitstamp"
-  datasets: []
-  notes: The recommended price source for crypto analytics once the Data License Agreement is signed.
+  datasets: [crypto.ohlc_daily]
+  notes: >-
+    The price source for the crypto section (decision 0019): daily candles for BTC, ETH and other majors in USD,
+    and ETH in BTC, from data_platform/collectors/bitstamp. Enabled on 2026-10-18 for development; the commercial
+    Data License Agreement (partners@bitstamp.net, draft in docs/letters/data-permission-requests.md) must be signed
+    before the section is public, and the status then becomes `allowed`.
 
 kraken:
   name: Kraken public market data and OHLCVT downloads

@@ -68,7 +68,7 @@ class Version(BaseModel):
 class Manifest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
-    market: Literal["lk_bonds", "cse", "lk_savings"]
+    market: Literal["lk_bonds", "cse", "lk_savings", "crypto"]
     title_key: str                        # text lives in web/messages/*.json, never here
     summary_key: str
     disclaimer_key: str                   # compliance/disclaimers.yaml
