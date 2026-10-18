@@ -59,9 +59,12 @@ user discussion, the name, and personal data. The answer decides how much of the
 Accounts (Supabase Pro, Cloudflare R2, Backblaze B2, Healthchecks.io), secrets, "Migrate history", then the
 `COLLECTION_ENABLED` variable, then the website on Vercel Pro. About two hours of your time plus the migration run.
 
-### 6. Trading calendars
-`config/calendars/cse.yaml` lists closures only up to August 2026 (inferred from data). Add the CSE's published
-holidays for the rest of 2026 and for 2027, or the site will warn "behind the market calendar" on those days.
+### 6. Trading calendars (mostly done 2026-10-18)
+Both calendars now list every bank holiday to the end of 2027, from the Central Bank's published lists; every past
+closure was also seen in the data. Two CSE closures are not bank holidays (1 and 7 January 2026, when the bond market
+was open), and 1 January 2027 is listed on the assumption that the CSE closes on New Year's Day again. When the CSE
+publishes its own holiday circular, check those three and the future dates against it
+(`config/calendars/cse.yaml`).
 
 ### Small fix for the old CSE tool (any time)
 The CSE says "Regular Trading" while the market is open, and the old tool's guard (`cse/fetch.py` line 123 and

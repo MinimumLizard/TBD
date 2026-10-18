@@ -1,24 +1,44 @@
-# Sri Lankan government securities market (PDMO daily reports): weekdays are business days unless listed below.
+# LKR government securities business days (secondary market quotes and trades): weekdays unless listed below.
 #
-# INFERRED from the data: weekdays since 2025-12-01 with no PDMO daily summary (docs/audit.md §3.2). Note this
-# calendar differs from the CSE's: the bond market was open on 2026-01-01 and 2026-01-07 when the CSE was closed.
-# Confirm each entry against an official list when available; unlisted closures are reported as
-# "unconfirmed closure" by the gap check.
+# Source (2026-10-18): the Central Bank's bank holiday lists for 2026 and 2027 (government securities settle through
+# the Central Bank, so its bank holidays are the market's closures). Closures up to the latest data were also seen in
+# the data (no PDMO files that day), so those are confirmed; future dates are listed in advance.
 name: LKR government securities business days
 starts: 2025-12-01
 closures:
-  2025-12-04: {reason: inferred from data, confirmed: false}
-  2025-12-25: {reason: inferred from data, confirmed: false}
-  2026-01-15: {reason: inferred from data, confirmed: false}
-  2026-02-04: {reason: inferred from data, confirmed: false}
-  2026-03-02: {reason: inferred from data, confirmed: false}
-  2026-04-01: {reason: inferred from data, confirmed: false}
-  2026-04-03: {reason: inferred from data, confirmed: false}
-  2026-04-13: {reason: inferred from data, confirmed: false}
-  2026-04-14: {reason: inferred from data, confirmed: false}
-  2026-05-01: {reason: inferred from data, confirmed: false}
-  2026-05-28: {reason: inferred from data, confirmed: false}
-  2026-06-29: {reason: inferred from data, confirmed: false}
-  2026-07-29: {reason: inferred from data, confirmed: false}
-  2026-08-26: {reason: inferred from data, confirmed: false}
-  2026-08-27: {reason: inferred from data, confirmed: false}
+  2025-12-04: {reason: "Unduvap Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2025-12-25: {reason: "Christmas Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-01-15: {reason: "Tamil Thai Pongal Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-02-04: {reason: "Independence Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-03-02: {reason: "Medin Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-01: {reason: "Bak Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-03: {reason: "Good Friday", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-13: {reason: "Day prior to Sinhala & Tamil New Year Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-14: {reason: "Sinhala & Tamil New Year Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-05-01: {reason: "Vesak Full Moon Poya Day; May Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-05-28: {reason: "Id-Ul-Allah (Hadji Festival Day)", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-06-29: {reason: "Poson Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-07-29: {reason: "Esala Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-08-26: {reason: "Milad-Un-Nabi (Holy Prophet's Birthday)", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-08-27: {reason: "Nikini Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-11-24: {reason: "Ill Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2026-12-23: {reason: "Unduwap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2026-12-25: {reason: "Christmas Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-01-15: {reason: "Tamil Thai Pongal Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-01-22: {reason: "Duruthu Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-02-04: {reason: "Independence Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-10: {reason: "Eid-Ul-Fitr (Ramazan Festival Day)", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-22: {reason: "Medin Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-26: {reason: "Good Friday", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-13: {reason: "Day prior to Sinhala & Tamil New Year Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-14: {reason: "Sinhala & Tamil New Year Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-20: {reason: "Bak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-17: {reason: "Eid-Ul-Allha (Hadji Festival Day)", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-19: {reason: "Vesak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-20: {reason: "Day following Vesak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-06-18: {reason: "Poson Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-08-16: {reason: "Nikini Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-09-15: {reason: "Binara Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-10-15: {reason: "Vap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-10-28: {reason: "Deepawali Festival Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-12-13: {reason: "Unduwap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list

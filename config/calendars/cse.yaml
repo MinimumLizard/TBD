@@ -1,28 +1,52 @@
 # Colombo Stock Exchange trading calendar: weekdays are sessions unless listed below.
 #
-# These closures were INFERRED from the data (weekdays with no ASPI value in the CSE's own one-year history,
-# docs/audit.md §2.2). The reasons are left unconfirmed rather than guessed. When the CSE publishes its holiday
-# list, confirm each entry (confirmed: true) and add the coming year's dates in advance; until a closure is
-# listed, the gap check reports that day as "unconfirmed closure" and asks.
+# Source (2026-10-18): the Central Bank's bank holiday lists for 2026 and 2027
+# (https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026 and ...-2027), which are made under the
+# Holidays Act; the CSE does not trade on bank holidays. Every closure up to the latest session was also seen in the
+# data (no ASPI value that day), so those are confirmed. Future dates are listed in advance and marked unconfirmed
+# until checked against the CSE's own holiday circular. Two closures are not bank holidays and stay unexplained.
+# A weekday that is not listed is a session: if it has no data, the gap check reports it.
 name: CSE trading days
 starts: 2025-10-07          # the first session the archive holds
 closures:
-  2025-10-20: {reason: inferred from data, confirmed: false}
-  2025-11-05: {reason: inferred from data, confirmed: false}
-  2025-12-04: {reason: inferred from data, confirmed: false}
-  2025-12-25: {reason: inferred from data, confirmed: false}
-  2026-01-01: {reason: inferred from data, confirmed: false}
-  2026-01-07: {reason: inferred from data, confirmed: false}
-  2026-01-15: {reason: inferred from data, confirmed: false}
-  2026-02-04: {reason: inferred from data, confirmed: false}
-  2026-03-02: {reason: inferred from data, confirmed: false}
-  2026-04-01: {reason: inferred from data, confirmed: false}
-  2026-04-03: {reason: inferred from data, confirmed: false}
-  2026-04-13: {reason: inferred from data, confirmed: false}
-  2026-04-14: {reason: inferred from data, confirmed: false}
-  2026-05-01: {reason: inferred from data, confirmed: false}
-  2026-05-28: {reason: inferred from data, confirmed: false}
-  2026-06-29: {reason: inferred from data, confirmed: false}
-  2026-07-29: {reason: inferred from data, confirmed: false}
-  2026-08-26: {reason: inferred from data, confirmed: false}
-  2026-08-27: {reason: inferred from data, confirmed: false}
+  2025-10-20: {reason: "Deepavali Festival Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2025-11-05: {reason: "Il Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2025-12-04: {reason: "Unduvap Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2025-12-25: {reason: "Christmas Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-01-01: {reason: "New Year's Day? Not a bank holiday: the CSE was closed while the bond market was open", source: inferred from data, confirmed: false}
+  2026-01-07: {reason: "Not a bank holiday: the CSE was closed while the bond market was open; reason unknown", source: inferred from data, confirmed: false}
+  2026-01-15: {reason: "Tamil Thai Pongal Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-02-04: {reason: "Independence Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-03-02: {reason: "Medin Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-01: {reason: "Bak Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-03: {reason: "Good Friday", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-13: {reason: "Day prior to Sinhala & Tamil New Year Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-04-14: {reason: "Sinhala & Tamil New Year Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-05-01: {reason: "Vesak Full Moon Poya Day; May Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-05-28: {reason: "Id-Ul-Allah (Hadji Festival Day)", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-06-29: {reason: "Poson Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-07-29: {reason: "Esala Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-08-26: {reason: "Milad-Un-Nabi (Holy Prophet's Birthday)", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-08-27: {reason: "Nikini Full Moon Poya Day", source: CBSL bank holiday list, seen_in_data: true, confirmed: true}
+  2026-11-24: {reason: "Ill Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2026-12-23: {reason: "Unduwap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2026-12-25: {reason: "Christmas Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-01-01: {reason: "New Year's Day? Not a bank holiday; listed because the CSE closed on 2026-01-01", source: assumption, confirmed: false}
+  2027-01-15: {reason: "Tamil Thai Pongal Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-01-22: {reason: "Duruthu Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-02-04: {reason: "Independence Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-10: {reason: "Eid-Ul-Fitr (Ramazan Festival Day)", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-22: {reason: "Medin Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-03-26: {reason: "Good Friday", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-13: {reason: "Day prior to Sinhala & Tamil New Year Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-14: {reason: "Sinhala & Tamil New Year Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-04-20: {reason: "Bak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-17: {reason: "Eid-Ul-Allha (Hadji Festival Day)", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-19: {reason: "Vesak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-05-20: {reason: "Day following Vesak Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-06-18: {reason: "Poson Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-08-16: {reason: "Nikini Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-09-15: {reason: "Binara Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-10-15: {reason: "Vap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-10-28: {reason: "Deepawali Festival Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
+  2027-12-13: {reason: "Unduwap Full Moon Poya Day", source: CBSL bank holiday list, confirmed: false}   # not yet checked against the exchange's own list
