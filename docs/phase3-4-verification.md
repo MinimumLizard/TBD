@@ -116,7 +116,8 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
    that bucket only.
 3. **Backblaze B2:** create a private bucket `zinvestiq-raw-copy` and an application key limited to it.
 4. **Healthchecks.io:** create a project and copy its ping URL (`https://hc-ping.com/<key>`). Create checks with
-   the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history` and `models-all`.
+   the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history`, `cbsl-collect`,
+   `dcs-cpi-collect` and `models-all`.
 
 **B. Load the history (nothing runs on a schedule yet)**
 5. **GitHub → this repo → Settings → Secrets and variables → Actions → Secrets:** add `DATABASE_URL` (the session
