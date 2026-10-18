@@ -161,7 +161,7 @@ export default async function Home() {
         <Link className="more" href="/learn">{t("home.learnAll")} →</Link>
       </div>
       <div className="learn-cards">
-        {([["1", "/learn#aspi"], ["2", "/learn#yield"], ["3", "/methods"]] as const).map(([n, href]) => (
+        {([["1", "/learn#aspi"], ["2", "/learn#yield"], ["4", "/learn/savings"], ["3", "/methods"]] as const).map(([n, href]) => (
           <Link key={n} href={href} className="card">
             <span className="kicker">{t(`home.learn${n}Kicker`)}</span>
             <strong className="display">{t(`home.learn${n}Title`)}</strong>

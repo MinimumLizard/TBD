@@ -18,7 +18,7 @@ const AS_OF = process.argv.includes("--as-of") ? process.argv[process.argv.index
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/plans", "/methods", "/about"];
+const SEEDS = ["/", "/cse", "/cse/shares", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/savings", "/plans", "/methods", "/about"];
 const proPage = (path) => path === "/bonds" || path.startsWith("/bonds/");  // the pages a Pro subscriber sees differently
 const ECHARTS = "https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js";
 const FONTS = "https://fonts.googleapis.com/css2?family=Manrope:wght@500..800&display=swap";

@@ -79,8 +79,10 @@ expressed on the oldest base (2002), so a future base year changes nothing alrea
 | 2013 | January 2014 | 1.7035 (177.5 ÷ 104.2) |
 | 2021 | January 2022 | 1.2743 (158.4 ÷ 124.3) |
 
-(Measured with `psql "$DATABASE_URL" -f data_platform/models/lk_savings_compare/checks.sql`, which also measures the
-overlap figures below and the bill-yield ratios above.)
+These factors, the overlap figures below and the bill-yield ratios above are measured with:
+
+    psql "$DATABASE_URL" -f data_platform/models/lk_savings_compare/checks.sql
+
 The choice matters where the bases disagree. Over January 2022 to January 2023, when both the 2013 and 2021 bases
 were published, the 2013 base rose 54.2% and the 2021 base 51.7%. Joining at January 2022 uses the 2021 base for
 the whole of that year.
@@ -93,7 +95,8 @@ yield and the CCPI are all published.
 instrument ended above the other (before tax only, nominal and real give the same count); in how many it ended
 above Rs 100,000 (in real terms: kept ahead of inflation); and the best, median and worst outcome, with the start
 month of the best and worst. Periods that start a month apart overlap almost entirely, so they are not independent
-observations: 164 ten-year periods contain about 24 years of history, not 164 separate decades.
+observations: all the ten-year periods together cover one stretch of history, not as many separate decades as there
+are periods.
 
 ## What it leaves out
 
