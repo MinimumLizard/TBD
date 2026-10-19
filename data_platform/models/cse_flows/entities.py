@@ -2,7 +2,7 @@
 
 Ported unchanged from MinimumLizard/CSE@e05c6f3 cse/ownership/names.py (normalisation, custodian and margin
 accounts, classification) and cse/flows.py (actor_entity, GENERIC_ACCOUNT). Two differences, both because the
-platform does not hold these facts yet (the ownership stream will add them):
+platform does not have these facts yet (the ownership stream will add them):
   * no aliases: the old config/ownership_aliases.yaml (the owner's hand-made merges of spellings) is not read. On the
     old data it changes no output of the flows (checked by the parity test, which runs the old code both ways);
   * no ownership groups: the old "own group" flag and an actor's group label need the ownership tracker's control

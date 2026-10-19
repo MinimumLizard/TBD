@@ -132,10 +132,10 @@ def summary(deals_: list[dict], end: dt.date) -> dict:
             "lag_median": statistics.median(lags) if lags else None}
 
 
-def flags(d: dict) -> dict:
+def flags(d: dict, large_lkr: float = LARGE_LKR) -> dict:
     """Old build()'s feed flags that need no ownership facts or watchlist: large (Rs 10 mn or more) and related
     account."""
-    return {"large": d["value"] >= LARGE_LKR, "related_account": d["account_type"] == "related"}
+    return {"large": d["value"] >= large_lkr, "related_account": d["account_type"] == "related"}
 
 
 # --- inputs ------------------------------------------------------------------------------------------------------
@@ -167,6 +167,8 @@ def inputs_of(inputs, as_of: dt.date | None) -> tuple[list[dict], dict[str, dict
 
 
 def compute(inputs, as_of):
+    windows = tuple(inputs.params.get("windows_days", WINDOWS))
+    large = float(inputs.params.get("large_lkr", LARGE_LKR))
     rows, filed, lists = inputs_of(inputs, as_of)
     all_deals = deals(rows, filed, lists)
     days = sorted({d["deal_date"] for d in all_deals if d["deal_date"]})
@@ -175,7 +177,7 @@ def compute(inputs, as_of):
     company, actor, summ = [], [], []
     for end in days:
         summ.append({"as_of": end, **summary(all_deals, end)})
-        for w in WINDOWS:
+        for w in windows:
             rows_w = window(all_deals, end, w)
             for c in per_company(rows_w):
                 company.append({"as_of": end, "window_days": w, "symbol": c["symbol"], "company": c["company"],
@@ -189,7 +191,7 @@ def compute(inputs, as_of):
                               "disposal_value": a["disposals"], "net_value": a["net"], "n_transactions": a["n"],
                               "companies": json.dumps([[k, v] for k, v in a["codes"].items()])})
     dealing = [{"transaction_id": d["transaction_id"], "symbol": d["symbol"], "deal_date": d["deal_date"],
-                "side": d["side"], "value": d["value_as_disclosed"], "actor_type": d["actor_type"], **flags(d)}
+                "side": d["side"], "value": d["value_as_disclosed"], "actor_type": d["actor_type"], **flags(d, large)}
                for d in all_deals if not as_of or (d["deal_date"] and d["deal_date"] <= as_of)]
     return {"models.cse_flow_company": company, "models.cse_flow_summary": summ, "models.cse_flow_dealing": dealing,
             "models.cse_flow_actor": actor}
