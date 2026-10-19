@@ -1,0 +1,1332 @@
+{
+  "reconciliation": {
+    "backfill": {
+      "old_files": 830,
+      "old_with_dealing_record": 826,
+      "facts_matching": 830,
+      "facts_with_dealing_record": 826,
+      "missing_in_new": 0,
+      "old_sha256": "c8b6297e096c837f6ede998a0ac8be5051c40538b3c25bbd646f765977de832f",
+      "new_sha256": "c8b6297e096c837f6ede998a0ac8be5051c40538b3c25bbd646f765977de832f",
+      "ok": true
+    },
+    "session_folders": {
+      "old_files": 35,
+      "old_with_dealing_record": 35,
+      "facts_matching": 35,
+      "facts_with_dealing_record": 35,
+      "missing_in_new": 0,
+      "old_sha256": "d29a117f1a9ec9b43e254b9c16353a7b9e3775c6c3f4045344bec1a09089fe00",
+      "new_sha256": "d29a117f1a9ec9b43e254b9c16353a7b9e3775c6c3f4045344bec1a09089fe00",
+      "ok": true
+    },
+    "dealings_csv": {
+      "old_notices": 782,
+      "notices_with_a_fact": 782,
+      "missing_in_new": 0,
+      "ok": true
+    },
+    "value_conflicts": 0,
+    "ok": true
+  },
+  "parity": {
+    "checks": [
+      {
+        "table": "cse_dealings: old dealings.csv (every row, every column, as text)",
+        "old_rows": 2262,
+        "new_rows": 2262,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "identical_lines": 2227,
+        "cells_same_number_other_text": 35,
+        "columns": 16,
+        "ok": true
+      },
+      {
+        "table": "cse_dealings: re-filed notices (old drop_refiled)",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "old_transactions": 2267,
+        "new_transactions": 2267,
+        "ok": true
+      },
+      {
+        "table": "old code: with and without its aliases file",
+        "ok": true,
+        "identical": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 30 days: companies",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 30 days: accounts",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 90 days: companies",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 90 days: accounts",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 365 days: companies",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27 365 days: accounts",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27: recent dealings and flags",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-05-27: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-05-27"
+      },
+      {
+        "table": "cse_flows 2025-07-02 30 days: companies",
+        "old_rows": 16,
+        "new_rows": 16,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02 30 days: accounts",
+        "old_rows": 28,
+        "new_rows": 28,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02 90 days: companies",
+        "old_rows": 19,
+        "new_rows": 19,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02 90 days: accounts",
+        "old_rows": 33,
+        "new_rows": 33,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02 365 days: companies",
+        "old_rows": 19,
+        "new_rows": 19,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02 365 days: accounts",
+        "old_rows": 33,
+        "new_rows": 33,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02: recent dealings and flags",
+        "old_rows": 112,
+        "new_rows": 112,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-07-02: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-07-02"
+      },
+      {
+        "table": "cse_flows 2025-08-01 30 days: companies",
+        "old_rows": 23,
+        "new_rows": 23,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01 30 days: accounts",
+        "old_rows": 30,
+        "new_rows": 30,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01 90 days: companies",
+        "old_rows": 35,
+        "new_rows": 35,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01 90 days: accounts",
+        "old_rows": 57,
+        "new_rows": 57,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01 365 days: companies",
+        "old_rows": 35,
+        "new_rows": 35,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01 365 days: accounts",
+        "old_rows": 57,
+        "new_rows": 57,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-08-01: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-08-01"
+      },
+      {
+        "table": "cse_flows 2025-09-03 30 days: companies",
+        "old_rows": 31,
+        "new_rows": 31,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03 30 days: accounts",
+        "old_rows": 42,
+        "new_rows": 42,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 50,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 79,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 54,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 88,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-09-03: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-09-03"
+      },
+      {
+        "table": "cse_flows 2025-10-03 30 days: companies",
+        "old_rows": 32,
+        "new_rows": 32,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03 30 days: accounts",
+        "old_rows": 35,
+        "new_rows": 35,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 58,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 83,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 67,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 112,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-10-03: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-10-03"
+      },
+      {
+        "table": "cse_flows 2025-11-07 30 days: companies",
+        "old_rows": 24,
+        "new_rows": 24,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07 30 days: accounts",
+        "old_rows": 33,
+        "new_rows": 33,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 58,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 80,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 75,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 128,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-11-07: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-11-07"
+      },
+      {
+        "table": "cse_flows 2025-12-09 30 days: companies",
+        "old_rows": 18,
+        "new_rows": 18,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09 30 days: accounts",
+        "old_rows": 23,
+        "new_rows": 23,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 48,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 65,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 77,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 140,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2025-12-09: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2025-12-09"
+      },
+      {
+        "table": "cse_flows 2026-01-13 30 days: companies",
+        "old_rows": 17,
+        "new_rows": 17,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13 30 days: accounts",
+        "old_rows": 31,
+        "new_rows": 31,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13 90 days: companies",
+        "old_rows": 39,
+        "new_rows": 39,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 68,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 85,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 165,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-01-13: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-01-13"
+      },
+      {
+        "table": "cse_flows 2026-02-16 30 days: companies",
+        "old_rows": 18,
+        "new_rows": 18,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16 30 days: accounts",
+        "old_rows": 25,
+        "new_rows": 25,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16 90 days: companies",
+        "old_rows": 37,
+        "new_rows": 37,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 65,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 87,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 177,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-02-16: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-02-16"
+      },
+      {
+        "table": "cse_flows 2026-03-18 30 days: companies",
+        "old_rows": 26,
+        "new_rows": 26,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18 30 days: accounts",
+        "old_rows": 33,
+        "new_rows": 33,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 42,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 71,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 98,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 196,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-03-18: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-03-18"
+      },
+      {
+        "table": "cse_flows 2026-04-21 30 days: companies",
+        "old_rows": 18,
+        "new_rows": 18,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21 30 days: accounts",
+        "old_rows": 24,
+        "new_rows": 24,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 48,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21 90 days: accounts",
+        "old_rows": 60,
+        "new_rows": 66,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 102,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 203,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-04-21: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-04-21"
+      },
+      {
+        "table": "cse_flows 2026-05-27 30 days: companies",
+        "old_rows": 13,
+        "new_rows": 13,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27 30 days: accounts",
+        "old_rows": 18,
+        "new_rows": 18,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 40,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27 90 days: accounts",
+        "old_rows": 52,
+        "new_rows": 52,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 105,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 210,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-05-27: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-05-27"
+      },
+      {
+        "table": "cse_flows 2026-07-02 30 days: companies",
+        "old_rows": 29,
+        "new_rows": 29,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02 30 days: accounts",
+        "old_rows": 30,
+        "new_rows": 30,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 44,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02 90 days: accounts",
+        "old_rows": 57,
+        "new_rows": 57,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 110,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 208,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-07-02: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-07-02"
+      },
+      {
+        "table": "cse_flows 2026-08-14 30 days: companies",
+        "old_rows": 17,
+        "new_rows": 17,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14 30 days: accounts",
+        "old_rows": 14,
+        "new_rows": 14,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 49,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14 90 days: accounts",
+        "old_rows": 56,
+        "new_rows": 56,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 108,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 198,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-08-14: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-08-14"
+      },
+      {
+        "table": "cse_flows 2026-09-18 30 days: companies",
+        "old_rows": 20,
+        "new_rows": 20,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18 30 days: accounts",
+        "old_rows": 23,
+        "new_rows": 23,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 42,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18 90 days: accounts",
+        "old_rows": 51,
+        "new_rows": 51,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 101,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 184,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-09-18: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-09-18"
+      },
+      {
+        "table": "cse_flows 2026-10-14 30 days: companies",
+        "old_rows": 21,
+        "new_rows": 21,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14 30 days: accounts",
+        "old_rows": 22,
+        "new_rows": 22,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14 90 days: companies",
+        "old_rows": 40,
+        "new_rows": 41,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14 90 days: accounts",
+        "old_rows": 47,
+        "new_rows": 47,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14 365 days: companies",
+        "old_rows": 40,
+        "new_rows": 100,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14 365 days: accounts",
+        "old_rows": 60,
+        "new_rows": 175,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "same_top_rows": true,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14: recent dealings and flags",
+        "old_rows": 150,
+        "new_rows": 150,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "cse_flows 2026-10-14: counts and median lag",
+        "old_rows": 1,
+        "new_rows": 1,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "ok": true,
+        "old_asof": "2026-10-14"
+      }
+    ],
+    "ok": true,
+    "old_code_compared": true,
+    "flows_dates_compared": 16,
+    "flows_rows_compared": 5816
+  }
+}
