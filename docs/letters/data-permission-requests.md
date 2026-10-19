@@ -35,24 +35,7 @@ Yours faithfully,
 
 ---
 
-## 2. Bitstamp — partners@bitstamp.net
-
-**Subject:** Commercial-use Data License Agreement for an analytics website
-
-Hello,
-
-Your API documentation directs companies that want to use Bitstamp exchange data commercially to sign a Data
-License Agreement. We are building ZinvestIQ, an information and education website. We would like to:
-- use daily (and hourly) OHLC for BTC, ETH and other major pairs, including full history from 2011;
-- compute and display statistics from it (moving averages, drawdowns, volatility), credited "Source: Bitstamp".
-
-Could you send the agreement and its fees?
-
-Thank you, [name]
-
----
-
-## 3. Central Bank of Sri Lanka — Director Communications, cbslgen@cbsl.lk
+## 2. Central Bank of Sri Lanka — Director Communications, cbslgen@cbsl.lk
 
 **Subject:** Reuse of published interest-rate statistics in an investor-education website
 
@@ -74,7 +57,7 @@ Yours faithfully, [name]
 
 ---
 
-## 4. Department of Census and Statistics — information@statistics.gov.lk
+## 3. Department of Census and Statistics — information@statistics.gov.lk
 
 **Subject:** Reuse of published CCPI and NCPI figures
 
@@ -86,4 +69,3 @@ Statistics, Sri Lanka", to show inflation beside interest rates.
 ## Also pending from earlier
 
 - **PDMO / Ministry of Finance:** permission for the government bond data (`docs/audit.md` §7).
-- **Kraken:** permission to use its OHLCVT archive commercially, as an alternative to Bitstamp.

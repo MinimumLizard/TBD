@@ -30,12 +30,11 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
   recent_window: Record<string, Markers>;
   bond_page: Record<string, { new: string[]; old: string[]; mid?: string[] }>;
   email_bonds: Record<string, string[]>;
-  crypto_page: Record<string, { new: string[]; old: string[]; mid?: string[] }>;
   never: string[];
 };
 
 // Detail pages and routes with a parameter, for the checks that apply to every page (seeded bond and share).
-const DETAIL = [...DETAIL_PAGES, "/api/v1/cse/shares/AAA.N0000", "/crypto/btc", "/crypto/eth"];
+const DETAIL = [...DETAIL_PAGES, "/api/v1/cse/shares/AAA.N0000"];
 
 async function get(url: string, tier: Tier | null) {
   const res = await fetch(BASE + url, { headers: tier ? { "x-test-tier": tier } : {} });
@@ -171,40 +170,11 @@ describe("everyone", () => {
     }
   });
 
-  test("bitcoin's own page shows each part of its analysis only to the tiers that include it", async () => {
-    for (const tier of TIERS) {
-      const page = await get("/crypto/btc", tier);
-      expect(page.status).toBe(200);
-      for (const [model, m] of Object.entries(markers.crypto_page)) {
-        const mode = expectation(model as ModelName, tier);
-        if (mode === "full") {
-          for (const v of m.new) expect(page.body, `/crypto/btc as ${tier} is missing ${model} ${v}`).toContain(v);
-        } else {
-          for (const v of [...m.new, ...(m.mid ?? [])]) expect(page.body, `/crypto/btc as ${tier} leaked ${model} ${v}`).not.toContain(v);
-          if (mode === "preview") for (const v of m.old) expect(page.body, `/crypto/btc preview is missing ${v}`).toContain(v);
-          if (mode === "denied") {
-            for (const v of m.old) expect(page.body, `/crypto/btc as ${tier} leaked ${model} ${v}`).not.toContain(v);
-            expect(page.body).toContain(`data-locked="${model}"`);
-          }
-        }
-      }
-    }
-  });
-
-  test("asking the crypto routes for a date cannot get past the cycle preview's delay", async () => {
-    const hidden = [...markers.models.crypto_cycle.new.api, ...(markers.models.crypto_cycle.mid?.api ?? [])];
-    for (const day of [markers.new, "2099-12-31"]) {
-      const res = await get(`/api/v1/crypto/cycle?pair=btcusd&date=${day}`, "free");
-      for (const v of hidden) expect(res.body, `cycle?date=${day} leaked ${v}`).not.toContain(v);
-    }
-    expect((await get("/api/v1/crypto/cycle?pair=nope", "free")).status).toBe(404);
-  });
-
   test("detail pages render for a free visitor, and a malformed address is a 404, not an error", async () => {
     for (const url of DETAIL) expect((await get(url, "free")).status).toBe(200);
     // (An address with a broken %-sequence is refused by Next.js's own router with a bare 500 before any of our code
     // runs; it carries no data or detail, so it is not checked here.)
-    for (const url of ["/methods/constructor", "/bonds/NOPE", "/cse/shares/NOPE.N0000", "/api/v1/cse/shares/NOPE.N0000", "/crypto/nope", "/crypto/constructor"]) {
+    for (const url of ["/methods/constructor", "/bonds/NOPE", "/cse/shares/NOPE.N0000", "/api/v1/cse/shares/NOPE.N0000"]) {
       expect((await get(url, "free")).status, url).toBe(404);
     }
     expect((await get("/api/v1/bonds/zscores?date=2026-02-30", "free")).status).toBe(400);

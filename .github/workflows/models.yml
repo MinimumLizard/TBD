@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: ["Collect: PDMO bonds", "Collect: CSE end of day", "Collect: CSE one-year history (gap repair)",
                 "Collect: CBSL interest rates", "Collect: DCS consumer prices (CCPI)",
-                "Collect: CSE corporate actions", "Collect: Bitstamp crypto"]
+                "Collect: CSE corporate actions"]
     types: [completed]
   schedule:
     - cron: "52 17 * * *"          # 23:22 Sri Lanka time

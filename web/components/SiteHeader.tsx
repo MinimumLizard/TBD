@@ -11,7 +11,6 @@ export default async function SiteHeader({ viewer }: { viewer: Viewer }) {
     ["/cse", t("nav.cse")],
     ["/cse/shares", t("nav.shares")],
     ["/bonds", t("nav.bonds")],
-    ["/crypto", t("nav.crypto")],
     ["/learn", t("nav.learn")],
     ["/plans", t("nav.plans")],
     ["/methods", t("nav.methods")],
