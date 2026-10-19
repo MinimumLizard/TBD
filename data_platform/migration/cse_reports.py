@@ -45,8 +45,8 @@ from ..core import db, rawstore, settings as settings_mod
 LEGACY = "legacy_cse"
 NOTE = "old repo raw file, archived as-is"          # the history migration's note (migration/cse.py archive_other)
 OWN = Path("data") / "raw" / "ownership"
-INDEX_RE = re.compile(r"@([0-9a-f]+)/data/raw/ownership/reports\.csv$")
-TEXT_RE = re.compile(r"@([0-9a-f]+)/data/raw/ownership/text/(\d+)\.txt$")
+INDEX_RE = re.compile(r"@([^/]+)/data/raw/ownership/reports\.csv$")
+TEXT_RE = re.compile(r"@([^/]+)/data/raw/ownership/text/(\d+)\.txt$")
 SESSION_RE = re.compile(r"data/raw/(\d{4}-\d{2}-\d{2})/companyProfile/")
 EXTRACTED_BY = "pdftotext -layout (MinimumLizard/CSE ownership collector; its text file)"
 SLT = dt.timezone(dt.timedelta(hours=5, minutes=30))
