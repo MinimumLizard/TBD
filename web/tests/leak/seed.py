@@ -37,6 +37,8 @@ OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible 
 MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
 ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only the window's full-history tier sees it
 MARKERS = Path(__file__).with_name("markers.json")
+PERSON = "Mr. Q. Zyxwvut"                  # a made-up private individual: in unpublished tables only
+GROUP_HEAD = "Leakcheck Holdings (Pvt) Ltd"   # a made-up company: companies may be named
 DB_NAME = os.environ.get("LEAK_DB_NAME", "tbd_leak")   # another name lets two checkouts test at once
 
 
@@ -113,6 +115,39 @@ def seed(conn) -> dict:
         {"symbol": "AAA.N0000", "session_date": d, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
          "tri": tri, "tr_1w": w} for d, tri, w in ((OLD, 1.0, None), (NEW, 1.2345, 0.031415))])
 
+    # Company figures (free) on the shares list and the share page; ownership (free) on the share page. The two
+    # ownership tables that name people are unpublished: PERSON (a made-up individual) and 424242.17 must never
+    # appear anywhere, to anyone.
+    put("cse_fundamentals", "models.cse_fundamentals", [
+        {"session_date": d, "code": "AAA", "price": 55.5, "price_date": d, "shares": 1e6, "fye": "31 Mar", "nav": 20.0,
+         "nav_period": OLD, "pb": 2.775, "ttm_profit": 1e6, "ttm_eps": 1.0, "ttm_to": OLD, "ttm_note": "", "pe": pe,
+         "earnings_yield": 0.02, "roe": 0.05, "div_ttm": 1.0, "dy": 0.018, "report_id": 7, "report_period": OLD,
+         "report_url": "https://cdn.cse.lk/r.pdf"} for d, pe in ((OLD, 61.4321), (NEW, 87.6543))])
+    put("cse_fundamentals", "models.cse_report_figures", [
+        {"report_id": 7, "code": "AAA", "period_date": OLD, "fye": "1", "shares": 1e6, "eps": 0.25, "eps_class": "quarter",
+         "eps_status": "verified", "profit": 250000.0, "unit": 1.0, "eps_line": "Basic earnings per share 0.25",
+         "nav": 20.0, "nav_status": "verified", "equity": 2e7, "nav_line": "Net assets per share 20.00",
+         "source_url": "https://cdn.cse.lk/r.pdf", "as_of": NEW}])
+    put("cse_ownership", "models.cse_company_ownership", [
+        {"session_date": d, "code": "AAA", "report_id": 7, "period_date": OLD, "report_status": "ok",
+         "table_status": "verified", "top20_pct": 80.0, "pct_listed": 10.0, "pct_company": 30.0, "pct_institution": 5.0,
+         "pct_individual": 35.0, "pct_joint": 0.0, "pct_estate": 0.0, "pct_trust": 0.0, "pct_nominee": 0.0,
+         "pct_own_shares": 0.0, "controller_type": "individual", "controller_name": None, "control_pct": 35.0,
+         "control_level": "influence", "group_id": "G:AAA", "group_head_type": "company", "group_head_name": GROUP_HEAD,
+         "group_size": 2, "free_float_pct": ff, "market_cap": 5.55e7, "source_url": "https://cdn.cse.lk/r.pdf"}
+        for d, ff in ((OLD, 52.1234), (NEW, 63.719))] + [
+        {"session_date": NEW, "code": "BBB", "report_status": "ok", "table_status": "verified", "top20_pct": 90.0,
+         "group_id": "G:AAA", "group_size": 2, "free_float_pct": 40.0}])
+    put("cse_ownership", "models.cse_ownership_detail", [
+        {"session_date": NEW, "code": "AAA", "name": "AAA PLC", "report_status": "ok", "controller_key": "ZYXWVUT",
+         "controller_name": PERSON, "controller_type": "individual", "control_pct": 35.0, "control_level": "influence",
+         "chain": f"AAA <- {PERSON}", "group_key": "ZYXWVUT", "group_name": PERSON, "market_cap": 424242.17}])
+    put("cse_ownership", "models.cse_holding", [
+        {"report_id": 7, "share_class": "N", "row_no": 1, "rank": 1, "period_date": OLD, "code": "AAA", "symbol": "AAA.N0000",
+         "name_as_filed": PERSON, "shares": 424242.17, "pct": 35.0, "fraction": 0.35, "owner_key": "ZYXWVUT",
+         "owner_name": PERSON, "owner_type": "individual", "owner_symbol": "", "via": "", "rule": "",
+         "table_status": "verified", "source_url": "https://cdn.cse.lk/r.pdf", "as_of": NEW}])
+
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
     put("lk_savings_compare", "models.savings_rates", [
@@ -165,6 +200,11 @@ def seed(conn) -> dict:
             "cse_corporate_actions": {"new": {"api": ["8.7654"], "page": ["Rs 8.7654 per share"]},
                                       "old": {"api": [], "page": []}},
             "cse_total_returns": {"new": {"api": ["0.031415"], "page": ["+3.14%"]}, "old": {"api": [], "page": []}},
+            # free company figures: the latest P/E (shares list and share page); free ownership: the latest free float
+            # and the group head, a company (an individual is never named)
+            "cse_fundamentals": {"new": {"api": ["87.6543"], "page": ["87.7"]}, "old": {"api": [], "page": []}},
+            "cse_ownership": {"new": {"api": ["63.719", "Leakcheck Holdings"], "page": ["63.7%", "Leakcheck Holdings"]},
+                              "old": {"api": [], "page": []}},
         },
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
@@ -173,7 +213,9 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
+                  # the unpublished ownership tables: an individual's name, and a number only they carry
+                  "Zyxwvut", "ZYXWVUT", "424242", "424,242"],
     }
 
 
