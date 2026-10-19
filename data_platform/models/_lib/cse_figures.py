@@ -304,28 +304,34 @@ def report_shares(market: own.Market, reports: list[own.Report], cache: own.Tabl
 
 class ShareCounts:
     """code -> every distinct shares-issued total (N + X) the CSE reported, newest first (old share_counts): per
-    session, the trade summary's market cap / close, then the company summary's quantity issued."""
+    session, the trade summary's market cap / close, then the company summary's quantity issued. Read forward once:
+    asking for sessions in order costs one pass over the history."""
 
     def __init__(self, data: own.MarketData):
         self.data = data
+        self._reset()
+
+    def _reset(self) -> None:
+        self._pos, self._issued, self._seen = 0, {}, defaultdict(list)
 
     def at(self, session: dt.date) -> dict[str, list[float]]:
-        issued: dict[str, float] = {}
-        seen: dict[str, list[float]] = defaultdict(list)
-        for d in self.data.dates:
-            if d > session:
-                break
+        dates = self.data.dates
+        if self._pos and dates[self._pos - 1] > session:
+            self._reset()
+        while self._pos < len(dates) and dates[self._pos] <= session:
+            d = dates[self._pos]
             for symbol, cap, close in self.data.trades.get(d, []):
                 if cap and close:
-                    issued[symbol] = float(round(cap / close))
+                    self._issued[symbol] = float(round(cap / close))
             for symbol, quantity, _cap in self.data.info.get(d, []):
                 if quantity:
-                    issued[symbol] = float(quantity)
-            for code in {s.split(".")[0] for s in issued}:
-                tot = (issued.get(code + ".N0000") or 0) + (issued.get(code + ".X0000") or 0)
-                if tot and tot not in seen[code]:
-                    seen[code].append(tot)
-        return {c: v[::-1] for c, v in seen.items()}
+                    self._issued[symbol] = float(quantity)
+            for code in {s.split(".")[0] for s in self._issued}:
+                tot = (self._issued.get(code + ".N0000") or 0) + (self._issued.get(code + ".X0000") or 0)
+                if tot and tot not in self._seen[code]:
+                    self._seen[code].append(tot)
+            self._pos += 1
+        return {c: v[::-1] for c, v in self._seen.items()}
 
 
 class Extractor:

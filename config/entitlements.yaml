@@ -31,11 +31,22 @@ models:
                                                   # published, read from its own announcement records
   cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
                                                   # published facts, combined by a stated formula)
+  cse_ownership:        { minimum_tier: free }    # who owns each company, by owner type, its ownership group and a
+                                                  # free-float estimate: company-level facts from the companies'
+                                                  # own filings (no individual is ever named; see below)
+  cse_fundamentals:     { minimum_tier: free }    # EPS, net assets per share, P/E, P/B, ROE, dividend yield: figures
+                                                  # the companies published, checked inside each report
   # Savings education
   lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
 
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a
 # performance claim (audit §8), so they need a legal view first.
+# The two ownership tables below name private individuals (the top-20 shareholder lists, and the controllers and
+# chains built from them). Sri Lanka's Personal Data Protection Act (decision 0010) applies: they stay unpublished
+# until the owner's lawyer has reviewed them (docs/plan-retail-features.md §7). Migration 0013 also withholds the
+# website's database grant on them, so the website could not read them even by mistake.
 unpublished_outputs:
   - models.model_stats
+  - models.cse_holding
+  - models.cse_ownership_detail

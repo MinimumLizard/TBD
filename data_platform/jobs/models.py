@@ -33,6 +33,7 @@ def run(conn, names: list[str] | None = None, market: str | None = None, version
     manifests = registry.load_all()
     registry.publish(conn, manifests)
     reviews.sync(conn)          # the owner's corporate-action confirmations, as the repository has them now
+    reviews.sync_ownership(conn)  # ... and the ownership confirmations (repository files + the private file)
     owners = output_owners()
     chosen = [n for n in registry.order(manifests)
               if (not names or n in names) and (not market or manifests[n].market == market)]

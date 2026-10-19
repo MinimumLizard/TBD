@@ -1,0 +1,23 @@
+# Ownership: spellings of one holder that the automatic rules don't merge (cse_ownership model; from the old
+# terminal's config/ownership_aliases.yaml).
+#
+# Matching already ignores case, punctuation, titles (Mr/Mrs/Dr...), "The", account numbers ("A/C No.2") and legal
+# suffixes ((Pvt) Ltd, Private Limited, PLC...). Add an entry only when two names are certainly the same holder:
+#
+#   Display name:
+#     variants: [other spelling, another spelling]   # as filed; matched after normalisation
+#     type: institution        # optional: listed | individual | joint | estate | trust | institution | company
+#     symbol: ABC              # optional: CSE code, when the holder is a listed company
+#
+# THIS REPOSITORY IS PUBLIC. Only companies, funds, nominee accounts and the state may be named here. An entry about
+# a private individual (or a joint holding, an estate or a family trust) goes in the PRIVATE file named by the
+# environment variable OWNERSHIP_PRIVATE_FILE (same format, both sections `aliases:` and `parents:`), never here;
+# the reviews job refuses such an entry in this file. Individuals are never merged automatically (initials vs full
+# names would be a guess about a person's identity).
+#
+# Before each model run, data_platform/jobs/reviews.py stores this file, config/ownership_parents.yaml and the
+# private file in cse.ownership_confirmations (each version kept); the model reads the latest version.
+aliases:
+  Employees' Trust Fund Board:
+    variants: [Employees Trust Fund]
+    type: institution

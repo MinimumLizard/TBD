@@ -68,9 +68,11 @@ create table cse.company_fiscal_years (
 create table cse.ownership_confirmations (
   version_id      bigserial   primary key,
   public_sha256   text        not null,       -- SHA-256 of the repository's two files (aliases, then parents)
-  private_sha256  text,                       -- SHA-256 of the private file (OWNERSHIP_PRIVATE_FILE); null: none
-  aliases         jsonb       not null,       -- {"aliases": {display name: {variants, type, symbol}}}
-  parents         jsonb       not null,       -- {"parents": {holder: {owner, owner_type, pct, source, quote}}}
+  public          jsonb       not null,       -- {"aliases": {display name: {variants, type, symbol}},
+                                              --  "parents": {holder: {owner, owner_type, pct, source, quote}}}
+  private_sha256  text,                       -- SHA-256 of the private file (OWNERSHIP_PRIVATE_FILE); null: none yet
+  private         jsonb       not null,       -- the same two sections from the private file: entries that name a
+                                              -- private individual never go in the public repository
   code_version    text,
   loaded_at       timestamptz not null default now()
 );
