@@ -6,7 +6,8 @@ Creates (or recreates) the database `tbd_leak` (or $LEAK_DB_NAME), applies every
 model outputs in which certain values are MARKERS: numbers that appear nowhere else, so the tests can tell exactly
 which model's data reached a page or an API response. Two dates per model: NEW (yesterday) and OLD (five days ago,
 the last day a 5-day free preview may show); the preview model also has MID (four days ago), which a preview must
-never show; the yield curve also has ANCIENT (40 days ago), beyond the 30-day recent window a free visitor sees. Every model also gets rows under
+never show (the directors' money flows, with a 7-day preview, has OLD7 and MID7 likewise, and a made-up person's
+name in its unpublished tables that must never appear); the yield curve also has ANCIENT (40 days ago), beyond the 30-day recent window a free visitor sees. Every model also gets rows under
 a reference version that the site must never show to anyone.
 
 Prints the database URL the web app should use (as the read-only web_reader role).
@@ -36,6 +37,8 @@ NEW = TODAY - dt.timedelta(days=1)
 OLD = TODAY - dt.timedelta(days=5)    # exactly the free preview's last visible day (delay 5 days)
 MID = TODAY - dt.timedelta(days=4)    # one day inside the delay: never visible to a free visitor
 ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only the window's full-history tier sees it
+OLD7 = TODAY - dt.timedelta(days=7)   # the money flows preview's last visible day (delay 7 days)
+MID7 = TODAY - dt.timedelta(days=6)   # inside that delay: never visible to a free visitor
 MARKERS = Path(__file__).with_name("markers.json")
 DB_NAME = os.environ.get("LEAK_DB_NAME", "tbd_leak")   # another name lets two checkouts test at once
 
@@ -113,6 +116,33 @@ def seed(conn) -> dict:
         {"symbol": "AAA.N0000", "session_date": d, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
          "tri": tri, "tr_1w": w} for d, tri, w in ((OLD, 1.0, None), (NEW, 1.2345, 0.031415))])
 
+    # Directors' dealings (free) and money flows (Plus, a 7-day free preview). The names live only in the two
+    # unpublished tables: a made-up name that must never appear anywhere.
+    put("cse_dealings", "models.cse_dealing", [
+        {"transaction_id": f"{aid}:1", "announcement_id": aid, "line_no": 1, "symbol": "AAA", "company": "AAA PLC",
+         "role": "executive", "account_type": "own", "trade_date": d, "deal_date": d, "side": "purchase",
+         "quantity": q, "price": 43.21, "value": q * 43.21, "announced_date": d, "lag_days": 0, "superseded_by": None}
+        for aid, d, q in ((11, OLD7, 87654.0), (12, NEW, 98765.0))])
+    put("cse_dealings", "models.cse_dealing_as_filed", [
+        {"transaction_id": f"{aid}:1", "director": "Zebedee Q. Markerperson", "director_role": "Executive Director",
+         "account": "Zebedee Q. Markerperson", "trans_type": "Purchase", "source_url": "https://cdn.cse.lk/z.pdf"}
+        for aid in (11, 12)])
+    put("cse_flows", "models.cse_flow_summary", [
+        {"as_of": d, "n_dealings": n, "n_trades": n, "lag_median": 2.0}
+        for d, n in ((OLD7, 53219), (MID7, 63219), (NEW, 73219))])
+    put("cse_flows", "models.cse_flow_company", [
+        {"as_of": d, "window_days": 30, "symbol": "AAA", "company": "AAA PLC", "purchase_value": v,
+         "disposal_value": 0.0, "net_value": v, "n_purchasers": 2, "n_disposers": 0, "n_transactions": 2,
+         "cluster": True} for d, v in ((OLD7, 54321000.0), (MID7, 65432100.0), (NEW, 76543210.0))])
+    put("cse_flows", "models.cse_flow_dealing", [
+        {"transaction_id": f"{aid}:1", "symbol": "AAA", "deal_date": d, "side": "purchase", "value": v,
+         "actor_type": "individual", "large": True, "related_account": False}
+        for aid, d, v in ((11, OLD7, 31234567.0), (12, NEW, 32345678.0))])
+    put("cse_flows", "models.cse_flow_actor", [
+        {"as_of": NEW, "window_days": 30, "actor_key": "ZEBEDEEQMARKERPERSON", "actor": "Zebedee Q. Markerperson",
+         "actor_type": "individual", "purchase_value": 76543210.0, "disposal_value": 0.0, "net_value": 76543210.0,
+         "n_transactions": 2, "companies": '[["AAA", 76543210.0]]'}])
+
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
     put("lk_savings_compare", "models.savings_rates", [
@@ -165,6 +195,13 @@ def seed(conn) -> dict:
             "cse_corporate_actions": {"new": {"api": ["8.7654"], "page": ["Rs 8.7654 per share"]},
                                       "old": {"api": [], "page": []}},
             "cse_total_returns": {"new": {"api": ["0.031415"], "page": ["+3.14%"]}, "old": {"api": [], "page": []}},
+            # free: the latest dealing's shares (raw in the API, formatted on the market-wide page and the share page)
+            "cse_dealings": {"new": {"api": ["98765"], "page": ["98,765"]}, "old": {"api": [], "page": []}},
+            # Plus with a 7-day preview: purchases and the dealing count on the latest date, a day inside the delay,
+            # and the last date a free visitor may see
+            "cse_flows": {"new": {"api": ["76543210", "73219"], "page": ["Rs 76.5 mn", "73,219"]},
+                          "mid": {"api": ["65432100", "63219"], "page": ["Rs 65.4 mn", "63,219"]},
+                          "old": {"api": ["54321000", "53219"], "page": ["Rs 54.3 mn", "53,219"]}},
         },
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
@@ -173,7 +210,9 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
+                  # a person's name from a dealing notice: stored, never published (config/entitlements.yaml)
+                  "Markerperson", "MARKERPERSON", "z.pdf"],
     }
 
 

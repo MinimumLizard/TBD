@@ -211,6 +211,21 @@ def is_ca_category(category: str | None) -> bool:
     return any(k in c for k in CA_KEYWORDS) and "DEBENTURE" not in c
 
 
+# Announcement categories that can carry a director's share dealing (old cse/dealings.py CATEGORY): "DEALINGS BY
+# DIRECTORS" and the relevant-interest disclosures made on listing. The collector fetches their details too; the
+# cse_dealings model reads the structured "DealingsByDirectors" records among them.
+DEALING_CATEGORY = re.compile(r"DEALING|RELEVANT INTEREST", re.I)
+
+
+def is_dealing_category(category: str | None) -> bool:
+    return bool(DEALING_CATEGORY.search(category or ""))
+
+
+def needs_detail(category: str | None) -> bool:
+    """The daily sweep fetches the detail of every corporate-action and dealing announcement it lists."""
+    return is_ca_category(category) or is_dealing_category(category)
+
+
 def announcement_date(v) -> dt.date | None:
     """The CSE's announcement dates: '01 Jul 2026' text, or epoch milliseconds (old cse/corpactions.parse_date)."""
     if v in (None, ""):

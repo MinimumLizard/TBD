@@ -87,3 +87,15 @@ allow:
     phrase: hold
     context: "recommendation to buy, sell or hold any security"
     reason: The disclaimer states what the product does not do.
+  - file: data_platform/models/cse_dealings/METHOD.md
+    phrase: buy
+    context: '"buy…", "bought"'
+    reason: >-
+      The method page quotes, as words, what the side rule looks for in a dealing notice's free-text transaction
+      type (text a company filed with the CSE). It describes how a disclosure is read; it is not advice.
+  - file: data_platform/models/cse_dealings/METHOD.md
+    phrase: sell
+    context: '"sale", "sell…", "sold"'
+    reason: >-
+      The method page quotes, as words, what the side rule looks for in a dealing notice's free-text transaction
+      type (text a company filed with the CSE). It describes how a disclosure is read; it is not advice.

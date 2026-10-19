@@ -1,0 +1,40 @@
+{
+ "reqBaseAnnouncement": {
+  "id": 900001,
+  "dType": "DealingsByDirectors",
+  "dateOfAnnouncement": "05 Oct 2026",
+  "remarks": null,
+  "symbol": "AAA",
+  "companyName": "ALPHA EXAMPLE PLC",
+  "accTypeRelInterest": false,
+  "accTypeOwnAcc": true,
+  "dircetorsName": "Mr. A. B. Example",
+  "relInterestAccountName": null,
+  "dateOfNotification": "05 Oct 2026",
+  "natureOfDir": "Executive Director",
+  "directorTransactions": [
+   {
+    "dirId": 9000010,
+    "transType": "Purchase",
+    "transactionDate": "01 Oct 2026",
+    "quantity": 1000,
+    "price": 10.5
+   },
+   {
+    "dirId": 9000011,
+    "transType": "Purchase of Shares",
+    "transactionDate": "02 Oct 2026",
+    "quantity": "500",
+    "price": "11"
+   }
+  ]
+ },
+ "reqAnnouncementDocs": [
+  {
+   "id": 900001,
+   "fileName": "notice 900001.pdf",
+   "fileUrl": "cmt/announcement_portal_prod/notice 900001.pdf",
+   "baseUrl": "https://cdn.cse.lk/"
+  }
+ ]
+}

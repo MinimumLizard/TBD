@@ -31,11 +31,25 @@ models:
                                                   # published, read from its own announcement records
   cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
                                                   # published facts, combined by a stated formula)
+  cse_dealings:         { minimum_tier: free }    # directors' share dealings, one row per transaction: disclosures
+                                                  # the CSE published, shown without names (roles, account type,
+                                                  # side, shares, price, value); proposal, the owner decides
+  cse_flows:            { minimum_tier: plus, free_preview: { delay_days: 7 } }
+                        # money flows: per company over 30, 90 and 365 days, purchases, disposals, net, how many
+                        # accounts on each side, clusters and the large / related-account flags; free sees them a
+                        # week late (proposal, the owner decides)
   # Savings education
   lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
 
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a
 # performance claim (audit §8), so they need a legal view first.
+#
+# Directors' dealings name private individuals (the director, and the related account: a relative or a company).
+# The names are stored as facts and used to count distinct accounts, but no output holding a name is served until
+# the owner's lawyer has reviewed it (docs/plan-retail-features.md §7). The database role of the website cannot
+# read these tables either (migration 0014).
 unpublished_outputs:
   - models.model_stats
+  - models.cse_dealing_as_filed      # cse_dealings: director, role and account as filed, transaction type, PDF link
+  - models.cse_flow_actor            # cse_flows: per account that dealt (a person's or a company's name)

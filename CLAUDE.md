@@ -32,6 +32,10 @@ decisions).
 - Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
   portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
   lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
+- Directors' dealings (`cse_dealings`, `cse_flows`, built 2026-10-19): the notices name private individuals. Names
+  are facts, used only to count accounts; every output holding a name is in `config/entitlements.yaml`
+  `unpublished_outputs` and revoked from the website's database role (migration 0014) until the lawyer answers
+  `docs/plan-retail-features.md` §7 item 9. Never show a name, the free-text role or the notice's PDF link.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
@@ -95,10 +99,10 @@ uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cs
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
-uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions ...  # history migration + reconciliation
+uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions|cse_dealings ...  # history migration + reconciliation
 uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
-uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions ...   # parity with the old tools
+uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions|cse_dealings ...   # parity with the old tools
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website
 TEST_DATABASE_URL=... uv run python web/tests/leak/seed.py   # then: DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100; wait for it; npm run test:leak
 ```

@@ -1,0 +1,33 @@
+{
+ "reqBaseAnnouncement": {
+  "id": 900003,
+  "dType": "DealingsByDirectors",
+  "dateOfAnnouncement": "08 Oct 2026",
+  "remarks": null,
+  "symbol": "AAA",
+  "companyName": "ALPHA EXAMPLE PLC",
+  "accTypeRelInterest": true,
+  "accTypeOwnAcc": false,
+  "dircetorsName": "Mrs. C. Sample",
+  "relInterestAccountName": "Example Holdings (Pvt) Ltd, in which Mrs. C. Sample serves as a Director",
+  "dateOfNotification": "08 Oct 2026",
+  "natureOfDir": "Non-Executive Director",
+  "directorTransactions": [
+   {
+    "dirId": 9000030,
+    "transType": "Sale of Shares",
+    "transactionDate": "06 Oct 2026",
+    "quantity": 2000000,
+    "price": 6
+   }
+  ]
+ },
+ "reqAnnouncementDocs": [
+  {
+   "id": 900003,
+   "fileName": "notice 900003.pdf",
+   "fileUrl": "cmt/announcement_portal_prod/notice 900003.pdf",
+   "baseUrl": "https://cdn.cse.lk/"
+  }
+ ]
+}

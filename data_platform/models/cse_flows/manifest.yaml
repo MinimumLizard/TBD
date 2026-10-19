@@ -1,0 +1,29 @@
+name: cse_flows
+market: cse
+title_key: models.cse_flows.title
+summary_key: models.cse_flows.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.security_list                # which accounts are listed companies, and their names (old load_market)
+outputs:
+  - models.cse_flow_company          # per company, window and dealing date: purchases, disposals, net, counts
+  - models.cse_flow_summary          # per dealing date: how many dealings, the median disclosure lag
+  - models.cse_flow_dealing          # per transaction: the kind of account that dealt, and the flags
+  - models.cse_flow_actor            # per account that dealt (names: unpublished, config/entitlements.yaml)
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models:
+      cse_dealings: "1.0.0"          # reads models.cse_dealing and models.cse_dealing_as_filed
+    parameters:
+      windows_days: [30, 90, 365]
+      large_lkr: 10000000
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/flows.py build(), run on the old data/dealings/dealings.csv"
+      tolerance: 0
+      notes: >-
+        The old page's tables (actors and companies per window, the feed's flags, the counts and the median lag)
+        compared exactly at the old page's date, and at earlier dealing dates by running the old code on the old CSV
+        cut at each date. The old code is run without its aliases file and ownership groups (the platform has
+        neither yet; neither changes any compared number on the old data, which the test also checks); the
+        "watchlist" and "own group" flags and the actors' group labels are left out.
