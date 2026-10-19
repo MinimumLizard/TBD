@@ -1,4 +1,4 @@
-# Data sources for crypto, the FD comparison, and the CSE's own terms (2026-10-18)
+# Data sources for the FD comparison, and the CSE's own terms (2026-10-18)
 
 Research for the owner's requests of 2026-10-18. Every status is recorded with its evidence in
 `config/sources.yaml`. This is not legal advice; every "silent" or "with agreement" source needs written
@@ -26,33 +26,8 @@ This affects half of the product, so the enquiry to the CSE's CEO is now the fir
 
 ## Crypto price and on-chain data
 
-No free source clearly allows commercial use of deep price history. These are the usable routes:
-
-| Source | Status | What it gives |
-|---|---|---|
-| **Bitstamp**, under its Data License Agreement | Commercial use and redistribution allowed once signed; fee not published | BTC/USD daily and hourly from 2011-09-14 (measured), plus ETH and other majors |
-| **CoinMarketCap Startup** (USD 79/month) | Explicit commercial licence for one product (up to 100k users) | All-time daily history across coins; market caps |
-| **Running our own Bitcoin node** | Allowed (MIT software, public chain) | On-chain metrics (supply, hash rate, realized cap, MVRV). Needs about 2 TB of SSD and a small server, so deferred |
-| alternative.me Fear & Greed | Allowed, with attribution beside the data | Sentiment index |
-
-Prohibited or paid-only for us:
-- **Exchanges:** Kraken, Gemini, OKX, Bybit, KuCoin, Crypto.com, Deribit, Coinbase, Binance.
-- **Aggregators:** CoinGecko (free plan), CoinDesk/CryptoCompare (free tier retired May 2026), Messari, Kaiko,
-  CoinPaprika (redistribution only on Enterprise), CoinCap.
-- **On-chain providers:** Glassnode, CryptoQuant, Blockchain.com, Blockchair, Coin Metrics (CC BY-NC).
-- **General finance sites:** Yahoo Finance.
-- **Unclear:** mempool.space's hosted API says nothing on commercial use; ask before relying on it.
-
-**Sri Lanka's position on crypto** (for framing):
-- CBSL (2021): virtual currencies are not legal tender, and no entity is licensed to deal in them.
-- CBSL (2023): crypto is "not recognized as an asset-class". It "urges those who are engaged in promoting and
-  facilitating the promotion of investing and trading in cryptocurrency to refrain from such activities".
-- The Cabinet approved a virtual-asset framework under the SEC on 2026-07-27; no law has passed yet.
-
-So crypto pages are to be framed as global market information and education, in USD:
-- no exchange links, no "how to get crypto" content;
-- a risk notice citing CBSL;
-- a lawyer's view on the 2023 "promoting" wording before anything is published.
+Moved out on 2026-10-19: crypto is now a separate product run by a separate company (decision 0020). The
+research is in this repository's history at commit `ca7e44c`, which the crypto project starts from.
 
 ## The FD comparison: rates, inflation, taxes and costs
 

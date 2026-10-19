@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Make a complete, verifiable, off-GitHub copy of the three existing repositories.
+# Make a complete, verifiable, off-GitHub copy of the existing Sri Lankan market repositories (CSE, Nelson-Siegel).
 #
 # What you get in OUT_DIR (default: ./repo-backup-YYYY-MM-DD):
 #   <repo>.bundle      every branch, tag and commit of the repo in ONE file, including all data history
-#                      (the crypto `data` branch, every daily version of the bond database, CSE raw files)
+#                      (every daily version of the bond database, CSE raw files)
 #   SHA256SUMS         fingerprints of every file, so a later copy can be checked with `sha256sum -c SHA256SUMS`
 #   README.txt         how to restore
 #
@@ -17,7 +17,9 @@
 set -euo pipefail
 
 OWNER="MinimumLizard"
-REPOS=(CSE Nelson-Siegel Crypto)
+# The old Crypto terminal now belongs to the separate crypto product (decision 0020), which backs it up itself;
+# to include it here anyway: EXTRA_REPOS="Crypto" bash scripts/backup_repos.sh
+REPOS=(CSE Nelson-Siegel ${EXTRA_REPOS:-})
 OUT_DIR="${1:-./repo-backup-$(date -u +%Y-%m-%d)}"
 
 mkdir -p "$OUT_DIR"
@@ -27,7 +29,7 @@ trap 'rm -rf "$WORK"' EXIT
 
 for repo in "${REPOS[@]}"; do
   echo "== $repo"
-  # --mirror copies every branch and tag, not just the default branch (the crypto history lives on `data`).
+  # --mirror copies every branch and tag, not just the default branch.
   # OLD_REPOS_TOKEN (optional): a read-only token, needed once the repos are private.
   AUTH=""; [ -n "${OLD_REPOS_TOKEN:-}" ] && AUTH="x-access-token:${OLD_REPOS_TOKEN}@"
   GIT_LFS_SKIP_SMUDGE=1 git clone --quiet --mirror "https://${AUTH}github.com/$OWNER/$repo.git" "$WORK/$repo.git"
@@ -42,7 +44,7 @@ Backup of github.com/$OWNER/{${REPOS[*]}} taken $(date -u +%Y-%m-%dT%H:%M:%SZ).
 
 Check nothing was damaged in transit:   sha256sum -c SHA256SUMS
 Restore a repository:                    git clone <name>.bundle <name>
-Restore a specific branch (e.g. crypto data):  git clone -b data Crypto.bundle Crypto-data
+Restore a specific branch:               git clone -b <branch> <name>.bundle <name>
 EOF
 
 ( cd "$OUT_DIR" && sha256sum ./*.bundle README.txt > SHA256SUMS )

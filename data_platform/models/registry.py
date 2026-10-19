@@ -155,8 +155,7 @@ def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
     calendars = {}
     for path in sorted((REPO_ROOT / "config" / "calendars").glob("*.yaml")):
         cal = yaml.safe_load(path.read_text())
-        calendars[path.stem] = {"name": cal.get("name"), "every_day": bool(cal.get("every_day", False)),
-                                "closures": sorted(str(d) for d in (cal.get("closures") or {}))}
+        calendars[path.stem] = {"name": cal.get("name"), "closures": sorted(str(d) for d in (cal.get("closures") or {}))}
     return {
         "tiers": ent["tiers"],
         "unpublished_outputs": ent.get("unpublished_outputs", []),

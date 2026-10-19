@@ -4,9 +4,14 @@ Handover notes between sessions. Keep this file current: future sessions rely on
 
 ## What this is
 
-A tiered retail market-information portal, mainly for Sri Lankan investors. It is being built by consolidating
-three existing personal tools (CSE equities, LKR government bonds, crypto) into one platform. The product is
-**ZinvestIQ** (decision 0017); the repository is still called TBD. The owner works with a partner, Janu.
+A tiered retail market-information portal for Sri Lankan investors: the CSE share market, LKR government bonds and
+bills, and retail education (the FD comparison). It is built by consolidating two existing personal tools (CSE
+equities, LKR government bonds) into one platform. The product is **ZinvestIQ** (decision 0017); the repository is
+still called TBD. The owner works with a partner, Janu.
+
+**Sri Lankan markets only (decision 0020, 2026-10-19).** Crypto and global markets are a separate product of a separate
+company, with its own repository; it started from commit `ca7e44c` of this repository. Nothing about crypto belongs
+here: no code, pages, sources, copy or links.
 
 Owner background: finance, fluent in R, learning Python, not a professional engineer. Explain decisions in plain
 language. Prefer boring, well-documented, managed services over clever or self-hosted ones.
@@ -27,10 +32,6 @@ decisions).
 - Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
   portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
   lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
-- Crypto section (decision 0019, built 2026-10-18 at the owner's request): Bitstamp collector, models `crypto_market`
-  (free), `crypto_cycle` (Plus, 7-day preview), `crypto_trend_bands` (Pro), pages /crypto and /crypto/<asset>.
-  Cross-checks: `docs/research/crypto-crosscheck.md`. Neutral names only; never imitate a paid crypto-research
-  service (`docs/research/crypto-itc-review.md`). Not public before the Bitstamp licence and a lawyer's view.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
@@ -44,9 +45,8 @@ tests; outputs carry `method_version`) → API as Next.js server routes (`web/li
 check) → Next.js web app on Vercel, all copy in `web/messages/{en,si,ta}.json`.
 
 Data-source rule (owner, decision 0009): use a source only if its terms allow commercial use or are silent. Status
-lives in `config/sources.yaml`. Crypto (decision 0019) runs on Bitstamp prices only, as a prototype: its Data License
-Agreement is unsigned, so `bitstamp` is `permission_required` (a launch blocker); most other crypto sources prohibit
-commercial use.
+lives in `config/sources.yaml`. The CSE's own terms need its written permission for commercial use, so `cse_api` is
+`permission_required`: a launch blocker until a letter or licence is on file (roadmap item 0).
 
 This session may NOT change the existing repos; push access to them was refused by the environment. Give the owner
 instructions instead.
@@ -57,7 +57,6 @@ instructions instead.
 |---|---|---|
 | CSE terminal | github.com/MinimumLizard/CSE (`main`) | minimumlizard.github.io/CSE/ |
 | Bonds (Nelson-Siegel) | github.com/MinimumLizard/Nelson-Siegel (`main`) | minimumlizard.github.io/Nelson-Siegel/ |
-| Crypto terminal | github.com/MinimumLizard/Crypto (code: `claude/minilizard-crypto-terminal-e6g100`; data: `data`) | minimumlizard.github.io/Crypto/ |
 
 They are public, so they can be cloned without credentials:
 `GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/MinimumLizard/<repo>`. Clone into a scratch folder, never inside
@@ -92,13 +91,12 @@ uv sync                                                        # once (Python 3.
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"   # what CI runs
 uv run python -m data_platform.compliance                      # copy lint
 uv run python -m data_platform.jobs.migrate                    # apply db/migrations (DATABASE_URL)
-uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | cbsl | dcs_cpi | bitstamp
+uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | cbsl | dcs_cpi
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
 uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions ...  # history migration + reconciliation
-uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings|crypto] [--model NAME]   # compute models (--as-of D: in memory only)
-uv run python -m data_platform.jobs.crosscheck_crypto           # crypto vs public reference points (docs/research/crypto-crosscheck.md)
+uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
 uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions ...   # parity with the old tools
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website

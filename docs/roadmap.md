@@ -10,8 +10,7 @@
 | 3 | Model plug-ins, bonds first, each passing parity tests | **Built and verified 2026-10-11 (`docs/phase3-4-verification.md`): all six bond models and the CSE market summary and share metrics, exact parity; bond curve version 2 (decision 0014). Awaiting approval.** |
 | 3b | The other CSE models. Proposed order (`docs/plan-retail-features.md` §8): corporate actions and total returns; risk estimates and the portfolio lab, internal only, with 10- and 15-name versions; fundamentals; ownership, dealings and flows | **Part 1 built 2026-10-18: corporate actions and total returns** (collector, facts from the old caches, both models with exact parity, shown on the share pages; decision 0018). Awaiting approval. Next: risk estimates and the portfolio lab (internal) |
 | 4 | Portal: API, auth, entitlements, web app (free tier first) | **Free-tier portal, API, single tier check and tier-leak suite built 2026-10-11. Accounts stubbed (everyone is free) until Supabase exists. Awaiting approval.** |
-| 4b | Accounts, payments, weekly email updates, a feedback feature, Sinhala and Tamil, deployment on Vercel | Needs the owner's accounts and translators |
-| C | Crypto section (owner's request, 2026-10-18; decision 0019): Bitstamp prices, three models, two pages, cross-checked | **Built 2026-10-18 as a prototype for the owners' preview. Public only after Bitstamp's Data License Agreement is signed and a lawyer has read it** |
+| 4b | Accounts, payments, weekly email updates, a feedback feature, Sinhala and Tamil, deployment on Vercel | **Feedback built; the weekly e-mail is built and previewable (2026-10-18).** The rest needs the owner's accounts and translators |
 | 5 | Retail education (new, 2026-10-16): FD vs bills and bonds, FD vs the market, a calculator; model portfolios published only in the form the lawyer allows | **FD vs treasury bills vs inflation, with a calculator, built 2026-10-18 (approved that day): collectors `cbsl` and `dcs_cpi`, model `lk_savings_compare` 1.0.0, page `/learn/savings`. Awaiting review; one question on bill yields below.** FD vs bonds and FD vs the market not started (the market needs the CSE's permission) |
 
 ## Owner actions, in order of priority (updated after the 2026-10-11 audit)
@@ -26,23 +25,14 @@
 The CSE's terms, at https://www.cse.lk/disclaimer, forbid commercial use of cse.lk data without the CEO's written
 permission (`docs/research/data-sources-2026-10-18.md`). Development and our private preview can continue, but the
 site cannot launch with CSE data until permission or a market-data licence is on file. A draft letter is in
-`docs/letters/data-permission-requests.md`, with drafts for Bitstamp (crypto prices), the CBSL (FD rates) and the
-statistics department (inflation).
+`docs/letters/data-permission-requests.md`, with drafts for the CBSL (FD rates) and the statistics department
+(inflation).
 
 Ask in the same letter for the CSE's market-data policy and fees for **end-of-day** data (all this product uses;
 usually the cheapest category). If the CSE says no or the fee is too high, the fallback is a vendor already licensed
 to redistribute CSE data (ICE, LSEG). Re-routing the same data through TradingView or another site does not avoid the
 terms (`docs/plan-retail-features.md` §7, question 7). If permission takes time, the bond pages and the FD comparison
 can launch first: their sources (PDMO, CBSL) carry no such restriction.
-
-### 0b. Crypto: sign Bitstamp's Data License Agreement, and three decisions (new, 2026-10-18)
-The crypto section runs on Bitstamp's prices, whose commercial use needs its signed agreement (draft request in
-`docs/letters/data-permission-requests.md`; fee unknown). Until then it is a launch blocker. Decisions for you:
-- **Tiers** as proposed: prices free, cycles Plus (free a week late), bitcoin's trend bands Pro?
-- **The band position (0 to 1):** publish it at all before the lawyer's view? It is labelled descriptively, but
-  readers may treat it as a signal (`docs/research/crypto-itc-review.md`, point 4).
-- **Which assets:** ten US-dollar pairs plus ETH/BTC (`data_platform/collectors/bitstamp/parse.py`). Add or remove?
-The lawyer's review (item 4) should include the crypto pages, given the CBSL's 2023 wording on promotion.
 
 ### 1. Look at the site, then approve (or send back) Phases 2, 3 and 4
 You asked to see the site before approving. A visual preview (every page, on a computer and a phone, free and paid

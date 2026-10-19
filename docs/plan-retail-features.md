@@ -233,6 +233,10 @@ All of them are measured forward from the day they start, never backfilled.
    allow display-only, personal use, forbid "creating products or services based on TradingView content", and it
    receives the CSE's data under its own agreement with the exchange. Its free embeddable chart widgets are the one
    use it offers websites; confirm their terms for a paid site before using them.
+8. Two companies (added 2026-10-19, decision 0020). The Sri Lankan product (ZinvestIQ) and a separate crypto and
+   global markets product start from the same platform code, written for the owners. Which company owns that code,
+   and on what terms does the other use it (an assignment and a licence)? Anything to keep the two clearly separate
+   (names, directors, shared staff, cross-promotion) given the CBSL's position on crypto?
 
 ## 8. Proposed order of work
 

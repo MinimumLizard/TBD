@@ -40,11 +40,6 @@ models:
                         # week late (proposal, the owner decides)
   # Savings education
   lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
-  # Crypto (decision 0019; a prototype until Bitstamp's data licence is signed)
-  crypto_market:        { minimum_tier: free }    # prices, returns, drawdown from the high, volatility, ETH/BTC
-  crypto_cycle:         { minimum_tier: plus, free_preview: { delay_days: 7 } }
-                        # long averages, Pi cycle lines, halvings, cycle table, monthly returns: free sees them a week late
-  crypto_trend_bands:    { minimum_tier: pro }     # bitcoin's long-run trend bands, re-fitted daily
 
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a

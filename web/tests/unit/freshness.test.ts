@@ -20,11 +20,3 @@ test("sessions behind", () => {
   expect(sessionsBehind("cse", "2026-10-09", at("2026-10-11T12:00:00Z"))).toBe(0);
   expect(sessionsBehind("cse", "2026-10-07", at("2026-10-09T12:00:00Z"))).toBe(2);
 });
-
-test("crypto trades every day; yesterday's UTC close is expected once it has been collected", () => {
-  expect(isSession("crypto", "2026-10-18")).toBe(true); // a Sunday
-  expect(expectedSession("crypto", at("2026-10-18T00:20:00Z"))).toBe("2026-10-16"); // 05:50 Colombo: not collected yet
-  expect(expectedSession("crypto", at("2026-10-18T01:30:00Z"))).toBe("2026-10-17"); // 07:00 Colombo
-  expect(expectedSession("crypto", at("2026-10-17T20:00:00Z"))).toBe("2026-10-16"); // 01:30 Colombo on the 18th
-  expect(sessionsBehind("crypto", "2026-10-15", at("2026-10-18T01:30:00Z"))).toBe(2); // weekend days count
-});

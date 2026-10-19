@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-10-19 — Sri Lankan markets only: crypto moved to a separate product (decision 0020)
+
+- The owners split the business in two: ZinvestIQ (this repository) covers Sri Lankan markets only; crypto and
+  global markets become a separate product of a separate company. ZinvestIQ keeps the name (reasons in decision
+  0020).
+- Removed: the Bitstamp collector, the three crypto models, migration 0010 (applied only to development and test
+  databases), the crypto pages and API routes, the crypto disclaimer, sources, calendar, workflow, research notes and
+  decision 0019. "Migrate history" and the backup script no longer archive the old Crypto terminal; the other product
+  archives its own history.
+- The crypto code, research and cross-checks remain in this repository's history at commit `ca7e44c`, from which the
+  other product starts.
+- Checked after the change: fast suite 279 passed, website unit tests 97, build, tier-leak suite 50/50, copy lint 0;
+  no page mentions crypto and /crypto returns 404.
+
+## 2026-10-18 — Feedback, the weekly e-mail, calendars to 2027, data rights
+
+- Feedback (Phase 4b, no accounts needed): "Was this page useful?" on every page and a short form at `/feedback`.
+  The website can only call `community.submit_feedback()` (migration 0012), which checks every field and limits
+  senders (30 a sender an hour, 5 messages; 2,000 an hour in all); it cannot read the table. Addresses are never
+  stored, only a keyed hash (`FEEDBACK_KEY_SECRET`) kept seven days. The owner reads it with
+  `python -m data_platform.jobs.feedback`.
+- The weekly e-mail per market, built once per tier through the tier check (`web/lib/email/`), with HTML and plain
+  text; preview at `/email/cse` and `/email/bonds`; the leak suite checks the bond e-mail. Sending waits for accounts.
+- Both trading calendars list every bank holiday to the end of 2027 from the CBSL's published lists; every past
+  closure was checked against the data by query. 1 and 7 January 2026 (CSE only) stay unexplained.
+- The CSE's terms re-read in a browser: both clauses quoted in `config/sources.yaml`; the lawyer's list and the
+  roadmap cover why a third-party copy (e.g. TradingView) does not help, the licence fallback and a bonds-first launch.
+- The static preview exporter can limit the Pro copies of bond pages (`--pro-details N`), so the preview fits the
+  511-file limit of a published page; republished 2026-10-19 with every section (439 pages).
+
 ## 2026-10-18 — Crypto section (prototype, decision 0019)
 
 - Bitstamp collector: daily candles for ten US-dollar pairs and ETH/BTC, full backfill from 2011-09-14 (29,329
