@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-10-19 — Directors' dealings and money flows (Phase 3b, part 3)
+
+- Facts: no new fact table. The dealing notices are announcement details (`cse.announcement_details`), kept as the
+  CSE served them, names included. The daily corporate-action sweep now also fetches the detail of every
+  "DEALINGS BY DIRECTORS" / "RELEVANT INTEREST" announcement it lists; the 2-hourly job already kept every detail.
+- Migration step `python -m data_platform.migration.cse_dealings` (added to "Migrate history"): the old terminal's
+  830 backfilled notices loaded from the archive and reconciled with the old files at e05c6f3 (830 backfill files and
+  35 session files, all facts with the same SHA-256; all 782 notices of the old `dealings.csv` present); repeatable.
+  Report: `docs/migration/cse-dealings-reconciliation.json`.
+- Migration 0014: six model output tables, all with row-level security. The two that hold names
+  (`models.cse_dealing_as_filed`, `models.cse_flow_actor`) are unpublished and revoked from the website's role.
+- Models (ported from the old `cse/dealings.py` and `cse/flows.py`, neutral side labels purchase / disposal / other):
+  - `cse_dealings` 1.0.0 (C18), proposed free: one row per transaction with the company, a role category read from
+    the free text (new: the free text sometimes names people), own or related account, side, shares, price, value,
+    announcement date and lag in weekdays. Re-filed notices stay on record, marked `superseded_by`.
+  - `cse_flows` 1.0.0 (C19), proposed Plus with a 7-day free preview: per company and per account over 30, 90 and
+    365 days, purchases, disposals, net, distinct accounts on each side, the cluster mark, and per dealing the large
+    (Rs 10 mn or more) and related-party flags. Point in time: one set of rows per dealing date.
+  - Left out, and why: the quarter-to-quarter top-20 list changes (C20), the "own group" flag and group labels need
+    the ownership facts (another stream); the watchlist flag was the old owner's personal list; the owner's aliases
+    file is not ported (it changes no number on the old data, which the parity test checks).
+- Parity (exact): `dealings.csv` 2,262 rows × 16 columns (35 value cells the old writer printed as "x.0" are the same
+  numbers), the old re-filing rule (1 notice, 5 transactions); the old flows code at 16 dealing dates, 5,816 old rows
+  (companies, accounts, recent dealings and flags, counts, median lag), all equal. Report:
+  `docs/migration/parity-cse-dealings-flows.json` (counts only). On the development copy: 2,267 transactions,
+  115,501 flow rows, 7 s.
+- Website: a "Directors' dealings" panel on each share page (its own component) and `/cse/dealings` (recent dealings;
+  money flows by company, ordered by total value in either direction; large dealings), API routes
+  `/api/v1/cse/dealings` and `/api/v1/cse/flows`, glossary terms (directors' dealings, related party, cluster). No
+  names anywhere; the tier-leak seed includes a made-up name that must never appear.
+- Compliance: two explicit `allow` entries let the method page quote the words the side rule looks for in a notice's
+  transaction type. The lawyer's list gains item 9 (names, roles, the cluster mark).
+
 ## 2026-10-19 — Sri Lankan markets only: crypto moved to a separate product (decision 0020)
 
 - The owners split the business in two: ZinvestIQ (this repository) covers Sri Lankan markets only; crypto and

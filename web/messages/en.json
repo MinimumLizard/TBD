@@ -183,6 +183,88 @@
     "dy": "Div. yield",
     "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile)."
   },
+  "dealings": {
+    "title": "Directors' dealings",
+    "intro": "Listed companies must tell the CSE when one of their directors deals in the company's shares, in the director's own name or through a related party. These are those disclosures as the CSE published them, usually one to four market days after the dealing. They record what happened; they say nothing about what a share's price will do.",
+    "namesNote": "Names are not shown while we take legal advice on publishing them. Each disclosure is public on the CSE's website.",
+    "recent": "Recent disclosed dealings",
+    "recentNote": "The {count} most recent transactions, newest first. A notice the company filed again is counted once.",
+    "date": "Dealing date",
+    "company": "Company",
+    "role": "Role",
+    "account": "Account",
+    "side": "Side",
+    "shares": "Shares",
+    "price": "Price",
+    "value": "Value",
+    "disclosed": "Disclosed",
+    "lag": "Lag",
+    "lagValue": "{n, plural, one {# weekday} other {# weekdays}}",
+    "none": "No dealings disclosed.",
+    "sides": {
+      "purchase": "Purchase",
+      "disposal": "Disposal",
+      "other": "Other"
+    },
+    "sideOtherNote": "Other: a gift, transfer, inheritance or wording that does not say purchase or disposal. Never counted as either.",
+    "accounts": {
+      "own": "Own",
+      "related": "Related party"
+    },
+    "roles": {
+      "chair": "Chair",
+      "chief_executive": "Managing director or CEO",
+      "executive": "Executive director",
+      "non_executive": "Non-executive director",
+      "independent_non_executive": "Independent non-executive director",
+      "several": "Several directors",
+      "not_stated": "Director (see the notice)"
+    },
+    "flows": "Money flows by company",
+    "flowsIntro": "Disclosed purchases and disposals by directors and their related parties, per company, in the {window} to {date}. Companies are listed by the total value dealt in either direction, largest first.",
+    "windows": {
+      "30": "30 days",
+      "90": "90 days",
+      "365": "year"
+    },
+    "windowLabel": "Window",
+    "purchases": "Purchases",
+    "disposals": "Disposals",
+    "net": "Net",
+    "purchasers": "Accounts purchasing",
+    "disposers": "Accounts disposing",
+    "transactions": "Dealings",
+    "cluster": "Cluster",
+    "clusterNote": "Cluster: two or more different accounts made purchases in the window, and purchases exceeded disposals by value. It describes the disclosures; it is not a signal.",
+    "noFlows": "No purchases or disposals were disclosed in this window.",
+    "more": "{count} more companies with smaller dealings are not listed.",
+    "summaryDealings": "Dealings disclosed",
+    "summaryDealingsNote": "since {date}",
+    "summaryLag": "Median disclosure lag",
+    "large": "Large dealings",
+    "largeIntro": "Dealings of Rs 10 mn or more in the 30 days to {date}.",
+    "noLarge": "No dealings of Rs 10 mn or more in the 30 days to {date}.",
+    "relatedFlag": "Related party",
+    "kind": "Kind of account",
+    "actorTypes": {
+      "individual": "A person",
+      "joint": "Joint account",
+      "estate": "An estate",
+      "trust": "A trust",
+      "institution": "An institution or fund",
+      "company": "A company",
+      "listed": "A listed company",
+      "nominee": "Not identified"
+    },
+    "previewNote": "Free access shows the money flows a week late.",
+    "linkAll": "All directors' dealings",
+    "panel": {
+      "title": "Directors' dealings",
+      "note": "Disclosed by the company to the CSE; the company code covers all its share classes. Names are not shown.",
+      "none": "No dealings by this company's directors are in our records.",
+      "more": "Showing the {shown} most recent of {count}."
+    }
+  },
   "share": {
     "titleSuffix": "share",
     "priceChart": "Closing price (unadjusted)",
@@ -471,6 +553,14 @@
       "title": "CSE total returns",
       "summary": "Each share's return with its confirmed dividends, sub-divisions, scrip and rights issues taken into account, beside its price-only return."
     },
+    "cse_dealings": {
+      "title": "Directors' share dealings",
+      "summary": "Every share dealing a listed company's director disclosed to the CSE: the date, the director's role, own or related account, purchase or disposal, shares, price and value. Names are not shown."
+    },
+    "cse_flows": {
+      "title": "Directors' money flows",
+      "summary": "Per company over 30 days, 90 days and a year: the value of directors' disclosed purchases and disposals, the net, how many accounts dealt on each side, clusters and large dealings."
+    },
     "cse_ownership": {
       "title": "Who owns CSE companies",
       "summary": "From the twenty largest shareholders each company lists in its interim reports: the share of the voting shares by type of owner, any controlling or influential block, the company's ownership group and an estimate of its free float. No private individual is named."
@@ -684,6 +774,21 @@
         "name": "Total return",
         "short": "The price change plus dividends, with splits, scrip and rights issues taken into account.",
         "long": "A share's published price falls when it pays a dividend or splits, even though its owners lose nothing. The total return adds the dividends back and corrects for changes in the number of shares, so it measures what the shares owned at the start would be worth with their dividends kept in the shares. Past returns do not predict future ones."
+      },
+      "directorsDealings": {
+        "name": "Directors' dealings",
+        "short": "A director's purchase or disposal of shares in their own company, which the company must disclose to the stock exchange.",
+        "long": "The CSE's listing rules require a listed company to announce, within a few market days, every dealing in its shares by its directors, in their own name or through a related party. The notice gives the director's role, the account, and each transaction's date, number of shares and price. Directors deal for many reasons, such as personal finances, taxes, estates or share schemes, so one dealing on its own says little."
+      },
+      "relatedParty": {
+        "name": "Related party",
+        "short": "A person or company connected with a director, such as a close relative or a company the director controls or sits on the board of.",
+        "long": "A director must disclose dealings through these accounts as well as in their own name. The notice names the related account; we show only that the dealing was through a related party."
+      },
+      "cluster": {
+        "name": "Cluster",
+        "short": "Two or more different accounts making purchases of the same company's shares within one window, with purchases exceeding disposals by value.",
+        "long": "We mark a cluster when, within the window, at least two distinct directors or related parties made purchases and the value of purchases was larger than the value of disposals. It describes what was disclosed. It is not a signal and says nothing about where the price will go."
       },
       "eps": {
         "name": "Earnings per share (EPS)",

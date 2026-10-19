@@ -7,6 +7,7 @@ import CompanyFigures from "@/components/CompanyFigures";
 import CompanyOwnership from "@/components/CompanyOwnership";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
+import DirectorsDealings from "@/components/DirectorsDealings";
 import { lineOption } from "@/lib/charts";
 import StatTile from "@/components/StatTile";
 import Term from "@/components/Term";
@@ -181,6 +182,7 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
           <p className="small muted">{t("share.actionsNote")}</p>
         </>
       )}
+      <DirectorsDealings viewer={viewer} symbol={symbol} />
       <ModelFooter models={["cse_security_metrics", ...(actions.access.allowed ? ["cse_corporate_actions" as const] : []),
                             ...(returns.access.allowed ? ["cse_total_returns" as const] : []),
                             ...(figures.access.allowed ? ["cse_fundamentals" as const] : []),

@@ -2,7 +2,7 @@
 export const GLOSSARY = [
   "aspi", "spsl20", "turnover", "breadth", "foreign", "pe", "pbv", "eps", "navPerShare", "roe", "dividendYield", "exDate",
   "totalReturn", "freeFloat", "ownershipGroup",
-  "marketCap", "range52",
+  "marketCap", "range52", "directorsDealings", "relatedParty", "cluster",
   "relative", "beta", "yield", "bp", "curve", "residual", "zscore", "liquidity", "bidOffer", "duration",
   "convexity", "carry", "rolldown", "fixedDeposit", "awfdr", "treasuryBill", "inflation", "realReturn", "methodVersion",
 ] as const;

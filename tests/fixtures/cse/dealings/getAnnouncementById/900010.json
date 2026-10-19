@@ -1,0 +1,26 @@
+{
+ "reqBaseAnnouncement": {
+  "id": 900010,
+  "dType": "DealingsByDirectors",
+  "dateOfAnnouncement": "09 Oct 2026",
+  "remarks": null,
+  "symbol": "BBB",
+  "companyName": "BETA SAMPLE HOLDINGS PLC",
+  "accTypeRelInterest": false,
+  "accTypeOwnAcc": true,
+  "dircetorsName": "Dr. F. Example",
+  "relInterestAccountName": null,
+  "dateOfNotification": "09 Oct 2026",
+  "natureOfDir": "Chairman",
+  "directorTransactions": [
+   {
+    "dirId": 9000100,
+    "transType": "Gift",
+    "transactionDate": "08 Oct 2026",
+    "quantity": 300,
+    "price": 20
+   }
+  ]
+ },
+ "reqAnnouncementDocs": []
+}

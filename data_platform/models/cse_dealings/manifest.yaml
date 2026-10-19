@@ -1,0 +1,20 @@
+name: cse_dealings
+market: cse
+title_key: models.cse_dealings.title
+summary_key: models.cse_dealings.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.announcement_details         # the dealing notices: structured records (dType DealingsByDirectors), as served
+outputs:
+  - models.cse_dealing               # one row per transaction, without names (published)
+  - models.cse_dealing_as_filed      # names and free text as filed (unpublished: config/entitlements.yaml)
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/dealings.py (parse, side_of, drop_refiled) and data/dealings/dealings.csv"
+      tolerance: 0
+      notes: >-
+        Every row of the old CSV, every column, as text, with the side labels mapped (the old CSV's two trading verbs
+        to purchase and disposal). The old CSV left out re-filed notices; here their rows are kept and marked
+        superseded_by, and the rows not superseded equal the CSV. The role category is new (no old column).

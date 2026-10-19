@@ -188,6 +188,7 @@ export default async function CsePage() {
           )}
         </>
       )}
+      <p><Link href="/cse/dealings">{t("dealings.linkAll")} →</Link></p>
       <ModelFooter models={["cse_market_tape", "cse_security_metrics"]} />
     </>
   );

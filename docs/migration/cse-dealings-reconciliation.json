@@ -1,0 +1,38 @@
+{
+  "old_commit": "e05c6f3",
+  "catalogue_entries_added": 0,
+  "loaded": {
+    "catalogue_entries": 3320
+  },
+  "reconciliation": {
+    "backfill": {
+      "old_files": 830,
+      "old_with_dealing_record": 826,
+      "facts_matching": 830,
+      "facts_with_dealing_record": 826,
+      "missing_in_new": 0,
+      "old_sha256": "c8b6297e096c837f6ede998a0ac8be5051c40538b3c25bbd646f765977de832f",
+      "new_sha256": "c8b6297e096c837f6ede998a0ac8be5051c40538b3c25bbd646f765977de832f",
+      "ok": true
+    },
+    "session_folders": {
+      "old_files": 35,
+      "old_with_dealing_record": 35,
+      "facts_matching": 35,
+      "facts_with_dealing_record": 35,
+      "missing_in_new": 0,
+      "old_sha256": "d29a117f1a9ec9b43e254b9c16353a7b9e3775c6c3f4045344bec1a09089fe00",
+      "new_sha256": "d29a117f1a9ec9b43e254b9c16353a7b9e3775c6c3f4045344bec1a09089fe00",
+      "ok": true
+    },
+    "dealings_csv": {
+      "old_notices": 782,
+      "notices_with_a_fact": 782,
+      "missing_in_new": 0,
+      "ok": true
+    },
+    "value_conflicts": 0,
+    "ok": true
+  },
+  "generated_at": "2026-10-19T07:10:18+00:00"
+}

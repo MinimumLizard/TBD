@@ -58,6 +58,10 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_company_ownership": "session_date",
   "models.cse_fundamentals": "session_date",
   "models.cse_report_figures": "period_date", // the quarter the report covers
+  "models.cse_dealing": "announced_date", // what was disclosed by a date (a preview shows only older notices)
+  "models.cse_flow_company": "as_of",
+  "models.cse_flow_summary": "as_of",
+  "models.cse_flow_dealing": "deal_date",
   "models.savings_rates": "month",
   "models.savings_growth": "start_month",
   "models.savings_summary": null,
