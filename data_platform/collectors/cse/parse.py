@@ -12,8 +12,8 @@ import re
 from urllib.parse import quote
 
 from .models import (AnnouncementDetail, ApprovedAnnouncements, CompanyAnnouncements, CompanyInfo, CompanyProfile,
-                     DailyMarketSummary, FinancialAnnouncements, IndexChart, MarketStatus, SectorList, SecurityList,
-                     StockChart, TradeSummary, ms_to_date, validate)
+                     DailyMarketSummary, FinancialAnnouncements, Financials, IndexChart, MarketStatus, SectorList,
+                     SecurityList, StockChart, TradeSummary, ms_to_date, validate)
 
 CDN = "https://cdn.cse.lk/"
 EQUITY_SUFFIXES = (".N0000", ".X0000")          # voting, non-voting (audit §2: API_NOTES §3)
@@ -119,6 +119,45 @@ def company_profile(body: bytes, symbol: str) -> dict:
     first = prof.reqComSumInfo[0] if prof.reqComSumInfo else None
     return {"symbol": symbol, "sector_label": first.sector if first else None,
             "board_type": first.boardType if first else None}
+
+
+def fin_year_end(body: bytes, symbol: str) -> dict:
+    """companyProfile -> the financial year end, as served ('1' = 31 March, '2' = 31 December; None when absent)."""
+    prof = validate(CompanyProfile, _json(body), f"companyProfile {symbol}")
+    first = prof.reqComSumInfo[0] if prof.reqComSumInfo else None
+    fye = first.finYearEnd if first else None
+    return {"symbol": symbol, "fin_year_end": None if fye in (None, "") else str(fye)}
+
+
+def financials(body: bytes, symbol: str) -> dict:
+    """financials (per company) -> {'quarterly': [items], 'annual': [items]}, each item a dict of the fields used."""
+    fin = validate(Financials, _json(body) if body.strip() else {}, f"financials {symbol}")
+    return {"quarterly": [i.model_dump() for i in fin.infoQuarterlyData or []],
+            "annual": [i.model_dump() for i in fin.infoAnnualData or []]}
+
+
+def pick_report(fin: dict) -> tuple[str, dict] | None:
+    """The report the ownership tracker reads: the newest quarterly report (period, then upload time), else the
+    newest annual report for a company without quarterly filings (old cse/ownership/collect.pick_report)."""
+    for kind in ("quarterly", "annual"):
+        items = [x for x in fin.get(kind) or [] if x.get("path")]
+        if items:
+            return kind, max(items, key=lambda x: (x.get("manualDate") or 0, x.get("uploadedDate") or 0))
+    return None
+
+
+def report_url(path: str) -> str:
+    return CDN + quote(str(path).lstrip("/"), safe="/")
+
+
+def report_entry(code: str, symbol: str, kind: str, item: dict) -> dict:
+    """One listed report -> the index columns the list gives (old collect._fetch_one's row)."""
+    up = item.get("uploadedDate")
+    return {"report_id": int(item["id"]), "code": code, "symbol": symbol, "kind": kind,
+            "title": (item.get("fileText") or "").strip(),
+            "period_date": ms_to_date(item["manualDate"]) if item.get("manualDate") else None,
+            "uploaded_at": dt.datetime.fromtimestamp(up / 1000, dt.timezone.utc) if isinstance(up, (int, float)) else None,
+            "url": report_url(item["path"])}
 
 
 def stock_chart(body: bytes, symbol: str) -> list[dict]:

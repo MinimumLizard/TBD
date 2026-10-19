@@ -17,12 +17,13 @@ def registry():
     from ..collectors.cbsl.collector import CbslCollector
     from ..collectors.cse.collector import (CseAnnouncementsCollector, CseCorporateActionsCollector,
                                             CseEndOfDayCollector, CseHistoryCollector)
+    from ..collectors.cse.reports import CseReportsCollector
     from ..collectors.dcs_cpi.collector import DcsCpiCollector
     from ..collectors.pdmo.collector import PdmoCollector
 
     return {c.source_id + ("" if c.job == "collect" else f":{c.job}"): c
             for c in (PdmoCollector, CseEndOfDayCollector, CseAnnouncementsCollector, CseHistoryCollector,
-                      CbslCollector, DcsCpiCollector, CseCorporateActionsCollector)}
+                      CbslCollector, DcsCpiCollector, CseCorporateActionsCollector, CseReportsCollector)}
 
 
 def main(argv: list[str] | None = None) -> int:
