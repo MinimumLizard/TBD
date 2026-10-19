@@ -47,7 +47,7 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
                 <td>{t(`share.ownerTypes.${type}` as never)}</td>
                 <td className="num">{percent(v, 2)}</td>
                 <td style={{ width: "40%" }} aria-hidden="true">
-                  <div className="breadth"><span className="b-flat" style={{ width: `${Math.min(100, v ?? 0)}%` }} /></div>
+                  <div className="breadth"><span className="b-up" style={{ width: `${Math.min(100, v ?? 0)}%`, opacity: 0.55 }} /></div>
                 </td>
               </tr>
             ))}
@@ -69,7 +69,7 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
               : t("share.groupUnnamed", { owner: typeName(o.group_head_type), count: o.group_size })
             : t("share.groupAlone")}
           {o.group_members.length > 0 && (
-            <span className="sub">
+            <div className="small muted">
               {t("share.groupMembers")}:{" "}
               {o.group_members.map((code, i) => (
                 <span key={code}>
@@ -77,7 +77,7 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
                   <Link href={`/cse/shares/${encodeURIComponent(`${code}.N0000`)}`}>{code}</Link>
                 </span>
               ))}
-            </span>
+            </div>
           )}
         </dd>
       </dl>
