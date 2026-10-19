@@ -8,7 +8,7 @@ import ModelFooter from "@/components/ModelFooter";
 import PreviewNote from "@/components/PreviewNote";
 import StatTile from "@/components/StatTile";
 import Term from "@/components/Term";
-import { flows, recentDealings } from "@/lib/data/dealings";
+import { dealingNames, flows, recentDealings } from "@/lib/data/dealings";
 import { WINDOWS, flowWindow } from "@/lib/dealings-display";
 import { date, int, lkr } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
@@ -29,6 +29,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
   const window = flowWindow(params.window);
   const [recent, flow] = await Promise.all([recentDealings(viewer, SHOWN_DEALINGS), flows(viewer, window)]);
   const f = flow.data;
+  const largeNames = (await dealingNames(viewer, (f?.large ?? []).map((d) => d.transaction_id))).data ?? new Map();
   const shareHref = (code: string) => `/cse/shares/${encodeURIComponent(`${code}.N0000`)}`;
   const companies = f?.companies ?? [];
   return (
@@ -130,7 +131,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                       <th>{t("dealings.company")}</th>
                       <th>{t("dealings.side")}</th>
                       <th className="num">{t("dealings.value")}</th>
-                      <th>{t("dealings.kind")}</th>
+                      <th>{t("dealings.director")}</th>
                       <th>{t("dealings.account")}</th>
                     </tr>
                   </thead>
@@ -144,8 +145,51 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                         </td>
                         <td>{t(`dealings.sides.${d.side}` as never)}</td>
                         <td className="num">{lkr(d.value)}</td>
-                        <td className="small">{t(`dealings.actorTypes.${d.actor_type}` as never)}</td>
-                        <td className="small">{d.related_account ? t("dealings.relatedFlag") : t("dealings.accounts.own")}</td>
+                        <td className="small">{largeNames.get(d.transaction_id)?.director ?? ""}</td>
+                        <td className="small">
+                          {d.related_account ? largeNames.get(d.transaction_id)?.account ?? "" : t("dealings.accounts.own")}
+                          <span className="sub">{t(`dealings.actorTypes.${d.actor_type}` as never)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {f.accounts.length > 0 && (
+            <>
+              <h3>{t("dealings.accountsTitle")}</h3>
+              <p>{t("dealings.accountsIntro", { window: t(`dealings.windows.${window}` as never), date: date(f.summary.as_of) })}</p>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("dealings.accountName")}</th>
+                      <th className="num">{t("dealings.purchases")}</th>
+                      <th className="num">{t("dealings.disposals")}</th>
+                      <th className="num">{t("dealings.net")}</th>
+                      <th className="num">{t("dealings.transactions")}</th>
+                      <th>{t("dealings.companiesDealt")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {f.accounts.map((a) => (
+                      <tr key={a.actor_key}>
+                        <td className="names">
+                          {a.actor}
+                          <span className="sub">{t(`dealings.actorTypes.${a.actor_type}` as never)}</span>
+                        </td>
+                        <td className="num">{rs(a.purchase_value)}</td>
+                        <td className="num">{rs(a.disposal_value)}</td>
+                        <td className="num">{lkr(a.net_value)}</td>
+                        <td className="num">{int(a.n_transactions)}</td>
+                        <td className="small">
+                          {(JSON.parse(a.companies) as [string, number][]).map(([code], i) => (
+                            <span key={code}>{i > 0 && ", "}<Link href={shareHref(code)}>{code}</Link></span>
+                          ))}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

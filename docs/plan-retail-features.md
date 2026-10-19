@@ -239,16 +239,16 @@ All of them are measured forward from the day they start, never backfilled.
    (names, directors, shared staff, cross-promotion) given the CBSL's position on crypto?
 9. Directors' dealings (added 2026-10-19, Phase 3b part 3). Listed companies announce every share dealing by a
    director, and the CSE publishes the notice, naming the director and any related account (a relative, or a company
-   the director is connected with). We store the names, use them only to count how many different accounts dealt,
-   and publish no name: each transaction's company, the director's role in a short category ("non-executive
+   the director is connected with). The owners decided to show the names as filed, with a link to the CSE's notice
+   (decision 0021, 2026-10-19), alongside each transaction's company, the director's role in a short category ("non-executive
    director", "chair"), own or related account, purchase or disposal, shares, price and value, and per company the
    totals, the number of accounts on each side and a "cluster" mark (two or more accounts making purchases, with
    purchases above disposals). (a) Under the Personal Data Protection Act, may we show the director's name, the
    related account's name, or a link to the CSE's own notice (which names them), given the notice is already public?
    (b) Can a role reveal a person even without the name (a company has one chair), and is that acceptable? (c) Is a
    per-company "cluster" mark, or a list of companies ordered by the value of directors' dealings, at risk of being
-   read as investment advice, and what wording keeps it factual? The tables with names are kept out of the website
-   (`config/entitlements.yaml` `unpublished_outputs`) until you answer.
+   read as investment advice, and what wording keeps it factual? The names are shown in the private preview; nothing
+   is public before your answer.
 10. Shareholder lists (added 2026-10-19, Phase 3b part 3). Every interim report lists the company's twenty largest
     shareholders, many of them private individuals (and joint holders, estates and family trusts). We store the
     lists, credit each holding to its beneficial owner (custodian and margin accounts resolved), and publish only

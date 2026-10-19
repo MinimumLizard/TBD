@@ -52,8 +52,9 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
   change it?
 - **Reversion statistics** stay hidden from everyone until a legal view. Agree?
 - **Directors' dealings (2026-10-19):** dealings free and money flows Plus with a one-week free preview (proposal in
-  `config/entitlements.yaml`)? Names of directors and related accounts stay unpublished until the lawyer answers
-  `docs/plan-retail-features.md` §7 item 9. Agree?
+  `config/entitlements.yaml`)? **Agreed by the owner 2026-10-19.** Names of directors and related accounts are shown
+  (owner, 2026-10-19, decision 0021); the lawyer's answer to `docs/plan-retail-features.md` §7 item 9 is needed
+  before anything is public.
 - **Bond volume dating (finding V3):** date the 3 disputed volume files by the PDMO index label instead of the data?
 - **The retail features (2026-10-16):** six short decisions in `docs/plan-retail-features.md` §9, including the
   Phase 3b order (proposed: corporate actions and total returns first).

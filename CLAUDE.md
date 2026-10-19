@@ -32,11 +32,10 @@ decisions).
 - Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
   portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
   lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
-- Directors' dealings (`cse_dealings`, `cse_flows`, built 2026-10-19): the notices name private individuals. Names
-  are facts, used only to count accounts; every output holding a name is in `config/entitlements.yaml`
-  `unpublished_outputs` and revoked from the website's database role (migration 0014) until the lawyer answers
-  `docs/plan-retail-features.md` §7 item 9. Never show a name, the free-text role or the notice's PDF link.
-- Ownership and company figures (Phase 3b part 3a, decision 0021): interim-report texts are facts
+- Directors' dealings (`cse_dealings` free, `cse_flows` Plus with a 7-day preview, built 2026-10-19): directors' and
+  accounts' names are shown as filed, with a link to the CSE's notice (owner, decision 0021; migration 0015). The
+  lawyer's answer to `docs/plan-retail-features.md` §7 item 9 is needed before anything is public.
+- Ownership and company figures (Phase 3b part 3a, decision 0022): interim-report texts are facts
   (`cse.financial_reports`, `cse.report_texts`, weekly `cse_api:reports`); `cse_ownership` and `cse_fundamentals`
   run as at every session. Shareholder lists name private individuals: only company-level rows are published, and
   owner confirmations about individuals live in a private file (`OWNERSHIP_PRIVATE_FILE` / secret

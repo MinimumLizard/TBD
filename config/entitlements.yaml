@@ -61,7 +61,7 @@ models:
 # website's database grant on them, so the website could not read them even by mistake.
 unpublished_outputs:
   - models.model_stats
-  - models.cse_dealing_as_filed      # cse_dealings: director, role and account as filed, transaction type, PDF link
-  - models.cse_flow_actor            # cse_flows: per account that dealt (a person's or a company's name)
   - models.cse_holding               # cse_ownership: every top-20 shareholder row, with the owner credited
   - models.cse_ownership_detail      # cse_ownership: controllers and chains, which can name individuals
+# Directors' and accounts' names (models.cse_dealing_as_filed, models.cse_flow_actor) are shown: the owner's decision of
+# 2026-10-19 (decision 0021); the lawyer's review before anything is public covers them.

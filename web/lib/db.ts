@@ -62,6 +62,8 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_flow_company": "as_of",
   "models.cse_flow_summary": "as_of",
   "models.cse_flow_dealing": "deal_date",
+  "models.cse_flow_actor": "as_of",
+  "models.cse_dealing_as_filed": null, // names as filed: only read for transactions already shown
   "models.savings_rates": "month",
   "models.savings_growth": "start_month",
   "models.savings_summary": null,

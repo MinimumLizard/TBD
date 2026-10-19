@@ -10,7 +10,7 @@ import type { Viewer } from "@/lib/entitlements";
 
 const SHOWN = 10;
 
-// The share page's "Directors' dealings" panel: the company's disclosed dealings, newest first, without names. It
+// The share page's "Directors' dealings" panel: the company's disclosed dealings, newest first, with the names the company filed. It
 // reads its own data (cse_dealings, through the one tier check), so the share page only places it.
 export default async function DirectorsDealings({ viewer, symbol }: { viewer: Viewer; symbol: string }) {
   const [t, result] = await Promise.all([getTranslations(), companyDealings(viewer, symbol)]);
