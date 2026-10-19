@@ -4,7 +4,8 @@
     python -m data_platform.jobs.collect cse_api:announcements   # disclosures (every couple of hours)
     python -m data_platform.jobs.collect cse_api:history         # weekly: one-year chart history, fills any missed day
     python -m data_platform.jobs.collect cse_api:corporate_actions   # daily: each company's announcements (92 days)
-                                                                     # and the details of its corporate actions
+                                                                     # and the details of its corporate actions and
+                                                                     # directors' dealings
 
 Rules carried over from the old terminal (audit §2.1), all enforced here:
   * the session date comes from the API (dailyMarketSummery), never from the clock;
@@ -225,14 +226,15 @@ class CseAnnouncementsCollector(CseCollector):
 
 
 class CseCorporateActionsCollector(CseCollector):
-    """Every company's announcement list over a rolling window, and the details of the corporate-action
-    announcements in it (old cse/corpactions.collect, which the old terminal ran once over 2025-06-01..2026-10-04).
+    """Every company's announcement list over a rolling window, and the details of the corporate-action and
+    directors' dealing announcements in it (old cse/corpactions.collect, which the old terminal ran once over
+    2025-06-01..2026-10-04, and old cse/dealings.backfill, which fetched the dealing notices' details).
 
     The 2-hourly announcements job already fetches the details of every announcement in the CSE's recent list; this
     daily sweep catches what that list missed (it covers only about six days) and is the source of record for the
-    cse_corporate_actions model. A detail is fetched once per announcement: typed record first, then the general
-    one if the typed endpoint has none, exactly as the old tool cached them. One company failing never stops the
-    others; the run fails at the end, naming it, and the next run retries it."""
+    cse_corporate_actions and cse_dealings models. A detail is fetched once per announcement: typed record first,
+    then the general one if the typed endpoint has none, exactly as the old tool cached them. One company failing
+    never stops the others; the run fails at the end, naming it, and the next run retries it."""
     job = "corporate_actions"
     window_days = 92
 
@@ -255,7 +257,7 @@ class CseCorporateActionsCollector(CseCollector):
                 rows = parse.company_announcements(f.body, symbol)
                 added += store_company_announcements(conn, rows, f.fetch_id, f.response.fetched_at)
                 for row in rows:
-                    if parse.is_ca_category(row["category"]):
+                    if parse.needs_detail(row["category"]):
                         details += self.fetch_detail(row["announcement_id"], asked)
                 conn.commit()
             except Exception as exc:  # noqa: BLE001 - recorded and raised at the end of the run
