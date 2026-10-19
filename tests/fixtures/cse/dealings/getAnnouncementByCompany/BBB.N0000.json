@@ -1,0 +1,14 @@
+{
+ "reqCompanyAnnouncement": [
+  {
+   "id": 70000,
+   "createdDate": null,
+   "dateOfAnnouncement": "09 Oct 2026",
+   "announcementId": 900010,
+   "announcementCategory": "DEALINGS BY DIRECTORS ",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  }
+ ]
+}

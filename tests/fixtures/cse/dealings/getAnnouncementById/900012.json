@@ -1,0 +1,33 @@
+{
+ "reqBaseAnnouncement": {
+  "id": 900012,
+  "dType": "DealingsByDirectors",
+  "dateOfAnnouncement": "05 Oct 2026",
+  "remarks": null,
+  "symbol": "AAA",
+  "companyName": "ALPHA EXAMPLE PLC",
+  "accTypeRelInterest": false,
+  "accTypeOwnAcc": true,
+  "dircetorsName": "Mrs. E. Sample",
+  "relInterestAccountName": null,
+  "dateOfNotification": "05 Oct 2026",
+  "natureOfDir": "Independent Non-Executive Director",
+  "directorTransactions": [
+   {
+    "dirId": 9000120,
+    "transType": "Acquisition",
+    "transactionDate": "03 Oct 2026",
+    "quantity": 100,
+    "price": 10
+   }
+  ]
+ },
+ "reqAnnouncementDocs": [
+  {
+   "id": 900012,
+   "fileName": "notice 900012.pdf",
+   "fileUrl": "cmt/announcement_portal_prod/notice 900012.pdf",
+   "baseUrl": "https://cdn.cse.lk/"
+  }
+ ]
+}

@@ -82,6 +82,10 @@ jobs:
         run: >-
           uv run --no-dev python -m data_platform.migration.cse_corporate_actions --old-repo "$WORK/CSE" --archive
           --report reports/cse-corporate-actions.json
+      - name: Load the old directors' dealing notices (from the archive) and reconcile them
+        run: >-
+          uv run --no-dev python -m data_platform.migration.cse_dealings --old-repo "$WORK/CSE" --archive
+          --report reports/cse-dealings.json
       - name: Archive every old file and check the audit baselines
         run: >-
           uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"

@@ -1,0 +1,64 @@
+{
+ "reqCompanyAnnouncement": [
+  {
+   "id": 70000,
+   "createdDate": null,
+   "dateOfAnnouncement": "05 Oct 2026",
+   "announcementId": 900001,
+   "announcementCategory": "DEALINGS BY DIRECTORS",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  },
+  {
+   "id": 70001,
+   "createdDate": null,
+   "dateOfAnnouncement": "05 Oct 2026",
+   "announcementId": 900012,
+   "announcementCategory": "DEALINGS BY DIRECTORS",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  },
+  {
+   "id": 70002,
+   "createdDate": null,
+   "dateOfAnnouncement": "07 Oct 2026",
+   "announcementId": 900002,
+   "announcementCategory": "DEALINGS BY DIRECTORS",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  },
+  {
+   "id": 70003,
+   "createdDate": null,
+   "dateOfAnnouncement": "08 Oct 2026",
+   "announcementId": 900003,
+   "announcementCategory": "DEALINGS BY DIRECTORS",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  },
+  {
+   "id": 70004,
+   "createdDate": null,
+   "dateOfAnnouncement": "08 Oct 2026",
+   "announcementId": 900004,
+   "announcementCategory": "ANNUAL GENERAL MEETING - APPROVED",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  },
+  {
+   "id": 70005,
+   "createdDate": null,
+   "dateOfAnnouncement": "09 Oct 2026",
+   "announcementId": 900005,
+   "announcementCategory": "RELEVANT INTEREST IN SHARES OTHER CLASS OF SHARES HELD BY THE DIRECTOR/S ON THE SAME DAY OF LISTING ON THE CSE",
+   "company": null,
+   "type": "new",
+   "symbol": null
+  }
+ ]
+}
