@@ -116,8 +116,8 @@ def seed(conn) -> dict:
         {"symbol": "AAA.N0000", "session_date": d, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
          "tri": tri, "tr_1w": w} for d, tri, w in ((OLD, 1.0, None), (NEW, 1.2345, 0.031415))])
 
-    # Directors' dealings (free) and money flows (Plus, a 7-day free preview). The names live only in the two
-    # unpublished tables: a made-up name that must never appear anywhere.
+    # Directors' dealings (free) and money flows (Plus, a 7-day free preview), with made-up names: the dealing's names
+    # are shown to everyone (decision 0021); each money-flow account's name only to the tiers that see that date.
     put("cse_dealings", "models.cse_dealing", [
         {"transaction_id": f"{aid}:1", "announcement_id": aid, "line_no": 1, "symbol": "AAA", "company": "AAA PLC",
          "role": "executive", "account_type": "own", "trade_date": d, "deal_date": d, "side": "purchase",
@@ -139,9 +139,11 @@ def seed(conn) -> dict:
          "actor_type": "individual", "large": True, "related_account": False}
         for aid, d, v in ((11, OLD7, 31234567.0), (12, NEW, 32345678.0))])
     put("cse_flows", "models.cse_flow_actor", [
-        {"as_of": NEW, "window_days": 30, "actor_key": "ZEBEDEEQMARKERPERSON", "actor": "Zebedee Q. Markerperson",
-         "actor_type": "individual", "purchase_value": 76543210.0, "disposal_value": 0.0, "net_value": 76543210.0,
-         "n_transactions": 2, "companies": '[["AAA", 76543210.0]]'}])
+        {"as_of": d, "window_days": 30, "actor_key": name.upper().replace(" ", "").replace(".", ""), "actor": name,
+         "actor_type": "individual", "purchase_value": v, "disposal_value": 0.0, "net_value": v,
+         "n_transactions": 2, "companies": '[["AAA", %s]]' % v}
+        for d, name, v in ((OLD7, "Xavier R. Oldmarker", 54321000.0), (MID7, "Wendy S. Midmarker", 65432100.0),
+                           (NEW, "Yolanda P. Flowmarker", 76543210.0))])
 
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
@@ -196,12 +198,17 @@ def seed(conn) -> dict:
                                       "old": {"api": [], "page": []}},
             "cse_total_returns": {"new": {"api": ["0.031415"], "page": ["+3.14%"]}, "old": {"api": [], "page": []}},
             # free: the latest dealing's shares (raw in the API, formatted on the market-wide page and the share page)
-            "cse_dealings": {"new": {"api": ["98765"], "page": ["98,765"]}, "old": {"api": [], "page": []}},
+            "cse_dealings": {"new": {"api": ["98765", "Zebedee Q. Markerperson", "z.pdf"],
+                                     "page": ["98,765", "Zebedee Q. Markerperson", "z.pdf"]},
+                             "old": {"api": [], "page": []}},
             # Plus with a 7-day preview: purchases and the dealing count on the latest date, a day inside the delay,
             # and the last date a free visitor may see
-            "cse_flows": {"new": {"api": ["76543210", "73219"], "page": ["Rs 76.5 mn", "73,219"]},
-                          "mid": {"api": ["65432100", "63219"], "page": ["Rs 65.4 mn", "63,219"]},
-                          "old": {"api": ["54321000", "53219"], "page": ["Rs 54.3 mn", "53,219"]}},
+            "cse_flows": {"new": {"api": ["76543210", "73219", "Yolanda P. Flowmarker"],
+                                  "page": ["Rs 76.5 mn", "73,219", "Yolanda P. Flowmarker"]},
+                          "mid": {"api": ["65432100", "63219", "Wendy S. Midmarker"],
+                                  "page": ["Rs 65.4 mn", "63,219", "Wendy S. Midmarker"]},
+                          "old": {"api": ["54321000", "53219", "Xavier R. Oldmarker"],
+                                  "page": ["Rs 54.3 mn", "53,219", "Xavier R. Oldmarker"]}},
         },
         # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
@@ -210,9 +217,7 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
-                  # a person's name from a dealing notice: stored, never published (config/entitlements.yaml)
-                  "Markerperson", "MARKERPERSON", "z.pdf"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
     }
 
 

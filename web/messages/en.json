@@ -182,7 +182,7 @@
   "dealings": {
     "title": "Directors' dealings",
     "intro": "Listed companies must tell the CSE when one of their directors deals in the company's shares, in the director's own name or through a related party. These are those disclosures as the CSE published them, usually one to four market days after the dealing. They record what happened; they say nothing about what a share's price will do.",
-    "namesNote": "Names are not shown while we take legal advice on publishing them. Each disclosure is public on the CSE's website.",
+    "namesNote": "Names are shown as the companies filed them with the CSE; each dealing links to its notice on the CSE's website.",
     "recent": "Recent disclosed dealings",
     "recentNote": "The {count} most recent transactions, newest first. A notice the company filed again is counted once.",
     "date": "Dealing date",
@@ -259,7 +259,13 @@
       "note": "Disclosed by the company to the CSE; the company code covers all its share classes. Names are not shown.",
       "none": "No dealings by this company's directors are in our records.",
       "more": "Showing the {shown} most recent of {count}."
-    }
+    },
+    "director": "Director",
+    "notice": "Notice",
+    "accountsTitle": "Accounts that dealt",
+    "accountsIntro": "Each account that disclosed dealings in the {window} to {date}, by the total value dealt in either direction. An account is a director, or a related party such as a family member or a company.",
+    "accountName": "Account",
+    "companiesDealt": "Companies (net)"
   },
   "share": {
     "titleSuffix": "share",

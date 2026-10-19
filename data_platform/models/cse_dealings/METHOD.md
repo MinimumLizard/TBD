@@ -10,10 +10,10 @@ price, the value, the date the CSE published the notice, and the lag between the
 These are disclosures of what happened. They say nothing about what a share's price will do, and a dealing can have
 many reasons (personal finances, taxes, estates, share schemes).
 
-**Names are not published.** The notices name the director and the related account (a relative or a company). The
-platform stores the names as facts, and uses them to count how many different accounts dealt (see `cse_flows`), but
-the table that keeps them (`models.cse_dealing_as_filed`) is served to nobody until the owner's lawyer has reviewed
-what may be shown (`config/entitlements.yaml`, `unpublished_outputs`).
+**Names are shown as filed.** The notices name the director and the related account (a relative or a company). The
+site shows them, with a link to the CSE's notice, as the companies filed them (the owner's decision of 2026-10-19,
+decision 0021; the lawyer's review before anything is public covers it). They are kept in their own table
+(`models.cse_dealing_as_filed`), so the facts table stays free of free text.
 
 ## Inputs
 
@@ -70,8 +70,8 @@ does not yet replace anything.
 
 ## Outputs
 
-- `models.cse_dealing` (published): the facts above, without names or free text.
-- `models.cse_dealing_as_filed` (not published): per transaction, the director, the role and the account exactly as
+- `models.cse_dealing`: the facts above, without names or free text.
+- `models.cse_dealing_as_filed` (shown beside each dealing): per transaction, the director, the role and the account exactly as
   filed, the transaction type as filed, and the link to the notice's PDF.
 
 ## Limits

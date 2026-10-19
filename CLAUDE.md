@@ -32,10 +32,9 @@ decisions).
 - Retail features requested 2026-10-16 (weekly emails, feedback, FD comparison, rebalancing signals, fewer-name
   portfolios): `docs/plan-retail-features.md`. Model portfolios and rebalancing are NOT to be published before a
   lawyer's view (decision 0010 point 6, hard rule 4); build them as internal research only.
-- Directors' dealings (`cse_dealings`, `cse_flows`, built 2026-10-19): the notices name private individuals. Names
-  are facts, used only to count accounts; every output holding a name is in `config/entitlements.yaml`
-  `unpublished_outputs` and revoked from the website's database role (migration 0014) until the lawyer answers
-  `docs/plan-retail-features.md` §7 item 9. Never show a name, the free-text role or the notice's PDF link.
+- Directors' dealings (`cse_dealings` free, `cse_flows` Plus with a 7-day preview, built 2026-10-19): directors' and
+  accounts' names are shown as filed, with a link to the CSE's notice (owner, decision 0021; migration 0015). The
+  lawyer's answer to `docs/plan-retail-features.md` §7 item 9 is needed before anything is public.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

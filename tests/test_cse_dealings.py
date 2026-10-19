@@ -82,7 +82,7 @@ def test_the_daily_sweep_fetches_each_dealing_notice_once(conn, store):
 
 
 @pytest.mark.db
-def test_both_models_run_on_the_stored_facts_and_names_stay_unpublished(conn, store):
+def test_both_models_run_on_the_stored_facts_and_the_website_can_read_the_names(conn, store):
     collect(conn, store)
     run_models(conn, ["cse_dealings", "cse_flows"])
     n = lambda sql: conn.execute(sql).fetchone()["n"]  # noqa: E731
@@ -90,16 +90,11 @@ def test_both_models_run_on_the_stored_facts_and_names_stay_unpublished(conn, st
     assert n("select count(*) n from models.cse_dealing where superseded_by = 900003") == 1
     assert n("select count(*) n from models.cse_flow_company where cluster") > 0
     assert n("select count(*) n from models.cse_flow_actor where actor = 'Mr. A. B. Example'") > 0
-    conn.execute("set role web_reader")
+    conn.execute("set role web_reader")     # names are shown since migration 0015 (decision 0021)
     try:
         assert n("select count(*) n from models.cse_flow_dealing") == 5
-        for table in ("models.cse_dealing_as_filed", "models.cse_flow_actor"):
-            with pytest.raises(Exception, match="permission denied"):
-                conn.execute("savepoint s")
-                try:
-                    conn.execute(f"select * from {table}")
-                finally:
-                    conn.execute("rollback to savepoint s")
+        assert n("select count(*) n from models.cse_dealing_as_filed") == 6
+        assert n("select count(*) n from models.cse_flow_actor where actor = 'Mr. A. B. Example'") > 0
     finally:
         conn.execute("reset role")
     again = run_models(conn, ["cse_dealings", "cse_flows"])                # nothing changes on a second run

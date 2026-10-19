@@ -8,20 +8,20 @@ import { modelEntry, registry } from "@/lib/registry";
 const TODAY = "2026-10-19";
 
 describe("directors' dealings and money flows", () => {
-  test("no output that holds a person's name can be read by anyone", () => {
-    expect(registry.unpublished_outputs).toEqual(expect.arrayContaining(["models.cse_dealing_as_filed", "models.cse_flow_actor"]));
-    const dealings = authorize({ id: null, tier: "professional" }, "cse_dealings", TODAY) as Granted;
-    const flows = authorize({ id: null, tier: "professional" }, "cse_flows", TODAY) as Granted;
-    expect(() => buildQuery(dealings, "models.cse_dealing_as_filed")).toThrow(/not published/);
-    expect(() => buildQuery(flows, "models.cse_flow_actor")).toThrow(/not published/);
-    expect(buildQuery(dealings, "models.cse_dealing").text).toContain("from models.cse_dealing where");
+  test("names are shown (decision 0021), and the money flows' names keep the flows' tier and preview", () => {
+    expect(registry.unpublished_outputs).not.toContain("models.cse_dealing_as_filed");
+    expect(registry.unpublished_outputs).not.toContain("models.cse_flow_actor");
+    const dealings = authorize({ id: null, tier: "free" }, "cse_dealings", TODAY) as Granted;
+    expect(buildQuery(dealings, "models.cse_dealing_as_filed").text).toContain("from models.cse_dealing_as_filed where");
+    const preview = authorize({ id: null, tier: "free" }, "cse_flows", TODAY) as Granted;
+    expect(buildQuery(preview, "models.cse_flow_actor").text).toContain("as_of <= $2");
   });
 
   test("the money flows' free preview stops a week back on every table it reads", () => {
     expect(modelEntry("cse_flows").free_preview?.delay_days).toBe(7);
     const preview = authorize({ id: null, tier: "free" }, "cse_flows", TODAY) as Granted;
     expect(preview.maxDate).toBe("2026-10-12");
-    for (const table of ["models.cse_flow_company", "models.cse_flow_summary", "models.cse_flow_dealing"]) {
+    for (const table of ["models.cse_flow_company", "models.cse_flow_summary", "models.cse_flow_dealing", "models.cse_flow_actor"]) {
       const column = dateColumn(table);
       expect(column, table).not.toBeNull();
       expect(buildQuery(preview, table).text).toContain(`${column} <= $2`);

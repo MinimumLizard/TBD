@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-19 — Directors' names shown (decision 0021)
+
+- On the owner's decision, the directors' dealings show each director's and related account's name as filed, with a
+  link to the CSE's notice; the money-flows page lists the accounts that dealt (Plus, a week late for free).
+  Migration 0015 lets the website read the two tables; the tier-leak tests now require each name exactly where its
+  model's tier allows. Tiers agreed: dealings free, money flows Plus with a one-week free preview.
+
 ## 2026-10-19 — Directors' dealings and money flows (Phase 3b, part 3)
 
 - Facts: no new fact table. The dealing notices are announcement details (`cse.announcement_details`), kept as the

@@ -11,8 +11,8 @@ every dealing, the kind of account that dealt (a person, a company, a listed com
 This describes disclosures. It is not a signal and says nothing about where a share's price will go; the order of
 the companies on the site is by the total value dealt in either direction, not by direction.
 
-**Names are not published.** Counting different accounts needs their names; the per-account table
-(`models.cse_flow_actor`) is served to nobody until the owner's lawyer has reviewed what may be shown.
+**Names are shown.** Counting different accounts needs their names; the per-account table (`models.cse_flow_actor`)
+is shown on the money-flows page under the same tier and preview as the rest of this model (decision 0021).
 
 ## Inputs
 
