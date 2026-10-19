@@ -36,6 +36,11 @@ decisions).
   are facts, used only to count accounts; every output holding a name is in `config/entitlements.yaml`
   `unpublished_outputs` and revoked from the website's database role (migration 0014) until the lawyer answers
   `docs/plan-retail-features.md` §7 item 9. Never show a name, the free-text role or the notice's PDF link.
+- Ownership and company figures (Phase 3b part 3a, decision 0021): interim-report texts are facts
+  (`cse.financial_reports`, `cse.report_texts`, weekly `cse_api:reports`); `cse_ownership` and `cse_fundamentals`
+  run as at every session. Shareholder lists name private individuals: only company-level rows are published, and
+  owner confirmations about individuals live in a private file (`OWNERSHIP_PRIVATE_FILE` / secret
+  `OWNERSHIP_PRIVATE_YAML`), never in git. Lawyer: plan §7 item 10.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
@@ -95,14 +100,15 @@ uv sync                                                        # once (Python 3.
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/postgres uv run pytest -m "not legacy"   # what CI runs
 uv run python -m data_platform.compliance                      # copy lint
 uv run python -m data_platform.jobs.migrate                    # apply db/migrations (DATABASE_URL)
-uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | cbsl | dcs_cpi
+uv run python -m data_platform.jobs.collect pdmo               # or cse_api | cse_api:announcements | cse_api:history | cse_api:corporate_actions | cse_api:reports | cbsl | dcs_cpi
+uv run python -m data_platform.jobs.reviews                    # store the owner's confirmations (corporate actions; ownership incl. OWNERSHIP_PRIVATE_FILE)
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
-uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions|cse_dealings ...  # history migration + reconciliation
+uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions|cse_dealings|cse_reports ...  # history migration + reconciliation
 uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy
-uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions|cse_dealings ...   # parity with the old tools
+uv run python -m data_platform.migration.parity bonds|cse|cse_corporate_actions|cse_dealings|cse_ownership ...   # parity with the old tools
 cd web && npm ci && npm run typecheck && npm test && npm run build                 # website
 TEST_DATABASE_URL=... uv run python web/tests/leak/seed.py   # then: DATABASE_URL=<printed> ALLOW_TEST_TIERS=1 npx next start -p 3100; wait for it; npm run test:leak
 ```

@@ -123,7 +123,10 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
 5. **GitHub → this repo → Settings → Secrets and variables → Actions → Secrets:** add `DATABASE_URL` (the session
    pooler string), `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`,
    `SECONDARY_S3_ENDPOINT_URL`, `SECONDARY_S3_BUCKET`, `SECONDARY_S3_ACCESS_KEY_ID`,
-   `SECONDARY_S3_SECRET_ACCESS_KEY`, `HEALTHCHECKS_BASE_URL` (descriptions in `.env.example`). **Do not add the
+   `SECONDARY_S3_SECRET_ACCESS_KEY`, `HEALTHCHECKS_BASE_URL` (descriptions in `.env.example`), and, for the ownership
+   tracker, `OWNERSHIP_PRIVATE_YAML`: the text of your private confirmations file (the old terminal's two confirmed
+   aliases of individuals, in the format of `config/ownership_aliases.yaml`; it never goes in git, see
+   `.env.example`). Add the Healthchecks slug `cse-api-reports` too. **Do not add the
    variable in step 7 yet:** until it exists every scheduled job skips itself, so nothing writes to the database
    while the history is being loaded.
 6. **Actions → "Migrate history (manual)" → Run workflow.** It takes up to four hours. Check that the three reports

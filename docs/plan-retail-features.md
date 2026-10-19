@@ -249,6 +249,19 @@ All of them are measured forward from the day they start, never backfilled.
    per-company "cluster" mark, or a list of companies ordered by the value of directors' dealings, at risk of being
    read as investment advice, and what wording keeps it factual? The tables with names are kept out of the website
    (`config/entitlements.yaml` `unpublished_outputs`) until you answer.
+10. Shareholder lists (added 2026-10-19, Phase 3b part 3). Every interim report lists the company's twenty largest
+    shareholders, many of them private individuals (and joint holders, estates and family trusts). We store the
+    lists, credit each holding to its beneficial owner (custodian and margin accounts resolved), and publish only
+    company-level figures: the share held by the top 20 by type of owner, whether one block controls the company
+    (over 50 %) or has influence (20–50 %), its ownership group, and a free-float estimate. The controlling block or
+    group head is named only when it is a company, a fund or the state; otherwise only its type ("an individual").
+    (a) Under the Personal Data Protection Act, may we show individual shareholders' names and holdings, or a
+    per-person view across companies ("who holds what"), given each report is public? (b) Can "controlled by an
+    individual" or a group of companies headed by one unnamed person still identify that person, and is that
+    acceptable? (c) The owner keeps confirmations that two spellings are one person in a private file outside the
+    public repository (`OWNERSHIP_PRIVATE_FILE`): is storing such a link in our database acceptable, and on what
+    basis? The two tables with names (`models.cse_holding`, `models.cse_ownership_detail`) are served to nobody, and
+    the website's database login cannot read them, until you answer.
 
 ## 8. Proposed order of work
 

@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: false
+      poppler:
+        description: install poppler-utils (pdftotext, for the CSE reports collector)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -75,6 +80,20 @@ jobs:
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-18
           echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - name: pdftotext (poppler-utils)
+        if: steps.cfg.outputs.ready == 'true' && inputs.poppler
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+      # The owner's ownership confirmations that name private individuals never go in the public repository: the
+      # secret OWNERSHIP_PRIVATE_YAML holds the file's text. Without it, the last stored version is kept.
+      - name: Private ownership confirmations (from a secret, when set)
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          OWNERSHIP_PRIVATE_YAML: ${{ secrets.OWNERSHIP_PRIVATE_YAML }}
+        run: |
+          if [ -n "$OWNERSHIP_PRIVATE_YAML" ]; then
+            printf '%s\n' "$OWNERSHIP_PRIVATE_YAML" > "$RUNNER_TEMP/ownership_private.yaml"
+            echo "OWNERSHIP_PRIVATE_FILE=$RUNNER_TEMP/ownership_private.yaml" >> "$GITHUB_ENV"
+          fi
       - name: Database migrations (idempotent)
         if: steps.cfg.outputs.ready == 'true'
         run: uv run --no-dev python -m data_platform.jobs.migrate

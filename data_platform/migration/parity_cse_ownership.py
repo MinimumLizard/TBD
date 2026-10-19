@@ -133,16 +133,23 @@ def build_checks(session: str, old: dict, new_res: dict, new_fund: tuple[list, l
     return checks
 
 
+def _iso(v) -> str:
+    """A date as text ('' for none): the models hand back dates or ISO text, as the framework accepts both."""
+    if v is None or v == "":
+        return ""
+    return v.isoformat()[:10] if hasattr(v, "isoformat") else str(v)[:10]
+
+
 def output_checks(session: str, old: dict, outputs: dict) -> list[dict]:
     """The model output tables at the latest session against the old code's rows."""
     hold = {}
     for h in outputs["models.cse_holding"]:
         hold[(str(h["report_id"]), h["share_class"], h["row_no"])] = {
             **h, "report_id": str(h["report_id"]), "class": h["share_class"],
-            "period_date": h["period_date"].isoformat() if h["period_date"] else ""}
+            "period_date": _iso(h["period_date"])}
     detail = {}
     for r in outputs["models.cse_ownership_detail"]:
-        if r["session_date"].isoformat() != session:
+        if _iso(r["session_date"]) != session:
             continue
         detail[(r["code"],)] = {"code": r["code"], "name": r["name"], "report_id": str(r["report_id"] or ""),
                                 "report_status": r["report_status"], "status_N": r["status_n"] or "",
@@ -153,11 +160,11 @@ def output_checks(session: str, old: dict, outputs: dict) -> list[dict]:
                                 "group": r["group_key"]}
     old_detail = {(k,): {**v, "group": old["groups"][k]} for k, v in old["res"]["companies"].items()}
     figs = {(str(r["report_id"]),): {**r, "report_id": str(r["report_id"]), "url": r["source_url"],
-                                      "period_date": r["period_date"].isoformat()} for r in outputs["models.cse_report_figures"]}
+                                      "period_date": _iso(r["period_date"])} for r in outputs["models.cse_report_figures"]}
     ratios = {}
     for r in outputs["models.cse_fundamentals"]:
-        if r["session_date"].isoformat() == session:
-            ratios[(r["code"],)] = {**r, **{c: (r[c].isoformat() if r[c] else "") for c in ("price_date", "nav_period", "ttm_to")}}
+        if _iso(r["session_date"]) == session:
+            ratios[(r["code"],)] = {**r, **{c: _iso(r[c]) for c in ("price_date", "nav_period", "ttm_to")}}
     return [
         compare(f"output models.cse_holding ({session})", _holdings_keyed(old["res"]["holdings"]), hold,
                 [c for c in own.HOLDING_COLS]),

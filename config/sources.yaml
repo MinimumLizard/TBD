@@ -49,7 +49,8 @@ cse_api:
     checked: 2026-10-18
     attribution: "Source: Colombo Stock Exchange"
   datasets: [cse.security_list, cse.prices_daily, cse.indices_daily, cse.market_daily, cse.announcements,
-             cse.company_info_daily, cse.company_profiles, cse.company_announcements, cse.announcement_details]
+             cse.company_info_daily, cse.company_profiles, cse.company_announcements, cse.announcement_details,
+             cse.financial_reports, cse.report_texts, cse.company_fiscal_years]
   calendar: cse
 
 cbsl:
