@@ -1,0 +1,749 @@
+{
+  "what": "cse_ownership 1.0.0 and cse_fundamentals 1.0.0 against MinimumLizard/CSE@e05c6f3 (old code at each of its 9 sessions, and its stored CSVs); the report facts reconciled with its data/raw/ownership folder",
+  "reconciliation": {
+    "index": {
+      "old_rows": 1387,
+      "facts_matching": 1387,
+      "missing_in_new": 0,
+      "values_differ": 0,
+      "facts_not_in_old_index": 0,
+      "old_status": {
+        "ok": 1330,
+        "no_text": 57
+      },
+      "old_sha256": "1ce855d4ce425d96d2829dd6b04e7b2aa39dbe9944211a43b0f67e6675cf06c1",
+      "new_sha256": "1ce855d4ce425d96d2829dd6b04e7b2aa39dbe9944211a43b0f67e6675cf06c1",
+      "ok": true
+    },
+    "texts": {
+      "old_files": 1387,
+      "facts_with_same_sha256": 1387,
+      "stored_text_identical": 1387,
+      "old_sha256": "33b0197afef2d48afcd218adf9d203ca0f06cf2cdc5777de18287b2c556cb0f8",
+      "new_sha256": "33b0197afef2d48afcd218adf9d203ca0f06cf2cdc5777de18287b2c556cb0f8",
+      "ok": true
+    },
+    "archived_financials_lists": {
+      "old_files": 281,
+      "in_archive": 281,
+      "ok": true
+    },
+    "archived_annual_passages": {
+      "old_files": 281,
+      "in_archive": 281,
+      "ok": true
+    },
+    "archived_annual_index": {
+      "old_files": 1,
+      "in_archive": 1,
+      "ok": true
+    },
+    "fiscal_years": {
+      "old_profiles": 302,
+      "with_year_end": 302,
+      "missing_in_new": 0,
+      "values_differ": 0,
+      "ok": true
+    },
+    "value_conflicts": 0,
+    "ok": true
+  },
+  "loaded": {
+    "texts_added": 1342,
+    "index_files": 1,
+    "index_rows_added": 1387,
+    "fiscal_year_rows_added": 302
+  },
+  "parity": {
+    "checks": [
+      {
+        "table": "2026-10-02 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-02 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-06 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-07 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-08 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-09 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-12 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-13 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-14 graph totals",
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 holdings",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 companies",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 owners",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 ownership groups",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 report figures",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 company ratios",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "2026-10-15 graph totals",
+        "ok": true
+      },
+      {
+        "table": "output models.cse_holding (2026-10-15)",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "output models.cse_ownership_detail (2026-10-15)",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "output models.cse_report_figures (2026-10-15)",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "output models.cse_fundamentals (2026-10-15)",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "values_differ": 0,
+        "max_abs_difference": 0.0,
+        "ok": true
+      },
+      {
+        "table": "stored data/ownership/holdings.csv vs 2026-10-09",
+        "old_rows": 27779,
+        "new_rows": 27779,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "cells_exact": 500022,
+        "cells_last_decimal": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "stored data/ownership/companies.csv vs 2026-10-09",
+        "old_rows": 281,
+        "new_rows": 281,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "cells_exact": 5620,
+        "cells_last_decimal": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "stored data/ownership/owners.csv vs 2026-10-09",
+        "old_rows": 2929,
+        "new_rows": 2929,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "cells_exact": 32219,
+        "cells_last_decimal": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "stored data/fundamentals/reports.csv vs 2026-10-15",
+        "old_rows": 1328,
+        "new_rows": 1328,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "cells_exact": 21248,
+        "cells_last_decimal": 0,
+        "values_differ": 0,
+        "ok": true
+      },
+      {
+        "table": "stored data/fundamentals/latest.csv vs 2026-10-15",
+        "old_rows": 277,
+        "new_rows": 277,
+        "missing_in_new": 0,
+        "extra_in_new": 0,
+        "cells_exact": 4709,
+        "cells_last_decimal": 0,
+        "values_differ": 0,
+        "ok": true
+      }
+    ],
+    "ok": true,
+    "old_code_compared": true,
+    "sessions": [
+      "2026-10-02",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15"
+    ],
+    "excluded_sessions_new_side": [
+      "2026-10-05"
+    ],
+    "generated_at": "2026-10-19T12:01:26+00:00"
+  }
+}

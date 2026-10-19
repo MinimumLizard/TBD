@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-10-19 — Interim reports, ownership and company figures (Phase 3b, part 3a; decision 0022)
+
+- Facts (migration 0013): `cse.financial_reports` (report index: company, kind, title, period, upload time, PDF link,
+  pages, words, status, SHA-256 of the PDF when we have it and of the text), `cse.report_texts` (each text, also
+  archived), `cse.company_fiscal_years` (each profile's financial year end, with the session that fetched it) and
+  `cse.ownership_confirmations` (every version of the owner's ownership confirmations). All append-only, all with
+  row-level security.
+- Collector `cse_api:reports` (weekly workflow "Collect: CSE interim reports", a Models trigger): each company's report
+  list, the newest quarterly report (else annual) not collected yet, the PDF archived (the old terminal kept only
+  text) and converted with `pdftotext -layout`; failures retried next run. The end-of-day job also stores each new
+  profile's financial year end. CI and the job install poppler-utils.
+- History step `python -m data_platform.migration.cse_reports` (added to "Migrate history"): the old terminal's 1,387
+  report texts (1,342 distinct) and index rows load from the archive and reconcile with its folder at e05c6f3: every
+  row equal, every text byte-identical, the report lists and annual passages archived, 302 profiles' year ends
+  equal; repeatable. Report: `docs/migration/parity-cse-ownership-fundamentals.json`.
+- Owner's confirmations: `config/ownership_aliases.yaml` and `config/ownership_parents.yaml` are stored before each
+  run (as the corporate-action reviews). The old aliases file named two private individuals: they are NOT in the
+  public repository; they go in a private file (`OWNERSHIP_PRIVATE_FILE`, in Actions the secret
+  `OWNERSHIP_PRIVATE_YAML`), and a run without it keeps the last stored version. The reviews job refuses an entry
+  about an individual, joint holder, estate or trust in the public files.
+- Models, both free, computed as at every session with only the facts known then (point in time, tested):
+  - `cse_ownership` 1.0.0 (C13–C16): `models.cse_company_ownership` (published: top-20 share by owner type, the
+    largest voting block's type, level and %, named only when a company, fund or the state; ownership group;
+    free-float estimate, new), and two unpublished tables that name people, `models.cse_holding` and
+    `models.cse_ownership_detail` (served to nobody, and the website's database login has no grant on them). The
+    parents evidence sheet (C17) is not ported (suggestions quoting annual reports); confirmed parents are.
+  - `cse_fundamentals` 1.0.0 (C21, C22): `models.cse_report_figures` (EPS and NAV per share reconciled inside each
+    report) and `models.cse_fundamentals` (TTM EPS, NAV per share, P/E, P/B, ROE, trailing dividends from the
+    corporate actions in use, dividend yield, the latest report).
+- Parity (exact; old code from a read-only clone at e05c6f3 run on its own files cut off at each of its 9 sessions):
+  holdings 27,779 rows, companies 281, owners 2,929, groups 281, report figures 1,328, company ratios 277, all equal
+  at every session; the output tables at 2026-10-15 equal; the stored CSVs equal cell for cell as the old writer
+  formatted them (holdings 500,022 cells, companies 5,620, owners 32,219, reports 21,248, latest 4,709).
+  `uv run python -m data_platform.migration.parity cse_ownership --old-code <clone> --report <file>`.
+- On the development copy (`select ... from models.cse_company_ownership / cse_fundamentals` at 2026-10-16): 247 of 281
+  companies with a checked shareholder table (230 with a block of 20 % or more); 1,004 of 1,328 reports with a
+  reconciled EPS and 904 with NAV per share; 214 of 277 companies with P/B, 131 with P/E, 138 with a dividend yield.
+- Website: on each share page "Company figures" (P/E, P/B, ROE, EPS last 12 months, NAV per share, dividend yield,
+  the report and its PDF) and "Who owns it" (top-20 share, free float, by owner type, largest block, ownership
+  group and its other companies; no individual named); sortable P/E, P/B and dividend-yield columns on the shares
+  list; API routes `/api/v1/cse/shares/<symbol>/fundamentals` and `/ownership`; glossary terms (EPS, net assets per
+  share, ROE, free float, ownership group). Checked at 390 px. The tier-leak seed has a made-up individual's name
+  that must never appear.
+- Lawyer's list: item 10 (shareholder lists and the private confirmations).
+
 ## 2026-10-19 — Directors' names shown (decision 0021)
 
 - On the owner's decision, the directors' dealings show each director's and related account's name as filed, with a
