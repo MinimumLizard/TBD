@@ -3,13 +3,17 @@ import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
 import Chart from "@/components/Chart";
+import CompanyFigures from "@/components/CompanyFigures";
+import CompanyOwnership from "@/components/CompanyOwnership";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import { lineOption } from "@/lib/charts";
 import StatTile from "@/components/StatTile";
 import Term from "@/components/Term";
 import { actionAmount, companyName } from "@/lib/cse-display";
-import { type TotalReturnSession, corporateActions, securityNames, shareHistory, totalReturns } from "@/lib/data/cse";
+import {
+  type TotalReturnSession, companyFigures, companyOwnership, corporateActions, securityNames, shareHistory, totalReturns,
+} from "@/lib/data/cse";
 import { NONE, date, int, lkr, num, pct, ratio, tone } from "@/lib/format";
 import { decodeSegment } from "@/lib/params";
 import { getViewer } from "@/lib/viewer";
@@ -23,8 +27,10 @@ export async function generateMetadata({ params }: { params: Promise<{ symbol: s
 export default async function SharePage({ params }: { params: Promise<{ symbol: string }> }) {
   const symbol = decodeSegment((await params).symbol);
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
-  const [history, names, actions, returns] = await Promise.all([
+  const code = symbol.split(".")[0];
+  const [history, names, actions, returns, figures, owners] = await Promise.all([
     shareHistory(viewer, symbol), securityNames(viewer), corporateActions(viewer, symbol), totalReturns(viewer, symbol),
+    companyFigures(viewer, code), companyOwnership(viewer, code),
   ]);
   const ref = names.data?.get(symbol);
   if (!history.access.allowed) {
@@ -134,6 +140,10 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
         </dd>
       </dl>
       {last.range_flag && <div className="notice warn">{t("shares.flagRange")}</div>}
+      <h2>{t("share.figures")}</h2>
+      <CompanyFigures result={figures} symbol={symbol} />
+      <h2>{t("share.owners")}</h2>
+      <CompanyOwnership result={owners} />
       <h2>{t("share.actions")}</h2>
       {!actions.access.allowed ? (
         <Locked access={actions.access} />
@@ -172,7 +182,9 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
         </>
       )}
       <ModelFooter models={["cse_security_metrics", ...(actions.access.allowed ? ["cse_corporate_actions" as const] : []),
-                            ...(returns.access.allowed ? ["cse_total_returns" as const] : [])]} />
+                            ...(returns.access.allowed ? ["cse_total_returns" as const] : []),
+                            ...(figures.access.allowed ? ["cse_fundamentals" as const] : []),
+                            ...(owners.access.allowed ? ["cse_ownership" as const] : [])]} />
     </>
   );
 }

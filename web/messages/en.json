@@ -177,7 +177,11 @@
     "flagRange": "A move of more than 40% in one session within the last year: the 52-week range may not be comparable.",
     "sortBy": "Sort by",
     "filterTraded": "Traded this session only",
-    "all": "All shares"
+    "all": "All shares",
+    "pe": "P/E",
+    "pb": "P/B",
+    "dy": "Div. yield",
+    "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile)."
   },
   "share": {
     "titleSuffix": "share",
@@ -229,7 +233,68 @@
       "scrip": "1 new share for every {existing}",
       "rights": "{new} new for every {existing} at Rs {price}",
       "rightsNoPrice": "{new} new for every {existing}, price to be confirmed"
-    }
+    },
+    "figures": "Company figures",
+    "figuresNote": "Read from the company's interim reports. A figure is shown only when it agrees with the profit or equity line in the same report; per-share figures use today's number of shares, so the P/E is market value ÷ profit over the last twelve months.",
+    "figuresNone": "No figures that reconcile inside the company's reports yet.",
+    "pe": "P/E",
+    "pb": "P/B",
+    "roe": "Return on equity",
+    "ttmEps": "EPS, last 12 months",
+    "nav": "Net assets per share",
+    "dy": "Dividend yield",
+    "divTtm": "Rs {amount} of dividends per share in the last 12 months",
+    "loss": "loss",
+    "ttmTo": "Twelve months to {date}",
+    "navAt": "At {date}",
+    "ttmMissing": "Not all of the last four quarters' profits are in the reports, so there is no 12-month figure.",
+    "votingPriceNote": "Ratios use the voting share's price.",
+    "report": "Latest report: period to {date}",
+    "reportLink": "report (PDF)",
+    "owners": "Who owns it",
+    "ownersNote": "From the twenty largest shareholders listed in the company's report for the period to {date}. Percentages are of the voting shares. Private individuals are never named here.",
+    "ownersNone": "No checked shareholder list for this company yet.",
+    "ownersStatus": {
+      "no_report": "No interim report collected yet.",
+      "no_text": "The latest report is a scanned image without text, so its shareholder list cannot be read.",
+      "no_table": "No shareholder list was found in the latest report.",
+      "download_failed": "The latest report could not be downloaded yet.",
+      "unverified": "The shareholder list in the latest report did not pass the checks (its numbers do not agree with each other or with the CSE's share count), so it is not used."
+    },
+    "top20": "Held by the largest 20",
+    "byType": "By type of owner",
+    "ownerTypes": {
+      "listed": "Listed companies",
+      "company": "Unlisted companies",
+      "institution": "Funds, insurers and the state",
+      "individual": "Individuals",
+      "joint": "Joint holders",
+      "estate": "Estates",
+      "trust": "Trusts",
+      "nominee": "Unidentified nominee accounts",
+      "own_shares": "The company itself"
+    },
+    "ownerTypeOne": {
+      "listed": "a listed company",
+      "company": "an unlisted company",
+      "institution": "a fund or state body",
+      "individual": "an individual",
+      "joint": "joint holders",
+      "estate": "an estate",
+      "trust": "a trust",
+      "nominee": "a nominee account"
+    },
+    "control": "Largest block",
+    "controlled": "{owner}, with {pct} of the votes: control (more than 50%)",
+    "influence": "{owner}, with {pct} of the votes: influence (20% to 50%)",
+    "noControl": "No single block has 20% or more of the votes.",
+    "group": "Ownership group",
+    "groupNamed": "{name}: {count, plural, one {this company only} other {# listed companies}}",
+    "groupUnnamed": "Headed by {owner}: {count, plural, one {this company only} other {# listed companies}}",
+    "groupAlone": "Not part of a group",
+    "groupMembers": "Also in the group",
+    "freeFloat": "Free float (estimate)",
+    "freeFloatNote": "Voting shares not held by the company itself or by any block of 10% or more. Directors' smaller holdings cannot be told apart in the list, so the true figure is lower."
   },
   "bonds": {
     "title": "Government bonds",
@@ -405,6 +470,14 @@
     "cse_total_returns": {
       "title": "CSE total returns",
       "summary": "Each share's return with its confirmed dividends, sub-divisions, scrip and rights issues taken into account, beside its price-only return."
+    },
+    "cse_ownership": {
+      "title": "Who owns CSE companies",
+      "summary": "From the twenty largest shareholders each company lists in its interim reports: the share of the voting shares by type of owner, any controlling or influential block, the company's ownership group and an estimate of its free float. No private individual is named."
+    },
+    "cse_fundamentals": {
+      "title": "Company figures: earnings, net assets and ratios",
+      "summary": "Earnings per share over the last twelve months and net assets per share, read from each company's interim reports and checked inside each report, with the P/E, P/B, return on equity and dividend yield at each session's price."
     }
   },
   "errors": {
@@ -488,7 +561,7 @@
         "long": "A P/E of 10 means the price equals ten years of the company's current yearly profit. Comparing P/Es only makes sense between similar companies, and profits change over time."
       },
       "pbv": {
-        "name": "Price / book (P/BV)",
+        "name": "Price / book (P/B, P/BV)",
         "short": "Share price compared with the company's net assets per share.",
         "long": "Book value is what the company owns minus what it owes, per share, as shown in its accounts. A P/BV of 1 means the market price equals that accounting value."
       },
@@ -611,6 +684,31 @@
         "name": "Total return",
         "short": "The price change plus dividends, with splits, scrip and rights issues taken into account.",
         "long": "A share's published price falls when it pays a dividend or splits, even though its owners lose nothing. The total return adds the dividends back and corrects for changes in the number of shares, so it measures what the shares owned at the start would be worth with their dividends kept in the shares. Past returns do not predict future ones."
+      },
+      "eps": {
+        "name": "Earnings per share (EPS)",
+        "short": "The company's profit divided by its number of shares.",
+        "long": "Here it is the profit attributable to the company's shareholders over the last four quarters, divided by today's number of shares. It is shown only when all four quarters' profits are in the company's reports."
+      },
+      "navPerShare": {
+        "name": "Net assets per share",
+        "short": "What the company owns minus what it owes, per share, as shown in its accounts.",
+        "long": "Also called book value per share. Here it is the equity attributable to the company's shareholders in its latest report, divided by today's number of shares."
+      },
+      "roe": {
+        "name": "Return on equity (ROE)",
+        "short": "Profit over the last year as a percentage of the shareholders' equity.",
+        "long": "An ROE of 15% means the company earned Rs 15 over the last year for every Rs 100 of net assets in its accounts. It is EPS over the last 12 months divided by net assets per share."
+      },
+      "freeFloat": {
+        "name": "Free float",
+        "short": "The share of a company's shares that is not held by its controlling or large holders.",
+        "long": "Shares held by a parent company, the company itself or any holder with 10% or more are not part of the free float. Here it is estimated from the twenty largest shareholders the company lists; directors' smaller holdings cannot be told apart, so the true free float is lower."
+      },
+      "ownershipGroup": {
+        "name": "Ownership group",
+        "short": "Listed companies that answer to the same owner.",
+        "long": "Found by following each company's largest voting block (20% or more) upward until an owner that is not itself a listed company. Funds, the state and nominee accounts never head a group."
       }
     },
     "guidesTitle": "Guides",

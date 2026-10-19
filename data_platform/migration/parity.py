@@ -217,7 +217,7 @@ def bonds_parity(conn, old_db: Path, old_code_dir: Path | None) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("market", choices=["bonds", "cse", "cse_corporate_actions"])
+    ap.add_argument("market", choices=["bonds", "cse", "cse_corporate_actions", "cse_ownership"])
     ap.add_argument("--old-db", type=Path, help="bonds: the old sgcp.sqlite")
     ap.add_argument("--old-code", type=Path, help="a read-only clone of the old repo at the audited commit")
     ap.add_argument("--report", type=Path, required=True)
@@ -228,9 +228,12 @@ def main(argv: list[str] | None = None) -> int:
     elif args.market == "cse":
         from .parity_cse import cse_parity
         report = cse_parity(conn, args.old_code)
-    else:
+    elif args.market == "cse_corporate_actions":
         from .parity_cse_corporate_actions import ca_parity
         report = ca_parity(conn, args.old_code)
+    else:
+        from .parity_cse_ownership import ownership_parity
+        report = ownership_parity(conn, args.old_code)
     conn.rollback()
     report["generated_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     args.report.parent.mkdir(parents=True, exist_ok=True)
