@@ -58,12 +58,6 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.savings_rates": "month",
   "models.savings_growth": "start_month",
   "models.savings_summary": null,
-  "models.crypto_market_daily": "day",
-  "models.crypto_cycle_daily": "day",
-  "models.crypto_cycle_event": "day",
-  "models.crypto_cycle_anchor": "day",
-  "models.crypto_cycle_monthly": "day", // the month's last day
-  "models.crypto_trend_band": "day",
 };
 
 export function dateColumn(table: string): string | null {

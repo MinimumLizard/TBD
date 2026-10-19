@@ -56,10 +56,9 @@ jobs:
         run: |
           mkdir -p "$WORK" && cd "$WORK"
           auth=""; [ -n "$OLD_REPOS_TOKEN" ] && auth="x-access-token:${OLD_REPOS_TOKEN}@"
-          for r in CSE Nelson-Siegel Crypto; do
+          for r in CSE Nelson-Siegel; do
             git clone --quiet "https://${auth}github.com/MinimumLizard/$r.git" "$r"
           done
-          git -C Crypto fetch --quiet origin data:refs/remotes/origin/data
           git -C Nelson-Siegel show 1c33084:data/sgcp.sqlite > sgcp-1c33084.sqlite
       - name: Full-history bundles
         run: bash scripts/backup_repos.sh "$WORK/bundles"
@@ -86,7 +85,7 @@ jobs:
       - name: Archive every old file and check the audit baselines
         run: >-
           uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"
-          --crypto "$WORK/Crypto" --bundles "$WORK/bundles" --report reports/legacy.json
+          --bundles "$WORK/bundles" --report reports/legacy.json
       - name: Compute every model on the migrated history
         run: uv run --no-dev python -m data_platform.jobs.models
       - uses: actions/upload-artifact@v4

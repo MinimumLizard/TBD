@@ -61,7 +61,7 @@ small and pre-computed.
 | Collectors scheduled "somewhere" | **GitHub Actions, several attempts a day, plus an outside dead-man's switch** | The project already runs on it and it is cheap. Its known weakness (late and occasionally skipped runs, F6) is handled by design: collectors catch up on any missed day, and a missing day raises an alert within hours rather than silently. |
 | A separate API service | **The API is the web app's own server routes** | One fewer service to run, deploy and pay for. The tier check sits in one server-side module with tests that try to leak paid data. A database-level guard (row-level security) is the second line. |
 | Payments behind an interface | Same, **not built** | As instructed. |
-| Crypto as one of the three tools | **Crypto deferred** | Most of its free sources prohibit commercial use (audit §7, decision 0009). It returns when licensed sources are budgeted. |
+| Crypto as one of the three tools | **Crypto deferred; since 2026-10-19 a separate product of a separate company (decision 0020)** | Most of its free sources prohibit commercial use (audit §7, decision 0009). It returns when licensed sources are budgeted. |
 | CSE portfolio lab as a product feature | **Kept as an internal research tool, not published** | Model portfolios with a live trade record are the closest thing in the codebase to investment advice. It waits for a lawyer's view (decision 0010). |
 
 Everything else follows your default.

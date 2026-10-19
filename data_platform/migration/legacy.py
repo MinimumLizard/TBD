@@ -1,14 +1,16 @@
-"""Archive the three old repositories completely, and check the archive against the audit's baselines.
+"""Archive the two old Sri Lankan market repositories completely, and check the archive against the audit's baselines.
 
-    python -m data_platform.migration.legacy --cse <clone> --ns <clone> --crypto <clone> \\
-        --bundles <dir with CSE.bundle, Nelson-Siegel.bundle, Crypto.bundle> --report docs/migration/legacy.json
+    python -m data_platform.migration.legacy --cse <clone> --ns <clone> \\
+        --bundles <dir with CSE.bundle, Nelson-Siegel.bundle> --report docs/migration/legacy.json
+
+The old Crypto terminal is not archived here: since 2026-10-19 it belongs to the separate crypto and global markets
+product, which archives its own history (decision 0020).
 
 Two layers, so nothing exists only on GitHub (audit F5):
   * every file at the audited commit of every branch that holds data, archived individually (source
     'legacy_<repo>', url git://github.com/MinimumLizard/<repo>@<commit>/<path>). This covers the files the bond and
     CSE migrations do not replay: CSE model outputs (corporate actions, dealings, ownership, fundamentals, the
-    portfolio record) and the owner's hand-written confirmations in config/; the crypto history store; the old
-    sites' code. Phase 3's parity tests read their golden inputs from here.
+    portfolio record) and the owner's hand-written confirmations in config/; the old sites' code. Phase 3's parity tests read their golden inputs from here.
   * the complete history of each repo as a verified git bundle (every commit, every branch).
 
 The check: recompute the audit's Appendix A fingerprints from the ARCHIVED bytes, not from the clones.
@@ -47,13 +49,11 @@ AUDIT_BASELINES = {   # docs/audit.md Appendix A (first 16 hex characters of SHA
 }
 # The commits the audit fingerprinted (docs/audit.md). The baselines are checked against these, whatever the old
 # repos' latest commit is by the time the migration runs (they keep collecting daily until cut-over).
-AUDITED = {"CSE": ("CSE", "f263830"), "Nelson-Siegel": ("Nelson-Siegel", "1c33084"),
-           "Crypto": ("Crypto", "4dc446a"), "Crypto@data": ("Crypto", "fce882b")}
+AUDITED = {"CSE": ("CSE", "f263830"), "Nelson-Siegel": ("Nelson-Siegel", "1c33084")}
 
 GROUP_BASELINES = {   # hash of the sorted "sha256  <path>" lines exactly as `sha256sum` printed them in the audit
     # (repo, path prefix, how the audit's `find` wrote the path): expected
     ("CSE", "data/raw/", "data/raw/"): "414cd7d24b457932",   # find data/raw -type f, run from the repo root
-    ("Crypto@data", "", "./"): "50653dc65730bb56",           # find . -name '*.parquet', run on the data branch
 }
 
 
@@ -108,8 +108,6 @@ def check_baselines(conn, store, files: dict) -> dict:
         for (n, path), sha in files.items():
             if n != name or not path.startswith(prefix):
                 continue
-            if name == "Crypto@data" and not path.endswith(".parquet"):
-                continue
             lines.append(f"{rawstore.sha256_of(db.raw_bytes(conn, store, sha))}  {shown}{path[len(prefix):]}")
         listing = "".join(line + "\n" for line in sorted(lines, key=lambda s: s.split("  ", 1)[1]))
         got = hashlib.sha256(listing.encode()).hexdigest()[:16]
@@ -121,7 +119,6 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cse", type=Path, required=True)
     ap.add_argument("--ns", type=Path, required=True)
-    ap.add_argument("--crypto", type=Path, required=True)
     ap.add_argument("--bundles", type=Path, required=True)
     ap.add_argument("--report", type=Path, required=True)
     args = ap.parse_args(argv)
@@ -129,19 +126,19 @@ def main(argv=None) -> int:
     conn = db.connect(s.database_url)
     db.migrate(conn)
     store = rawstore.from_settings(s)
-    clones = {"CSE": args.cse, "Nelson-Siegel": args.ns, "Crypto": args.crypto}
+    clones = {"CSE": args.cse, "Nelson-Siegel": args.ns}
     files: dict = {}
     latest: dict = {}
     counts = {}
     for key, (name, commit) in AUDITED.items():           # the audited commits: checked against the baselines
         counts[f"{key} @{commit}"] = archive_tree(conn, store, clones[name], name, commit, files, key=key)
-    for key, ref in (("CSE", "HEAD"), ("Nelson-Siegel", "HEAD"), ("Crypto", "HEAD"), ("Crypto@data", "origin/data")):
+    for key, ref in (("CSE", "HEAD"), ("Nelson-Siegel", "HEAD")):
         name = AUDITED[key][0]                              # and the latest state, which may be newer
         head = git(clones[name], "rev-parse", "--short", ref).decode().strip()
         if head != AUDITED[key][1]:
             counts[f"{key} @{head} (latest)"] = archive_tree(conn, store, clones[name], name, ref, latest, key=key)
     bundles = {name: archive_bundle(conn, store, args.bundles / f"{name}.bundle", name)
-               for name in ("CSE", "Nelson-Siegel", "Crypto")}
+               for name in ("CSE", "Nelson-Siegel")}
     checks = check_baselines(conn, store, files)
     report = {"files_archived": counts, "bundles_sha256": bundles, "audit_baselines": checks,
               "ok": all(c["ok"] for c in checks.values()),

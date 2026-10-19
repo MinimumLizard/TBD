@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-19 — Sri Lankan markets only: crypto moved to a separate product (decision 0020)
+
+- The owners split the business in two: ZinvestIQ (this repository) covers Sri Lankan markets only; crypto and
+  global markets become a separate product of a separate company. ZinvestIQ keeps the name (reasons in decision
+  0020).
+- Removed: the Bitstamp collector, the three crypto models, migration 0010 (applied only to development and test
+  databases), the crypto pages and API routes, the crypto disclaimer, sources, calendar, workflow, research notes and
+  decision 0019. "Migrate history" and the backup script no longer archive the old Crypto terminal; the other product
+  archives its own history.
+- The crypto code, research and cross-checks remain in this repository's history at commit `ca7e44c`, from which the
+  other product starts.
+- Checked after the change: fast suite 279 passed, website unit tests 97, build, tier-leak suite 50/50, copy lint 0;
+  no page mentions crypto and /crypto returns 404.
+
 ## 2026-10-18 — Feedback, the weekly e-mail, calendars to 2027, data rights
 
 - Feedback (Phase 4b, no accounts needed): "Was this page useful?" on every page and a short form at `/feedback`.
