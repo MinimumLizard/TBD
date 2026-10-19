@@ -23,7 +23,7 @@ Every figure must reconcile inside its own report or it isn't used:
 - Shares are the report's own period-end count (from its verified shareholder table: shares / fraction), else each
   count the CSE has reported for the company, newest first.
 
-Trailing-12-month EPS. Reports differ in what their first column holds: the quarter, or the year to date. It is
+Trailing-12-month EPS. Reports differ in what their first column shows: the quarter, or the year to date. It is
 taken from the column headers above the EPS line ("Quarter ended", "03 months to" -> quarter; "Six months", "Nine
 months", "Year ended" -> year to date; "Period ended" alone is unknown unless the report is the first quarter of the
 financial year, where both agree). The financial year end comes from the company profile (finYearEnd 1 = 31 March,
