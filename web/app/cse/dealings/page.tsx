@@ -177,7 +177,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                   <tbody>
                     {f.accounts.map((a) => (
                       <tr key={a.actor_key}>
-                        <td>
+                        <td className="names">
                           {a.actor}
                           <span className="sub">{t(`dealings.actorTypes.${a.actor_type}` as never)}</span>
                         </td>

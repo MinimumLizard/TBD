@@ -274,3 +274,6 @@ dl.facts dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
 .tabs a { padding: var(--s1) var(--s4); border-radius: 999px; border: 1px solid var(--border); text-decoration: none; font-weight: 600; }
 .tabs a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: #ffffff; }
 .email-frame { border-radius: var(--radius); overflow: hidden; margin-top: var(--s3); color-scheme: light; }
+
+/* Names as filed can be long (a notice may list several directors): wrap them instead of widening the table. */
+td.names { white-space: normal; min-width: 11rem; max-width: 18rem; }

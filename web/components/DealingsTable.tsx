@@ -39,11 +39,11 @@ export default async function DealingsTable({ rows, showCompany = false }: { row
               <td className="num">{lkr(r.value)}</td>
               <td className="num">{int(r.quantity)}</td>
               <td className="num">{num(r.price)}</td>
-              <td className="small">
+              <td className="small names">
                 {r.director ?? ""}
                 <span className="sub">{t(`dealings.roles.${r.role}` as never)}</span>
               </td>
-              <td className="small">
+              <td className="small names">
                 {r.account_type === "related" ? (
                   <>
                     {r.account ?? ""}
