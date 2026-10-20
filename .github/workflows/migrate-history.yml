@@ -8,7 +8,7 @@
 #   3. rebuilds the bond database's row history from its git versions (self-verified)
 #   4. saves the CSE's one-year chart history (fills the missed 2026-10-05 session)
 #   5. replays bonds and CSE through the new parsers and reconciles with the old tables (incl. the CSE
-#      corporate-action caches)
+#      corporate-action caches, the directors' dealing notices and the interim-report texts)
 #   6. archives every file of every old repo (at the audited commits, checked against the audit baselines, and at
 #      their latest commits) plus full-history bundles
 # The old repos keep collecting until cut-over, so steps 2-5 use their LATEST state (all history to date), while the
@@ -86,6 +86,10 @@ jobs:
         run: >-
           uv run --no-dev python -m data_platform.migration.cse_dealings --old-repo "$WORK/CSE" --archive
           --report reports/cse-dealings.json
+      - name: Load the old interim-report texts and financial year ends (from the archive) and reconcile them
+        run: >-
+          uv run --no-dev python -m data_platform.migration.cse_reports --old-repo "$WORK/CSE" --archive
+          --report reports/cse-reports.json
       - name: Archive every old file and check the audit baselines
         run: >-
           uv run --no-dev python -m data_platform.migration.legacy --cse "$WORK/CSE" --ns "$WORK/Nelson-Siegel"

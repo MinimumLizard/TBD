@@ -31,6 +31,11 @@ models:
                                                   # published, read from its own announcement records
   cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
                                                   # published facts, combined by a stated formula)
+  cse_ownership:        { minimum_tier: free }    # who owns each company, by owner type, its ownership group and a
+                                                  # free-float estimate: company-level facts from the companies'
+                                                  # own filings (no individual is ever named; see below)
+  cse_fundamentals:     { minimum_tier: free }    # EPS, net assets per share, P/E, P/B, ROE, dividend yield: figures
+                                                  # the companies published, checked inside each report
   cse_dealings:         { minimum_tier: free }    # directors' share dealings, one row per transaction: disclosures
                                                   # the CSE published, shown without names (roles, account type,
                                                   # side, shares, price, value); proposal, the owner decides
@@ -53,3 +58,6 @@ unpublished_outputs:
   - models.model_stats
 # Directors' and accounts' names (models.cse_dealing_as_filed, models.cse_flow_actor) are shown: the owner's decision of
 # 2026-10-19 (decision 0021); the lawyer's review before anything is public covers them.
+# Shareholders' names (models.cse_holding: the top-20 lists; models.cse_ownership_detail: controllers and chains),
+# individuals included, are shown on the same basis (the owner's decision of 2026-10-19, decision 0021;
+# docs/plan-retail-features.md §7 item 10).

@@ -55,6 +55,9 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.cse_corporate_action": "announced_date", // when the CSE announced it (an ex-date can be missing)
   "models.cse_corporate_action_used": "announced_date",
   "models.cse_total_return": "session_date",
+  "models.cse_company_ownership": "session_date",
+  "models.cse_fundamentals": "session_date",
+  "models.cse_report_figures": "period_date", // the quarter the report covers
   "models.cse_dealing": "announced_date", // what was disclosed by a date (a preview shows only older notices)
   "models.cse_flow_company": "as_of",
   "models.cse_flow_summary": "as_of",

@@ -1,0 +1,25 @@
+# Saturdays at 10:13 Sri Lanka time: each company's report list, and the PDF of any new interim report (the newest
+# quarterly one, else the newest annual one), archived and converted to text with pdftotext (about 290 list requests
+# and a handful of PDFs a week, one request a second per host). Feeds cse_ownership and cse_fundamentals.
+name: "Collect: CSE interim reports"
+
+on:
+  schedule:
+    - cron: "43 4 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: collect-cse-reports
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: ./.github/workflows/_run.yml
+    with:
+      command: data_platform.jobs.collect cse_api:reports
+      timeout: 90
+      poppler: true
+    secrets: inherit

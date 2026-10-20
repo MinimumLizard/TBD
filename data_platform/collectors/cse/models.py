@@ -216,10 +216,26 @@ class ComSumInfo(Model):
     symbol: str | None = None
     sector: str | None = None
     boardType: str | None = None
+    finYearEnd: str | int | None = None     # TBD: the financial year end ('1' = 31 March, '2' = 31 December)
 
 
 class CompanyProfile(Model):
     reqComSumInfo: list[ComSumInfo] = Field(default_factory=list)
+
+
+# --- financial reports (TBD: the old cse/ownership/collect.py read these as plain JSON) ----------
+
+class ReportItem(Model):
+    id: int
+    path: str | None = None
+    manualDate: int | None = None           # the report's period, epoch ms (midnight Sri Lanka time)
+    uploadedDate: int | float | None = None  # epoch ms
+    fileText: str | None = None
+
+
+class Financials(Model):
+    infoQuarterlyData: list[ReportItem] | None = None
+    infoAnnualData: list[ReportItem] | None = None
 
 
 # --- announcements --------------------------------------------------------------------------

@@ -1,0 +1,27 @@
+name: cse_ownership
+market: cse
+title_key: models.cse_ownership.title
+summary_key: models.cse_ownership.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.financial_reports_current    # the report index (one row per report)
+  - cse.report_texts                 # each report's text
+  - cse.security_list                # company names (listed holders are recognised by name)
+  - cse.company_info_daily           # shares issued and market cap per share class (company summaries)
+  - cse.prices_daily_current         # ... and the trade summary's market cap / close
+  - cse.ownership_confirmations      # the owner's aliases and parents (config/ownership_*.yaml + the private file)
+outputs:
+  - models.cse_holding
+  - models.cse_ownership_detail
+  - models.cse_company_ownership
+versions:
+  - method_version: "1.0.0"
+    status: current
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/ownership/analyse.py build() and groups.py, and data/ownership/{holdings,companies,owners}.csv"
+      tolerance: 1.0e-9
+      notes: >-
+        The old code, imported from a read-only clone, runs on the old repo's own files cut off at each of its
+        sessions; the model's build for that session must equal it row for row (holdings, companies, owners,
+        groups). The stored CSVs, written on 2026-10-11 from the 2026-10-09 session, are compared with that session
+        as the CSV writer stored them (numbers rounded to 8 decimals).

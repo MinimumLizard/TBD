@@ -249,6 +249,18 @@ All of them are measured forward from the day they start, never backfilled.
    per-company "cluster" mark, or a list of companies ordered by the value of directors' dealings, at risk of being
    read as investment advice, and what wording keeps it factual? The names are shown in the private preview; nothing
    is public before your answer.
+10. Shareholder lists (added 2026-10-19, Phase 3b part 3). Every interim report lists the company's twenty largest
+    shareholders, many of them private individuals (and joint holders, estates and family trusts). We store the
+    lists, credit each holding to its beneficial owner (custodian and margin accounts resolved), and show, per
+    company: the share held by the top 20 by type of owner, whether one block controls the company (over 50 %) or has
+    influence (20–50 %), its ownership group, a free-float estimate, and the latest list itself (rank, holder as
+    resolved, shares, % of issued shares, type of owner). The names, individuals included, are shown in the private
+    preview by the owner's decision of 2026-10-19 (decision 0021, as for directors' names); your answer is needed
+    before anything is public. (a) Under the Personal Data Protection Act, may we show individual shareholders' names
+    and holdings, given each report is public, and may we show a person's holdings across companies (the data allows
+    it; the site does not offer it today)? (b) The owner keeps confirmations that two spellings are one person in a
+    private file outside the public repository (`OWNERSHIP_PRIVATE_FILE`): is storing such a link in our database
+    acceptable, and on what basis?
 
 ## 8. Proposed order of work
 

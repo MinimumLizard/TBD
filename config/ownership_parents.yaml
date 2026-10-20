@@ -1,0 +1,20 @@
+# Ownership: who owns or controls an UNLISTED shareholder (cse_ownership model; from the old terminal's
+# config/ownership_parents.yaml, which was empty).
+#
+# Ownership chains stop at unlisted holders, because their shareholders are in no CSE table. Their owners are
+# sometimes named in the listed companies' own reports. Nothing is used until it is entered here (or in the private
+# file), after checking it against the PDF.
+#
+#   <holder, as the tracker names it>:
+#     owner: <who owns or controls it>          # spelled as in the tables if they hold shares directly
+#     owner_type: company | institution | trust | individual
+#     pct: 100            # % of the holder's shares; OMIT when the report states control but no %
+#     source: <PDF url>
+#     quote: "<the sentence, verbatim>"
+#
+# Effect: the holder's votes count with its owner's (control chains and groups continue upward). Value passes up only
+# for the stated pct; without a pct the holder keeps it.
+#
+# THIS REPOSITORY IS PUBLIC: an entry whose owner is a private individual goes in the private file named by
+# OWNERSHIP_PRIVATE_FILE (config/ownership_aliases.yaml explains), never here.
+parents: {}

@@ -181,3 +181,128 @@ export async function totalReturns(viewer: Viewer, symbol: string): Promise<Resu
     }),
   );
 }
+
+export interface CompanyFigures {
+  session_date: string;
+  code: string;
+  price: number | null;
+  price_date: string | null;
+  shares: number | null;
+  fye: string;
+  nav: number | null;
+  nav_period: string | null;
+  pb: number | null;
+  ttm_profit: number | null;
+  ttm_eps: number | null;
+  ttm_to: string | null;
+  ttm_note: string;
+  pe: number | null;
+  roe: number | null;
+  div_ttm: number | null;
+  dy: number | null;
+  report_period: string | null;
+  report_url: string | null;
+}
+
+const FIGURE_COLUMNS = ["session_date", "code", "price", "price_date", "shares", "fye", "nav", "nav_period", "pb",
+  "ttm_profit", "ttm_eps", "ttm_to", "ttm_note", "pe", "roe", "div_ttm", "dy", "report_period", "report_url"];
+
+/** A company's figures at the latest session (company code, e.g. JKH). */
+export async function companyFigures(viewer: Viewer, code: string): Promise<Result<CompanyFigures | null>> {
+  return withModel(viewer, "cse_fundamentals", async (g) => {
+    const rows = await readOutput<CompanyFigures>(g, "models.cse_fundamentals", {
+      columns: FIGURE_COLUMNS, where: "code = ?", params: [code], orderBy: "session_date desc", limit: 1,
+    });
+    return rows[0] ?? null;
+  });
+}
+
+export type CompanyRatios = Pick<CompanyFigures, "pe" | "pb" | "dy" | "ttm_eps">;
+
+/** Every company's P/E, P/B and dividend yield at the latest session, by company code. */
+export async function ratiosByCompany(viewer: Viewer): Promise<Result<{ date: string | null; byCode: Map<string, CompanyRatios> }>> {
+  return withModel(viewer, "cse_fundamentals", async (g) => {
+    const day = await latestSession(g, "models.cse_fundamentals");
+    const rows = day
+      ? await readOutput<CompanyRatios & { code: string }>(g, "models.cse_fundamentals", {
+          columns: ["code", "pe", "pb", "dy", "ttm_eps"], where: "session_date = ?", params: [day],
+        })
+      : [];
+    return { date: day, byCode: new Map(rows.map((r) => [r.code, { pe: r.pe, pb: r.pb, dy: r.dy, ttm_eps: r.ttm_eps }])) };
+  });
+}
+
+export interface CompanyOwnership {
+  session_date: string;
+  code: string;
+  report_id: number | null;
+  period_date: string | null;
+  report_status: string;
+  table_status: string | null;
+  top20_pct: number | null;
+  pct_listed: number | null;
+  pct_company: number | null;
+  pct_institution: number | null;
+  pct_individual: number | null;
+  pct_joint: number | null;
+  pct_estate: number | null;
+  pct_trust: number | null;
+  pct_nominee: number | null;
+  pct_own_shares: number | null;
+  controller_type: string | null;
+  controller_name: string | null;
+  control_pct: number | null;
+  control_level: string | null;
+  group_id: string;
+  group_head_type: string | null;
+  group_head_name: string | null;
+  group_size: number;
+  free_float_pct: number | null;
+  source_url: string | null;
+  group_members: string[]; // the other companies in the group (codes), at the same session
+  holders: Holder[]; // the report's checked top-20 table(s), voting class first
+}
+
+export interface Holder {
+  share_class: string; // N voting, X non-voting
+  row_no: number;
+  rank: number;
+  owner_name: string; // the holder as resolved (custodian and margin accounts credited to the owner)
+  owner_type: string;
+  name_as_filed: string;
+  shares: number;
+  pct: number; // % of the class's issued shares, as the report prints it
+}
+
+const OWNERSHIP_COLUMNS = ["session_date", "code", "report_id", "period_date", "report_status", "table_status", "top20_pct",
+  "pct_listed", "pct_company", "pct_institution", "pct_individual", "pct_joint", "pct_estate", "pct_trust",
+  "pct_nominee", "pct_own_shares", "controller_type", "controller_name", "control_pct", "control_level", "group_id",
+  "group_head_type", "group_head_name", "group_size", "free_float_pct", "source_url"];
+
+/** A company's ownership at the latest session, with the other members of its ownership group. */
+export async function companyOwnership(viewer: Viewer, code: string): Promise<Result<CompanyOwnership | null>> {
+  return withModel(viewer, "cse_ownership", async (g) => {
+    const [row] = await readOutput<Omit<CompanyOwnership, "group_members" | "holders">>(g, "models.cse_company_ownership", {
+      columns: OWNERSHIP_COLUMNS, where: "code = ?", params: [code], orderBy: "session_date desc", limit: 1,
+    });
+    if (!row) return null;
+    const [members, holders] = await Promise.all([
+      row.group_size > 1
+        ? readOutput<{ code: string }>(g, "models.cse_company_ownership", {
+            columns: ["code"], where: "session_date = ? and group_id = ? and code <> ?",
+            params: [row.session_date, row.group_id, code], orderBy: "code",
+          })
+        : Promise.resolve([]),
+      // the latest report's top-20 table(s), only where the table passed its checks (shareholders' names are shown:
+      // the owner's decision of 2026-10-19, decision 0021)
+      row.report_id != null
+        ? readOutput<Holder>(g, "models.cse_holding", {
+            columns: ["share_class", "row_no", "rank", "owner_name", "owner_type", "name_as_filed", "shares", "pct"],
+            where: "report_id = ? and code = ? and table_status in ('verified', 'verified_total')",
+            params: [row.report_id, code], orderBy: "share_class, row_no",
+          })
+        : Promise.resolve([]),
+    ]);
+    return { ...row, group_members: members.map((m) => m.code), holders };
+  });
+}

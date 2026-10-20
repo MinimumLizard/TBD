@@ -28,6 +28,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --frozen
+      - name: pdftotext (the CSE reports collector converts PDFs with it)
+        run: sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
       - name: Tests (collectors, database guard rails, gap check, backups, repo rules)
         run: uv run pytest -m "not legacy"
       - name: Model registry (every manifest valid; the web app's copy of it up to date)

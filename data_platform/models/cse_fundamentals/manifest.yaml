@@ -1,0 +1,28 @@
+name: cse_fundamentals
+market: cse
+title_key: models.cse_fundamentals.title
+summary_key: models.cse_fundamentals.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.financial_reports_current    # the report index (one row per report)
+  - cse.report_texts                 # each report's text
+  - cse.security_list                # company names (the share-count step works per listed company)
+  - cse.company_info_daily           # shares issued per share class (company summaries)
+  - cse.prices_daily_current         # closes, and the trade summary's market cap / close
+  - cse.company_fiscal_years         # each company's financial year end (company profiles)
+outputs:
+  - models.cse_report_figures
+  - models.cse_fundamentals
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models:
+      cse_corporate_actions: "1.0.0"   # the cash dividends in use (models.cse_corporate_action_used)
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/fundamentals.py build(), and data/fundamentals/{reports,latest}.csv"
+      tolerance: 1.0e-9
+      notes: >-
+        The old code, imported from a read-only clone, runs on the old repo's own files cut off at each of its
+        sessions (after the old ownership step, whose holdings it reads); the model's rows for that session must
+        equal it. The stored CSVs, written on 2026-10-15 from that session, are compared as the CSV writer stored
+        them (numbers rounded to 8 decimals). 2026-10-05 is left out on the new side (the old terminal never had it).

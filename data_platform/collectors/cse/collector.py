@@ -6,6 +6,8 @@
     python -m data_platform.jobs.collect cse_api:corporate_actions   # daily: each company's announcements (92 days)
                                                                      # and the details of its corporate actions and
                                                                      # directors' dealings
+    python -m data_platform.jobs.collect cse_api:reports         # weekly: each company's latest interim report
+                                                                 # (reports.py)
 
 Rules carried over from the old terminal (audit §2.1), all enforced here:
   * the session date comes from the API (dailyMarketSummery), never from the clock;
@@ -170,6 +172,10 @@ class CseEndOfDayCollector(CseCollector):
                     f = self.api("companyProfile", symbol=sec["symbol"])
                     added += store(conn, "cse.company_profiles",
                                    [dict(parse.company_profile(f.body, sec["symbol"]), raw_sha256=f.sha256)],
+                                   ["symbol", "raw_sha256"], f.fetch_id, f.response.fetched_at)
+                    added += store(conn, "cse.company_fiscal_years",
+                                   [dict(parse.fin_year_end(f.body, sec["symbol"]), raw_sha256=f.sha256,
+                                         session_date=session)],
                                    ["symbol", "raw_sha256"], f.fetch_id, f.response.fetched_at)
                 conn.commit()
             except Exception as exc:  # noqa: BLE001 - recorded and raised at the end of the run
