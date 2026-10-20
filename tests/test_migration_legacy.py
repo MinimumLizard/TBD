@@ -113,7 +113,7 @@ def test_dealing_notices_reconcile_and_the_dealings_and_flows_models_reproduce_t
     report there."""
     import json
 
-    from data_platform.migration import cse, cse_corporate_actions as ca, cse_dealings as dl
+    from data_platform.migration import cse, cse_corporate_actions as ca, cse_dealings as dl, cse_reports
     from data_platform.migration import parity_cse_dealings as pdl
 
     repo, chart = os.environ.get("LEGACY_CSE_REPO"), os.environ.get("LEGACY_CSE_CHART_ARCHIVE")
@@ -122,6 +122,8 @@ def test_dealing_notices_reconcile_and_the_dealings_and_flows_models_reproduce_t
     cse.load(conn, store, Path(repo), Path(chart))
     ca.archive_cache(conn, store, Path(repo))
     ca.load_from_archive(conn, store)                   # the session folders' detail files
+    cse_reports.archive_files(conn, store, Path(repo))  # the shareholder lists the ownership groups come from
+    cse_reports.load_from_archive(conn, store)
     dl.archive_backfill(conn, store, Path(repo))
     first = dl.load_from_archive(conn, store)
     assert first["with_dealing_record"] > 0

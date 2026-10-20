@@ -9,13 +9,15 @@ What differs from the old page, and why (METHOD.md):
   * point in time: the old page was computed once, as of its latest dealing date. Here every dealing date D gets
     its own rows, from the dealings dated on or before D, so a row for D never changes when later dealings arrive
     (only when a notice dated D or earlier arrives late, or a re-filing replaces one). The latest D is the old page;
-  * the quarter-to-quarter top-20 list changes (audit C20), the "own group" flag and the actors' group labels need
-    the ownership facts, which the platform does not have yet; the "watchlist" flag was the old owner's personal
-    list. All four are left out;
+  * accounts are matched with the owner's confirmed aliases (as cse_ownership matches shareholders), and the
+    ownership groups (the "own group" flag, each account's group name) are cse_ownership's as at the dealing date
+    (the old page used its latest companies list; on the old data the groups were the same at every session);
+  * the quarter-to-quarter top-20 list changes (audit C20) are not ported yet; the "watchlist" flag was the old
+    owner's personal list and is left out;
   * the old page showed the top 60 actors and top 40 companies; every row is stored here.
 
 Outputs: models.cse_flow_company, models.cse_flow_summary and models.cse_flow_dealing (no names), and
-models.cse_flow_actor (account names; unpublished).
+models.cse_flow_actor (account names).
 """
 from __future__ import annotations
 
@@ -25,6 +27,7 @@ import json
 import statistics
 from collections import defaultdict
 
+from .._lib.cse_reads import confirmations
 from . import entities
 
 WINDOWS = (30, 90, 365)
@@ -62,21 +65,48 @@ class Lists:
         return self._markets[d]
 
 
-def deals(dealings: list[dict], filed: dict[str, dict], lists: Lists) -> list[dict]:
+class GroupLists:
+    """cse_ownership's ownership groups by session: for a date, the latest session on or before it (before the first
+    session: the first, as for the security lists)."""
+
+    def __init__(self, rows: list[dict]):
+        by: dict[dt.date, entities.Groups] = defaultdict(entities.Groups)
+        for r in rows:
+            g = by[r["session_date"]]
+            g.of[r["code"]] = r["group_key"]
+            if r["group_name"] is not None:
+                g.label[r["group_key"]] = r["group_name"]
+        self.dates = sorted(by)
+        self._by = by
+
+    def at(self, day: dt.date | None) -> entities.Groups:
+        if not self.dates:
+            return entities.Groups()
+        i = bisect.bisect_right(self.dates, day) - 1 if day else len(self.dates) - 1
+        return self._by[self.dates[max(i, 0)]]
+
+
+def deals(dealings: list[dict], filed: dict[str, dict], lists: Lists, aliases: dict | None = None,
+          groups: GroupLists | None = None) -> list[dict]:
     """The counted transactions (re-filed notices left out), in the old CSV's order, each with the account that dealt
-    (old flows.dealings_rows). Each account is resolved against the security list in force on its dealing date."""
+    and its ownership group (old flows.dealings_rows). Each account is resolved against the security list in force
+    on its dealing date and the owner's aliases, and placed in the ownership groups in force on that date."""
     out = []
     cache: dict[tuple, entities.Entity] = {}
+    groups = groups or GroupLists([])
     for r in dealings:
         f = filed[r["transaction_id"]]
         account = entities.account_name(f["account"], f["director"], r["company"])
         m = lists.market(r["deal_date"])
         key = (account, id(m))
         if key not in cache:
-            cache[key] = entities.actor_entity(account, m)
+            cache[key] = entities.actor_entity(account, m, aliases)
         e = cache[key]
+        g = groups.at(r["deal_date"])
+        actor_group, target_group = g.actor(e), g.target(r["symbol"])
         out.append({**r, "actor_key": e.key, "actor": e.name, "actor_type": e.type, "value": _f(r["value"]),
-                    "value_as_disclosed": r["value"],
+                    "value_as_disclosed": r["value"], "actor_rule": e.rule, "actor_group": actor_group,
+                    "actor_group_name": g.name(actor_group, e.name), "own_group": actor_group == target_group,
                     "date": r["deal_date"].isoformat() if r["deal_date"] else ""})
     return out
 
@@ -88,11 +118,13 @@ def window(deals_: list[dict], end: dt.date, days: int) -> list[dict]:
 
 
 def per_actor(rows: list[dict]) -> list[dict]:
-    """Old build(): per account, purchases, disposals, net, transactions and the net by company (largest six)."""
+    """Old build(): per account, its ownership group's name (as at its first dealing in the rows), purchases,
+    disposals, net, transactions and the net by company (largest six)."""
     per: dict[str, dict] = {}
     for d in rows:
         a = per.setdefault(d["actor_key"], {"key": d["actor_key"], "name": d["actor"], "type": d["actor_type"],
-                                            "purchases": 0.0, "disposals": 0.0, "n": 0, "codes": defaultdict(float)})
+                                            "group": d.get("actor_group_name", d["actor"]), "purchases": 0.0,
+                                            "disposals": 0.0, "n": 0, "codes": defaultdict(float)})
         v = d["value"] if d["side"] == "purchase" else -d["value"]
         a["purchases" if v > 0 else "disposals"] += abs(v)
         a["n"] += 1
@@ -133,9 +165,10 @@ def summary(deals_: list[dict], end: dt.date) -> dict:
 
 
 def flags(d: dict, large_lkr: float = LARGE_LKR) -> dict:
-    """Old build()'s feed flags that need no ownership facts or watchlist: large (Rs 10 mn or more) and related
-    account."""
-    return {"large": d["value"] >= large_lkr, "related_account": d["account_type"] == "related"}
+    """Old build()'s feed flags, except the old owner's watchlist: large (Rs 10 mn or more), related account, and own
+    group (the account that dealt is in the same ownership group as the company whose shares it dealt in)."""
+    return {"large": d["value"] >= large_lkr, "related_account": d["account_type"] == "related",
+            "own_group": bool(d.get("own_group", False))}
 
 
 # --- inputs ------------------------------------------------------------------------------------------------------
@@ -144,10 +177,11 @@ DEALING_COLUMNS = ("transaction_id, announcement_id, line_no, symbol, company, a
                    "side, value, announced_date, lag_days, superseded_by")
 
 
-def inputs_of(inputs, as_of: dt.date | None) -> tuple[list[dict], dict[str, dict], Lists]:
+def inputs_of(inputs, as_of: dt.date | None) -> tuple[list[dict], dict[str, dict], Lists, dict, GroupLists]:
     """The counted transactions of cse_dealings (as the old CSV: re-filed notices left out), their accounts as filed,
-    and the security lists. With as_of: only notices announced on or before it, and a re-filing counts only if it was
-    announced by then too."""
+    the security lists, the owner's aliases and cse_ownership's ownership groups by session. With as_of: only notices
+    announced on or before it (a re-filing counts only if it was announced by then too), the aliases stored by then
+    and the groups of the sessions up to it."""
     rows = inputs.rows("models.cse_dealing", DEALING_COLUMNS)
     announced = {r["announcement_id"]: r["announced_date"] for r in rows}
     known = (lambda d: d is not None and d <= as_of) if as_of else (lambda d: True)
@@ -163,14 +197,18 @@ def inputs_of(inputs, as_of: dt.date | None) -> tuple[list[dict], dict[str, dict
         lists = Lists(inputs.rows("cse.security_list", "session_date, symbol, name",
                                   where="session_date = (select min(session_date) from cse.security_list)",
                                   order_by="symbol"))
-    return rows, filed, lists
+    aliases, _ = confirmations(inputs, as_of)
+    groups = GroupLists(inputs.rows("models.cse_ownership_detail", "session_date, code, group_key, group_name",
+                                    where="session_date <= %s" if as_of else "", params=(as_of,) if as_of else (),
+                                    order_by="session_date, code"))
+    return rows, filed, lists, aliases, groups
 
 
 def compute(inputs, as_of):
     windows = tuple(inputs.params.get("windows_days", WINDOWS))
     large = float(inputs.params.get("large_lkr", LARGE_LKR))
-    rows, filed, lists = inputs_of(inputs, as_of)
-    all_deals = deals(rows, filed, lists)
+    rows, filed, lists, aliases, groups = inputs_of(inputs, as_of)
+    all_deals = deals(rows, filed, lists, aliases, groups)
     days = sorted({d["deal_date"] for d in all_deals if d["deal_date"]})
     if as_of:
         days = [d for d in days if d <= as_of]
@@ -187,7 +225,7 @@ def compute(inputs, as_of):
                                 "cluster": c["cluster"]})
             for a in per_actor(rows_w):
                 actor.append({"as_of": end, "window_days": w, "actor_key": a["key"], "actor": a["name"],
-                              "actor_type": a["type"], "purchase_value": a["purchases"],
+                              "actor_type": a["type"], "actor_group": a["group"], "purchase_value": a["purchases"],
                               "disposal_value": a["disposals"], "net_value": a["net"], "n_transactions": a["n"],
                               "companies": json.dumps([[k, v] for k, v in a["codes"].items()])})
     dealing = [{"transaction_id": d["transaction_id"], "symbol": d["symbol"], "deal_date": d["deal_date"],

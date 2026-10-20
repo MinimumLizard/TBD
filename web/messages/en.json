@@ -245,6 +245,9 @@
     "largeIntro": "Dealings of Rs 10 mn or more in the 30 days to {date}.",
     "noLarge": "No dealings of Rs 10 mn or more in the 30 days to {date}.",
     "relatedFlag": "Related party",
+    "ownGroupFlag": "Same ownership group as the company",
+    "ownGroupNote": "Same ownership group: the account that dealt is in the company's own ownership group (the company's parent, a company under the same parent, or the company itself), as worked out from the companies' top-20 shareholder lists.",
+    "groupOf": "Ownership group: {group}",
     "kind": "Kind of account",
     "actorTypes": {
       "individual": "A person",

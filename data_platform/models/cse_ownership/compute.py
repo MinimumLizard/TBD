@@ -22,29 +22,12 @@ import datetime as dt
 
 from collections import defaultdict
 
-from .._lib import cse_names as names
 from .._lib import cse_ownership as own
-from .._lib.cse_reads import known_on, market_data, reports, texts
+from .._lib.cse_reads import confirmations, known_on, market_data, reports, texts
 
 TYPES = ("listed", "company", "institution", "individual", "joint", "estate", "trust", "nominee")
 FLOAT_BLOCK = 10.0              # % of the voting shares: a block this large is not part of the free float
 
-
-
-# --- reading the facts ------------------------------------------------------------------------------------------
-
-def confirmations(inputs, as_of) -> tuple[dict, dict[str, own.Link]]:
-    """(aliases, parents): the latest version stored (on or before as_of); public entries first, then private."""
-    sub = "(select max(version_id) from cse.ownership_confirmations" + (
-        " where loaded_at < (%s::date + 1))" if as_of else ")")
-    rows = inputs.rows("cse.ownership_confirmations", "public, private", where=f"version_id = {sub}",
-                       params=(as_of,) if as_of else ())
-    if not rows:
-        return {}, {}
-    pub, priv = rows[0]["public"] or {}, rows[0]["private"] or {}
-    merged = {"aliases": {**(pub.get("aliases") or {}), **(priv.get("aliases") or {})},
-              "parents": {**(pub.get("parents") or {}), **(priv.get("parents") or {})}}
-    return names.load_aliases(merged), own.load_links(merged)
 
 
 # --- names ------------------------------------------------------------------------------------------------------

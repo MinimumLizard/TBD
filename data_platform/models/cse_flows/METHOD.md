@@ -5,8 +5,9 @@
 Where directors' money moved, from their disclosed share dealings (`cse_dealings`), per company over the last 30
 days, 90 days and year: the value of purchases, the value of disposals, the net, how many different accounts made
 purchases and how many made disposals, how many dealings there were, and whether there was a **cluster**. Also, for
-every dealing, the kind of account that dealt (a person, a company, a listed company, a fund…) and two flags:
-**large** (Rs 10 mn or more) and **related party**.
+every dealing, the kind of account that dealt (a person, a company, a listed company, a fund…) and three flags:
+**large** (Rs 10 mn or more), **related party** and **same ownership group** (the account that dealt belongs to the
+company's own ownership group). Each account also carries the name of its ownership group.
 
 This describes disclosures. It is not a signal and says nothing about where a share's price will go; the order of
 the companies on the site is by the total value dealt in either direction, not by direction.
@@ -19,6 +20,9 @@ is shown on the money-flows page under the same tier and preview as the rest of 
 - `cse_dealings` 1.0.0: the transactions (`models.cse_dealing`), without re-filed notices, and their accounts as
   filed (`models.cse_dealing_as_filed`).
 - The CSE's security list (`cse.security_list`): which accounts are listed companies, and their names.
+- The owner's confirmed aliases (`cse.ownership_confirmations`: `config/ownership_aliases.yaml` and the private file,
+  the same list `cse_ownership` uses for shareholders): spellings the owner has confirmed are one holder.
+- `cse_ownership` 1.0.0: each company's ownership group, by session (`models.cse_ownership_detail`).
 
 ## Method (version 1.0.0)
 
@@ -39,7 +43,8 @@ The name is then cleaned, as the old terminal's ownership tracker cleans shareho
    "<lender>/<owner>" become the owner.
 4. Matching key: upper case, without titles (Mr, Mrs, Dr, M/S…), punctuation, "The", account numbers ("A/C No. 2")
    and legal suffixes (PLC, Ltd, (Pvt) Ltd, Private Limited…). Two spellings are the same account only when their
-   keys are identical; initials are never matched to full names.
+   keys are identical, or when the owner's aliases list them as one holder (the aliases always win); initials are
+   never matched to full names automatically.
 5. Kind of account, first match: a life or policyholders' fund is an institution; a key equal to a listed
    company's (from the security list in force on the dealing date) is that listed company (shown under the CSE's
    name for it); "Estate of…" / "Late…" an estate; a trust (not a trust fund, not a company) a trust; funds, pension
@@ -61,34 +66,40 @@ later never change the rows for D; a late notice dated D or earlier, or a re-fil
   the median disclosure lag in weekdays.
 
 Per dealing: **large** when the value is Rs 10 mn or more; **related party** when the dealing was through a related
-account. Values are added in the order of the old terminal's file (by dealing date, announcement date, announcement
-id, then position in the notice), so the totals agree with it to the last digit.
+account; **same ownership group** when the account's group equals the company's group. Groups are `cse_ownership`'s
+as at the dealing date (its latest session on or before that date; before its first session, the first): a
+company's group is the holder at the top of its chain of largest voting blocks of 20 % or more; a listed account's
+group is its company's group; any other account is its own group, so a holding company at the top of a group matches
+the companies under it. A company with no shareholder table is its own group. The account's **group name** is its
+group's name (the account's own name when it heads no group).
+
+Values are added in the order of the old terminal's file (by dealing date, announcement date, announcement id, then
+position in the notice), so the totals agree with it to the last digit.
 
 ## Outputs
 
 - `models.cse_flow_company`: per dealing date, window and company (published).
 - `models.cse_flow_summary`: per dealing date (published).
-- `models.cse_flow_dealing`: per dealing (published).
-- `models.cse_flow_actor`: per dealing date, window and account, with the account's name (not published).
+- `models.cse_flow_dealing`: per dealing, with the three flags (published).
+- `models.cse_flow_actor`: per dealing date, window and account, with the account's name and its group's name (shown
+  under the model's tier, decision 0021).
 
 ## Limits
 
 - Windows end on the latest dealing date, not on today: after a quiet spell, "the last 30 days" are the 30 days to
   the latest dealing (the old terminal's rule, kept for version 1).
-- The old terminal also matched accounts with the owner's hand-made list of spellings and grouped listed companies
-  by who controls them, and it flagged a listed company dealing in its own group's shares ("own group") and the
-  owner's personal watchlist. The platform has no ownership facts yet, so version 1 has no list of spellings, no
-  groups and neither flag. On the old data the list of spellings changed no number, which the parity test checks.
-- The old page also compared consecutive quarterly top-20 shareholder lists (audit C20). That needs the shareholder
-  lists, which the platform does not collect yet; it is left out here.
-- Different spellings of one person's name are different accounts unless their keys match.
+- The old page also flagged the old owner's personal watchlist; that list is personal and is not ported.
+- The old page also compared consecutive quarterly top-20 shareholder lists (audit C20); not ported yet.
+- Different spellings of one person's name are different accounts unless their keys match or the owner's aliases
+  join them. A change to the aliases changes the rows of every date on the next run (as for `cse_ownership`).
+- The groups are only as complete as the shareholder lists: a company whose top-20 table could not be checked is its
+  own group, so a dealing by its parent is not flagged.
 
 ## Parity
 
 Version 1 reproduces the old CSE terminal's money-flow tables (`cse/flows.py` build() at commit e05c6f3), computed on
-its `data/dealings/dealings.csv`: per window, every company row (purchases, disposals, net, the distinct accounts on
-each side, the cluster flag) and every account row (sums, number of dealings, net by company), the large and
-related-party flags of every dealing, the counts and the median lag, exactly, at the old page's date and at earlier
-dealing dates (the old code run on the old file cut at each date). The old code is run without its list of
-spellings and groups, and the test checks that the list of spellings changes nothing. Report (counts only):
-`docs/migration/parity-cse-dealings-flows.json`.
+its `data/dealings/dealings.csv` with its own aliases file and ownership groups: per window, every company row
+(purchases, disposals, net, the distinct accounts on each side, the cluster flag) and every account row (its group's
+name, sums, number of dealings, net by company), the large, related-party and same-ownership-group flags of every
+dealing, the counts and the median lag, exactly, at the old page's date and at earlier dealing dates (the old code run
+on the old file cut at each date). Report (counts only): `docs/migration/parity-cse-dealings-flows.json`.

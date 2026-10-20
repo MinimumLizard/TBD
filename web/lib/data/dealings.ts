@@ -104,6 +104,7 @@ export interface LargeDealing {
   value: number | null;
   actor_type: string;
   related_account: boolean;
+  own_group: boolean; // the account is in the same ownership group as the company
 }
 
 export interface Flows {
@@ -119,6 +120,7 @@ export interface Flows {
 export interface FlowAccount {
   actor_key: string;
   actor: string; // as filed: a person, a company or a fund
+  actor_group: string | null; // the name of its ownership group (its own name when it heads none)
   actor_type: string;
   purchase_value: number;
   disposal_value: number;
@@ -154,12 +156,12 @@ export async function flows(viewer: Viewer, window: FlowWindow = 30, date?: stri
         columns: ["symbol", "company"], where: "as_of = ? and window_days = ?", params: [summary.as_of, 365],
       }),
       readOutput<LargeDealing>(g, "models.cse_flow_dealing", {
-        columns: ["transaction_id", "symbol", "deal_date", "side", "value", "actor_type", "related_account"],
+        columns: ["transaction_id", "symbol", "deal_date", "side", "value", "actor_type", "related_account", "own_group"],
         where: "large and side <> ? and deal_date > ? and deal_date <= ?", params: ["other", addDays(summary.as_of, -30), summary.as_of],
         orderBy: "deal_date desc, transaction_id",
       }),
       readOutput<FlowAccount>(g, "models.cse_flow_actor", {
-        columns: ["actor_key", "actor", "actor_type", "purchase_value", "disposal_value", "net_value", "n_transactions", "companies"],
+        columns: ["actor_key", "actor", "actor_type", "actor_group", "purchase_value", "disposal_value", "net_value", "n_transactions", "companies"],
         where: "as_of = ? and window_days = ?", params: [summary.as_of, window],
       }),
     ]);

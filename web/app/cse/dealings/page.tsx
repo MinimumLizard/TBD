@@ -149,12 +149,14 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                         <td className="small">
                           {d.related_account ? largeNames.get(d.transaction_id)?.account ?? "" : t("dealings.accounts.own")}
                           <span className="sub">{t(`dealings.actorTypes.${d.actor_type}` as never)}</span>
+                          {d.own_group && <span className="sub">{t("dealings.ownGroupFlag")}</span>}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              {f.large.some((d) => d.own_group) && <p className="small muted">{t("dealings.ownGroupNote")}</p>}
             </>
           )}
 
@@ -180,6 +182,9 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                         <td className="names">
                           {a.actor}
                           <span className="sub">{t(`dealings.actorTypes.${a.actor_type}` as never)}</span>
+                          {a.actor_group && a.actor_group !== a.actor && (
+                            <span className="sub">{t("dealings.groupOf", { group: a.actor_group })}</span>
+                          )}
                         </td>
                         <td className="num">{rs(a.purchase_value)}</td>
                         <td className="num">{rs(a.disposal_value)}</td>

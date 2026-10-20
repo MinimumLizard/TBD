@@ -169,7 +169,7 @@ def seed(conn) -> dict:
          "cluster": True} for d, v in ((OLD7, 54321000.0), (MID7, 65432100.0), (NEW, 76543210.0))])
     put("cse_flows", "models.cse_flow_dealing", [
         {"transaction_id": f"{aid}:1", "symbol": "AAA", "deal_date": d, "side": "purchase", "value": v,
-         "actor_type": "individual", "large": True, "related_account": False}
+         "actor_type": "individual", "large": True, "related_account": False, "own_group": aid == 12}
         for aid, d, v in ((11, OLD7, 31234567.0), (12, NEW, 32345678.0))])
     put("cse_flows", "models.cse_flow_actor", [
         {"as_of": d, "window_days": 30, "actor_key": name.upper().replace(" ", "").replace(".", ""), "actor": name,

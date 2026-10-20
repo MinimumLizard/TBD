@@ -32,9 +32,11 @@ def dealings_outputs(as_of=None) -> dict:
 
 
 class Inputs:
-    def __init__(self, dealing: dict, securities=SECURITIES, params=None):
+    def __init__(self, dealing: dict, securities=SECURITIES, params=None, groups=(), aliases=None):
         self.dealing = dealing
         self.securities = securities
+        self.groups = list(groups)          # rows of models.cse_ownership_detail: session_date, code, group_key, ...
+        self.aliases = aliases              # the stored confirmations' public part, or None: nothing stored
         self.params = dict(load_manifest("cse_flows").current.parameters, **(params or {}))
 
     def rows(self, dataset, columns="*", where="", params=(), order_by="", group_by=""):
@@ -42,6 +44,10 @@ class Inputs:
             return [dict(r) for r in self.dealing["models.cse_dealing"]]
         if dataset == "models.cse_dealing_as_filed":
             return [dict(r) for r in self.dealing["models.cse_dealing_as_filed"]]
+        if dataset == "cse.ownership_confirmations":
+            return [] if self.aliases is None else [{"public": {"aliases": self.aliases}, "private": {}}]
+        if dataset == "models.cse_ownership_detail":
+            return [dict(r) for r in self.groups if not params or r["session_date"] <= params[0]]
         assert dataset == "cse.security_list", dataset
         if "min(session_date)" in where:
             first = min(r["session_date"] for r in self.securities)
@@ -200,3 +206,49 @@ def test_the_security_list_in_force_is_the_latest_on_or_before_the_day(day):
     lists = m.Lists(SECURITIES + [later])
     names = lists.market(dt.date.fromisoformat(day)).names
     assert names["AAA"] == ("ALPHA EXAMPLE PLC" if day < "2026-10-15" else "ALPHA RENAMED PLC")
+
+
+# --- the owner's aliases and the ownership groups (old dealings_rows) -----------------------------------------------
+
+def detail(day, code, key, name):
+    return {"session_date": dt.date.fromisoformat(day), "code": code, "group_key": key, "group_name": name}
+
+
+GROUPED = [detail("2026-09-30", "AAA", "EXAMPLEHOLDINGS", "Example Holdings (Pvt) Ltd"),
+           detail("2026-09-30", "BBB", "LISTED:BBB", "BETA SAMPLE HOLDINGS PLC")]
+
+
+def own_group(out, transaction_id):
+    return next(r["own_group"] for r in out["models.cse_flow_dealing"] if r["transaction_id"] == transaction_id)
+
+
+def test_an_account_in_the_companys_own_ownership_group_is_flagged():
+    out = run(groups=GROUPED)
+    own = {r["transaction_id"]: r["own_group"] for r in out["models.cse_flow_dealing"]}
+    assert own == {"900001:1": False, "900001:2": False, "900012:1": False, "900003:1": True, "900010:1": False}
+    actors = {r["actor"]: r["actor_group"] for r in out["models.cse_flow_actor"]
+              if r["as_of"] == dt.date(2026, 10, 6) and r["window_days"] == 30}
+    assert actors == {"Example Holdings (Pvt) Ltd": "Example Holdings (Pvt) Ltd",
+                      "Mr. A. B. Example": "Mr. A. B. Example", "Mrs. E. Sample": "Mrs. E. Sample"}
+    assert not any(r["own_group"] for r in run()["models.cse_flow_dealing"])     # no groups stored: no flag
+
+
+def test_a_listed_account_is_in_its_own_companys_group():
+    g = entities.Groups(of={"AAA": "LISTED:BBB", "BBB": "LISTED:BBB"}, label={"LISTED:BBB": "BETA SAMPLE HOLDINGS PLC"})
+    e = entities.actor_entity("Alpha Example PLC - Common Directors", market())
+    assert g.actor(e) == g.target("BBB") == "LISTED:BBB"
+    assert g.name(g.actor(e), e.name) == "BETA SAMPLE HOLDINGS PLC"
+    assert g.target("ZZZ") == "LISTED:ZZZ"                       # a company with no row is its own group
+
+
+def test_the_groups_in_force_are_those_of_the_latest_session_on_or_before_the_dealing_date():
+    later = [dict(r, session_date=dt.date(2026, 10, 7)) for r in GROUPED]
+    assert own_group(run(groups=later), "900003:1")              # before the first session: the first session's
+    earlier = [detail("2026-10-01", "AAA", "LISTED:AAA", "ALPHA EXAMPLE PLC")]
+    assert not own_group(run(groups=earlier + later), "900003:1")   # dealt on 6 October: the 1 October groups
+
+
+def test_the_owners_aliases_merge_two_spellings_into_one_account():
+    aliases = {"Mr. A. B. Example": {"variants": ["Mrs. E. Sample"], "type": "individual"}}
+    c = company(run(aliases=aliases), "2026-10-03", 30, "AAA")
+    assert (c["n_purchasers"], c["cluster"]) == (1, False)       # without the alias: two purchasers, a cluster

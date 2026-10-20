@@ -55,9 +55,11 @@
         "ok": true
       },
       {
-        "table": "old code: with and without its aliases file",
+        "table": "old data: dealings by an account in its company's own ownership group (count)",
         "ok": true,
-        "identical": true
+        "dealings": 325,
+        "of": 2262,
+        "accounts_named_by_an_alias": 0
       },
       {
         "table": "cse_flows 2025-05-27 30 days: companies",

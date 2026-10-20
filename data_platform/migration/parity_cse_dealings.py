@@ -3,23 +3,23 @@
     python -m data_platform.migration.parity cse_dealings --old-code <CSE clone> \\
         --report docs/migration/parity-cse-dealings-flows.json
 
-On the migrated facts (the dealing notices in cse.announcement_details, the security lists), the two models run in
-memory. Then:
+On the migrated facts (the dealing notices in cse.announcement_details, the security lists, the report texts the
+ownership groups come from), with the old repo's own aliases stored as the owner's confirmations (in memory, rolled
+back afterwards), the models run in memory. Then:
 
   1. cse_dealings against the old data/dealings/dealings.csv: the rows not superseded, written as the old CSV writer
      writes them (old cse/storage.py, imported from the clone; the neutral side labels mapped back to the old file's
      words), must equal the old file byte for byte; and the notices the model marks superseded must be exactly those
      the old code (cse/dealings.py drop_refiled, run on the old raw files) leaves out;
-  2. cse_flows against the old code (cse/flows.py build(), imported from the clone) run on the old dealings.csv,
-     at the old page's date and at earlier dealing dates (the old file cut at each date, in a temporary folder that
-     links to the clone's other data). Compared: every company row the old page shows (purchases, disposals, net,
-     the distinct accounts on each side by name, cluster), every account row (key, name, kind, sums, number of
-     dealings, net by company), the 150 most recent dealings' fields and flags, the counts and the median lag;
-  3. the old code run with and without its aliases file at the latest date: the compared numbers must not change
-     (version 1 has no aliases; ownership groups only change the group labels and the "own group" flag, which are
-     left out).
+  2. cse_flows against the old code (cse/flows.py build(), imported from the clone, with its own aliases file and
+     ownership groups) run on the old dealings.csv, at the old page's date and at earlier dealing dates (the old file
+     cut at each date, in a temporary folder that links to the clone's other data). Compared: every company row the
+     old page shows (purchases, disposals, net, the distinct accounts on each side by name, cluster), every account
+     row (key, name, kind, its group's name, sums, number of dealings, net by company), the 150 most recent dealings'
+     fields, group names and flags (large, related account, own group), the counts and the median lag;
+  3. how many dealings the aliases and the groups touch on the old data (counts, for the record).
 
-The old code runs without its aliases file and ownership groups (patched in memory; the clone is never written).
+Only the old "watchlist" flag (the old owner's personal list) is left out. The clone is never written.
 The report holds counts and differences only, never data rows or names (the repository is public).
 """
 from __future__ import annotations
@@ -33,10 +33,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+import yaml
+
+from ..jobs import reviews as reviews_job
+from ..models._lib import cse_names
 from ..models.cse_flows import compute as flows_model
 from .parity import old_code, run_chain
 
-NAMES = ["cse_dealings", "cse_flows"]
+NAMES = ["cse_dealings", "cse_ownership", "cse_flows"]
 OLD_SIDE = {"purchase": "buy", "sell": "sell", "disposal": "sell", "other": "other"}
 WINDOWS = ("30", "90", "365")
 
@@ -116,9 +120,26 @@ def _cut_root(clone: Path, tmp: Path, csv_text: str, day: str | None) -> Path:
     return root
 
 
-def _new_side(new: dict, conn) -> tuple[list[dict], dict]:
-    """The model's own intermediate rows (accounts per dealing), rebuilt from the in-memory outputs, so the parity can
-    compare the names of the accounts on each side, which the published table only counts."""
+def old_aliases(root: Path) -> dict:
+    """The old repo's aliases and parents files, as the owner's confirmations hold them (every entry, the two that
+    name individuals included: in production they come from the private file)."""
+    data = {}
+    for f in ("ownership_aliases.yaml", "ownership_parents.yaml"):
+        p = root / "config" / f
+        data.update((yaml.safe_load(p.read_text()) or {}) if p.exists() else {})
+    return {"aliases": data.get("aliases") or {}, "parents": data.get("parents") or {}}
+
+
+def store_old_confirmations(conn, root: Path) -> None:
+    """The old repo's confirmations, stored without committing (the caller rolls back)."""
+    reviews_job.store_ownership(conn, {"aliases": {}, "parents": {}}, "parity", old_aliases(root), "parity-old-repo",
+                                "parity", commit=False)
+
+
+def _new_side(new: dict, conn, root: Path) -> tuple[list[dict], dict]:
+    """The model's own intermediate rows (accounts per dealing, with their groups), rebuilt from the in-memory
+    outputs, so the parity can compare the names of the accounts on each side, which the published table only
+    counts."""
     dealing = [r for r in new["models.cse_dealing"] if r["superseded_by"] is None]
     for r in dealing:
         for k in ("trade_date", "deal_date", "announced_date"):
@@ -129,7 +150,11 @@ def _new_side(new: dict, conn) -> tuple[list[dict], dict]:
     filed = {r["transaction_id"]: r for r in new["models.cse_dealing_as_filed"]}
     lists = flows_model.Lists([dict(r) for r in conn.execute(
         "select session_date, symbol, name from cse.security_list order by session_date, symbol")])
-    return flows_model.deals(dealing, filed, lists), filed
+    groups = flows_model.GroupLists([{**r, "session_date": r["session_date"] if isinstance(r["session_date"], dt.date)
+                                      else dt.date.fromisoformat(str(r["session_date"])[:10])}
+                                     for r in new["models.cse_ownership_detail"]])
+    aliases = cse_names.load_aliases(old_aliases(root))
+    return flows_model.deals(dealing, filed, lists, aliases, groups), filed
 
 
 def _flows_compare(day: str, old: dict, deals: list[dict], new: dict) -> list[dict]:
@@ -163,7 +188,8 @@ def _flows_compare(day: str, old: dict, deals: list[dict], new: dict) -> list[di
                 missing += 1
                 continue
             codes = {k: v for k, v in json.loads(t["companies"])}
-            differ += sum([t["actor"] != a["name"], t["actor_type"] != a["type"], t["purchase_value"] != a["buy"],
+            differ += sum([t["actor"] != a["name"], t["actor_type"] != a["type"], t["actor_group"] != a["group"],
+                           t["purchase_value"] != a["buy"],
                            t["disposal_value"] != a["sell"], t["net_value"] != a["net"],
                            t["n_transactions"] != a["n"], codes != a["codes"],
                            list(codes) != list(a["codes"])])
@@ -180,10 +206,12 @@ def _flows_compare(day: str, old: dict, deals: list[dict], new: dict) -> list[di
     differ = 0
     for o, d in zip(old["feed"], recent):
         f = flags[d["transaction_id"]]
-        old_flags = {x for x in o["flags"] if x in ("large", "related account")}
-        new_flags = {x for x, on in (("large", f["large"]), ("related account", f["related_account"])) if on}
+        old_flags = {x for x in o["flags"] if x != "watchlist"}
+        new_flags = {x for x, on in (("large", f["large"]), ("related account", f["related_account"]),
+                                     ("own group", f["own_group"])) if on}
         differ += sum([o["date"] != d["date"], o["announced"] != flows_model._iso(d["announced_date"]),
                        o["symbol"] != d["symbol"], o["company"] != d["company"], o["actor"] != d["actor"],
+                       o["actor_group_name"] != d["actor_group_name"],
                        o["actor_type"] != d["actor_type"] or o["actor_type"] != f["actor_type"],
                        o["account_type"] != d["account_type"], OLD_SIDE[d["side"]] != o["side"],
                        o["value"] != d["value"], str(o["lag_days"] or "") != str(d["lag_days"] if d["lag_days"]
@@ -201,26 +229,15 @@ def _flows_compare(day: str, old: dict, deals: list[dict], new: dict) -> list[di
     return out
 
 
-def _comparable(result: dict) -> dict:
-    """What version 1 reproduces from build(): no group labels, no watchlist, no "own group" flag."""
-    return {"actors": {w: [{k: v for k, v in a.items() if k != "group"} for a in result["actors"][w]]
-                       for w in WINDOWS},
-            "companies": {w: [{k: v for k, v in c.items() if k != "watch"} for c in result["companies"][w]]
-                          for w in WINDOWS},
-            "feed": [{k: (v if k != "flags" else [x for x in v if x in ("large", "related account")])
-                      for k, v in f.items() if k != "actor_group_name"} for f in result["feed"]],
-            "counts": [result["n_dealings"], result["n_trades"], result["lag_median"]]}
-
-
 def dealings_parity(conn, old_code_dir: Path, every: int = 20) -> dict:
     root = Path(old_code_dir)
     checks: list[dict] = []
+    store_old_confirmations(conn, root)
     new = run_chain(conn, NAMES)
     _purge_old_modules()
     try:
         with old_code(root) as load:
-            dealings, storage = load("cse.dealings"), load("cse.storage")
-            flows, names, groups = load("cse.flows"), load("cse.ownership.names"), load("cse.ownership.groups")
+            dealings, storage, flows = load("cse.dealings"), load("cse.storage"), load("cse.flows")
 
             # 1. the table, as text, and the re-filed notices
             filed = {r["transaction_id"]: r for r in new["models.cse_dealing_as_filed"]}
@@ -243,16 +260,14 @@ def dealings_parity(conn, old_code_dir: Path, every: int = 20) -> dict:
                                  old_transactions=len(parsed), new_transactions=len(new["models.cse_dealing"])))
             checks[-1]["ok"] = checks[-1]["ok"] and len(parsed) == len(new["models.cse_dealing"])
 
-            # 3. the aliases file changes nothing that version 1 compares (at the latest date)
-            with_aliases = _comparable(flows.build(root))
-            names.load_aliases = lambda path: {}
-            groups.group_of = lambda r: ({}, {})
-            without = _comparable(flows.build(root))
-            checks.append({"table": "old code: with and without its aliases file", "ok": with_aliases == without,
-                           "identical": with_aliases == without})
-
             # 2. flows, at the old page's date and earlier dealing dates
-            deals, _ = _new_side(new, conn)
+            deals, _ = _new_side(new, conn, root)
+            # 3. what the aliases and groups touch on the old data (counts only)
+            checks.append({"table": "old data: dealings by an account in its company's own ownership group (count)",
+                           "ok": True, "dealings": sum(1 for d in deals if d["own_group"]),
+                           "of": len(deals),
+                           "accounts_named_by_an_alias": len({d["actor_key"] for d in deals
+                                                              if "alias" in d["actor_rule"]})})
             days = sorted({d["date"] for d in deals if d["date"]})
             picked = sorted(set(days[::every]) | {days[-1]})
             with tempfile.TemporaryDirectory() as tmp:

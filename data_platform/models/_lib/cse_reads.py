@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime as dt
 from collections import defaultdict
 
+from . import cse_names as names
 from . import cse_ownership as own
 
 SLT = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -58,3 +59,18 @@ def texts(inputs, reps: list[own.Report]):
     body = {r["sha256"]: r["body"] for r in inputs.rows("cse.report_texts", "sha256, body", where="sha256 = any(%s)",
                                                          params=(shas,), order_by="sha256")}
     return body.__getitem__
+
+
+def confirmations(inputs, as_of) -> tuple[dict, dict[str, own.Link]]:
+    """The owner's ownership confirmations (aliases, parents): the latest version stored (on or before as_of); public
+    entries first, then private. Read by cse_ownership and cse_flows."""
+    sub = "(select max(version_id) from cse.ownership_confirmations" + (
+        " where loaded_at < (%s::date + 1))" if as_of else ")")
+    rows = inputs.rows("cse.ownership_confirmations", "public, private", where=f"version_id = {sub}",
+                       params=(as_of,) if as_of else ())
+    if not rows:
+        return {}, {}
+    pub, priv = rows[0]["public"] or {}, rows[0]["private"] or {}
+    merged = {"aliases": {**(pub.get("aliases") or {}), **(priv.get("aliases") or {})},
+              "parents": {**(pub.get("parents") or {}), **(priv.get("parents") or {})}}
+    return names.load_aliases(merged), own.load_links(merged)
