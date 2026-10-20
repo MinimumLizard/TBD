@@ -21,11 +21,12 @@
   `OWNERSHIP_PRIVATE_YAML`), and a run without it keeps the last stored version. The reviews job refuses an entry
   about an individual, joint holder, estate or trust in the public files.
 - Models, both free, computed as at every session with only the facts known then (point in time, tested):
-  - `cse_ownership` 1.0.0 (C13–C16): `models.cse_company_ownership` (published: top-20 share by owner type, the
-    largest voting block's type, level and %, named only when a company, fund or the state; ownership group;
-    free-float estimate, new), and two unpublished tables that name people, `models.cse_holding` and
-    `models.cse_ownership_detail` (served to nobody, and the website's database login has no grant on them). The
-    parents evidence sheet (C17) is not ported (suggestions quoting annual reports); confirmed parents are.
+  - `cse_ownership` 1.0.0 (C13–C16): `models.cse_company_ownership` (top-20 share by owner type; the largest voting
+    block's name, type, level and %; ownership group; free-float estimate, new), `models.cse_holding` (every top-20
+    row, holder as resolved) and `models.cse_ownership_detail` (the old companies list with controllers and chains).
+    Shareholders' names, individuals included, are shown on the owner's decision of 2026-10-19 (decision 0021, as for
+    directors' names; first built unpublished, changed the same day). The parents evidence sheet (C17) is not ported
+    (suggestions quoting annual reports); confirmed parents are.
   - `cse_fundamentals` 1.0.0 (C21, C22): `models.cse_report_figures` (EPS and NAV per share reconciled inside each
     report) and `models.cse_fundamentals` (TTM EPS, NAV per share, P/E, P/B, ROE, trailing dividends from the
     corporate actions in use, dividend yield, the latest report).
@@ -39,11 +40,13 @@
   reconciled EPS and 904 with NAV per share; 214 of 277 companies with P/B, 131 with P/E, 138 with a dividend yield.
 - Website: on each share page "Company figures" (P/E, P/B, ROE, EPS last 12 months, NAV per share, dividend yield,
   the report and its PDF) and "Who owns it" (top-20 share, free float, by owner type, largest block, ownership
-  group and its other companies; no individual named); sortable P/E, P/B and dividend-yield columns on the shares
+  group and its other companies, then the latest top-20 table: rank, holder as resolved, shares, % of issued
+  shares, type, with the report date and PDF); sortable P/E, P/B and dividend-yield columns on the shares
   list; API routes `/api/v1/cse/shares/<symbol>/fundamentals` and `/ownership`; glossary terms (EPS, net assets per
-  share, ROE, free float, ownership group). Checked at 390 px. The tier-leak seed has a made-up individual's name
-  that must never appear.
-- Lawyer's list: item 10 (shareholder lists and the private confirmations).
+  share, ROE, free float, ownership group). Checked at 390 px. The tier-leak seed has a made-up individual
+  shareholder whose name must appear on the share page and in the ownership API.
+- Lawyer's list: item 10 (shareholders' names, shown in the private preview by the owner's decision; the private
+  confirmations).
 
 ## 2026-10-19 — Directors' names shown (decision 0021)
 

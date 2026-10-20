@@ -7,13 +7,13 @@ report (CSE Listing Rules): how much of the voting shares those holders have bet
 owner** (listed companies, unlisted companies, funds and the state, individuals, joint holders, estates, trusts,
 unidentified nominee accounts, the company itself); whether one **block** of holders controls the company (more
 than 50 % of the voting shares) or has influence over it (20 % to 50 %); the **ownership group** it belongs to; and
-an estimate of its **free float**.
+an estimate of its **free float**; and the **list itself**: rank, holder, shares, % of the class's issued shares and
+type of owner, as the latest report prints it, with each holder named as resolved (step 3).
 
-**No private individual is ever named on the site.** The shareholder lists name people. They are stored, because the
-company-level figures are built from them, but the tables that carry names (`models.cse_holding`,
-`models.cse_ownership_detail`) are served to nobody, and the website's database login cannot read them, until a
-lawyer has reviewed them under Sri Lanka's Personal Data Protection Act (decision 0010). A controlling block or an
-ownership group is named only when its owner is a company, a fund or the state; otherwise only its type is shown.
+**Names are shown, individuals included**, on the owner's decision of 2026-10-19 (decision 0021, the same basis as
+directors' names). The shareholder lists are in the companies' public reports; the lawyer's answer under Sri Lanka's
+Personal Data Protection Act is needed before anything is public (`docs/plan-retail-features.md` §7 item 10). The
+owner's confirmations that two spellings are one person stay out of the public repository (a private file).
 
 ## Inputs
 
@@ -78,8 +78,8 @@ fraction through chains of listed holding companies is F = D (I − W)⁻¹, and
 least 20 % and its owner is not a fund, the state or a nominee; when the owner is a listed company, continue from it;
 stop at an unlisted owner, at a company with no such block, or at a loop. Companies that end at the same owner form
 one group (a group is wider than control: a 43 % owner runs a company in practice). On the site a group is named
-after its head when the head is a company, a fund or the state; otherwise it is identified by its first company's
-code (`G:<code>`).
+after its head; its identifier is the head's code when the head is a listed company, else its first company's code
+(`G:<code>`).
 
 **7. Free float (an estimate, new in this platform).** Of the voting shares:
 
@@ -99,12 +99,12 @@ upload date), or when the owner corrects a confirmation; every such change is ke
 
 ## Outputs
 
-- `models.cse_company_ownership` (published): per company and session, the report used and its period, the table
-  check, `top20_pct`, `pct_<owner type>`, `pct_own_shares`, the controlling block's type, name (company, fund or
-  state only), % and level, `group_id`, the group head's type and name (likewise), `group_size`, `free_float_pct`,
-  market capitalisation and the report's PDF.
-- `models.cse_ownership_detail` (unpublished): the old companies list, with the controller and the chain of holders.
-- `models.cse_holding` (unpublished): every parsed row of every report, as checked at the latest session.
+- `models.cse_company_ownership`: per company and session, the report used and its period, the table check,
+  `top20_pct`, `pct_<owner type>`, `pct_own_shares`, the controlling block's type, name, % and level, `group_id`, the
+  group head's type and name, `group_size`, `free_float_pct`, market capitalisation and the report's PDF.
+- `models.cse_ownership_detail`: the old companies list, with the controller and the chain of holders.
+- `models.cse_holding`: every parsed row of every report, as checked at the latest session (the share page shows the
+  latest report's rows whose table passed the checks).
 
 ## Limits
 

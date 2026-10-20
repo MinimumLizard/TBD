@@ -37,9 +37,9 @@ decisions).
   lawyer's answer to `docs/plan-retail-features.md` §7 item 9 is needed before anything is public.
 - Ownership and company figures (Phase 3b part 3a, decision 0022): interim-report texts are facts
   (`cse.financial_reports`, `cse.report_texts`, weekly `cse_api:reports`); `cse_ownership` and `cse_fundamentals`
-  run as at every session. Shareholder lists name private individuals: only company-level rows are published, and
-  owner confirmations about individuals live in a private file (`OWNERSHIP_PRIVATE_FILE` / secret
-  `OWNERSHIP_PRIVATE_YAML`), never in git. Lawyer: plan §7 item 10.
+  run as at every session. Shareholders' names, individuals included, are shown on the share page (owner, decision
+  0021); the lawyer's answer to plan §7 item 10 is needed before anything is public. The owner's confirmations about
+  individuals live in a private file (`OWNERSHIP_PRIVATE_FILE` / secret `OWNERSHIP_PRIVATE_YAML`), never in git.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

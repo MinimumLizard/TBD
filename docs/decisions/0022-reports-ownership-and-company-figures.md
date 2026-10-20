@@ -19,10 +19,10 @@
    sessions never change, and equals the old code's output on the day it would have run. Parsing a report does not
    depend on the session, so it is done once per run. Per-report rows (`models.cse_holding`,
    `models.cse_report_figures`) are as at the latest session, as the old CSVs were.
-4. **No individual is named on the site.** The shareholder lists, controllers and chains are stored in two
-   unpublished tables the website's login cannot read (migration 0013 revokes the grant). The published table names
-   a controller or group head only when it is a listed company, or an unlisted company or institution whose name
-   reads as one (legal suffix or fund word, and no personal title). The lawyer's list gains item 10.
+4. **Shareholders' names are shown, individuals included**, on the owner's decision of 2026-10-19 (decision 0021, as
+   for directors' names; first built with no individual named, changed the same day). Every output is readable by
+   the website; the share page lists the latest checked top-20 table with each holder as resolved. The lawyer's
+   answer (plan §7 item 10) is needed before anything is public.
 5. **The owner's confirmations that name individuals live outside the public repository.** The old aliases file
    named two individuals; the repository keeps only the institution entry. A private file (environment variable
    `OWNERSHIP_PRIVATE_FILE`; in GitHub Actions the secret `OWNERSHIP_PRIVATE_YAML`) carries the rest; a run without
