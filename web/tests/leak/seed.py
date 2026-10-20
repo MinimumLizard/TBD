@@ -40,7 +40,7 @@ ANCIENT = TODAY - dt.timedelta(days=40)   # outside a 30-day recent window: only
 OLD7 = TODAY - dt.timedelta(days=7)   # the money flows preview's last visible day (delay 7 days)
 MID7 = TODAY - dt.timedelta(days=6)   # inside that delay: never visible to a free visitor
 MARKERS = Path(__file__).with_name("markers.json")
-PERSON = "Mr. Q. Zyxwvut"                  # a made-up private individual: in unpublished tables only
+PERSON = "Mr. Q. Zyxwvut"                  # a made-up individual shareholder: shown on the share page
 GROUP_HEAD = "Leakcheck Holdings (Pvt) Ltd"   # a made-up company: companies may be named
 DB_NAME = os.environ.get("LEAK_DB_NAME", "tbd_leak")   # another name lets two checkouts test at once
 
@@ -118,9 +118,8 @@ def seed(conn) -> dict:
         {"symbol": "AAA.N0000", "session_date": d, "close": 55.5, "share_factor": 1.0, "dividend": 0.0, "events": "",
          "tri": tri, "tr_1w": w} for d, tri, w in ((OLD, 1.0, None), (NEW, 1.2345, 0.031415))])
 
-    # Company figures (free) on the shares list and the share page; ownership (free) on the share page. The two
-    # ownership tables that name people are unpublished: PERSON (a made-up individual) and 424242.17 must never
-    # appear anywhere, to anyone.
+    # Company figures (free) on the shares list and the share page; ownership (free) on the share page, with the
+    # top-20 table: PERSON (a made-up individual) must appear to everyone (shareholders' names are shown, decision 0021).
     put("cse_fundamentals", "models.cse_fundamentals", [
         {"session_date": d, "code": "AAA", "price": 55.5, "price_date": d, "shares": 1e6, "fye": "31 Mar", "nav": 20.0,
          "nav_period": OLD, "pb": 2.775, "ttm_profit": 1e6, "ttm_eps": 1.0, "ttm_to": OLD, "ttm_note": "", "pe": pe,
@@ -234,7 +233,8 @@ def seed(conn) -> dict:
             # free company figures: the latest P/E (shares list and share page); free ownership: the latest free float
             # and the group head, a company (an individual is never named)
             "cse_fundamentals": {"new": {"api": ["87.6543"], "page": ["87.7"]}, "old": {"api": [], "page": []}},
-            "cse_ownership": {"new": {"api": ["63.719", "Leakcheck Holdings"], "page": ["63.7%", "Leakcheck Holdings"]},
+            "cse_ownership": {"new": {"api": ["63.719", "Leakcheck Holdings", "Zyxwvut"],
+                                      "page": ["63.7%", "Leakcheck Holdings", "Zyxwvut", "424,242"]},
                               "old": {"api": [], "page": []}},
             # free: the latest dealing's shares (raw in the API, formatted on the market-wide page and the share page)
             "cse_dealings": {"new": {"api": ["98765", "Zebedee Q. Markerperson", "z.pdf"],
@@ -256,9 +256,7 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
-                  # the unpublished ownership tables: an individual's name, and a number only they carry
-                  "Zyxwvut", "ZYXWVUT", "424242", "424,242"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
     }
 
 
