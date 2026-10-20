@@ -1,0 +1,17 @@
+# Per-share sector assignments for companies whose CSE profile label is not a GICS industry group (legacy CSE sector
+# names). Values must be one of the 20 S&P/CSE industry-group index names. Copied from the old terminal
+# (MinimumLizard/CSE@e05c6f3 config/sector_overrides.yaml); company sector assignments only, nothing personal.
+#
+# Used by the portfolio lab's risk estimates (cse_risk_estimates: the 30 % sector cap). Models read only the database,
+# so the models job stores this file (cse.sector_overrides, data_platform/jobs/reviews.py) before every run; each
+# version stays on record and a run's input fingerprint names the version it used.
+#
+# PROPOSED in the old terminal from the company's name and business - CONFIRM or EDIT each line.
+# Shares not listed here and not resolvable from their label are "unclassified" and left out of the lab's universe.
+overrides:
+  HNBF.N0000: Diversified Financials   # label "Banks Finance & Insurance"; HNB Finance is a licensed finance company
+  HNBF.X0000: Diversified Financials
+  VPEL.N0000: Utilities                # label "Power and Energy"; Vallibel Power Erathna, hydro power producer
+  MSL.N0000: Transportation            # label "Services"; Mercantile Shipping Company
+  # CWL.N0000 (Chrissworld PLC, label "Industrials") - business unclear; left unclassified
+  # TESS.N0000 / TESS.X0000 (Tess Agro PLC, label "Trading") - left unclassified
