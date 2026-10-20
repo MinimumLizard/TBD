@@ -340,7 +340,7 @@
     "report": "Latest report: period to {date}",
     "reportLink": "report (PDF)",
     "owners": "Who owns it",
-    "ownersNote": "From the twenty largest shareholders listed in the company's report for the period to {date}. Percentages are of the voting shares. Private individuals are never named here.",
+    "ownersNote": "From the twenty largest shareholders listed in the company's report for the period to {date}. Percentages are of the voting shares.",
     "ownersNone": "No checked shareholder list for this company yet.",
     "ownersStatus": {
       "no_report": "No interim report collected yet.",
@@ -382,7 +382,26 @@
     "groupAlone": "Not part of a group",
     "groupMembers": "Also in the group",
     "freeFloat": "Free float (estimate)",
-    "freeFloatNote": "Voting shares not held by the company itself or by any block of 10% or more. Directors' smaller holdings cannot be told apart in the list, so the true figure is lower."
+    "freeFloatNote": "Voting shares not held by the company itself or by any block of 10% or more. Directors' smaller holdings cannot be told apart in the list, so the true figure is lower.",
+    "top20Table": "The largest shareholders",
+    "rank": "Rank",
+    "holder": "Holder",
+    "sharesHeld": "Shares",
+    "pctIssued": "% of issued shares",
+    "ownerType": "Type",
+    "nonVoting": "non-voting shares",
+    "asFiled": "as filed: {name}",
+    "top20Note": "As the company's report for the period to {date} lists them, with each holder named as resolved: shares held through a custodian or a margin account are credited to the owner, whose name as filed is shown beneath. The percentage is of the class's issued shares, as the report prints it.",
+    "ownerTypeShort": {
+      "listed": "Listed company",
+      "company": "Company",
+      "institution": "Fund or state body",
+      "individual": "Individual",
+      "joint": "Joint holders",
+      "estate": "Estate",
+      "trust": "Trust",
+      "nominee": "Nominee account"
+    }
   },
   "bonds": {
     "title": "Government bonds",
@@ -569,7 +588,7 @@
     },
     "cse_ownership": {
       "title": "Who owns CSE companies",
-      "summary": "From the twenty largest shareholders each company lists in its interim reports: the share of the voting shares by type of owner, any controlling or influential block, the company's ownership group and an estimate of its free float. No private individual is named."
+      "summary": "From the twenty largest shareholders each company lists in its interim reports: the share of the voting shares by type of owner, any controlling or influential block, the company's ownership group, an estimate of its free float, and the shareholder list itself."
     },
     "cse_fundamentals": {
       "title": "Company figures: earnings, net assets and ratios",

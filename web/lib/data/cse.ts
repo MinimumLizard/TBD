@@ -235,6 +235,7 @@ export async function ratiosByCompany(viewer: Viewer): Promise<Result<{ date: st
 export interface CompanyOwnership {
   session_date: string;
   code: string;
+  report_id: number | null;
   period_date: string | null;
   report_status: string;
   table_status: string | null;
@@ -259,11 +260,21 @@ export interface CompanyOwnership {
   free_float_pct: number | null;
   source_url: string | null;
   group_members: string[]; // the other companies in the group (codes), at the same session
+  holders: Holder[]; // the report's checked top-20 table(s), voting class first
 }
 
-// Company-level columns only. The tables that name individuals are unpublished: lib/db.ts refuses them, and the
-// website's database login has no grant on them.
-const OWNERSHIP_COLUMNS = ["session_date", "code", "period_date", "report_status", "table_status", "top20_pct",
+export interface Holder {
+  share_class: string; // N voting, X non-voting
+  row_no: number;
+  rank: number;
+  owner_name: string; // the holder as resolved (custodian and margin accounts credited to the owner)
+  owner_type: string;
+  name_as_filed: string;
+  shares: number;
+  pct: number; // % of the class's issued shares, as the report prints it
+}
+
+const OWNERSHIP_COLUMNS = ["session_date", "code", "report_id", "period_date", "report_status", "table_status", "top20_pct",
   "pct_listed", "pct_company", "pct_institution", "pct_individual", "pct_joint", "pct_estate", "pct_trust",
   "pct_nominee", "pct_own_shares", "controller_type", "controller_name", "control_pct", "control_level", "group_id",
   "group_head_type", "group_head_name", "group_size", "free_float_pct", "source_url"];
@@ -271,16 +282,27 @@ const OWNERSHIP_COLUMNS = ["session_date", "code", "period_date", "report_status
 /** A company's ownership at the latest session, with the other members of its ownership group. */
 export async function companyOwnership(viewer: Viewer, code: string): Promise<Result<CompanyOwnership | null>> {
   return withModel(viewer, "cse_ownership", async (g) => {
-    const [row] = await readOutput<Omit<CompanyOwnership, "group_members">>(g, "models.cse_company_ownership", {
+    const [row] = await readOutput<Omit<CompanyOwnership, "group_members" | "holders">>(g, "models.cse_company_ownership", {
       columns: OWNERSHIP_COLUMNS, where: "code = ?", params: [code], orderBy: "session_date desc", limit: 1,
     });
     if (!row) return null;
-    const members = row.group_size > 1
-      ? await readOutput<{ code: string }>(g, "models.cse_company_ownership", {
-          columns: ["code"], where: "session_date = ? and group_id = ? and code <> ?",
-          params: [row.session_date, row.group_id, code], orderBy: "code",
-        })
-      : [];
-    return { ...row, group_members: members.map((m) => m.code) };
+    const [members, holders] = await Promise.all([
+      row.group_size > 1
+        ? readOutput<{ code: string }>(g, "models.cse_company_ownership", {
+            columns: ["code"], where: "session_date = ? and group_id = ? and code <> ?",
+            params: [row.session_date, row.group_id, code], orderBy: "code",
+          })
+        : Promise.resolve([]),
+      // the latest report's top-20 table(s), only where the table passed its checks (shareholders' names are shown:
+      // the owner's decision of 2026-10-19, decision 0021)
+      row.report_id != null
+        ? readOutput<Holder>(g, "models.cse_holding", {
+            columns: ["share_class", "row_no", "rank", "owner_name", "owner_type", "name_as_filed", "shares", "pct"],
+            where: "report_id = ? and code = ? and table_status in ('verified', 'verified_total')",
+            params: [row.report_id, code], orderBy: "share_class, row_no",
+          })
+        : Promise.resolve([]),
+    ]);
+    return { ...row, group_members: members.map((m) => m.code), holders };
   });
 }

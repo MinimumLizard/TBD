@@ -10,15 +10,16 @@ after its upload date) or the owner corrects a confirmation.
 
 Outputs (see METHOD.md):
   models.cse_holding             every parsed table row of every report, as checked at the latest session
-                                 (the old holdings.csv). Names private individuals: unpublished.
-  models.cse_ownership_detail    per company and session, the old companies.csv plus the ownership group (names
-                                 controllers, possibly individuals: unpublished).
-  models.cse_company_ownership   per company and session, what the site may show: no individual is ever named.
+                                 (the old holdings.csv), the share page's top-20 table.
+  models.cse_ownership_detail    per company and session, the old companies.csv plus the ownership group.
+  models.cse_company_ownership   per company and session, the share page's summary.
+Shareholders' names, individuals included, are shown on the owner's decision of 2026-10-19 (decision 0021); the
+lawyer's answer is needed before anything is public (docs/plan-retail-features.md §7 item 10).
 """
 from __future__ import annotations
 
 import datetime as dt
-import re
+
 from collections import defaultdict
 
 from .._lib import cse_names as names
@@ -27,7 +28,7 @@ from .._lib.cse_reads import known_on, market_data, reports, texts
 
 TYPES = ("listed", "company", "institution", "individual", "joint", "estate", "trust", "nominee")
 FLOAT_BLOCK = 10.0              # % of the voting shares: a block this large is not part of the free float
-PERSONAL_TITLE = re.compile(r"^\s*(?:MR|MRS|MS|MISS|DR|PROF|REV|VEN|HON|SIR|LATE)\b\.?", re.I)
+
 
 
 # --- reading the facts ------------------------------------------------------------------------------------------
@@ -46,21 +47,16 @@ def confirmations(inputs, as_of) -> tuple[dict, dict[str, own.Link]]:
     return names.load_aliases(merged), own.load_links(merged)
 
 
-# --- what may be published --------------------------------------------------------------------------------------
+# --- names ------------------------------------------------------------------------------------------------------
 
 def public_name(name: str | None, typ: str | None, symbol: str | None, market: own.Market) -> str | None:
-    """A holder's name only when it is a company, a fund or the state: a listed company (by its CSE name), or an
-    unlisted company or institution whose name reads as one (a legal suffix or a fund word, and no personal title).
-    Everything else (individuals, joint holders, estates, trusts, nominees) is never named."""
+    """A holder's name as the site shows it: a listed company by its CSE name, anyone else as resolved from the
+    filing (individuals included: the owner's decision of 2026-10-19, decision 0021)."""
     if not name or not typ:
         return None
     if typ == "listed":
         return market.names.get(symbol or "", name)
-    if typ in ("company", "institution") and not PERSONAL_TITLE.match(name):
-        c = names.clean(name)
-        if names.COMPANY_WORDS.search(c) or names.FUND_WORDS.search(c):
-            return name
-    return None
+    return name
 
 
 def _num(v):

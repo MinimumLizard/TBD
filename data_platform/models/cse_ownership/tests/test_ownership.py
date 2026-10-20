@@ -74,15 +74,14 @@ def test_a_parent_link_needs_its_evidence():
         own.load_links({"parents": {"X Ltd": {"owner": "Y PLC", "source": "s", "quote": "q", "pct": 150}}})
 
 
-def test_only_companies_funds_and_the_state_are_ever_named():
+def test_a_listed_holder_shows_by_its_cse_name_and_everyone_else_as_resolved():
+    """Individuals included: the owner's decision of 2026-10-19 (decision 0021)."""
     market = own.Market("2026-10-01", {"SLP": "SAMPLE LISTED PLC"}, {}, {})
     assert m.public_name("LISTED:SLP", "listed", "SLP", market) == "SAMPLE LISTED PLC"
-    assert m.public_name("Example Holdings (Private) Limited", "company", "", market) == "Example Holdings (Private) Limited"
-    assert m.public_name("Employees Trust Fund", "institution", "", market) == "Employees Trust Fund"
-    for name, typ in (("Mr. Q. Testperson", "individual"), ("Mr. Q. Testperson & Mrs. R. Testperson", "joint"),
-                      ("Testperson Family Trust", "trust"), ("ESTATE OF LATE A. SAMPLE", "estate"),
-                      ("Mr. Q. Testperson Holdings Ltd", "company"), ("QRS", "company"), ("Sample Nominee", "nominee")):
-        assert m.public_name(name, typ, "", market) is None, name
+    for name, typ in (("Example Holdings (Private) Limited", "company"), ("Employees Trust Fund", "institution"),
+                      ("Mr. Q. Testperson", "individual"), ("Testperson Family Trust", "trust")):
+        assert m.public_name(name, typ, "", market) == name
+    assert m.public_name(None, "individual", "", market) is None
 
 
 # --- the model end to end -----------------------------------------------------------------------------------------
@@ -131,7 +130,7 @@ def published(conn):
 
 
 @pytest.mark.db
-def test_the_company_view_names_no_individual_and_the_holdings_keep_every_row(conn, store):
+def test_the_company_view_and_the_holdings_keep_every_row(conn, store):
     seed(conn, store)
     run_models(conn, ["cse_ownership"])
     rows = published(conn)
@@ -144,20 +143,18 @@ def test_the_company_view_names_no_individual_and_the_holdings_keep_every_row(co
     assert t["group_head_name"] == "Example Holdings (Private) Limited" and t["group_id"] == "G:TESTCO"
     assert t["free_float_pct"] == 45.0          # 100 - the 55 % block; every other block is under 10 %
     assert rows[(D1, "SLP")]["report_status"] == "no_report" and rows[(D1, "SLP")]["top20_pct"] is None
-    for r in rows.values():
-        assert PERSON not in " ".join(str(v) for v in r.values())
     holdings = conn.execute("select * from models.cse_holding order by row_no").fetchall()
     assert len(holdings) == 8 and holdings[2]["owner_type"] == "listed" and holdings[2]["owner_symbol"] == "SLP"
+    assert holdings[3]["owner_name"] == f"Mr. Q. {PERSON}" and holdings[3]["owner_type"] == "individual"
     assert holdings[1]["owner_name"] == "Sample Growth Fund" and holdings[1]["via"] == "Bank of Ceylon"
     assert holdings[0]["fraction"] == pytest.approx(0.55)
 
 
 @pytest.mark.db
-def test_the_tables_that_name_people_are_closed_to_the_website(conn, store):
-    for table in ("models.cse_holding", "models.cse_ownership_detail"):
-        assert not conn.execute("select has_table_privilege('web_reader', %s, 'select') ok", (table,)).fetchone()["ok"]
-    assert conn.execute("select has_table_privilege('web_reader', 'models.cse_company_ownership', 'select') ok"
-                        ).fetchone()["ok"]
+def test_every_ownership_output_is_readable_by_the_website(conn, store):
+    """Shareholders' names are shown (the owner's decision of 2026-10-19, decision 0021)."""
+    for table in ("models.cse_holding", "models.cse_ownership_detail", "models.cse_company_ownership"):
+        assert conn.execute("select has_table_privilege('web_reader', %s, 'select') ok", (table,)).fetchone()["ok"]
 
 
 @pytest.mark.db

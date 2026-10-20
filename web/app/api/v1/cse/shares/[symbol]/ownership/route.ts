@@ -4,8 +4,8 @@ import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
-// Who owns the company, at company level only (by owner type, largest block, ownership group, free float). No
-// private individual is named: the tables that name people are unpublished.
+// Who owns the company: by owner type, largest block, ownership group, free float, and the latest report's top-20
+// table with each holder named (individuals included: the owner's decision of 2026-10-19, decision 0021).
 export async function GET(_request: Request, { params }: { params: Promise<{ symbol: string }> }) {
   let symbol: string;
   try {

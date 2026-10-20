@@ -10,13 +10,12 @@
 --   cse.ownership_confirmations  every version of the owner's ownership confirmations (aliases of one holder,
 --                                parents of unlisted holders), as loaded before each model run
 -- Model outputs:
---   models.cse_holding                 every row of every parsed top-20 table, with the credited owner
---                                      (NAMES PRIVATE INDIVIDUALS: unpublished, the website cannot read it)
+--   models.cse_holding                 every row of every parsed top-20 table, with the credited owner (names
+--                                      private individuals: shown, on the owner's decision 0021)
 --   models.cse_ownership_detail        per company and session, the old companies.csv, incl. the controller's
---                                      name and the chain (may name individuals: unpublished, likewise)
---   models.cse_company_ownership       per company and session, what the site shows: shares of the top 20 by
---                                      owner type, the controlling block's type (and name only when it is a
---                                      company, a fund or the state), the ownership group, a free-float estimate
+--                                      name and the chain
+--   models.cse_company_ownership       per company and session: shares of the top 20 by owner type, the
+--                                      controlling block, the ownership group, a free-float estimate
 --   models.cse_report_figures          per report: EPS and NAV per share, reconciled inside the report
 --   models.cse_fundamentals            per company and session: TTM EPS, NAV per share, P/E, P/B, ROE, dividend yield
 
@@ -239,14 +238,9 @@ begin
   foreach t in array array['cse_holding', 'cse_ownership_detail', 'cse_company_ownership', 'cse_report_figures',
                            'cse_fundamentals'] loop
     execute format('alter table models.%I enable row level security', t);
+    -- every output is readable by the website: shareholders' names are shown, on the owner's decision of 2026-10-19
+    -- (decision 0021, as for directors' names); the lawyer's answer is needed before anything is public
     execute format('create policy web_read on models.%I for select to web_reader using (true)', t);
-  end loop;
-  foreach t in array array['cse_company_ownership', 'cse_report_figures', 'cse_fundamentals'] loop
     execute format('grant select on models.%I to web_reader', t);
   end loop;
 end $$;
-
--- Only the company-level outputs are readable by the website. The two tables that can name private individuals are
--- not (config/entitlements.yaml unpublished_outputs; decision 0010, Sri Lanka's PDPA): 0006's default privileges
--- would grant them, so the grant is taken back here.
-revoke select on models.cse_holding, models.cse_ownership_detail from web_reader;

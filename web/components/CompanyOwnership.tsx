@@ -5,12 +5,12 @@ import Locked from "./Locked";
 import Term from "./Term";
 import type { CompanyOwnership as Ownership } from "@/lib/data/cse";
 import type { Result } from "@/lib/data/common";
-import { date, percent } from "@/lib/format";
+import { date, int, percent } from "@/lib/format";
 
 const TYPES = ["listed", "company", "institution", "individual", "joint", "estate", "trust", "nominee", "own_shares"] as const;
 
-// The share page's "Who owns it" (cse_ownership): company-level figures only. The model names a holder only when it is
-// a company, a fund or the state; otherwise this panel shows its type ("an individual"), never a name.
+// The share page's "Who owns it" (cse_ownership): the company-level summary, then the latest report's top-20 table,
+// holders named as resolved, individuals included (the owner's decision of 2026-10-19, decision 0021).
 export default async function CompanyOwnership({ result }: { result: Result<Ownership | null> }) {
   const t = await getTranslations();
   if (!result.access.allowed) return <Locked access={result.access} />;
@@ -92,6 +92,50 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
         {" "}
         {t("share.freeFloatNote")}
       </p>
+      {o.holders.length > 0 && (
+        <>
+          <h3>{t("share.top20Table")}</h3>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th className="num">{t("share.rank")}</th>
+                  <th>{t("share.holder")}</th>
+                  <th className="num">{t("share.sharesHeld")}</th>
+                  <th className="num">{t("share.pctIssued")}</th>
+                  <th>{t("share.ownerType")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {o.holders.map((h) => (
+                  <tr key={`${h.share_class}-${h.row_no}`}>
+                    <td className="num">{h.rank}</td>
+                    <td>
+                      {h.owner_name}
+                      {h.share_class === "X" && <span className="sub">{t("share.nonVoting")}</span>}
+                      {h.name_as_filed !== h.owner_name && h.owner_type !== "listed" && (
+                        <span className="sub">{t("share.asFiled", { name: h.name_as_filed })}</span>
+                      )}
+                    </td>
+                    <td className="num">{int(h.shares)}</td>
+                    <td className="num">{percent(h.pct, 2)}</td>
+                    <td>{t(`share.ownerTypeShort.${h.owner_type}` as never)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="small muted">
+            {o.period_date && t("share.top20Note", { date: date(o.period_date) })}
+            {o.source_url && (
+              <>
+                {" "}
+                <a href={o.source_url} rel="noopener noreferrer">{t("share.reportLink")}</a>
+              </>
+            )}
+          </p>
+        </>
+      )}
     </>
   );
 }
