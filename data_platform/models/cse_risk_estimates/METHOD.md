@@ -122,7 +122,8 @@ checks that the rebuilt δ equals the stored one to the last bit).
 - The ASPI is a price index (dividends are not in it), so the market return is understated by the dividend yield.
 - A late fact (a corporate action confirmed later, a late price) changes the total-return index, and so the rows of
   dates after its ex-date, on the next run; every change is kept in `models.revisions` for version 1.1.0.
-- Each run computes every date again (about half a second a date); a later version can compute only new dates.
+- Each run computes every date again, so the run time grows with the history; a later version can compute only new
+  dates.
 
 ## Parity
 
