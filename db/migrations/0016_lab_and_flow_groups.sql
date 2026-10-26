@@ -270,8 +270,9 @@ create table models.cse_lab_trade (
   primary key (method_version, series, session_date, portfolio, seq)
 );
 
--- Row-level security on every new table (with no policy for the website's role), and the website's role revoked
--- explicitly: migration 0006 grants it every new models table by default.
+-- Row-level security on every new table, with the models schema's usual read policy (as migration 0014 did for its
+-- unpublished tables), and the website's role revoked explicitly: migration 0006 grants it every new models table by
+-- default, so without this revoke it could read them. With it, the role cannot read them at all.
 do $$
 declare t text;
 begin
@@ -279,6 +280,7 @@ begin
                            'cse_lab_summary', 'cse_lab_cap', 'cse_lab_portfolio', 'cse_lab_weight', 'cse_lab_exposure',
                            'cse_lab_frontier', 'cse_lab_nav', 'cse_lab_holding', 'cse_lab_trade'] loop
     execute format('alter table models.%I enable row level security', t);
+    execute format('create policy web_read on models.%I for select to web_reader using (true)', t);
     execute format('revoke all on models.%I from web_reader', t);
   end loop;
 end $$;
