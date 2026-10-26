@@ -167,3 +167,29 @@ def test_cse_report_facts_reconcile_and_ownership_and_figures_reproduce_the_old_
         Path(os.environ["LEGACY_OWN_REPORT"]).write_text(json.dumps(
             {"reconciliation": rec, "parity": report}, indent=2, default=str) + "\n")
     assert report["ok"], [c for c in report["checks"] if not c["ok"]]
+
+
+@pytest.mark.db
+def test_the_portfolio_lab_reproduces_the_old_lab_and_record(conn, store):
+    """Phase 3b: cse_risk_estimates, cse_portfolio_lab and cse_lab_record (version 1.0.0) reproduce the old terminal's
+    lab at its 9 sessions (its own code on its files cut at each session, and its stored data/lab/*.json) and its
+    record files; the plan §6 table is reproduced. Set LEGACY_LAB_REPORT to a path to also write the counts-only
+    report there."""
+    import json
+
+    from data_platform.migration import cse, cse_corporate_actions as ca, cse_reports
+    from data_platform.migration import parity_cse_portfolio_lab as plab
+
+    repo, chart = os.environ.get("LEGACY_CSE_REPO"), os.environ.get("LEGACY_CSE_CHART_ARCHIVE")
+    if not (repo and chart):
+        pytest.skip("LEGACY_CSE_REPO / LEGACY_CSE_CHART_ARCHIVE not set")
+    cse.load(conn, store, Path(repo), Path(chart))
+    ca.archive_cache(conn, store, Path(repo))
+    ca.load_from_archive(conn, store)
+    cse_reports.archive_files(conn, store, Path(repo))
+    cse_reports.load_from_archive(conn, store)
+    report = plab.lab_parity(conn, Path(repo))
+    conn.rollback()
+    if os.environ.get("LEGACY_LAB_REPORT"):
+        Path(os.environ["LEGACY_LAB_REPORT"]).write_text(json.dumps(report, indent=2, default=str) + "\n")
+    assert report["ok"], [c for c in report["checks"] if not c["ok"]]
