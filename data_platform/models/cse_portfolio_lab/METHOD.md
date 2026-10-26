@@ -19,7 +19,7 @@ old tool's versions.
 For minimum variance, risk parity and maximum Sharpe, with weights w_i:
 
 - **0 ≤ w_i ≤ cap_i**, **cap_i = min(10 %, 0.20 × median daily turnover_i × 10 / notional)**: a share may be at
-  most 10 % of the portfolio, and at most what 20 % of its median daily turnover for 10 days would buy for a
+  most 10 % of the portfolio, and at most 20 % of its median daily turnover over 10 days as a share of a
   portfolio of the notional size (the liquidity cap);
 - the shares of one sector (the 20 S&P/CSE industry groups) sum to at most **30 %**;
 - the shares of one ownership group (`cse_ownership`) sum to at most **20 %** (a one-share group adds a constraint only
@@ -28,7 +28,7 @@ For minimum variance, risk parity and maximum Sharpe, with weights w_i:
 
 **Feasibility first.** Σ cap_i ≥ 1, and the sum over sectors of min(30 %, the sector's caps) ≥ 1, are necessary
 (and, without groups, sufficient). With groups the same reach test runs per group, then an exact linear program
-decides. If the constraints cannot all hold, nothing is solved and the date's status names what binds (too few
+decides. If the constraints cannot all be met, nothing is solved and the date's status names what binds (too few
 shares for the per-share cap, liquidity caps, sector caps, group caps, or sector and group caps together).
 
 ## The portfolios
@@ -57,7 +57,7 @@ the highest E[R] the constraints allow.
 
 ## Versions with fewer names (version 1.1.0)
 
-The full portfolios hold up to about 140 names; many holdings are too small to be worth their costs in a small
+The full portfolios have up to about 140 names; many holdings are too small to be worth their costs in a small
 portfolio. Following `docs/plan-retail-features.md` §6, for K = 10 and 15:
 
 - **Which names.** The full portfolio of the same kind is ranked by weight (equal weight uses the names chosen for
@@ -71,7 +71,7 @@ portfolio. Following `docs/plan-retail-features.md` §6, for K = 10 and 15:
   session of January, April, July and October. Between them the weights stay as set (each date's row shows the
   weights in force, with the date they were set, and their risk on that date's estimates).
 - **Tracking error** against the full portfolio of the same kind on the date: **√((w − w_full)′ Σ (w − w_full))**.
-- If the caps and the floor cannot all hold on a rebalance date, the portfolio keeps the weights it had and the date
+- If the caps and the floor cannot all be met on a rebalance date, the portfolio keeps the weights it had and the date
   says why.
 
 ## Notional
@@ -105,8 +105,8 @@ everything again (tested), in a fraction of the time.
   promises a return.
 - **Maximum Sharpe is unstable**: one new week of data can change several of its largest names. The fewer-name
   versions therefore change only on the quarterly calendar and with a buffer.
-- These are model portfolios computed by rules, for research. They are not advice, not an offer and not a
-  recommendation of any security.
+- These are model portfolios computed by rules, for research. They are not advice and not an offer, and they say
+  nothing about any security's future price.
 
 ## Parity
 

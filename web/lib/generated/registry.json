@@ -480,6 +480,19 @@
     "professional"
   ],
   "unpublished_outputs": [
-    "models.model_stats"
+    "models.model_stats",
+    "models.cse_weekly_return",
+    "models.cse_risk_summary",
+    "models.cse_risk_universe",
+    "models.cse_risk_estimate",
+    "models.cse_lab_summary",
+    "models.cse_lab_cap",
+    "models.cse_lab_portfolio",
+    "models.cse_lab_weight",
+    "models.cse_lab_exposure",
+    "models.cse_lab_frontier",
+    "models.cse_lab_nav",
+    "models.cse_lab_holding",
+    "models.cse_lab_trade"
   ]
 }

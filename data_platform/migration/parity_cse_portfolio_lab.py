@@ -357,17 +357,29 @@ def record_check(name: str, path: Path, cols: list[str], key, new_rows: list[dic
             out[k + (seen[k],)] = {c: fmt(r[c]) if fmt is _fmt else r[c] for c in cols}
     missing = [k for k in old if k not in new]
     extra = [k for k in new if k not in old]
-    exact = differ = 0
+    exact = same_number = differ = 0
     for k in old:
         if k in new:
             for c in cols:
-                if old[k][c] == new[k][c]:
+                a, b = old[k][c], new[k][c]
+                if a == b:
                     exact += 1
+                elif _same_number(a, b):
+                    same_number += 1
                 else:
                     differ += 1
     return {"table": name, "old_rows": len(old), "new_rows": len(new), "missing_in_new": len(missing),
-            "extra_in_new": len(extra), "cells_exact": exact, "values_differ": differ,
-            "ok": not missing and not extra and not differ}
+            "extra_in_new": len(extra), "cells_exact": exact, "cells_same_number_other_text": same_number,
+            "values_differ": differ, "ok": not missing and not extra and not differ}
+
+
+def _same_number(a: str, b: str) -> bool:
+    """The old writer printed a whole number computed as 9760573.999999999 as "9760574.0" (it rounded after testing
+    for a whole number); the record keeps the rounded number, which prints "9760574". The same number either way."""
+    try:
+        return float(a) == float(b)
+    except ValueError:
+        return False
 
 
 # --- docs/plan-retail-features.md §6 -----------------------------------------------------------------------------
@@ -486,10 +498,17 @@ def lab_parity(conn, old_code_dir: Path) -> dict:
 
     # 3. the record files
     rows = {t: out[t] for t in record_model.OUTPUTS}
-    v0_rows = v0_record(conn, v0, relations)
+    record_dir = repo / "record"
+    old_v0 = {}
+    for r in csv.DictReader((record_dir / "holdings.csv").open(newline="")):
+        if r["series"] == V0_SERIES and r["portfolio"] == "risk_parity" and float(r["target_weight"]) > 0:
+            old_v0[r["symbol"]] = float(r["target_weight"])
+    v0_rows, v0_rp_gap = v0_record(conn, v0, relations, old_v0)
+    checks.append({"table": "v0-52w risk parity: the stored model weights against the model's own (2026-10-07)",
+                   "values_compared": len(old_v0), "max_abs_difference": v0_rp_gap,
+                   "ok": v0_rp_gap <= RISK_PARITY_STORED_TOL})
     text = {k: a + b for (k, a), b in zip(old_record_text(rows).items(), old_record_text(v0_rows).values())}
     series = {"v1-52w-grp20", V0_SERIES}
-    record_dir = repo / "record"
     checks.append(record_check("stored record/nav.csv", record_dir / "nav.csv", NAV_COLS,
                                lambda r: (r["date"], r["series"], r["portfolio"]), text["nav.csv"], series))
     checks.append(record_check("stored record/holdings.csv", record_dir / "holdings.csv", HOLD_COLS,
@@ -505,9 +524,13 @@ def lab_parity(conn, old_code_dir: Path) -> dict:
             "tolerance": {"default": TOL, "risk_parity_stored_2026_10_09_and_12": RISK_PARITY_STORED_TOL}}
 
 
-def v0_record(conn, v0: dict, relations: dict) -> dict[str, list[dict]]:
+def v0_record(conn, v0: dict, relations: dict, stored_risk_parity: dict[str, float]) -> tuple[dict, float]:
     """The old series v0-52w: the record started on 2026-10-07 on the portfolios without the group cap, as the old
-    tool did that morning (it changed series the same day)."""
+    tool did that morning (it changed series the same day). Its risk-parity weights came from a solve that stopped
+    at the solver's tolerance up to 1.9e-6 away from today's (the same as the stored files of 2026-10-09 and 12), and
+    whole shares turn such a difference into a share more or less; so risk parity's rows are rebuilt from the weights
+    the old record stored (8 decimals), which checks the record's own arithmetic exactly, and the gap between the two
+    sets of weights is returned and reported."""
     inputs = _inputs(conn, "cse_lab_record", relations, EXCLUDE["cse_lab_record"])
     p = inputs.params
     sessions, aspi, closes, actions = record_model.market_facts(inputs, None, {dt.date.fromisoformat(MISSED_SESSION)})
@@ -519,7 +542,15 @@ def v0_record(conn, v0: dict, relations: dict) -> dict[str, list[dict]]:
             targets.setdefault(d, {}).setdefault(w["portfolio"], {})[w["symbol"]] = w["weight"]
     cfg = {k: p[k] for k in ("record_notional_lkr", "cost_per_side", "dividend_withholding", "rebalance_months",
                              "band_relative", "band_absolute", "min_trade_lkr")}
+    model_rp = targets["2026-10-07"]["risk_parity"]
+    gap = max(abs(stored_risk_parity.get(s, 0.0) - model_rp.get(s, 0.0)) for s in set(model_rp) | set(stored_risk_parity))
     empty = {t: [] for t in record_model.OUTPUTS}
     rows, _ = record_model.advance(empty, ["2026-10-07"], sessions, targets, aspi, closes, actions, cfg, V0_SERIES,
                                    tuple(p["portfolios"]), p["digits"], wait_for_targets=False)
-    return rows
+    stored = {"2026-10-07": {**targets["2026-10-07"], "risk_parity": stored_risk_parity}}
+    rp, _ = record_model.advance(empty, ["2026-10-07"], sessions, stored, aspi, closes, actions, cfg, V0_SERIES,
+                                 tuple(p["portfolios"]), p["digits"], wait_for_targets=False)
+    rows = {t: [r for r in rows[t] if r["portfolio"] != "risk_parity"] + [r for r in rp[t]
+                                                                          if r["portfolio"] == "risk_parity"]
+            for t in record_model.OUTPUTS}
+    return rows, gap

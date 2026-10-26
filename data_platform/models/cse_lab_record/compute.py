@@ -43,7 +43,7 @@ def recorded(inputs, series: str) -> dict[str, list[dict]]:
 
 def targets_by_date(inputs, as_of, portfolios: tuple[str, ...]) -> dict[str, dict[str, dict[str, float]] | None]:
     """The lab's model weights per date: {date: {portfolio: {symbol: weight}}}, or None for a date without valid
-    weights (estimates waiting, a preview, constraints that cannot all hold, a portfolio not formed)."""
+    weights (estimates waiting, a preview, constraints that cannot all be met, a portfolio not formed)."""
     where, params = session_filter(as_of, "as_of")
     ok = {r["as_of"] for r in inputs.rows("models.cse_lab_summary", "as_of, status, preview", where=where,
                                           params=params) if r["status"] == "ok" and not r["preview"]}
@@ -94,9 +94,9 @@ def _row_date(r: dict) -> str:
 def state_of(rows: dict[str, list[dict]]) -> tuple[str | None, dict[str, rec.State]]:
     """The last recorded session and the state there, as the old code read it from its files."""
     nav = [{"date": _row_date(r), "portfolio": r["portfolio"], "cash": r["cash"]} for r in rows[NAV]]
-    hold = [{"date": _row_date(r), "portfolio": r["portfolio"], "symbol": r["symbol"], "shares": r["shares"],
+    positions = [{"date": _row_date(r), "portfolio": r["portfolio"], "symbol": r["symbol"], "shares": r["shares"],
              "target_weight": r["target_weight"], "flag": r["outside_band"]} for r in rows[HOLDING]]
-    return rec.last_state(nav, hold)
+    return rec.last_state(nav, positions)
 
 
 def to_rows(up: rec.Update, digits: int | None, next_seq: dict) -> dict[str, list[dict]]:
@@ -105,7 +105,7 @@ def to_rows(up: rec.Update, digits: int | None, next_seq: dict) -> dict[str, lis
     day = dt.date.fromisoformat(up.session)
     nav = [{"series": r["series"], "session_date": day, "portfolio": r["portfolio"], "nav": k(r["nav"]),
             "cash": k(r["cash"]), "holdings_value": k(r["holdings_value"]), "note": r["note"]} for r in up.nav]
-    hold = [{"series": r["series"], "session_date": day, "portfolio": r["portfolio"], "symbol": r["symbol"],
+    positions = [{"series": r["series"], "session_date": day, "portfolio": r["portfolio"], "symbol": r["symbol"],
              "shares": k(r["shares"]), "price": k(r["price"]), "value": k(r["value"]), "weight": k(r["weight"]),
              "target_weight": k(r["target_weight"]), "outside_band": r["flag"] == "1"} for r in up.holdings]
     trades = []
@@ -115,13 +115,13 @@ def to_rows(up: rec.Update, digits: int | None, next_seq: dict) -> dict[str, lis
         trades.append({"series": r["series"], "session_date": day, "portfolio": r["portfolio"], "seq": next_seq[key],
                        "symbol": r["symbol"], "action": r["action"], "shares": k(r["shares"]), "price": k(r["price"]),
                        "value": k(r["value"]), "cost": k(r["cost"]), "reason": r["reason"]})
-    return {NAV: nav, HOLDING: hold, TRADE: trades}
+    return {NAV: nav, HOLDING: positions, TRADE: trades}
 
 
 def advance(rows: dict[str, list[dict]], todo: list[str], sessions: list[str], targets: dict, aspi: dict,
             closes: dict, actions: list[dict], cfg: dict, series: str, portfolios: tuple[str, ...],
             digits: int | None, wait_for_targets: bool) -> tuple[dict[str, list[dict]], list[str]]:
-    """Record the sessions in `todo`, in order, after what `rows` holds; return all rows and each session's status.
+    """Record the sessions in `todo`, in order, after what `rows` contains; return all rows and each session's status.
     Without a record yet, the first session with valid model weights is the inception; a session before it adds
     nothing (wait_for_targets: try the next one; otherwise stop)."""
     rows = {t: list(v) for t, v in rows.items()}

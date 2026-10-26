@@ -173,7 +173,7 @@ def market_row(day: dt.date, summary: dict, weekly: dict) -> dict:
 
 
 class FewerNames:
-    """The versions with K names, along the dates: what each holds, and when it was set."""
+    """The versions with K names, along the dates: what each contains, and when it was set."""
 
     def __init__(self, spec: dict, sessions: list[str], max_weight: float):
         self.spec, self.sessions, self.max_weight = spec, sessions, max_weight
@@ -216,7 +216,7 @@ class FewerNames:
                         chosen[source] = names
                     try:
                         if len(names) < k:
-                            raise opt.Infeasible(f"the full portfolio holds only {len(names)} names")
+                            raise opt.Infeasible(f"the full portfolio has only {len(names)} names")
                         sub = opt.subproblem(p, [idx[s] for s in names], cap)     # in ranking order
                         w = opt.solve_retail(kind, sub, floor)
                         weights = {s: float(x) for s, x in zip(names, w) if x > 0}

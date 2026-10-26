@@ -10,7 +10,7 @@ same inputs. Constraints for minimum variance, risk parity and maximum Sharpe:
   sum of w_i = 1.
 
 A group is the companies whose ownership traces to the same holder (cse_ownership); a one-share group adds a
-constraint only when max_group_weight is tighter than max_weight. When the constraints cannot all hold,
+constraint only when max_group_weight is tighter than max_weight. When the constraints cannot all be met,
 check_feasible names the binding one and nothing is solved.
 
 The second part (retail_*) is new: a portfolio of K names, taken from the full portfolio's largest weights with a
@@ -102,7 +102,7 @@ def check_feasible(p: Problem) -> None:
     if reach.sum() < 1 - 1e-9:
         raise Infeasible(
             f"sector caps bind: with max_sector_weight {p.max_sector_weight:.0%} and the per-stock caps, "
-            f"the {len(p.sector_names)} sectors can hold at most {reach.sum():.3f} in total")
+            f"the {len(p.sector_names)} sectors can take at most {reach.sum():.3f} in total")
     G = p.group_matrix()
     if len(G):
         alone = 1 - G.sum(axis=0)                  # shares in no multi-share group
@@ -110,7 +110,7 @@ def check_feasible(p: Problem) -> None:
         if greach < 1 - 1e-9:
             raise Infeasible(
                 f"group caps bind: with max_group_weight {p.max_group_weight:.0%} and the per-stock caps, "
-                f"the universe can hold at most {greach:.3f} in total")
+                f"the universe can take at most {greach:.3f} in total")
         w = cp.Variable(len(p.symbols))
         prob = cp.Problem(cp.Minimize(0), _constraints(p, w) + [cp.sum(w) == 1])
         prob.solve(solver=SOLVER)
@@ -250,7 +250,7 @@ AT_CAP = 1e-6
 
 
 def binding(w: np.ndarray, p: Problem, floor: float | None = None) -> list[str]:
-    """The constraints that hold with equality at w (to 1e-6), in words: shares at their cap (and whether the cap
+    """The constraints met with equality at w (to 1e-6), in words: shares at their cap (and whether the cap
     is the per-share maximum or the liquidity cap), sectors and ownership groups at theirs, names at the retail floor.
     Equal weight has no caps: nothing binds."""
     out = []
@@ -321,7 +321,7 @@ def subproblem(p: Problem, idx: list[int], cap: float) -> Problem:
 def solve_retail(kind: str, p: Problem, floor: float) -> np.ndarray:
     """Minimum variance or maximum Sharpe on the chosen names with every name at or above `floor` (the research
     script's problems). Equal weight: 1/K, no caps (the comparison, like the full equal-weight portfolio).
-    Raises Infeasible when the caps and the floor cannot all hold."""
+    Raises Infeasible when the caps and the floor cannot all be met."""
     n = len(p.symbols)
     if kind == "equal_weight":
         return np.full(n, 1 / n)
@@ -331,7 +331,7 @@ def solve_retail(kind: str, p: Problem, floor: float) -> np.ndarray:
         problem = cp.Problem(cp.Minimize(cp.quad_form(y, cp.psd_wrap(p.cov))), cons)
         problem.solve(solver=SOLVER)
         if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
-            raise Infeasible(f"maximum Sharpe on {n} names: the sector or group caps and the floor cannot all hold")
+            raise Infeasible(f"maximum Sharpe on {n} names: the sector or group caps and the floor cannot all be met")
         return _clean(y.value / k.value)
     if kind != "min_variance":
         raise ValueError(f"no retail version of {kind}")
@@ -340,7 +340,7 @@ def solve_retail(kind: str, p: Problem, floor: float) -> np.ndarray:
                          _constraints(p, x) + [cp.sum(x) == 1, x >= floor])
     problem.solve(solver=SOLVER)
     if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
-        raise Infeasible(f"minimum variance on {n} names: the sector or group caps and the floor cannot all hold")
+        raise Infeasible(f"minimum variance on {n} names: the sector or group caps and the floor cannot all be met")
     return _clean(x.value)
 
 

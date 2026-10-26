@@ -7,7 +7,7 @@ tool's record/*.csv on the same inputs. What differs is plumbing and wording:
     one session to the next is read from the rows already recorded, as the old code read its files;
   * the old files kept numbers rounded to 8 decimals (its CSV writer), and the next session read them back rounded;
     `digits` reproduces that for the port (version 1.0.0); None keeps full precision;
-  * the old trade directions "buy" / "sell" are recorded as "increase" / "decrease" (of the shares held);
+  * the old file's two words for a trade's direction are recorded as "increase" / "decrease" (of the shares held);
   * the old personal comparison portfolio ("my book") and the personal trade list are not ported.
 
 Rules (METHOD.md has them in full):
@@ -222,7 +222,7 @@ def update(last: str | None, states: dict[str, State], series: str, session: str
            cfg: dict, portfolios: tuple[str, ...] = TRADED) -> Update:
     """One session of one series (old update(), with the last state passed in). `targets`: the model weights of each
     portfolio computed for this session, or None when there are none today (the estimates are waiting or the
-    constraints cannot all hold)."""
+    constraints cannot all be met)."""
     up = Update(session)
     if last == session:
         up.status = f"record already has {session} for {series}; nothing written"
