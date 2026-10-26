@@ -1,0 +1,62 @@
+name: cse_lab_record
+market: cse
+title_key: internal.cse_lab_record.title         # internal research: not on the site (config/entitlements.yaml)
+summary_key: internal.cse_lab_record.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current        # the ASPI: the calendar and the market portfolio
+  - cse.prices_daily_current         # closes, to value the holdings
+  - models.cse_lab_nav               # its own record so far: read back and never rewritten (append-only)
+  - models.cse_lab_holding
+  - models.cse_lab_trade
+outputs:
+  - models.cse_lab_nav               # per session, series and portfolio: value and cash
+  - models.cse_lab_holding           # ... and name: shares, price, value, weight, model weight, drift band
+  - models.cse_lab_trade             # each change of shares, with its cost and reason
+versions:
+  - method_version: "1.0.0"
+    status: reference
+    requires_models:
+      cse_portfolio_lab: "1.0.0"     # the model weights per date
+      cse_corporate_actions: "1.0.0" # the corporate actions in use, booked on holdings on their ex-date
+    parameters:
+      series: v1-52w-grp20           # the old tool's series label
+      inception: "2026-10-07"        # the old series' inception: the record continues it
+      portfolios: [min_variance, risk_parity, max_sharpe, equal_weight]
+      record_notional_lkr: 10000000
+      cost_per_side: 0.0112          # VERIFY against the current CSE cost schedule (the old tool's note)
+      dividend_withholding: 0.0
+      rebalance_months: [1, 4, 7, 10]
+      band_relative: 0.25
+      band_absolute: 0.02
+      min_trade_lkr: 25000
+      digits: 8                      # numbers kept to 8 decimals, as the old CSV files kept them
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/record.py; record/nav.csv, holdings.csv, trades.csv"
+      tolerance: 0
+      notes: >-
+        The old record files at the audited commit, every row of both series (v0-52w on 2026-10-07, v1-52w-grp20 from
+        2026-10-07 to 2026-10-15), compared as the old CSV writer formats them. See
+        docs/migration/parity-cse-portfolio-lab.json.
+  - method_version: "1.1.0"
+    status: current
+    changes: >-
+      Records the 1.1.0 portfolios, the versions with 10 and 15 names included, from a neutral Rs 1 mn each, starting
+      at the first run with valid model weights (never backfilled); full precision; changes under Rs 2,500 (0.25 % of
+      the notional, as the old Rs 25,000 of Rs 10 mn) are skipped.
+    requires_models:
+      cse_portfolio_lab: "1.1.0"
+      cse_corporate_actions: "1.0.0"
+    parameters:
+      series: "1.1.0"
+      inception: null                # the first run that finds valid model weights
+      portfolios: [min_variance, risk_parity, max_sharpe, equal_weight, min_variance_10, max_sharpe_10,
+                   equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
+      record_notional_lkr: 1000000
+      cost_per_side: 0.0112
+      dividend_withholding: 0.0
+      rebalance_months: [1, 4, 7, 10]
+      band_relative: 0.25
+      band_absolute: 0.02
+      min_trade_lkr: 2500
+      digits: null

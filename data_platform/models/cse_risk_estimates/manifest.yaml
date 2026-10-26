@@ -1,0 +1,58 @@
+name: cse_risk_estimates
+market: cse
+title_key: internal.cse_risk_estimates.title     # internal research: not on the site (config/entitlements.yaml)
+summary_key: internal.cse_risk_estimates.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current        # the ASPI: the session calendar and the market proxy
+  - cse.prices_daily_current         # turnover (the CSE's own, else close x volume) and the days each share traded
+  - cse.security_list                # the securities listed on each session
+  - cse.company_profiles             # each share's CSE sector label
+  - cse.sector_overrides             # the owner's sector assignments (config/sector_overrides.yaml)
+  - cse.lab_private_settings         # 1.0.0 only: the owner's conflict-of-interest list (LAB_PRIVATE_FILE)
+  - rates.cbsl_monthly_current       # 1.1.0 only: the CBSL's 12-month treasury bill yield (table 4.04)
+outputs:
+  - models.cse_weekly_return         # each share's and the ASPI's Wednesday-to-Wednesday returns
+  - models.cse_risk_summary          # per estimate date: status, the weeks used, shrinkage, risk-free rate
+  - models.cse_risk_universe         # per estimate date and security: in the universe, or why not
+  - models.cse_risk_estimate         # per estimate date and share in the universe: beta, expected return, risk
+versions:
+  - method_version: "1.0.0"
+    status: reference
+    requires_models:
+      cse_total_returns: "1.0.0"     # models.cse_total_return: each share's total-return index
+      cse_ownership: "1.0.0"         # models.cse_ownership_detail: the ownership groups by session
+    parameters:
+      min_history_weeks: 52          # weekly returns required (the old decision D1)
+      min_traded_share: 0.80         # share of the last 52 weeks' sessions with a trade
+      min_median_turnover_lkr: 1000000
+      risk_free: {source: fixed, annual: 0.099}   # the old tool's typed 12-month bill yield
+      equity_risk_premium: 0.06      # an assumption, used only for CAPM expected returns
+      exclusions: private            # the owner's conflict-of-interest list, from the private settings
+      first_estimate_date: "2026-10-02"   # the old lab's first session
+      preview_min_weeks: 26          # the old lab's preview on the longest history while the full one is missing
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/estimates.py, cse/returns.py, cse/sectors.py; data/lab/*.json"
+      tolerance: 0
+      notes: >-
+        Universe (every security and its reason), weekly returns, shrinkage, beta, expected return, volatility,
+        Amihud, median turnover and its source, compared with the old code run on the old repo cut at each of its 9
+        sessions, and with the stored data/lab/<session>.json and latest.json. See
+        docs/migration/parity-cse-portfolio-lab.json.
+  - method_version: "1.1.0"
+    status: current
+    changes: >-
+      Risk-free rate from the CBSL's 12-month treasury bill yield as published by the estimate date (not the typed
+      9.9 %); no personal exclusions; no preview; estimate dates from the first session with a year of weekly returns.
+    requires_models:
+      cse_total_returns: "1.0.0"
+      cse_ownership: "1.0.0"
+    parameters:
+      min_history_weeks: 52
+      min_traded_share: 0.80
+      min_median_turnover_lkr: 1000000
+      risk_free: {source: cbsl_tb_12m, publication_delay_months: 1}
+      equity_risk_premium: 0.06      # ASSUMPTION, labelled as one wherever it is shown
+      exclusions: none
+      first_estimate_date: null
+      preview_min_weeks: null

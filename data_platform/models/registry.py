@@ -11,7 +11,8 @@ What "check" enforces, so a broken plug-in fails CI rather than the site:
   * the disclaimer key exists in compliance/disclaimers.yaml;
   * every dataset read and every table written exists in db/migrations; every output has exactly one owner;
   * every pinned dependency names a model and version that exist, and there are no cycles;
-  * config/entitlements.yaml gives every model a tier that exists.
+  * config/entitlements.yaml gives every model a tier that exists, except an internal model (internal_models: research
+    for the owner only), which has no tier, every output of which is unpublished, and which export-web leaves out.
 """
 from __future__ import annotations
 
@@ -78,6 +79,10 @@ def check(root: Path = MODELS_DIR) -> list[str]:
     tiers = ent.get("tiers", [])
     owners: dict[str, str] = {}
 
+    internal = set(ent.get("internal_models") or [])
+    unpublished = set(ent.get("unpublished_outputs") or [])
+    for name in sorted(internal - set(manifests)):
+        problems.append(f"config/entitlements.yaml: internal model {name} is not a model")
     for name, m in manifests.items():
         folder = root / name
         compute_py = folder / "compute.py"
@@ -85,6 +90,27 @@ def check(root: Path = MODELS_DIR) -> list[str]:
             problems.append(f"{name}: compute.py must define compute(inputs, as_of)")
         if not (folder / "METHOD.md").exists():
             problems.append(f"{name}: METHOD.md is missing")
+        if name in internal:
+            # Internal research: never exported to the website, so its text is not in the web messages; every
+            # output must be unpublished, and it has no tier.
+            for out in m.outputs:
+                if out not in unpublished:
+                    problems.append(f"{name}: internal, but {out} is not in unpublished_outputs")
+            if name in (ent.get("models") or {}):
+                problems.append(f"{name}: internal, so it must not have a tier in config/entitlements.yaml models")
+            for out in m.outputs:
+                if out.lower() not in relations:
+                    problems.append(f"{name}: outputs {out}, which no migration creates")
+                if out != "models.model_stats":
+                    if out in owners:
+                        problems.append(f"{name}: {out} is already written by {owners[out]}")
+                    owners[out] = name
+            for ds in m.requires_datasets:
+                if ds.lower() not in relations:
+                    problems.append(f"{name}: requires {ds}, which no migration creates")
+            if m.disclaimer_key not in disclaimers:
+                problems.append(f"{name}: disclaimer {m.disclaimer_key} is not in compliance/disclaimers.yaml")
+            continue
         for key in (m.title_key, m.summary_key):
             if not _has_key(messages, key):
                 problems.append(f"{name}: message key {key} is not in web/messages/en.json")
@@ -150,8 +176,11 @@ def order(manifests: dict[str, Manifest]) -> list[str]:
 def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
     """Everything the web app needs, in one generated file, so it never reads outside web/: tiers and each model's
     minimum tier, labels, current version and method page; the disclaimer texts; the trading calendars (for the
-    freshness check). No parameters, nothing secret."""
+    freshness check). No parameters, nothing secret. Internal models (config/entitlements.yaml internal_models) are
+    left out entirely: the website does not know they exist."""
     ent = load_entitlements()
+    internal = set(ent.get("internal_models") or [])
+    manifests = {n: m for n, m in manifests.items() if n not in internal}
     calendars = {}
     for path in sorted((REPO_ROOT / "config" / "calendars").glob("*.yaml")):
         cal = yaml.safe_load(path.read_text())

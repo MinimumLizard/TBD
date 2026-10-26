@@ -1,8 +1,10 @@
 """Store the owner's confirmations in the database:  python -m data_platform.jobs.reviews
 
-Two kinds: corporate actions (below) and ownership (sync_ownership: config/ownership_aliases.yaml,
+Four kinds: corporate actions (below); ownership (sync_ownership: config/ownership_aliases.yaml,
 config/ownership_parents.yaml and the private file named by OWNERSHIP_PRIVATE_FILE, stored in
-cse.ownership_confirmations for the cse_ownership model, the same way).
+cse.ownership_confirmations for the cse_ownership model, the same way); the sector assignments
+(config/sector_overrides.yaml -> cse.sector_overrides) and the owner's personal portfolio-lab settings (the private
+file named by LAB_PRIVATE_FILE -> cse.lab_private_settings), both read by the portfolio lab.
 
 config/corporate_actions_review.yaml is the owner's file, in the old terminal's format: `confirm` accepts a row that
 needs review (optionally correcting fields), `reject` ignores a row. Models never read files, so the models job
@@ -166,6 +168,77 @@ def store_ownership(conn, public: dict, public_sha: str, private: dict, private_
     return version
 
 
+# --- the owner's sector assignments and personal lab settings (the portfolio lab) ---------------------------------
+
+SECTOR_FILE = REPO_ROOT / "config" / "sector_overrides.yaml"
+LAB_PRIVATE_ENV = "LAB_PRIVATE_FILE"
+LAB_PRIVATE_FIELDS = {"excluded", "portfolio_size_lkr"}
+
+
+def read_sector_overrides(path: Path = SECTOR_FILE) -> tuple[dict, str]:
+    """({symbol: industry group}, sha256 of the file). Every value must be one of the 20 industry groups."""
+    from ..models._lib.cse_sectors import load_overrides
+
+    body = path.read_bytes() if path.exists() else b""
+    data = yaml.safe_load(body) or {}
+    if not isinstance(data, dict) or set(data) - {"overrides"}:
+        raise ValueError(f"{path.name}: expected only `overrides`")
+    return load_overrides(data), hashlib.sha256(body).hexdigest()
+
+
+def sync_sector_overrides(conn, path: Path = SECTOR_FILE, code_version: str | None = None,
+                          commit: bool = True) -> int | None:
+    """Store the sector assignments if the file differs from the version stored last."""
+    overrides, sha = read_sector_overrides(path)
+    last = conn.execute("select file_sha256 from cse.sector_overrides order by version_id desc limit 1").fetchone()
+    if last and last["file_sha256"] == sha:
+        return None
+    version = conn.execute(
+        """insert into cse.sector_overrides (file_sha256, overrides, code_version) values (%s, %s, %s)
+           returning version_id""", (sha, Jsonb(overrides), code_version or current_code_version())).fetchone()["version_id"]
+    if commit:
+        conn.commit()
+    return version
+
+
+def read_lab_private(path: Path) -> tuple[dict, str]:
+    """The owner's personal lab settings (never in this public repository): `excluded`, the conflict-of-interest list
+    (shares no model portfolio of version 1.0.0 may hold), and `portfolio_size_lkr`, the size its liquidity caps are
+    computed for. Unknown fields are an error, never ignored."""
+    body = path.read_bytes()
+    data = yaml.safe_load(body) or {}
+    if not isinstance(data, dict) or set(data) - LAB_PRIVATE_FIELDS:
+        raise ValueError(f"{LAB_PRIVATE_ENV}: expected only {sorted(LAB_PRIVATE_FIELDS)}")
+    excluded = data.get("excluded") or []
+    if not isinstance(excluded, list) or not all(isinstance(s, str) for s in excluded):
+        raise ValueError(f"{LAB_PRIVATE_ENV}: `excluded` must be a list of symbols")
+    size = data.get("portfolio_size_lkr")
+    if size is not None and (isinstance(size, bool) or not isinstance(size, (int, float)) or size <= 0):
+        raise ValueError(f"{LAB_PRIVATE_ENV}: `portfolio_size_lkr` must be a positive number")
+    settings = {"excluded": sorted(set(excluded)), "portfolio_size_lkr": size}
+    return settings, hashlib.sha256(body).hexdigest()
+
+
+def sync_lab_private(conn, path: Path | None | str = "env", code_version: str | None = None,
+                     commit: bool = True) -> int | None:
+    """Store the private lab settings if they differ from the version stored last. path "env" (the default) reads
+    LAB_PRIVATE_FILE; without one, nothing is stored and the last stored version stays in use."""
+    if path == "env":
+        path = Path(os.environ[LAB_PRIVATE_ENV]) if os.environ.get(LAB_PRIVATE_ENV) else None
+    if path is None:
+        return None
+    settings, sha = read_lab_private(Path(path))
+    last = conn.execute("select file_sha256 from cse.lab_private_settings order by version_id desc limit 1").fetchone()
+    if last and last["file_sha256"] == sha:
+        return None
+    version = conn.execute(
+        """insert into cse.lab_private_settings (file_sha256, settings, code_version) values (%s, %s, %s)
+           returning version_id""", (sha, Jsonb(settings), code_version or current_code_version())).fetchone()["version_id"]
+    if commit:
+        conn.commit()
+    return version
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--file", type=Path, default=REVIEW_FILE)
@@ -176,6 +249,11 @@ def main(argv: list[str] | None = None) -> int:
           "corporate actions: unchanged (the latest stored version is this file)")
     version = sync_ownership(conn)
     print(f"ownership: stored as version {version}" if version else "ownership: unchanged")
+    version = sync_sector_overrides(conn)
+    print(f"sector assignments: stored as version {version}" if version else "sector assignments: unchanged")
+    version = sync_lab_private(conn)
+    print(f"private lab settings: stored as version {version}" if version else
+          "private lab settings: unchanged (or LAB_PRIVATE_FILE not set: the last stored version stays in use)")
     return 0
 
 

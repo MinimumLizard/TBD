@@ -1,0 +1,68 @@
+name: cse_portfolio_lab
+market: cse
+title_key: internal.cse_portfolio_lab.title      # internal research: not on the site (config/entitlements.yaml)
+summary_key: internal.cse_portfolio_lab.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current        # the session calendar (the quarterly rebalance dates)
+  - cse.lab_private_settings         # 1.0.0 only: the owner's portfolio size (LAB_PRIVATE_FILE)
+  - models.cse_lab_summary           # its own earlier rows: a date whose inputs have not changed is reused
+  - models.cse_lab_cap
+  - models.cse_lab_portfolio
+  - models.cse_lab_weight
+  - models.cse_lab_exposure
+  - models.cse_lab_frontier
+outputs:
+  - models.cse_lab_summary           # per estimate date: status, and the fingerprint of its inputs
+  - models.cse_lab_cap               # per estimate date and share: the per-share and liquidity caps
+  - models.cse_lab_portfolio         # per estimate date and portfolio: expected return, risk, what binds
+  - models.cse_lab_weight            # per estimate date, portfolio and name: the model weight
+  - models.cse_lab_exposure          # per estimate date, portfolio and sector or ownership group
+  - models.cse_lab_frontier          # per estimate date: the constrained efficient frontier
+versions:
+  - method_version: "1.0.0"
+    status: reference
+    requires_models:
+      cse_risk_estimates: "1.0.0"
+    parameters:
+      max_weight: 0.10
+      max_sector_weight: 0.30
+      max_group_weight: 0.20
+      participation: 0.20            # share of the median daily turnover the liquidity cap allows per day
+      days_to_build: 10
+      notional: private              # the owner's portfolio size, from the private settings
+      frontier_points: 25
+      market_row: false
+      fewer_names: null
+    parity:
+      reference: "MinimumLizard/CSE@e05c6f3 cse/optimize.py and cse/lab.py compute(); data/lab/*.json"
+      tolerance: 1.0e-9
+      notes: >-
+        Every portfolio's weights, risk contributions, caps, sectors, groups, expected return, volatility, Sharpe,
+        constraint report, and the frontier, against the old code on the same inputs and against the stored JSON
+        files. Risk parity's stored weights on 2026-10-09 and 2026-10-12 differ from the old code's own rerun by up to
+        3.3e-6 (the old tool's own runs on identical inputs, 2026-10-09 and 2026-10-12 against 2026-10-13, differ by
+        the same amount: the solver stops at its tolerance), so they are compared within 1e-5. See
+        docs/migration/parity-cse-portfolio-lab.json.
+  - method_version: "1.1.0"
+    status: current
+    changes: >-
+      Liquidity caps for a neutral notional of Rs 1 mn (not the owner's portfolio size); the market as a reference
+      row; the versions with 10 and 15 names (minimum variance, maximum Sharpe, equal weight) set on the quarterly
+      rebalance dates with a buffer, and their tracking error against the full portfolio.
+    requires_models:
+      cse_risk_estimates: "1.1.0"
+    parameters:
+      max_weight: 0.10
+      max_sector_weight: 0.30
+      max_group_weight: 0.20
+      participation: 0.20
+      days_to_build: 10
+      notional_lkr: 1000000          # a neutral notional for the liquidity caps (decision 0023)
+      frontier_points: 25
+      market_row: true
+      fewer_names:
+        sizes: [10, 15]
+        kinds: [min_variance, max_sharpe, equal_weight]
+        buffer: 1.5                  # a name in the portfolio stays while it ranks in the top 1.5 K
+        rebalance_months: [1, 4, 7, 10]

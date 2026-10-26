@@ -56,6 +56,29 @@ models:
 # read these tables either (migration 0014).
 unpublished_outputs:
   - models.model_stats
+  # The portfolio lab (decision 0023): internal research only, until the owner has a lawyer's view on model
+  # portfolios (decision 0010 point 6, docs/plan-retail-features.md §5). Read by the owner's lab report job
+  # (python -m data_platform.jobs.lab_report), never by the website; migration 0016 revokes them from its role.
+  - models.cse_weekly_return
+  - models.cse_risk_summary
+  - models.cse_risk_universe
+  - models.cse_risk_estimate
+  - models.cse_lab_summary
+  - models.cse_lab_cap
+  - models.cse_lab_portfolio
+  - models.cse_lab_weight
+  - models.cse_lab_exposure
+  - models.cse_lab_frontier
+  - models.cse_lab_nav
+  - models.cse_lab_holding
+  - models.cse_lab_trade
+
+# Models computed for the owner's research only: no tier, every output unpublished, and left out of the website's copy
+# of the registry entirely (no methods page, no plans entry, no API listing).
+internal_models:
+  - cse_risk_estimates
+  - cse_portfolio_lab
+  - cse_lab_record
 # Directors' and accounts' names (models.cse_dealing_as_filed, models.cse_flow_actor) are shown: the owner's decision of
 # 2026-10-19 (decision 0021); the lawyer's review before anything is public covers them.
 # Shareholders' names (models.cse_holding: the top-20 lists; models.cse_ownership_detail: controllers and chains),
