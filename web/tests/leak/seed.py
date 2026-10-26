@@ -178,6 +178,19 @@ def seed(conn) -> dict:
         for d, name, v in ((OLD7, "Xavier R. Oldmarker", 54321000.0), (MID7, "Wendy S. Midmarker", 65432100.0),
                            (NEW, "Yolanda P. Flowmarker", 76543210.0))])
 
+    # The portfolio lab: internal research, unpublished; its markers must never appear anywhere (they are in "never").
+    put("cse_risk_estimates", "models.cse_risk_estimate", [
+        {"as_of": NEW, "symbol": "AAA.N0000", "sector": "Banks", "group_key": "AAA.N0000", "group_name": None,
+         "beta": 1.0, "beta_current": 1.0, "beta_lag": 0.0, "expected_return": 0.7531864209, "volatility": 0.2,
+         "amihud": 0.001, "median_turnover": 2000000.0, "turnover_source": "real"}])
+    put("cse_portfolio_lab", "models.cse_lab_weight", [
+        {"as_of": NEW, "portfolio": "min_variance_15", "symbol": "AAA.N0000", "weight": 0.8642097531,
+         "risk_contribution": 1.0, "cap": 0.9, "sector": "Banks", "group_key": "AAA.N0000", "expected_return": 0.1,
+         "at_cap": False}])
+    put("cse_lab_record", "models.cse_lab_nav", [
+        {"series": "1.1.0", "session_date": NEW, "portfolio": "min_variance_15", "nav": 86420975.31, "cash": 0.0,
+         "holdings_value": 86420975.31, "note": "inception"}])
+
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
     put("lk_savings_compare", "models.savings_rates", [
@@ -256,7 +269,9 @@ def seed(conn) -> dict:
         # Pro's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
-        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%"],
+        "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
+                  # the portfolio lab (internal research): a weight, an expected return, a record value
+                  "0.8642097531", "86.42%", "0.7531864209", "75.32%", "86420975.31", "86,420,975", "Rs 86.4 mn"],
     }
 
 
