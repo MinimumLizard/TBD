@@ -126,7 +126,12 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
    `SECONDARY_S3_SECRET_ACCESS_KEY`, `HEALTHCHECKS_BASE_URL` (descriptions in `.env.example`), and, for the ownership
    tracker, `OWNERSHIP_PRIVATE_YAML`: the text of your private confirmations file (the old terminal's two confirmed
    aliases of individuals, in the format of `config/ownership_aliases.yaml`; it never goes in git, see
-   `.env.example`). Add the Healthchecks slug `cse-api-reports` too. **Do not add the
+   `.env.example`). For the portfolio lab (internal research, decision 0023), optionally `LAB_PRIVATE_YAML`: the
+   text of your personal lab settings, two lines in this form (the old terminal's values, from its
+   `config/universe.yaml` `excluded:` and `config/portfolio.yaml` `portfolio_size_lkr:`):
+   `excluded: [SYMBOL.N0000, SYMBOL.N0000]` and `portfolio_size_lkr: 5000000`. It never goes in git; without it the
+   lab's version 1.0.0 (the exact port of the old lab) computes nothing, and the current version 1.1.0 is unaffected.
+   Add the Healthchecks slug `cse-api-reports` too. **Do not add the
    variable in step 7 yet:** until it exists every scheduled job skips itself, so nothing writes to the database
    while the history is being loaded.
 6. **Actions → "Migrate history (manual)" → Run workflow.** It takes up to four hours. Check that the three reports
@@ -184,6 +189,9 @@ until curl -sf http://127.0.0.1:3100/api/v1/models > /dev/null; do sleep 1; done
   PDFs, announcement details) and confirmations the owner keeps in the old repo. They are the next model work,
   in an order for the owner to choose.
 - **The old terminal's portfolio lab, live record and trade list:** personal tools, not ported (audit §8).
+  *Update 2026-10-20 (decision 0023):* the lab and its record are now ported as internal research only
+  (`cse_risk_estimates`, `cse_portfolio_lab`, `cse_lab_record`; unpublished, read by the owner's
+  `python -m data_platform.jobs.lab_report`). The trade list and the old personal comparison portfolio stay unported.
 - **Accounts, payments, Sinhala and Tamil text, deployment:** need the owner's accounts or translators
   (decision 0016).
 

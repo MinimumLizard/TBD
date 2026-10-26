@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-10-20 — The portfolio lab, internal research only (Phase 3b, part 4; decision 0023)
+
+- **Money flows completed** (`cse_flows` 1.0.0, in place: no production run yet): account names are matched with the
+  owner's confirmed aliases (the stored list `cse_ownership` uses), and each dealing carries the old page's "own
+  group" flag (the account is in the company's own ownership group, `cse_ownership`'s groups as at the dealing date);
+  each account carries its group's name. The money-flows page marks large dealings in the company's own group and
+  shows an account's group. Parity with the old code, now run with its own aliases and groups: exact at 16 dealing
+  dates (5,816 old rows); 325 of 2,262 old dealings carry the flag (`docs/migration/parity-cse-dealings-flows.json`).
+- **Inputs** (migration 0016, append-only, row-level security): `cse.sector_overrides` (`config/sector_overrides.yaml`,
+  company sector assignments copied from the old terminal) and `cse.lab_private_settings` (the owner's
+  conflict-of-interest list and portfolio size from the private file `LAB_PRIVATE_FILE`, secret `LAB_PRIVATE_YAML`;
+  never in git). Both stored by `python -m data_platform.jobs.reviews` before every model run.
+- **Models, internal only** (`internal_models` in `config/entitlements.yaml`: no tier, every output unpublished and
+  revoked from the website's role, left out of the website's registry copy; the registry check enforces it):
+  - `cse_risk_estimates` (C4, C8, C9): per session, the universe with every exclusion's reason, weekly total returns
+    (Wednesdays), Ledoit-Wolf covariance (stored in factor form), Dimson beta, CAPM expected return, volatility,
+    Amihud illiquidity, median turnover and its source.
+  - `cse_portfolio_lab` (C10): minimum variance, risk parity, maximum Sharpe, equal weight (and the market as a
+    reference) with the 10 % / 30 % sector / 20 % ownership-group / liquidity caps, what binds, the frontier; version
+    1.1.0 adds the 10- and 15-name versions (plan §6: buffer of 1.5 K, cap max(10 %, 1.5/K), floor 0.5/K, quarterly
+    calendar, tracking error). Unchanged dates are reused by their input fingerprint (same result as recomputing).
+  - `cse_lab_record` (C11): forward-only and append-only, whole shares, 1.12 % per side, rebalance dates, drift band,
+    dividends, splits, scrip and rights taken up. Version 1.1.0's record starts at the first production run.
+  - Version 1.0.0 of each is the exact port (the owner's typed 9.9 %, 6 % premium, the private settings, the old
+    record continued from 2026-10-07); version 1.1.0 is current: the CBSL 12-month bill yield as published by the
+    date, no personal exclusions, a neutral Rs 1 mn notional.
+- **Parity** (counts only, `docs/migration/parity-cse-portfolio-lab.json`; `LEGACY_LAB_REPORT=<file> pytest -m legacy
+  -k portfolio_lab` or `python -m data_platform.migration.parity cse_portfolio_lab`): the old lab code on its own files
+  cut at each of its 9 sessions and the 9 stored `data/lab/*.json` files, about 5,000 values each, all within 1e-9
+  (largest weight difference 3e-13); the stored risk-parity solutions of 2026-10-09 and 2026-10-12 within 5.3e-6, the
+  spread of the old tool's own runs on identical inputs; the old `record/nav.csv` (40 rows), `holdings.csv` (2,888) and
+  `trades.csv` (732) row for row, both old series; the plan §6 table reproduced for 2026-10-15.
+- **The owner's report:** `python -m data_platform.jobs.lab_report --out <file outside the repo>`: one self-contained
+  HTML page with the current portfolios (full and 10/15 names), risk, what binds, the frontier, the §6-style comparison
+  on the day's estimates, the record, the caveats, and three wording mock-ups for the lawyer (paths P1, P2, P3), each
+  marked MOCK-UP. The copy lint scans the report job.
+- Dependencies: cvxpy 1.9.3, Clarabel 0.11.1, scikit-learn 1.9.1, SciPy 1.17.1 (the old terminal's versions).
+
 ## 2026-10-19 — Interim reports, ownership and company figures (Phase 3b, part 3a; decision 0022)
 
 - Facts (migration 0013): `cse.financial_reports` (report index: company, kind, title, period, upload time, PDF link,

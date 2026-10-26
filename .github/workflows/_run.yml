@@ -94,6 +94,18 @@ jobs:
             printf '%s\n' "$OWNERSHIP_PRIVATE_YAML" > "$RUNNER_TEMP/ownership_private.yaml"
             echo "OWNERSHIP_PRIVATE_FILE=$RUNNER_TEMP/ownership_private.yaml" >> "$GITHUB_ENV"
           fi
+      # The owner's personal portfolio-lab settings (conflict-of-interest list, portfolio size; decision 0023) never
+      # go in the public repository either: the secret LAB_PRIVATE_YAML holds the file's text. Without it, the last
+      # stored version is kept (and without any, the lab's version 1.0.0 computes nothing).
+      - name: Private portfolio-lab settings (from a secret, when set)
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          LAB_PRIVATE_YAML: ${{ secrets.LAB_PRIVATE_YAML }}
+        run: |
+          if [ -n "$LAB_PRIVATE_YAML" ]; then
+            printf '%s\n' "$LAB_PRIVATE_YAML" > "$RUNNER_TEMP/lab_private.yaml"
+            echo "LAB_PRIVATE_FILE=$RUNNER_TEMP/lab_private.yaml" >> "$GITHUB_ENV"
+          fi
       - name: Database migrations (idempotent)
         if: steps.cfg.outputs.ready == 'true'
         run: uv run --no-dev python -m data_platform.jobs.migrate
