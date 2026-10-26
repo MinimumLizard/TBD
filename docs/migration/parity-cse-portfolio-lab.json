@@ -1,0 +1,261 @@
+{
+  "checks": [
+    {
+      "table": "2026-10-02: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5251,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "waiting"
+    },
+    {
+      "table": "2026-10-06: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5232,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "waiting"
+    },
+    {
+      "table": "2026-10-07: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-08: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5009,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-09: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 7.450580596923828e-09,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-12: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 3.725290298461914e-09,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-13: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 3.725290298461914e-09,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-14: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 4940,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "2026-10-15: old code (cse/lab.py) on the old files cut at the session",
+      "values_compared": 4915,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "plan \u00a76 table, max_sharpe, 2026-10-15 (rounded as the table)",
+      "values_compared": 25,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 0.0,
+      "ok": true
+    },
+    {
+      "table": "plan \u00a76 table, min_variance, 2026-10-15 (rounded as the table)",
+      "values_compared": 26,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 0.0,
+      "ok": true
+    },
+    {
+      "table": "stored data/lab/2026-10-02.json (before the group cap)",
+      "values_compared": 5037,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "waiting"
+    },
+    {
+      "table": "stored data/lab/2026-10-07.json",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-08.json",
+      "values_compared": 5009,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-09.json",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 5.276641437151897e-06,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-12.json",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 5.276641437151897e-06,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-13.json",
+      "values_compared": 5006,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 3.725290298461914e-09,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-14.json",
+      "values_compared": 4940,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/2026-10-15.json",
+      "values_compared": 4915,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "stored data/lab/latest.json",
+      "values_compared": 4915,
+      "values_differ": 0,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "max_abs_difference": 1.4901161193847656e-08,
+      "ok": true,
+      "old_status": "ok"
+    },
+    {
+      "table": "v0-52w risk parity: the stored model weights against the model's own (2026-10-07)",
+      "values_compared": 141,
+      "max_abs_difference": 1.8884083272333735e-06,
+      "ok": true
+    },
+    {
+      "table": "stored record/nav.csv",
+      "old_rows": 40,
+      "new_rows": 40,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "cells_exact": 278,
+      "cells_same_number_other_text": 2,
+      "values_differ": 0,
+      "ok": true
+    },
+    {
+      "table": "stored record/holdings.csv",
+      "old_rows": 2888,
+      "new_rows": 2888,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "cells_exact": 28868,
+      "cells_same_number_other_text": 12,
+      "values_differ": 0,
+      "ok": true
+    },
+    {
+      "table": "stored record/trades.csv",
+      "old_rows": 732,
+      "new_rows": 732,
+      "missing_in_new": 0,
+      "extra_in_new": 0,
+      "cells_exact": 7320,
+      "cells_same_number_other_text": 0,
+      "values_differ": 0,
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "old_code_compared": true,
+  "sessions": [
+    "2026-10-02",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-12",
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15"
+  ],
+  "excluded_sessions_new_side": [
+    "2026-10-05"
+  ],
+  "tolerance": {
+    "default": 1e-09,
+    "risk_parity_stored_2026_10_09_and_12": 1e-05
+  }
+}

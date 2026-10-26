@@ -234,3 +234,23 @@ def test_weekly_returns_use_the_last_value_on_or_before_each_wednesday():
     r = est.weekly_returns(level, ["2026-09-16", "2026-09-23", "2026-09-30"])
     assert list(r.index) == ["2026-09-23", "2026-09-30"]
     assert r["2026-09-23"] == pytest.approx(0.10) and r["2026-09-30"] == pytest.approx(99 / 110 - 1)
+
+
+@pytest.mark.db
+def test_the_owners_report_is_marked_internal_has_the_mockups_and_no_banned_wording(lab):
+    from data_platform import compliance
+    from data_platform.jobs import lab_report
+
+    text = lab_report.build(lab, "1.1.0", LAB)
+    assert "INTERNAL RESEARCH ONLY" in text and text.count("MOCK-UP FOR LEGAL REVIEW") == 3
+    assert "<script" not in text and "http" not in text                  # self-contained, nothing loaded
+    banned, allow = compliance.load_rules()
+    assert compliance.scan_text("lab-report.html", text, banned, allow) == []
+
+
+def test_the_report_refuses_a_path_inside_the_repository(tmp_path):
+    from data_platform.core.settings import REPO_ROOT
+    from data_platform.jobs import lab_report
+
+    assert lab_report.main(["--out", str(REPO_ROOT / "docs" / "lab.html")]) == 2
+    assert not (REPO_ROOT / "docs" / "lab.html").exists()

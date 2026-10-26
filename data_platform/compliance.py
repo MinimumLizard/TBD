@@ -31,6 +31,7 @@ USER_FACING = [
     "web/app/**/*.tsx",
     "web/lib/**/*.ts",
     "web/components/**/*.tsx",
+    "data_platform/jobs/lab_report.py",     # the owner's lab report: model portfolios, worded as the site would be
 ]
 
 
