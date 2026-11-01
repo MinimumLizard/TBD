@@ -190,6 +190,14 @@ def seed(conn) -> dict:
     put("cse_lab_record", "models.cse_lab_nav", [
         {"series": "1.1.0", "session_date": NEW, "portfolio": "min_variance_15", "nav": 86420975.31, "cash": 0.0,
          "holdings_value": 86420975.31, "note": "inception"}])
+    put("cse_lab_backtest", "models.cse_bt_nav", [
+        {"session_date": NEW, "policy": "quarterly", "portfolio": "min_variance_15", "nav": 64209753.18, "cash": 0.0,
+         "n_names": 15}])
+    put("cse_lab_backtest", "models.cse_bt_target", [
+        {"as_of": NEW, "policy": "quarterly", "portfolio": "min_variance_15", "symbol": "AAA.N0000", "applied": True,
+         "today": False, "weight": 0.6420975318, "risk_contribution": 1.0, "volatility": 0.2, "beta": 1.0,
+         "avg_correlation": 0.0, "sector": "Banks", "group_key": "AAA.N0000", "group_name": None, "at_cap": False,
+         "at_floor": False, "rank": 1, "in_previous": False}])
 
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
@@ -271,7 +279,9 @@ def seed(conn) -> dict:
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
         "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
                   # the portfolio lab (internal research): a weight, an expected return, a record value
-                  "0.8642097531", "86.42%", "0.7531864209", "75.32%", "86420975.31", "86,420,975", "Rs 86.4 mn"],
+                  "0.8642097531", "86.42%", "0.7531864209", "75.32%", "86420975.31", "86,420,975", "Rs 86.4 mn",
+                  # its walk-forward test: a value and a model weight
+                  "64209753.18", "64,209,753", "Rs 64.2 mn", "0.6420975318", "64.21%"],
     }
 
 

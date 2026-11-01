@@ -72,6 +72,12 @@ unpublished_outputs:
   - models.cse_lab_nav
   - models.cse_lab_holding
   - models.cse_lab_trade
+  # The lab's walk-forward test (decision 0024), internal like the rest of the lab; migration 0017 revokes them.
+  - models.cse_bt_summary
+  - models.cse_bt_nav
+  - models.cse_bt_event
+  - models.cse_bt_target
+  - models.cse_bt_trade
 
 # Models computed for the owner's research only: no tier, every output unpublished, and left out of the website's copy
 # of the registry entirely (no methods page, no plans entry, no API listing).
@@ -79,6 +85,7 @@ internal_models:
   - cse_risk_estimates
   - cse_portfolio_lab
   - cse_lab_record
+  - cse_lab_backtest
 # Directors' and accounts' names (models.cse_dealing_as_filed, models.cse_flow_actor) are shown: the owner's decision of
 # 2026-10-19 (decision 0021); the lawyer's review before anything is public covers them.
 # Shareholders' names (models.cse_holding: the top-20 lists; models.cse_ownership_detail: controllers and chains),

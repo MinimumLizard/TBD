@@ -1,0 +1,54 @@
+name: cse_lab_backtest
+market: cse
+title_key: internal.cse_lab_backtest.title       # internal research: not on the site (config/entitlements.yaml)
+summary_key: internal.cse_lab_backtest.summary
+disclaimer_key: general
+requires_datasets:
+  - cse.indices_daily_current        # the ASPI: the calendar, the market proxy and the market benchmark
+  - cse.prices_daily_current         # closes (to value holdings), turnover and the days each share traded
+  - cse.security_list                # the securities listed (as first recorded, for earlier dates)
+  - cse.company_profiles             # each share's CSE sector label
+  - cse.sector_overrides             # the owner's sector assignments (config/sector_overrides.yaml)
+  - rates.cbsl_monthly_current       # the CBSL's 12-month treasury bill yield (risk-free rate, bills benchmark)
+outputs:
+  - models.cse_bt_summary            # per policy and portfolio: return, volatility, largest fall, rebalances, costs
+  - models.cse_bt_nav                # per session, policy and portfolio: value
+  - models.cse_bt_event              # each rebalance (inception, scheduled, threshold) and drift-band repair
+  - models.cse_bt_target             # the rules' weights on each date they were computed, with what explains them
+  - models.cse_bt_trade              # each change of shares and each corporate action, with its cost
+versions:
+  - method_version: "1.0.0"
+    status: current
+    requires_models:
+      cse_total_returns: "1.0.0"     # each share's total-return index (the weekly returns)
+      cse_ownership: "1.0.0"         # the ownership groups (the 20 % group cap)
+      cse_corporate_actions: "1.0.0" # the corporate actions in use, booked on holdings on their ex-date
+    parameters:
+      # the lab's estimates (cse_risk_estimates 1.1.0), with its preview rule while a full year is missing
+      min_history_weeks: 52
+      preview_min_weeks: 26
+      min_traded_share: 0.80
+      min_median_turnover_lkr: 1000000
+      risk_free: {source: cbsl_tb_12m, publication_delay_months: 1}
+      equity_risk_premium: 0.06      # ASSUMPTION, used only for CAPM expected returns (maximum Sharpe)
+      # the lab's portfolios (cse_portfolio_lab 1.1.0)
+      max_weight: 0.10
+      max_sector_weight: 0.30
+      max_group_weight: 0.20
+      participation: 0.20
+      days_to_build: 10
+      notional_lkr: 1000000
+      fewer_names: {sizes: [10, 15], kinds: [min_variance, max_sharpe, equal_weight], buffer: 1.5}
+      portfolios: [min_variance_10, max_sharpe_10, equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
+      # holding them (cse_lab_record 1.1.0)
+      record_notional_lkr: 1000000
+      cost_per_side: 0.0112          # VERIFY against the current CSE cost schedule
+      dividend_withholding: 0.0
+      rebalance_months: [1, 4, 7, 10]
+      band_relative: 0.25
+      band_absolute: 0.02
+      min_trade_lkr: 2500
+      # the rebalancing policies (new)
+      policies: [quarterly, dynamic]
+      te_threshold: 0.03             # dynamic: rebalance at a monthly check when the holdings' estimated tracking
+                                     # error against the rules' new portfolio exceeds 3 % a year

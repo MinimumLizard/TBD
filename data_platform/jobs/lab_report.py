@@ -26,6 +26,7 @@ from ..core.settings import REPO_ROOT
 from ..models import registry
 from ..models._lib import cse_optimize as opt
 from ..models.cse_portfolio_lab import compute as lab_model
+from . import lab_backtest_report as bt_report
 
 SIZES = (25, 20, 15, 12, 10, 8, 6, 5)
 KINDS = ("min_variance", "max_sharpe")
@@ -274,7 +275,12 @@ table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #d8dde6;paddi
 th{background:#f2f4f8}.small td{font-size:13px}.warn{background:#fff3cd;border:1px solid #e0c060;padding:8px 12px}
 .mockup{border:2px dashed #b03030;padding:8px 14px;margin:14px 0}.mock{color:#b03030;font-weight:bold}
 .note{color:#555;font-size:13px}svg{width:100%;max-width:640px;font-size:11px}.axis{stroke:#888}
-.frontier{fill:none;stroke:#2a5db0;stroke-width:2}circle{fill:#b05a2a}"""
+.frontier{fill:none;stroke:#2a5db0;stroke-width:2}circle{fill:#b05a2a}
+.lab-chart{margin:12px 0}.lab-chart svg{max-width:100%;font-size:11px}.lab-chart .grid{stroke:#e5e5df}
+.lab-chart .base{stroke:#999;stroke-dasharray:2 3}.lab-chart figcaption{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}
+.lab-chart .lg i{display:inline-block;width:12px;height:3px;margin-right:5px;vertical-align:middle}
+.explain{background:#f2f4f0;border-radius:8px;padding:8px 14px}.small{font-size:13px}.muted{color:#5d625c}
+ol.steps li{margin-bottom:6px}"""
 
 
 def build(conn, version: str, params: dict | None = None) -> str:
@@ -290,6 +296,15 @@ def build(conn, version: str, params: dict | None = None) -> str:
         parts.append("<p>No estimate date with portfolios yet for this version (the estimates may still be waiting: "
                      "for a year of weekly returns, the private settings, or a published bill yield).</p>")
     else:
+        bt_params = manifests["cse_lab_backtest"].current.parameters
+        names = {r["symbol"]: r["name"] for r in q(conn, "select symbol, name from models.cse_security_reference "
+                                                         "where name is not null")}
+        parts.append(bt_report.section_intro())
+        parts.append(bt_report.section_rules(bt_params))
+        parts.append(bt_report.section_backtest(conn))
+        parts.append(bt_report.section_today(conn, names))
+        parts.append("<h2>Workings</h2><p class=\"note\">The lab's full computation on the latest estimate date: the "
+                     "universe, every portfolio, the frontier, the effect of fewer names and the forward record.</p>")
         day = lab["as_of"]
         summary, prob = problem_at(conn, version, day, lab["notional_lkr"], params)
         uni = q(conn, "select * from models.cse_risk_universe where method_version = %s and as_of = %s", version, day)

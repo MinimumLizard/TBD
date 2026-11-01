@@ -254,3 +254,82 @@ def test_the_report_refuses_a_path_inside_the_repository(tmp_path):
 
     assert lab_report.main(["--out", str(REPO_ROOT / "docs" / "lab.html")]) == 2
     assert not (REPO_ROOT / "docs" / "lab.html").exists()
+
+
+# --- the walk-forward test (cse_lab_backtest) ------------------------------------------------------------------------
+
+BT_PORTFOLIOS = [f"{kind}_{k}" for k in (2, 3) for kind in ("min_variance", "max_sharpe", "equal_weight")]
+BT_PARAMS = {**PARAMS, "cse_lab_backtest": {
+    "risk_free": {"source": "fixed", "annual": 0.10}, "max_weight": 0.5, "max_sector_weight": 1.0,
+    "max_group_weight": 1.0, "fewer_names": {"sizes": [2, 3], "kinds": ["min_variance", "max_sharpe", "equal_weight"],
+                                             "buffer": 1.5},
+    "portfolios": BT_PORTFOLIOS}}
+BT_MODELS = MODELS + ["cse_lab_backtest"]
+
+
+def bt_rows(conn, table, where="true"):
+    return rows(conn, table, "1.0.0", where)
+
+
+@pytest.mark.db
+def test_the_backtest_starts_when_the_rules_first_can_run_and_covers_both_policies(conn, store, tmp_path):
+    load(conn, store)
+    settings(conn, tmp_path)
+    run_models(conn, BT_MODELS, BT_PARAMS)
+    summary = {(r["policy"], r["portfolio"]): r for r in bt_rows(conn, "models.cse_bt_summary")}
+    assert set(summary) == {(p, x) for p in ("quarterly", "dynamic") for x in BT_PORTFOLIOS + ["market", "bills"]}
+    first = conn.execute("select min(session_date) d from cse.indices_daily").fetchone()["d"]
+    start = {r["start_date"] for r in summary.values()}
+    assert len(start) == 1 and (start.pop() - first).days >= 26 * 7       # 26 weekly returns before the first date
+    nav = bt_rows(conn, "models.cse_bt_nav")
+    first_day = min(r["session_date"] for r in nav)
+    assert all(r["nav"] == pytest.approx(1_000_000) for r in nav
+               if r["session_date"] == first_day and r["portfolio"] in ("market", "bills"))
+    # bills grow at the stated rate, never fall
+    bills = sorted((r["session_date"], r["nav"]) for r in nav if r["portfolio"] == "bills" and r["policy"] == "quarterly")
+    assert all(b >= a for (_, a), (_, b) in zip(bills, bills[1:])) and bills[-1][1] > bills[0][1]
+    # every portfolio paid the cost of its first purchases
+    events = bt_rows(conn, "models.cse_bt_event")
+    inception = [e for e in events if e["kind"] == "inception"]
+    assert len(inception) == 2 * len(BT_PORTFOLIOS) and all(e["cost"] > 0 for e in inception)
+
+
+@pytest.mark.db
+def test_quarterly_rebalances_only_on_quarter_dates_and_dynamic_only_on_monthly_checks(conn, store, tmp_path):
+    load(conn, store)
+    settings(conn, tmp_path)
+    run_models(conn, BT_MODELS, BT_PARAMS)
+    events = [e for e in bt_rows(conn, "models.cse_bt_event") if e["kind"] in ("scheduled", "threshold")]
+    sessions = sorted(r["session_date"] for r in conn.execute(
+        "select distinct session_date from cse.indices_daily where index_code = 'ASI'"))
+    first_of_month = {min(s for s in sessions if (s.year, s.month) == (d.year, d.month)) for d in sessions}
+    for e in events:
+        assert e["session_date"] in first_of_month, e
+        if e["policy"] == "quarterly":
+            assert e["kind"] == "scheduled" and e["session_date"].month in (1, 4, 7, 10)
+        if e["kind"] == "threshold":
+            assert e["policy"] == "dynamic" and (e["left_universe"] or e["tracking_error"] > 0.03)
+    targets = bt_rows(conn, "models.cse_bt_target", "today")
+    assert targets and not any(t["applied"] for t in targets)            # today's portfolio is shown, not applied
+    for p in BT_PORTFOLIOS:
+        w = [t["weight"] for t in targets if t["portfolio"] == p and t["policy"] == "dynamic"]
+        assert sum(w) == pytest.approx(1.0) and len(w) == int(p[-1])
+
+
+@pytest.mark.db
+def test_a_backtest_decision_uses_only_data_up_to_its_date(conn, store, tmp_path):
+    """Run on the data up to a cut, then with the rest: every value, rebalance, trade and model weight up to the cut is
+    unchanged (today's portfolio, which is the latest session's, aside)."""
+    cut = D("2026-08-14")
+    load(conn, store, until=cut)
+    settings(conn, tmp_path)
+    run_models(conn, BT_MODELS, BT_PARAMS)
+    tables = {"models.cse_bt_nav": "session_date", "models.cse_bt_event": "session_date",
+              "models.cse_bt_trade": "session_date", "models.cse_bt_target": "as_of"}
+    before = {t: [r for r in bt_rows(conn, t) if not r.get("today")] for t in tables}
+    assert before["models.cse_bt_nav"] and before["models.cse_bt_event"]
+    load(conn, store, since=cut)
+    run_models(conn, BT_MODELS, BT_PARAMS)
+    for t, col in tables.items():
+        after = [r for r in bt_rows(conn, t) if r[col] <= cut and not r.get("today")]
+        assert same(before[t], after), t
