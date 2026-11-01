@@ -45,6 +45,11 @@ decisions).
   left out of the web registry). Never add a page or route for them before the lawyer's view (plan §5). The owner's
   personal lab settings live in `LAB_PRIVATE_FILE` / secret `LAB_PRIVATE_YAML`, never in git. Read it with
   `jobs.lab_report`.
+- Site redesign (2026-11-01, `docs/research/retail-investor-needs-2026-11.md`): long pages use `components/Section.tsx`
+  (collapsible, a summary line, why/how, related guides) under `components/PageHead.tsx`; guides live in `lib/guides.ts`
+  with text in `messages` (`guides.<slug>`), menus in `lib/menu.ts`. The private preview (`web/scripts/export-static.mjs`)
+  holds every tier's version of each page and, with `--lab`, the internal lab report as a preview-only page: that is
+  for the owners' eyes and is never a route of the real site. The owner picks one of three palettes from the preview.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

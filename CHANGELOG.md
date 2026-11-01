@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-11-01 — Site redesign: professional look, collapsible sections, explanations, guides (owner's review)
+
+- **Why:** the owner's review of the preview (2026-11-01): the colours looked artificial, long pages needed drop-downs,
+  and the site did not explain how its parts link, why they help, or what sets it apart. Research behind the redesign:
+  `docs/research/retail-investor-needs-2026-11.md` (retail investors' needs, the Sri Lankan competitors, which all
+  cover CSE shares only, several with buy/sell "signals"; design evidence on progressive disclosure and credibility).
+- **Look:** warm paper and ink, one deep ink-blue accent, green and red only for up and down, no gradients or glows;
+  Source Serif 4 for headings and Inter for text and figures (both SIL OFL, self-hosted; Manrope removed). Charts and
+  the weekly e-mail use the same palette.
+- **Structure:** menus grouped by market (Shares, Bonds & bills, Savings, Learn; `lib/menu.ts`), folded into one
+  "Menu" on a phone. Long pages (home, stock market, share, bonds, bond, dealings) open with a heading, jump links and
+  an always-visible "At a glance"; their parts are collapsible sections (`components/Section.tsx`) whose closed
+  heading still carries a one-line summary, and each opens with "Why it matters", "How to read it" and links to the
+  guide that explains it. The share page went from about 5,000 to 2,700 pixels tall.
+- **Home page:** the promise ("Sri Lanka's markets, explained"), today's brief, starting paths by goal, how shares,
+  government securities and savings connect, what makes ZinvestIQ different, and the tiers.
+- **Learn:** fourteen guides at three levels matching the tiers (the basics, going deeper, advanced), every guide free
+  to read (`lib/guides.ts`, `/learn/<guide>`); the glossary moved to `/learn/glossary`. Plans page: who each tier is
+  for, the free previews of paid data, and questions. About page: how we work.
+- **Copy corrections found while writing:** the trades-against-quotes figure is one market-wide figure, not per bond;
+  a money-flows cluster is two or more accounts making purchases with purchases above disposals; carry and roll-down
+  are per year.
+- **Private preview:** `web/scripts/export-static.mjs` now puts every tier's version of a page in the same file, with
+  a bar to switch between Free, Plus and Pro and between three palettes (the default and two alternatives for the
+  owners to choose from), one shared stylesheet and script, and, with `--lab`, the owner's internal portfolio-lab
+  report as one page marked internal. The preview stays private; the real site still has no lab page or route.
+- **Checks:** copy lint 0; registry 18 models, 0 problems; website types, 122 unit tests (new: guides and menus), build;
+  tier-leak suite 66/66 (the new pages included).
+
 ## 2026-10-20 — The portfolio lab, internal research only (Phase 3b, part 4; decision 0023)
 
 - **Money flows completed** (`cse_flows` 1.0.0, in place: no production run yet): account names are matched with the
