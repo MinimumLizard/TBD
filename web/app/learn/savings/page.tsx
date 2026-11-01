@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import Chart from "@/components/Chart";
+import PageHead from "@/components/PageHead";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import StatTile from "@/components/StatTile";
@@ -73,8 +74,7 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <h1>{t("savings.title")}</h1>
-      <p className="lead">{t("savings.lead")}</p>
+      <PageHead eyebrow={t("menu.savings.label")} title={t("savings.title")} lead={t("savings.lead")} />
       {through && <p className="asof">{t("savings.latest", { month: monthYear(through) })}</p>}
 
       {latest && (

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import Explain from "@/components/Explain";
+import PageHead from "@/components/PageHead";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import PreviewNote from "@/components/PreviewNote";
@@ -31,8 +33,9 @@ export default async function ZscoresPage({ searchParams }: { searchParams: Prom
     .sort((a, b) => maturity(a.isin_b).localeCompare(maturity(b.isin_b)));
   return (
     <>
-      <h1>{t("zscores.title")}</h1>
-      <p className="lead">{t("zscores.intro")}</p>
+      <PageHead eyebrow={<>{t("bonds.eyebrow")} · <span className="tier-pill plus">{t("tiers.plus")}</span></>}
+                title={t("zscores.title")} lead={t("zscores.intro")} />
+      <Explain why={t("zscores.why")} how={<p>{t("zscores.how")}</p>} related={[{ href: "/learn/bond-relative-value", label: t("bonds.guideRv") }, { href: "/learn/yield-curve", label: t("bonds.guideCurve") }]} />
       {!z.access.allowed ? (
         <Locked access={z.access} />
       ) : (

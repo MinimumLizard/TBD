@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
+import PageScripts from "@/components/PageScripts";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { getViewer } from "@/lib/viewer";
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </NextIntlClientProvider>
         </main>
         <SiteFooter />
+        <PageScripts />
       </body>
     </html>
   );

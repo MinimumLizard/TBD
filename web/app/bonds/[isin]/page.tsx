@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import PageHead from "@/components/PageHead";
+import Section from "@/components/Section";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
@@ -58,21 +60,30 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
   const lastC = c[c.length - 1];
   const recentTrades = (trades.data ?? []).slice(-10).reverse();
 
+  const recentAll = trades.data ?? [];
+  const lastTrade = recentAll[recentAll.length - 1];
+  const parts = [
+    { id: "bond", label: t("bond.sections.bond") },
+    { id: "curve", label: t("bond.sections.curve") },
+    { id: "unusual", label: t("bond.sections.unusual") },
+    { id: "trades", label: t("bond.sections.trades") },
+    { id: "carry", label: t("bond.sections.carry") },
+  ];
   return (
     <>
-      <h1>{title}</h1>
-      {bond && (
-        <p className="lead">
-          {[bond.coupon_pct != null ? `${t("bond.coupon")} ${percent(bond.coupon_pct, 2)}` : null,
-            `${t("bond.maturity")} ${date(bond.maturity_date)}`,
-            yearsLeft != null ? `${num(yearsLeft, 1)} ${t("bonds.years").toLowerCase()}` : null].filter(Boolean).join(" · ")}
-        </p>
-      )}
+      <PageHead
+        eyebrow={t("bond.eyebrow")}
+        title={title}
+        lead={bond ? [bond.coupon_pct != null ? `${t("bond.coupon")} ${percent(bond.coupon_pct, 2)}` : null,
+                      `${t("bond.maturity")} ${date(bond.maturity_date)}`,
+                      yearsLeft != null ? `${num(yearsLeft, 1)} ${t("bonds.years").toLowerCase()}` : null].filter(Boolean).join(" · ") : undefined}
+        meta={ref.access.allowed ? <AsOf day={last?.obs_date ?? null} calendar="lk_bond_market" /> : null}
+        parts={ref.access.allowed ? parts : undefined}
+      />
       {!ref.access.allowed ? (
         <Locked access={ref.access} />
       ) : (
         <>
-          <AsOf day={last?.obs_date ?? null} calendar="lk_bond_market" />
           {isSynthetic(isin) && <div className="notice warn">{t("bond.synthetic")}</div>}
           <div className="tiles">
             <StatTile label={t("bonds.mid")} value={percent(last?.mid_yield, 3)}
@@ -101,9 +112,13 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
             )}
           </div>
 
-          <div className="grid two" style={{ marginTop: 16 }}>
-            <section className="card">
-              <h2>{t("bond.facts")}</h2>
+          <Section id="bond" open title={t("bond.sections.bond")}
+                   summary={t("bond.sections.bondSum", { mid: percent(last?.mid_yield, 3), maturity: date(bond?.maturity_date) })}
+                   why={t("bond.sections.bondWhy")} how={<p>{t("bond.sections.bondHow")}</p>}
+                   related={[{ href: "/learn/bonds-basics", label: t("bonds.guideBonds") }]}>
+          <div className="grid two">
+            <section>
+              <h3>{t("bond.facts")}</h3>
               <dl className="facts">
                 <dt>ISIN</dt>
                 <dd>{isSynthetic(isin) ? NONE : isin}</dd>
@@ -133,21 +148,20 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
                 )}
               </dl>
             </section>
-            <section className="card">
-              <h2><Term id="yield">{t("bond.yieldChart")}</Term></h2>
+            <section>
+              <h3><Term id="yield">{t("bond.yieldChart")}</Term></h3>
               <Chart label={t("bond.yieldChart")} height={240}
                      option={lineOption([{ name: title, points: history.map((q) => [q.obs_date, q.mid_yield]) }], "%", { area: true })} />
             </section>
           </div>
+          </Section>
         </>
       )}
 
-      <div className="section-head">
-        <h2>{t("bond.analysisTitle")}</h2>
-      </div>
-      <div className="grid two">
-        <section className="card">
-          <h3><Term id="residual">{t("bond.residualChart")}</Term> <span className="tier-pill free">{t("tiers.free")}</span></h3>
+      <Section id="curve" title={t("bond.sections.curve")}
+               summary={residuals.access.allowed && lastRes ? t("bond.sections.curveSum", { bp: signed(lastRes.residual_bp, 1), date: date(lastRes.obs_date) }) : undefined}
+               why={t("bond.sections.curveWhy")} how={<p>{t("bond.sections.curveHow")}</p>}
+               related={[{ href: "/learn/bond-relative-value", label: t("bonds.guideRv") }, { href: "/learn/yield-curve", label: t("bonds.guideCurve") }]}>
           {!residuals.access.allowed ? (
             <Locked access={residuals.access} />
           ) : (
@@ -157,9 +171,11 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
                      option={lineOption([{ name: title, points: res.map((p) => [p.obs_date, Math.round(p.residual_bp * 10) / 10]) }], "bp", { zeroLine: true })} />
             </>
           )}
-        </section>
-        <section className="card">
-          <h3><Term id="zscore">{t("bond.zTitle")}</Term> <span className="tier-pill plus">{t("tiers.plus")}</span></h3>
+      </Section>
+      <Section id="unusual" tier="plus" title={t("bond.sections.unusual")}
+               summary={zs.access.allowed && lastZ ? t("bond.sections.unusualSum", { z: signed(lastZ.zscore, 2), date: date(lastZ.obs_date) }) : t("bond.sections.unusualLocked")}
+               why={t("bond.sections.unusualWhy")} how={<p>{t("bond.sections.unusualHow")}</p>}
+               related={[{ href: "/learn/bond-relative-value", label: t("bonds.guideRv") }]}>
           {!zs.access.allowed ? (
             <Locked access={zs.access} />
           ) : (
@@ -180,11 +196,12 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
               )}
             </>
           )}
-        </section>
-      </div>
+      </Section>
 
-      <section className="card" style={{ marginTop: 16 }}>
-        <h3>{t("bond.tradesTitle")} <span className="tier-pill free">{t("tiers.free")}</span></h3>
+      <Section id="trades" title={t("bond.sections.trades")}
+               summary={trades.access.allowed ? (lastTrade ? t("bond.sections.tradesSum", { date: date(lastTrade.obs_date), y: percent(lastTrade.observed_yield, 3) }) : t("bond.tradesNone")) : undefined}
+               why={t("bond.sections.tradesWhy")} how={<p>{t("bond.sections.tradesHow")}</p>}
+               related={[{ href: "/learn/trades-vs-quotes", label: t("bond.guideTrades") }]}>
         {!trades.access.allowed ? (
           <Locked access={trades.access} />
         ) : (
@@ -216,10 +233,12 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
             )}
           </>
         )}
-      </section>
+      </Section>
 
-      <section className="card" style={{ marginTop: 16 }}>
-        <h3>{t("bond.carryTitle")} <span className="tier-pill pro">{t("tiers.pro")}</span></h3>
+      <Section id="carry" tier="pro" title={t("bond.sections.carry")}
+               summary={carry.access.allowed && lastC ? t("bond.sections.carrySum", { d: num(lastC.duration, 2), total: signed(lastC.total_bp, 0) }) : t("bond.sections.carryLocked")}
+               why={t("bond.sections.carryWhy")} how={<p>{t("bond.sections.carryHow")}</p>}
+               related={[{ href: "/learn/carry-rolldown", label: t("bond.guideCarry") }, { href: "/learn/duration-convexity", label: t("bond.guideDuration") }]}>
         {!carry.access.allowed ? (
           <Locked access={carry.access} />
         ) : !lastC ? (
@@ -261,7 +280,7 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
             )}
           </>
         )}
-      </section>
+      </Section>
 
       <ModelFooter models={["bond_identity", "bond_ns_curve", "bond_liquidity", "bond_rv_zscores", "bond_carry"]} />
     </>

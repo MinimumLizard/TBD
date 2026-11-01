@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import Brief from "@/components/Brief";
 import BreadthBar from "@/components/BreadthBar";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
@@ -47,30 +48,26 @@ export default async function Home() {
     curve: fit ? { y1: ns(fit, 1), y5: ns(fit, 5), y10: ns(fit, 10) } : null,
   });
 
+  const when = session || fit ? t("home.when", { cse: date(session?.session_date), bonds: date(fit?.obs_date) }) : null;
   return (
     <>
-      <section className="hero">
-        <div className="eyebrow">{t("home.eyebrow")}</div>
+      <section className="intro">
+        <p className="eyebrow">{t("home.eyebrow")}</p>
         <h1>{t("home.heroTitle")}</h1>
-        {summary.length ? (
-          <ul>
-            {summary.map((line) => (
-              <li key={line.key}>{t(line.key as never, line.values as never)}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>{t("home.heroSub")}</p>
-        )}
-        {(session || fit) && (
-          <p className="when">
-            {t("home.when", { cse: date(session?.session_date), bonds: date(fit?.obs_date) })}
-          </p>
-        )}
+        <p className="lead">{t("home.heroLead")}</p>
+        <ul className="trust">
+          <li>{t("home.trust1")}</li>
+          <li>{t("home.trust2")}</li>
+          <li>{t("home.trust3")}</li>
+        </ul>
       </section>
+
+      <Brief title={t("home.briefTitle")} lines={summary.map((line) => t(line.key as never, line.values as never))} when={when} />
 
       <div className="section-head">
         <h2>{t("home.snapshot")}</h2>
       </div>
+      <p className="small muted" style={{ marginTop: -4 }}>{t("home.snapshotLead")}</p>
       {!tape.access.allowed ? (
         <Locked access={tape.access} />
       ) : (
@@ -123,6 +120,7 @@ export default async function Home() {
                 <Chart label={t("cse.aspiChart")} height={240}
                        option={lineOption([{ name: "ASPI", points: aspi.data.map((r) => [r.session_date, r.value]) }], undefined, { area: true })} />
               )}
+              <p className="small muted">{t("home.cseWhy")}</p>
               <p className="small muted"><Term id="aspi" /> · <Term id="turnover" /> · <Term id="foreign" /></p>
             </>
           )}
@@ -148,6 +146,7 @@ export default async function Home() {
                   names: { quotes: t("bonds.quotes"), wide: t("bonds.wideQuotes"), trades: t("bonds.trades"), curve: t("bonds.curve"), years: t("bonds.years"), yield: t("bonds.yield") },
                 })}
               />
+              <p className="small muted">{t("home.bondsWhy")}</p>
               <p className="small muted"><Term id="curve" /> · <Term id="yield" /> · <Term id="bp" /></p>
             </>
           ) : (
@@ -157,26 +156,58 @@ export default async function Home() {
       </div>
 
       <div className="section-head">
-        <h2>{t("home.learnTitle")}</h2>
-        <Link className="more" href="/learn">{t("home.learnAll")} →</Link>
+        <h2>{t("home.startTitle")}</h2>
       </div>
-      <div className="learn-cards">
-        {([["1", "/learn#aspi"], ["2", "/learn#yield"], ["4", "/learn/savings"], ["3", "/methods"]] as const).map(([n, href]) => (
-          <Link key={n} href={href} className="card">
-            <span className="kicker">{t(`home.learn${n}Kicker`)}</span>
-            <strong className="display">{t(`home.learn${n}Title`)}</strong>
-            <span className="muted small">{t(`home.learn${n}Body`)}</span>
+      <p className="muted" style={{ marginTop: -4 }}>{t("home.startLead")}</p>
+      <div className="paths">
+        {([["1", "/learn/savings"], ["2", "/learn/shares-basics"], ["3", "/cse/shares"], ["4", "/bonds"]] as const).map(([n, href]) => (
+          <Link key={n} href={href}>
+            <span className="p-who">{t(`home.path${n}Who`)}</span>
+            <span className="p-what">{t(`home.path${n}What`)}</span>
+            <span className="p-go">{t(`home.path${n}Go`)} →</span>
           </Link>
         ))}
       </div>
 
-      <section className="card" style={{ marginTop: 24 }}>
-        <div className="card-head">
-          <h2>{t("home.plansTitle")}</h2>
-          <Link className="more" href="/plans">{t("home.plansLink")} →</Link>
-        </div>
-        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>{t("home.plansBody")}</p>
-      </section>
+      <div className="section-head">
+        <h2>{t("home.linksTitle")}</h2>
+      </div>
+      <p className="muted" style={{ marginTop: -4 }}>{t("home.linksLead")}</p>
+      <div className="links3">
+        {([["1", "/learn/yield-curve"], ["2", "/learn/savings"], ["3", "/learn/shares-basics"]] as const).map(([n, href]) => (
+          <div key={n}>
+            <h3>{t(`home.link${n}Title`)}</h3>
+            <p>{t(`home.link${n}Body`)}</p>
+            <Link className="more" href={href}>{t(`home.link${n}Go`)} →</Link>
+          </div>
+        ))}
+      </div>
+
+      <div className="section-head">
+        <h2>{t("home.differsTitle")}</h2>
+      </div>
+      <ul className="differs">
+        {(["1", "2", "3", "4"] as const).map((n) => (
+          <li key={n}>
+            <strong>{t(`home.differ${n}Title`)}</strong>
+            <span>{t(`home.differ${n}Body`)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="section-head">
+        <h2>{t("home.tiersTitle")}</h2>
+        <Link className="more" href="/plans">{t("home.plansLink")} →</Link>
+      </div>
+      <p className="muted" style={{ marginTop: -4 }}>{t("home.tiersLead")}</p>
+      <div className="tier-strip">
+        {(["free", "plus", "pro"] as const).map((tier) => (
+          <div key={tier}>
+            <span className={`tier-pill ${tier}`} style={{ justifySelf: "start" }}>{t(`tiers.${tier}`)}</span>
+            <p>{t(`home.tier${tier === "free" ? "Free" : tier === "plus" ? "Plus" : "Pro"}`)}</p>
+          </div>
+        ))}
+      </div>
 
       <ModelFooter models={["cse_market_tape", "bond_ns_curve"]} />
     </>

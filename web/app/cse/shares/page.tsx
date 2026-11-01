@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import Explain from "@/components/Explain";
+import PageHead from "@/components/PageHead";
+
 import AsOf from "@/components/AsOf";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
@@ -63,8 +66,9 @@ export default async function SharesPage({ searchParams }: { searchParams: Promi
   };
   return (
     <>
-      <h1>{t("shares.title")}</h1>
-      <p className="lead">{t("shares.intro")}</p>
+      <PageHead eyebrow={t("cse.eyebrow")} title={t("shares.title")} lead={t("shares.intro")} />
+      <Explain why={t("shares.why")} how={<p>{t("shares.how")}</p>}
+               related={[{ href: "/learn/shares-basics", label: t("share.guideShares") }, { href: "/learn/company-figures", label: t("share.guideFigures") }]} />
       {!result.access.allowed ? (
         <Locked access={result.access} />
       ) : (

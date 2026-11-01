@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import PageHead from "@/components/PageHead";
+
 import { MODEL_NAMES, modelEntry } from "@/lib/registry";
 
 export async function generateMetadata() {
@@ -13,8 +15,7 @@ export default async function MethodsPage() {
   const markets = ["cse", "lk_bonds", "lk_savings"] as const;
   return (
     <>
-      <h1>{t("methods.title")}</h1>
-      <p className="lead">{t("methods.intro")}</p>
+      <PageHead eyebrow={t("methods.eyebrow")} title={t("methods.title")} lead={t("methods.intro")} />
       {markets.map((market) => (
         <section key={market}>
           <h2>{t(`methods.market_${market}`)}</h2>

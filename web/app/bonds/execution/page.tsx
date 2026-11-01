@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import Explain from "@/components/Explain";
+import PageHead from "@/components/PageHead";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
@@ -24,8 +26,9 @@ export default async function ExecutionPage() {
   const last = rows[rows.length - 1];
   return (
     <>
-      <h1>{t("execution.title")}</h1>
-      <p className="lead">{t("execution.intro")}</p>
+      <PageHead eyebrow={<>{t("bonds.eyebrow")} · <span className="tier-pill plus">{t("tiers.plus")}</span></>}
+                title={t("execution.title")} lead={t("execution.intro")} />
+      <Explain why={t("execution.why")} how={<p>{t("execution.how")}</p>} related={[{ href: "/learn/trades-vs-quotes", label: t("bond.guideTrades") }]} />
       {!gap.access.allowed ? (
         <Locked access={gap.access} />
       ) : (

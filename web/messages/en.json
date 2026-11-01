@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "ZinvestIQ",
-    "tagline": "Sri Lanka's markets, made clear",
+    "tagline": "Sri Lanka's markets, explained",
     "skip": "Skip to content"
   },
   "nav": {
@@ -48,11 +48,11 @@
     "cseTitle": "Stock market",
     "bondsTitle": "Government bond yield curve",
     "more": "More",
-    "eyebrow": "Today in Sri Lankan markets",
-    "heroTitle": "Sri Lanka's markets, made clear",
+    "eyebrow": "Sri Lankan markets",
+    "heroTitle": "Sri Lanka's markets, explained",
     "heroSub": "Share prices, government bond yields and what they mean, from public sources, in plain words.",
     "when": "Stock market data for {cse}; government bonds for {bonds}.",
-    "snapshot": "Market snapshot",
+    "snapshot": "The numbers behind it",
     "aspiTile": "ASPI",
     "spTile": "S&P SL20",
     "turnoverTile": "Turnover",
@@ -90,7 +90,54 @@
     "vsPrevDay": "vs the previous day",
     "learn4Kicker": "Savings",
     "learn4Title": "Fixed deposits, bills and inflation",
-    "learn4Body": "What Rs 100,000 grew to in a fixed deposit and in treasury bills since 2003, before and after tax and inflation."
+    "learn4Body": "What Rs 100,000 grew to in a fixed deposit and in treasury bills since 2003, before and after tax and inflation.",
+    "heroLead": "The share market, government bonds and treasury bills, and fixed-deposit rates in one place. Every number comes with what it means, why it matters and how it was calculated. No tips, signals or ratings.",
+    "trust1": "Public sources: the CSE, the Central Bank, the Ministry of Finance",
+    "trust2": "Every method published, with a version number",
+    "trust3": "Information and education, never advice",
+    "briefTitle": "Today in brief",
+    "snapshotLead": "The day's main figures for shares and for government bonds. Each tile shows the latest value and its recent trend.",
+    "cseWhy": "The ASPI is the broadest measure of the share market: when most large companies' prices rise, it rises.",
+    "bondsWhy": "The curve shows what the government pays to borrow for each length of time. Treasury bills, bonds and, indirectly, fixed-deposit rates are priced around it.",
+    "startTitle": "Where to start",
+    "startLead": "Pick the description closest to you. Each path leads to a short guide and the part of the site it explains.",
+    "path1Who": "I keep my savings in fixed deposits",
+    "path1What": "How fixed deposits, treasury bills and inflation compared since 2003, before and after tax.",
+    "path1Go": "Compare savings",
+    "path2Who": "I'm new to the share market",
+    "path2What": "What a share is, what moves the market, and how to read a share's page step by step.",
+    "path2Go": "Start the guide",
+    "path3Who": "I already own shares",
+    "path3What": "Each company's return with dividends included, its figures, who owns it, and what its directors traded.",
+    "path3Go": "Find your shares",
+    "path4Who": "I follow bonds and bills",
+    "path4What": "Today's yield curve, every government bond measured against it, and how dealers' quotes compare with trades.",
+    "path4Go": "See the curve",
+    "linksTitle": "How Sri Lanka's markets fit together",
+    "linksLead": "Shares, government securities and savings are priced against each other. Interest rates connect them.",
+    "link1Title": "Interest rates set the starting point",
+    "link1Body": "Treasury bill and bond yields are what the government pays to borrow, from three months to twenty years. They follow the Central Bank's policy and the government's borrowing needs, and they are the safest rupee return available.",
+    "link1Go": "How the yield curve works",
+    "link2Title": "Savings are priced around them",
+    "link2Body": "Banks set fixed-deposit rates with treasury bill yields in view: when bill yields rise, deposit rates usually follow, with a lag. What counts for a saver is the return left after tax and inflation.",
+    "link2Go": "FDs, bills and inflation",
+    "link3Title": "Shares are measured against them",
+    "link3Body": "A share's dividends and profits are uncertain, so investors compare them with the certain return on a government bill. When yields are high, shares have to offer more to attract money; when yields fall, the comparison changes.",
+    "link3Go": "Shares, step by step",
+    "differsTitle": "What makes ZinvestIQ different",
+    "differ1Title": "The whole picture",
+    "differ1Body": "Shares, government bonds and bills, and savings side by side. Most Sri Lankan market sites cover listed shares only.",
+    "differ2Title": "Explained, not rated",
+    "differ2Body": "No signals, scores, stances or forecasts. We show what the numbers mean and how to read them; the decisions stay yours.",
+    "differ3Title": "Numbers you can check",
+    "differ3Body": "Every figure comes from a published method with a version number. Share returns include dividends, splits and rights issues, which the CSE's prices leave out.",
+    "differ4Title": "Disclosures made readable",
+    "differ4Body": "Directors' dealings, shareholder lists and company figures from the companies' own filings, each linked to the original document.",
+    "tiersTitle": "Free to start",
+    "tiersLead": "Everything you need to understand the markets is free. The paid plans add tools for following government bonds closely, and money flows on the day.",
+    "tierFree": "Daily markets, every share's page, the yield curve, the savings comparison, and every guide.",
+    "tierPlus": "Each bond's full history against the curve, how unusual its position is, trades against quotes, and money flows on the day.",
+    "tierPro": "Carry, roll-down, duration and convexity for every bond: what a bond earns and how its price reacts to rate changes."
   },
   "cse": {
     "title": "Stock market",
@@ -155,7 +202,37 @@
       "UTI": "Utilities",
       "RE": "Real estate"
     },
-    "noTurnover": "The CSE's turnover figures for this session were not collected (the session was filled in from the price history), so the most-traded list and the largest moves are not shown."
+    "noTurnover": "The CSE's turnover figures for this session were not collected (the session was filled in from the price history), so the most-traded list and the largest moves are not shown.",
+    "eyebrow": "Shares",
+    "leadLong": "The Colombo Stock Exchange's day in one page: where the indices closed, how much traded, how many shares rose and fell, what foreign investors did, and which shares moved most.",
+    "sections": {
+      "indices": "The indices",
+      "indicesSum": "ASPI {aspi} ({aspiPct}) · S&P SL20 {sp} ({spPct})",
+      "indicesWhy": "An index sums up the market in one number. The ASPI covers every listed company, weighted by size; the S&P SL20 follows 20 large, frequently traded companies.",
+      "indicesHow": "Read the change against recent days rather than on its own: a 1% day is large on the CSE. When the ASPI and the S&P SL20 move apart, the largest companies are moving differently from the rest.",
+      "activity": "How much traded",
+      "activitySum": "Turnover {turnover} · {trades} trades",
+      "activityWhy": "Turnover shows how much money changed hands. A move on heavy turnover reflects many investors; on light turnover, a few trades can move prices.",
+      "activityHow": "Compare each figure with its 20-session average, shown under it: 1.5× means half again as much as usual.",
+      "breadth": "Rises, falls and foreign investors",
+      "breadthSum": "{up} rose, {down} fell · foreign investors net {net}",
+      "breadthWhy": "Breadth shows whether a move was shared by most companies or driven by a few large ones. Foreign investors' net flow shows whether money from abroad came in or went out.",
+      "breadthHow": "An index can rise while more shares fall than rise, when a few large companies go up. Foreign flows on one day can come from a single large trade; look at them over several days.",
+      "valuation": "The market's valuation",
+      "valuationSum": "P/E {per} · P/B {pbv} · Dividend yield {dy}",
+      "valuationWhy": "These figures relate the whole market's price to its companies' combined profits, net assets and dividends, as the CSE publishes them.",
+      "valuationHow": "Compare them with the market's own history and with government bond yields: a dividend yield well below the treasury bill yield means investors are counting on growth.",
+      "movers": "Most traded, largest rises and falls",
+      "moversSum": "Most traded today: {symbol}",
+      "moversWhy": "The day's most traded shares show where investors' attention was; the largest moves show which prices changed most.",
+      "moversHow": "Large percentage moves on small turnover can be a single trade, so the lists of rises and falls include only shares with meaningful turnover.",
+      "sectors": "Sector indices",
+      "sectorsSum": "{count} sector indices: {up} rose, {down} fell",
+      "sectorsWhy": "Sector indices show which parts of the economy the market's moves came from: banks, consumer companies, manufacturing and so on.",
+      "sectorsHow": "A sector with few companies can move sharply on one company's news; check the share pages behind a large sector move."
+    },
+    "guideShares": "Shares, step by step",
+    "guideMap": "How the markets fit together"
   },
   "shares": {
     "title": "Shares",
@@ -181,7 +258,9 @@
     "pe": "P/E",
     "pb": "P/B",
     "dy": "Div. yield",
-    "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile)."
+    "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile).",
+    "why": "One table for every listed share, so a company can be found and compared with the rest of the market: its latest price, how it moved against the ASPI, and its valuation figures.",
+    "how": "Sort by any column by selecting its heading. Returns against the ASPI show whether a share's price did better or worse than the market over the same period. P/E, P/B and dividend yield come from each company's latest interim report; compare them between similar companies rather than across the whole market. Select a share for its full page."
   },
   "dealings": {
     "title": "Directors' dealings",
@@ -272,7 +351,27 @@
     "accountsTitle": "Accounts that dealt",
     "accountsIntro": "Each account that disclosed dealings in the {window} to {date}, by the total value dealt in either direction. An account is a director, or a related party such as a family member or a company.",
     "accountName": "Account",
-    "companiesDealt": "Companies (net)"
+    "companiesDealt": "Companies (net)",
+    "guideFlows": "Money flows, explained",
+    "sections": {
+      "recent": "Latest dealings",
+      "recentSum": "The latest {count} dealings disclosed; the most recent on {date}",
+      "recentWhy": "Listed companies must tell the CSE when their directors, or accounts related to them, trade the company's shares. Every investor can see what the people closest to a company did.",
+      "recentHow": "Each row is one transaction as the company filed it: the date of the dealing, purchase or disposal, the number of shares, the price and the value, the director and the account that dealt, and how many weekdays later it was disclosed. The notice link opens the company's own filing.",
+      "flows": "Money flows by company",
+      "flowsSum": "{count} dealings across {companies} companies in the {window}",
+      "flowsLocked": "Which companies saw the most dealing by directors and related accounts, and in which direction",
+      "flowsWhy": "One dealing can have personal reasons. Several different directors or related accounts making purchases in the same company within a short time, or large values relative to the company, are easier to notice when the dealings are added up by company.",
+      "flowsHow": "Companies are listed by total value dealt (purchases plus disposals): activity, not direction. Net is purchases less disposals. A cluster marks a company where two or more different accounts made purchases and purchases exceeded disposals. The window tabs change the period; each ends on the latest dealing date.",
+      "large": "Large dealings",
+      "largeSum": "{count} dealings of Rs 10 mn or more in the 30 days to {date}",
+      "largeWhy": "The largest single dealings are the ones most likely to matter to a company's share register and to its share price.",
+      "largeHow": "Each large dealing shows the director and the account, and marks accounts within the company's own ownership group: moves inside a group can be restructuring rather than a view on the shares.",
+      "accounts": "Accounts that dealt",
+      "accountsSum": "The {count} accounts with the largest value dealt",
+      "accountsWhy": "The same people and companies appear across several listed companies. Adding up their dealings shows who was most active across the market.",
+      "accountsHow": "Each account is named as filed, with the group it belongs to where known, the value it purchased and disposed of, and the companies it dealt in."
+    }
   },
   "share": {
     "titleSuffix": "share",
@@ -404,7 +503,54 @@
       "estate": "Estate",
       "trust": "Trust",
       "nominee": "Nominee account"
-    }
+    },
+    "eyebrow": "Shares · {sector}",
+    "eyebrowNoSector": "Shares",
+    "leadLine": "{symbol} on the Colombo Stock Exchange. Everything on this page comes from the CSE's own data and the company's filings.",
+    "glance": {
+      "close": "The price closed at {price} on {date}, {change} on the day.",
+      "closeNoTrade": "The share did not trade on {date}; its last close was {price}.",
+      "rel3mMore": "Over three months the price changed {ret}, {gap} percentage points more than the ASPI.",
+      "rel3mLess": "Over three months the price changed {ret}, {gap} percentage points less than the ASPI.",
+      "tr3m": "With dividends and share changes included, the three-month return was {tr}.",
+      "figures": "P/E {pe}, P/B {pb} and a dividend yield of {dy}, from the report for the period to {date}.",
+      "figuresLoss": "The company made a loss over the last twelve months; P/B {pb}, from the report for the period to {date}.",
+      "owners": "The 20 largest shareholders own {top20}; the largest is {name}, with {pct}.",
+      "dealings": "Directors reported {count, plural, one {# dealing} other {# dealings}} in the last year; the latest on {date}.",
+      "dealingsNone": "No directors' dealings were reported in the last year."
+    },
+    "sections": {
+      "price": "Price and returns",
+      "priceSum": "Price {ret3m} over three months; {tr3m} with dividends included",
+      "priceSumNoTr": "Price {ret3m} over three months",
+      "priceWhy": "The CSE's price drops when a dividend is paid or shares are split, so the price alone understates what shareholders received. The total-return line puts dividends and share changes back.",
+      "priceHow": "Both lines start at the same point. Where the total-return line is above the price line, dividends or share changes added to the return. The returns table compares the share with the ASPI over the same periods: a positive gap means the share's price did better than the market as a whole.",
+      "figures": "Company figures",
+      "figuresSum": "P/E {pe} · P/B {pb} · Return on equity {roe} · Dividend yield {dy}",
+      "figuresSumNone": "Figures from the company's latest interim report",
+      "figuresWhy": "These relate the share price to what the company earns, what it owns and what it pays out, so companies of different sizes can be compared.",
+      "figuresHow": "Compare a figure with the same company's own past and with similar companies, not with a fixed rule. A low P/E can reflect low expected growth or a one-off profit; after a loss, the P/E has no meaning.",
+      "owners": "Who owns it",
+      "ownersSum": "The 20 largest shareholders own {top20}; free float about {ff}",
+      "ownersSumNone": "Shareholders from the company's latest interim report",
+      "ownersWhy": "Who owns a company affects how freely its shares trade and who has a say in it. A company within a group often moves with the group's decisions.",
+      "ownersHow": "Start with the largest block and the ownership group, then the free-float estimate: the part of the company likely to change hands. A small free float can mean thin trading and larger price swings.",
+      "actions": "Dividends and other corporate actions",
+      "actionsSum": "{count, plural, one {# action} other {# actions}} recorded; the latest ex-date {date}",
+      "actionsSumNone": "No corporate actions recorded",
+      "actionsWhy": "Dividends, splits, scrip issues and rights issues change the share price without changing the value of what a shareholder owns. They explain the sudden steps in the price chart.",
+      "actionsHow": "The ex-date is the first day a purchase no longer carries the right to the dividend or issue; the price usually falls by about its value that day. A row awaiting confirmation is not used in the total return until it has been checked.",
+      "dealings": "Directors' dealings",
+      "dealingsSum": "{count, plural, one {# dealing} other {# dealings}} on record; the latest on {date}",
+      "dealingsSumNone": "No dealings reported",
+      "dealingsWhy": "Directors know their company well, so the CSE requires their dealings in its shares to be disclosed for every investor to see.",
+      "dealingsHow": "Look at the size of a dealing against the company's usual turnover, and at patterns across several directors. A single dealing can have personal reasons, such as tax, a loan or a family transfer, and is not a forecast."
+    },
+    "guideFigures": "Reading company figures",
+    "guideOwners": "Who owns a company",
+    "guideDealings": "Directors' dealings, explained",
+    "guideReturns": "Price return and total return",
+    "guideShares": "Shares, step by step"
   },
   "bonds": {
     "title": "Government bonds",
@@ -439,7 +585,35 @@
     "executionLink": "Trades against quotes",
     "carryLink": "Carry, rolldown and duration",
     "wideQuotes": "Wide quotes (little weight)",
-    "wideQuote": "wide"
+    "wideQuote": "wide",
+    "eyebrow": "Bonds & bills",
+    "leadLong": "Sri Lanka's government bonds as the dealers quoted them today, the yield curve fitted through those quotes, and each bond measured against it. Bond yields are the base on which savings rates and share valuations rest.",
+    "glance": {
+      "slopeUp": "The curve slopes upward: the 10-year yield is {bp} bp above the 1-year.",
+      "slopeDown": "The curve slopes downward: the 10-year yield is {bp} bp below the 1-year.",
+      "quoted": "Dealers quoted {n} bonds; {trades, plural, =0 {no trades were reported} one {# trade was reported} other {# trades were reported}}.",
+      "fit": "The fitted curve sits on average {rmse} bp from the dealers' quotes."
+    },
+    "sections": {
+      "curve": "Today's yield curve",
+      "curveSum": "1 year {y1} · 5 years {y5} · 10 years {y10}",
+      "curveWhy": "The curve shows what the government pays to borrow for each length of time. Every rupee interest rate, from treasury bills to fixed deposits, is set with it in view.",
+      "curveHow": "Each dot is a bond: across, the years it has left; up, its yield. The line is the smooth curve that fits them best. A dot above the line is quoted at a higher yield than bonds of a similar maturity, a dot below at a lower one. Hollow dots are quotes with a wide gap between bid and offer, which count for less in the fit.",
+      "table": "All bonds today",
+      "tableSum": "{n} bonds quoted; distance from the curve, trading activity and turnover for each",
+      "tableWhy": "The table puts every bond's quote, its distance from the curve and how actively it trades side by side, so a figure can be read with its context.",
+      "tableHow": "Bonds are listed by maturity. The distance from the curve is in basis points (100 bp = 1%). A bond that rarely trades can sit far from the curve simply because its quote is seldom tested; the activity column shows which those are. Select a bond for its full page.",
+      "further": "Going further",
+      "furtherLead": "Tools for following individual bonds closely. Each one is explained in a guide that anyone can read."
+    },
+    "tools": {
+      "zscores": "How unusual each bond's distance from the curve is today, compared with its own recent history.",
+      "execution": "How far, typically, trades were done from the dealers' quoted yields over the last 20 days.",
+      "carry": "What each bond earns if rates do not move, and how its price reacts when they do."
+    },
+    "guideCurve": "The yield curve",
+    "guideBonds": "Bonds and bills, step by step",
+    "guideRv": "Bonds off the curve"
   },
   "bond": {
     "yieldChart": "Quoted mid yield",
@@ -472,10 +646,38 @@
     "priceChange": "Price change",
     "price": "Price (per 100)",
     "duration": "Duration",
-    "convexity": "Convexity"
+    "convexity": "Convexity",
+    "eyebrow": "Bonds & bills · Treasury bond",
+    "guideTrades": "Dealer quotes and trades",
+    "guideCarry": "Carry and roll-down",
+    "guideDuration": "Duration and convexity",
+    "sections": {
+      "bond": "The bond and its yield",
+      "bondSum": "Mid yield {mid} · matures {maturity}",
+      "bondWhy": "A bond's yield is the yearly return built into today's price if it is kept until it matures. It is the number to compare with a fixed deposit or a treasury bill of a similar length.",
+      "bondHow": "The mid yield is halfway between the yield dealers quote to purchase the bond (bid) and to dispose of it (offer). A wide gap between the two means fewer dealers were ready to trade at close to one price. The chart shows how the mid yield moved over time.",
+      "curve": "Against the curve",
+      "curveSum": "{bp} bp from the curve on {date}",
+      "curveWhy": "Comparing a bond with the fitted curve shows whether it is quoted in line with bonds of a similar maturity, or higher or lower than them.",
+      "curveHow": "Above zero, the bond yields more than the curve at its maturity; below zero, less. The distance often has ordinary reasons: how often the bond trades, its coupon, or a recent auction. It describes today's quote; it says nothing about tomorrow's.",
+      "unusual": "How unusual its position is",
+      "unusualSum": "Z-score {z} on {date}",
+      "unusualLocked": "Today's distance from the curve compared with this bond's own recent history",
+      "unusualWhy": "A bond can always sit a little above or below the curve. What is informative is a distance unusual for that particular bond, which the z-score measures.",
+      "unusualHow": "0 means a typical day for this bond; +2 or −2 means a distance seen only rarely in its last 60 observations. It describes the bond's position against its own past; it is not a forecast of where the bond goes next.",
+      "trades": "Trades",
+      "tradesSum": "Latest trade {date} at {y}",
+      "tradesWhy": "Dealers' quotes show where they say they would deal; reported trades show where business was actually done.",
+      "tradesHow": "Each trade is shown with its distance from the curve on that day. Trades close to the quotes confirm them; trades far away suggest the screen was not where business would happen.",
+      "carry": "Carry, roll-down and price sensitivity",
+      "carrySum": "Duration {d} · carry and roll-down {total} bp a year",
+      "carryLocked": "What the bond earns if rates do not move, and how its price reacts when they do",
+      "carryWhy": "Carry and roll-down estimate what a bond earns, per year, if the curve stays where it is. Duration and convexity show how much its price changes when yields move.",
+      "carryHow": "Carry is the bond's yield less the cost of funding it (here, the 12-month treasury bill yield plus a small margin); roll-down is the gain as the bond ages and slides along an upward-sloping curve, measured over a quarter and stated per year. A duration of 5 means a 1% rise in yields lowers the price by about 5%. The scenario table applies those figures to yield moves of different sizes."
+    }
   },
   "zscores": {
-    "title": "Residuals against their own history",
+    "title": "Unusual positions against the curve",
     "intro": "Each bond's distance from the curve, compared with that bond's own previous 60 observations. A z-score of +2 means the residual is two standard deviations above its own recent average. This describes the data; it is not a forecast.",
     "bondsTitle": "Bonds, by maturity",
     "pairsTitle": "Pairs with {bond}",
@@ -486,13 +688,17 @@
     "pair": "Pair",
     "spread": "Spread (bp)",
     "pairsNone": "No pair with enough common history on this date.",
-    "choose": "Pairs"
+    "choose": "Pairs",
+    "why": "Every bond sits a little above or below the fitted curve for ordinary reasons. This page shows which bonds are, today, unusually far from their own normal distance, and the same for the gap between neighbouring bonds.",
+    "how": "Bonds are listed by maturity, never ranked. For each: its distance from the curve today, how far that is from its own recent average, the usual size of its daily variation (standard deviation), and the ratio of the two (the z-score). Around 0 is ordinary; beyond +2 or −2 is rare for that bond. Choose a bond to see its pairs with neighbouring bonds. Nothing here forecasts where a bond goes next."
   },
   "execution": {
     "title": "Trades against quotes",
     "intro": "Where executed trades printed relative to the dealers' quoted mid, as a 20-day median. Positive: trades at higher yields (lower prices) than the quotes.",
     "chart": "Median gap, trailing 20 days (bp)",
-    "latest": "Latest: {gap} bp over {n} bond-days"
+    "latest": "Latest: {gap} bp over {n} bond-days",
+    "why": "Dealers' screens show where they say they would deal; trades show where business was done. The gap between the two tells you how far a quoted yield can be relied on.",
+    "how": "One figure for the whole market: the median gap, over the last 20 calendar days, between the yield at which bonds traded and their quoted mid on the same day, counting every bond that both quoted and traded. Positive means trades were done at higher yields (lower prices) than the screen showed; negative, at lower yields. It is reported only when there are at least 8 such bond-days, and it describes the recent past, not a precise level."
   },
   "carry": {
     "title": "Carry, rolldown and duration",
@@ -504,7 +710,9 @@
     "carry": "Carry (bp)",
     "roll": "Rolldown (bp)",
     "total": "Total (bp)",
-    "perDuration": "Per year of duration (bp)"
+    "perDuration": "Per year of duration (bp)",
+    "why": "Two bonds with the same yield can earn different amounts over time, depending on the cost of funding them and how they age along the curve. Per unit of duration, bonds of different lengths become comparable.",
+    "how": "All figures are in basis points per year. Carry: the bond's yield less the funding rate. Roll-down: the gain as the bond ages along an unchanged curve. Their total divided by duration puts long and short bonds on the same footing. These are estimates under an unchanged curve; when yields move, duration says how much the price changes."
   },
   "methods": {
     "title": "Methods",
@@ -517,24 +725,30 @@
     "status_retired": "no longer computed",
     "market_lk_bonds": "Government bonds",
     "market_cse": "Stock market",
-    "market_lk_savings": "Savings and inflation"
+    "market_lk_savings": "Savings and inflation",
+    "eyebrow": "Learn"
   },
   "about": {
     "title": "About",
-    "what": "What this is",
-    "whatBody": "A market-information service for Sri Lankan investors: data from public sources, the methods applied to it, and the limits of both. It offers information, tools and education only.",
+    "what": "What we do",
+    "whatBody": "We collect the market's public data each day, apply stated methods to it, and show the result with an explanation of what it means and how to read it. ZinvestIQ offers information, tools and education only: it never says what to do with anyone's money.",
     "sources": "Data sources",
     "sourcesBody": "Share prices, indices and market statistics: Colombo Stock Exchange. Government bond quotes, trades, volumes and auctions: Public Debt Management Office, Ministry of Finance. Interest rates and treasury bill yields: Central Bank of Sri Lanka. Consumer prices: Department of Census and Statistics, Sri Lanka. Data is used only where the source's terms allow it.",
     "tiers": "Access",
     "tiersBody": "Most of the site is free. Some analysis will be part of paid tiers (Plus, Pro, Professional) once accounts open. The tier rules are applied on our server: information outside your tier is never sent to your browser.",
     "corrections": "Corrections",
-    "correctionsBody": "Sources are stored exactly as published, and every calculation is versioned. When a source corrects a figure, the correction is applied and the earlier value is kept on record."
+    "correctionsBody": "Sources are stored exactly as published, and every calculation is versioned. When a source corrects a figure, the correction is applied and the earlier value is kept on record.",
+    "eyebrow": "About ZinvestIQ",
+    "lead": "ZinvestIQ explains Sri Lanka's markets in plain language: the share market, government bonds and treasury bills, and savings rates, side by side, from public sources, with every method published.",
+    "differ": "How we work",
+    "differBody": "Three rules shape everything on the site. Explained, not rated: no signals, scores, stances or forecasts, anywhere. Numbers you can check: every figure comes from a published method with a version number, computed wherever possible from the data available on that day, and earlier values are kept on record when a source revises something. The whole picture: shares, government securities and savings are read together, because interest rates connect them."
   },
   "footer": {
     "rights": "© ZinvestIQ",
-    "tagline": "Information, tools and education for Sri Lankan investors. Not investment advice.",
+    "tagline": "Sri Lanka's share market, government bonds and bills, and savings, explained in plain language. Information and education, never investment advice.",
     "markets": "Markets",
-    "company": "ZinvestIQ"
+    "company": "ZinvestIQ",
+    "learn": "Learn"
   },
   "models": {
     "bond_identity": {
@@ -604,49 +818,70 @@
   },
   "plans": {
     "title": "Plans",
-    "intro": "Most of ZinvestIQ is free. The paid plans add deeper analysis. Accounts and subscriptions are not open yet; these are the planned tiers.",
+    "intro": "Everything needed to understand Sri Lanka's markets is free, and always will be: every share's page, the yield curve, the savings comparison and every guide. The paid plans add the tools for following government bonds closely, and money flows on the day. Accounts and subscriptions are not open yet; these are the planned tiers.",
     "includes": "What it includes",
     "models": "Calculations in this plan",
     "current": "You are viewing as: {tier}",
     "soon": "Opening soon",
     "free": {
-      "tagline": "Daily market data, explained",
+      "tagline": "Understand the markets",
       "features": [
-        "Stock market summary: indices, turnover, breadth and foreign flows",
-        "Every listed share: price, 52-week range and returns against the ASPI",
-        "Government bond quotes and today's yield curve",
-        "Each bond's last 30 days against the curve",
-        "Plain-language explanations and a method page for every number"
-      ]
+        "Today's share market: indices, turnover, rises and falls, foreign investors",
+        "Every listed share: total return with dividends, company figures, who owns it, directors' dealings",
+        "Government bond quotes and today's yield curve, with each bond's last 30 days against it",
+        "How unusual each bond's position is, five days later",
+        "Fixed deposits, treasury bills and inflation since 2003, with a calculator",
+        "Every guide, the glossary and a method page for every number",
+        "Money flows by company, a week after the dealings"
+      ],
+      "who": "Savers comparing fixed deposits and bills, people new to shares, and shareholders following their companies."
     },
     "plus": {
-      "tagline": "Each bond's full story",
+      "tagline": "Follow each bond closely",
       "features": [
         "Everything in Free",
         "Each bond's full history against the curve",
-        "How unusual each bond's position is today (z-scores)",
-        "Where trades print against dealer quotes"
-      ]
+        "How unusual each bond's position is today (z-scores), and its pairs with neighbouring bonds",
+        "Where trades were done against the dealers' quotes",
+        "Money flows by company and account, on the day"
+      ],
+      "who": "Investors who own or follow government bonds, and anyone who wants directors' and related accounts' activity on the day."
     },
     "pro": {
-      "tagline": "Bond income and price sensitivity",
+      "tagline": "Income and price sensitivity",
       "features": [
         "Everything in Plus",
-        "Carry, rolldown, duration and convexity for every bond",
+        "Carry, roll-down, duration and convexity for every bond",
         "Each bond's yield-change table"
-      ]
+      ],
+      "who": "Active bond investors who compare what each bond earns and how its price reacts when rates move."
     },
     "professional": {
       "tagline": "For firms and heavy users",
       "features": [
         "Everything in Pro",
         "Data downloads and the API (planned)"
-      ]
+      ],
+      "who": "Firms and researchers who need the data in their own tools."
+    },
+    "eyebrow": "Plans",
+    "whoTitle": "Who it is for",
+    "guidesLink": "Guides for this level",
+    "faqTitle": "Questions",
+    "faq": {
+      "freeQ": "Why is so much free?",
+      "freeA": "Understanding the market should not depend on paying for it. The free tier covers everything a saver or shareholder needs to read the markets; the paid tiers are for people who follow government bonds as closely as a dealer would.",
+      "previewQ": "What does a free visitor see of the paid tools?",
+      "previewA": "Each locked panel says what it would show and why that is useful. Some paid information is shown free after a delay: each bond's z-scores five days later, money flows a week later, and each bond's history against the curve for the last 30 days.",
+      "adviceQ": "Is any of this investment advice?",
+      "adviceA": "No. ZinvestIQ shows what public data says and explains how to read it. It never says what to do: no tips, signals, ratings or forecasts, in any plan.",
+      "dataQ": "Where does the data come from?",
+      "dataA": "From public sources: the Colombo Stock Exchange, the Public Debt Management Office of the Ministry of Finance, the Central Bank of Sri Lanka and the Department of Census and Statistics. Every figure links to the method that produced it."
     }
   },
   "learn": {
-    "title": "Learn the basics",
-    "intro": "Plain-language explanations of the terms used on ZinvestIQ.",
+    "title": "Learn",
+    "intro": "Plain-language guides to Sri Lanka's markets, from the basics to the tools bond professionals use. Every guide is free to read, and each links to the part of the site it explains.",
     "terms": {
       "aspi": {
         "name": "ASPI (All Share Price Index)",
@@ -846,7 +1081,11 @@
     },
     "guidesTitle": "Guides",
     "savingsGuide": "Fixed deposits, treasury bills and inflation",
-    "savingsGuideBody": "How Rs 100,000 would have grown in each since 2003, with a calculator."
+    "savingsGuideBody": "How Rs 100,000 would have grown in each since 2003, with a calculator.",
+    "savingsKicker": "Interactive",
+    "moreTitle": "Reference",
+    "glossaryTitle": "Glossary",
+    "glossaryIntro": "Every term used on ZinvestIQ, explained in a sentence or two. A dotted underline anywhere on the site links to its entry here."
   },
   "feedback": {
     "title": "Tell us what you think",
@@ -1020,5 +1259,691 @@
     "sourceCbsl": "Source: Central Bank of Sri Lanka",
     "sourceDcs": "Source: Department of Census and Statistics, Sri Lanka",
     "sourcesBoth": "Sources: Central Bank of Sri Lanka (interest rates); Department of Census and Statistics, Sri Lanka (CCPI)."
+  },
+  "ui": {
+    "whyItMatters": "Why it matters.",
+    "howToRead": "How to read it",
+    "related": "Related",
+    "onThisPage": "On this page",
+    "openAll": "Open all sections",
+    "closeAll": "Close all sections",
+    "atAGlance": "At a glance",
+    "menu": "Menu",
+    "mainMenu": "Main menu",
+    "level": "Level",
+    "readGuide": "Read the guide",
+    "minutes": "{count} min read",
+    "seeItLive": "See it on the site"
+  },
+  "menu": {
+    "plansDesc": "What is free, and what Plus and Pro add",
+    "shares": {
+      "label": "Shares",
+      "market": {
+        "title": "Market today",
+        "desc": "Indices, turnover, rises and falls, foreign investors' flows"
+      },
+      "allShares": {
+        "title": "All shares",
+        "desc": "Every listed share: returns, company figures and ownership"
+      },
+      "dealings": {
+        "title": "Directors' dealings",
+        "desc": "Shares directors and their related accounts traded, from their notices"
+      }
+    },
+    "bonds": {
+      "label": "Bonds & bills",
+      "curve": {
+        "title": "Yield curve and bonds",
+        "desc": "Today's government yield curve and every bond measured against it"
+      },
+      "zscores": {
+        "title": "Unusual positions",
+        "desc": "Bonds sitting unusually far from their normal place on the curve"
+      },
+      "execution": {
+        "title": "Trades against quotes",
+        "desc": "How far trades were done from the dealers' quoted yields"
+      },
+      "carry": {
+        "title": "Carry and rolldown",
+        "desc": "Each bond's income, roll-down and sensitivity to rate changes"
+      }
+    },
+    "savings": {
+      "label": "Savings",
+      "savings": {
+        "title": "FDs, bills and inflation",
+        "desc": "What Rs 100,000 grew to since 2003, before and after tax and inflation"
+      }
+    },
+    "learn": {
+      "label": "Learn",
+      "guides": {
+        "title": "Guides",
+        "desc": "From the basics to advanced, in plain language"
+      },
+      "glossary": {
+        "title": "Glossary",
+        "desc": "Every term on the site, explained in a sentence or two"
+      },
+      "methods": {
+        "title": "How every number is made",
+        "desc": "Published methods, each with a version number"
+      },
+      "about": {
+        "title": "About ZinvestIQ",
+        "desc": "Who we are, where the data comes from, and how we work"
+      }
+    }
+  },
+  "guides": {
+    "inShort": "In short",
+    "limitsTitle": "What it can't tell you",
+    "levels": {
+      "basics": {
+        "title": "The basics",
+        "tools": "Free tools",
+        "desc": "How Sri Lanka's markets work, and how to read every free page on the site."
+      },
+      "deeper": {
+        "title": "Going deeper",
+        "tools": "Explains the Plus tools",
+        "desc": "What sits behind the bond and money-flow tools: why bonds sit off the curve, how trades compare with quotes, and why the number of shares in a portfolio matters."
+      },
+      "advanced": {
+        "title": "Advanced",
+        "tools": "Explains the Pro tools",
+        "desc": "What a bond earns over time, and how its price reacts when interest rates move."
+      }
+    },
+    "tools": {
+      "home": "Today's markets",
+      "savings": "FDs, bills and inflation",
+      "market": "The share market today",
+      "shares": "All shares",
+      "dealings": "Directors' dealings",
+      "bonds": "Yield curve and bonds",
+      "zscores": "Unusual positions",
+      "execution": "Trades against quotes",
+      "flows": "Money flows",
+      "carry": "Carry and rolldown"
+    },
+    "markets-map": {
+      "title": "How Sri Lanka's markets fit together",
+      "summary": "Shares, government bonds and bills, and fixed deposits are priced against each other. Interest rates are the thread that connects them.",
+      "keypoints": [
+        "A rupee can be lent to a bank (a fixed deposit), lent to the government (a treasury bill or bond) or used to own part of a company (a share).",
+        "The government's borrowing rates, the yield curve, are the base: the return on the safest rupee investment for each length of time.",
+        "Fixed-deposit rates move with treasury bill yields, usually with a lag.",
+        "Shares are uncertain, so they are judged against what a government bill pays for certain.",
+        "What matters in the end is the return left after tax and inflation."
+      ],
+      "sections": [
+        {
+          "h": "Three places for a rupee",
+          "p": [
+            "A Sri Lankan saver has three main choices. A fixed deposit lends money to a bank or finance company for a set time at a set rate. A treasury bill or bond lends it to the government. A share makes the investor a part-owner of a listed company, with a claim on its future profits and dividends.",
+            "They differ in what is promised. A deposit and a government security promise a stated rupee return if they are kept to the end. A share promises nothing: its dividends and its price depend on how the company does and on what other investors will pay."
+          ]
+        },
+        {
+          "h": "The government's rates come first",
+          "p": [
+            "The government borrows by issuing treasury bills (up to a year) and treasury bonds (two to twenty years or more) at regular auctions. The yields at those auctions, and in the trading that follows, are the return on lending to the government for each length of time. Lined up by maturity, they form the yield curve.",
+            "Because the government can raise taxes and issue rupees, its rupee borrowing is treated as the lowest-risk rupee investment. Its yields are the base that other rates are built on, and they follow the Central Bank's policy rate, inflation and the government's own borrowing needs."
+          ]
+        },
+        {
+          "h": "Savings rates follow",
+          "p": [
+            "Banks compete with the government for savers' money. When treasury bill yields rise, banks usually raise deposit rates, and when bill yields fall, deposit rates follow them down, typically with a delay of weeks or months.",
+            "For a saver, the headline rate is only the start. Tax is deducted from interest, and inflation reduces what the money can purchase. The real return, what is left after both, is what the savings comparison on this site measures."
+          ]
+        },
+        {
+          "h": "Shares are measured against them",
+          "p": [
+            "A share's return is uncertain, so investors compare it with the certain return on a government bill. When bill yields are high, a share's dividends and expected growth have to offer more to attract money; when yields fall, the comparison changes in shares' favour.",
+            "This is why the share market often reacts to interest-rate news, and why the market's dividend yield and P/E are worth reading next to the yield curve."
+          ]
+        },
+        {
+          "h": "How ZinvestIQ follows the chain",
+          "p": [
+            "The home page shows the day's share market and yield curve side by side. The bonds pages show every government bond against the curve. The savings page compares fixed deposits, bills and inflation since 2003. The share pages show each company's return with dividends included, its figures and its owners. The guides explain each step."
+          ]
+        }
+      ],
+      "limits": [
+        "The links between rates and prices apply on average and over time, not every day or for every company.",
+        "Other things move markets too: company results, politics, the exchange rate and foreign investors' decisions.",
+        "This guide explains how the markets relate; it does not say which is the better place for anyone's money."
+      ]
+    },
+    "shares-basics": {
+      "title": "Shares, step by step",
+      "summary": "What a share is, what moves its price, what the indices measure, and how to read a share's page on this site.",
+      "keypoints": [
+        "A share is part-ownership of a company: a claim on its profits, paid out as dividends or kept to grow the business.",
+        "Prices on the CSE move with what investors will pay, which reflects company results, interest rates and sentiment.",
+        "The ASPI measures the whole market; the S&P SL20 its 20 largest, most traded companies.",
+        "A share's page here goes from the latest price, to its return with dividends, to its figures, owners and directors' dealings."
+      ],
+      "sections": [
+        {
+          "h": "What a share is",
+          "p": [
+            "When a company lists on the Colombo Stock Exchange, its shares can be traded between investors. Each share is a small piece of ownership. Shareholders vote at general meetings and receive the dividends the board declares.",
+            "Investing on the CSE needs an account with the Central Depository System (CDS), opened through a licensed stockbroker. The shares are held electronically in that account."
+          ]
+        },
+        {
+          "h": "What moves a share's price",
+          "p": [
+            "The price is simply the level at which the last trade was done. Over time it follows what investors expect the company to earn and pay out, and how they value those earnings against other choices, above all the yield on government securities.",
+            "Day to day, prices also move with news, with large investors' decisions and with the general mood of the market. On days with little trading, a few orders can move a price a long way."
+          ]
+        },
+        {
+          "h": "The indices",
+          "p": [
+            "The All Share Price Index (ASPI) combines the market value of every listed company, so the largest companies count for the most. The S&P Sri Lanka 20 follows 20 large, frequently traded companies. Sector indices group companies by industry.",
+            "An index can rise while most shares fall, if a few large companies go up. Market breadth, the count of shares that rose, fell or did not change, shows whether a move was widely shared."
+          ]
+        },
+        {
+          "h": "Reading a share's page",
+          "p": [
+            "At the top: the latest price and its change, where it sits in the past year's range, and the company's size (market capitalisation). Below it, 'At a glance' sums up the page in a few sentences.",
+            "Price and returns shows the price and the total return, which puts dividends and share changes back in, and compares the share with the ASPI over one week, one month and three months. Company figures relate the price to the company's profits, net assets and dividends. Who owns it lists the largest shareholders and estimates the free float. Dividends and other corporate actions list what the company paid and issued. Directors' dealings shows what its directors traded.",
+            "Each section opens with why it matters and how to read it, and links to the guide that explains it in full."
+          ]
+        }
+      ],
+      "limits": [
+        "Past prices and returns describe what happened; they do not predict what comes next.",
+        "Company figures come from interim reports that are a few months old by the time the next one appears.",
+        "Nothing on a share's page is a view on whether it suits any particular investor."
+      ]
+    },
+    "total-return": {
+      "title": "Price return and total return",
+      "summary": "Why a share's price chart understates what its shareholders received, and how dividends, splits and rights issues are put back.",
+      "keypoints": [
+        "On the ex-date of a dividend, the share price usually falls by about the dividend: shareholders have not lost anything.",
+        "Splits, scrip dividends and rights issues change the number of shares and the price without changing the value owned.",
+        "The total return puts those back, as if dividends had been kept in the shares.",
+        "Comparing companies, or a share with a fixed deposit, needs total return, not price return."
+      ],
+      "sections": [
+        {
+          "h": "Why the price alone misleads",
+          "p": [
+            "Suppose a share trades at Rs 100 and the company pays a dividend of Rs 5. From the ex-date, a purchase no longer carries the right to that dividend, so the price typically opens about Rs 5 lower. The price chart shows a fall of 5%, yet a shareholder has Rs 95 in shares and Rs 5 in cash: nothing was lost.",
+            "Over years, these steps add up. For a company that pays generous dividends, the price chart can look flat while shareholders did well."
+          ]
+        },
+        {
+          "h": "Splits, scrip and rights issues",
+          "p": [
+            "A sub-division splits each share into several, at a proportionally lower price. A scrip dividend pays the dividend in new shares instead of cash. A rights issue lets existing shareholders take up new shares, usually at a discount. All of these change the price per share, so an unadjusted chart shows jumps that are not gains or losses."
+          ]
+        },
+        {
+          "h": "How the total return is built",
+          "p": [
+            "ZinvestIQ starts from the CSE's published closing prices and each confirmed corporate action. On each ex-date it adjusts for the dividend or the change in the number of shares, so the total-return line shows the value of the shares owned at the start, with each dividend kept in the shares. Dividends are counted before withholding tax.",
+            "Corporate actions are read from the companies' announcements and checked; an action still awaiting confirmation is listed on the share's page but not used until it has been checked."
+          ]
+        },
+        {
+          "h": "Reading the two lines",
+          "p": [
+            "On a share's page, both lines start at the same point. Where the total-return line runs above the price line, dividends and share changes added to the return. The gap between them is the part of the return the price chart leaves out."
+          ]
+        }
+      ],
+      "limits": [
+        "Tax on dividends is not deducted, so the after-tax return is somewhat lower.",
+        "It assumes dividends were kept in the shares at the ex-date price; a shareholder who spent them has a different result.",
+        "A corporate action announced in an unusual way may take time to confirm, and the total return waits for it."
+      ]
+    },
+    "company-figures": {
+      "title": "Reading company figures",
+      "summary": "P/E, P/B, return on equity, earnings per share and dividend yield: what each measures, how they are computed here, and what they leave out.",
+      "keypoints": [
+        "Each figure relates the share price to something in the company's accounts: profits, net assets or dividends.",
+        "They come from the company's latest interim reports, using the last twelve months.",
+        "Compare a figure with the company's own past and with similar companies, not with a fixed number.",
+        "A single figure never tells the whole story: a low P/E can have many reasons."
+      ],
+      "sections": [
+        {
+          "h": "Earnings per share and P/E",
+          "p": [
+            "Earnings per share (EPS) is the profit attributable to shareholders over the last twelve months, divided by the number of shares. The price-to-earnings ratio (P/E) divides the share price by EPS. A P/E of 10 means the price equals ten years of the company's current yearly profit.",
+            "A low P/E can reflect low expected growth, a risky business, or a one-off profit that inflated EPS. A high P/E can reflect high expected growth or a temporary dip in profits. When a company makes a loss, the P/E has no meaning and is not shown."
+          ]
+        },
+        {
+          "h": "Net assets per share and P/B",
+          "p": [
+            "Net assets per share (book value) is what the company owns less what it owes, per share, as its accounts state it. Price-to-book (P/B) divides the share price by it. A P/B of 1 means the market values the company at its accounting value.",
+            "P/B is most informative for companies whose assets are mostly financial, such as banks and finance companies, and least for companies whose value lies in brands or people."
+          ]
+        },
+        {
+          "h": "Return on equity",
+          "p": [
+            "Return on equity (ROE) divides the last twelve months' profit by net assets: how much profit the company made on the shareholders' money it uses. Read together, P/B and ROE explain each other: a company that earns a high return on its equity usually trades at a higher P/B."
+          ]
+        },
+        {
+          "h": "Dividend yield",
+          "p": [
+            "The dividend yield is the dividends paid over the last twelve months as a percentage of today's price. It is worth comparing with fixed-deposit rates and treasury bill yields, remembering that dividends are not promised and can be cut."
+          ]
+        },
+        {
+          "h": "Where the numbers come from",
+          "p": [
+            "ZinvestIQ reads each company's interim reports as filed with the CSE, adds up the last four quarters, and shows a figure only when it agrees with the profit or equity line in the same report. Per-share figures use today's number of shares, and each figure links to the report it came from."
+          ]
+        }
+      ],
+      "limits": [
+        "Accounts are backward-looking and a few months old by the time they are published.",
+        "One-off gains or losses can distort a year's profit and every figure built on it.",
+        "Figures say nothing on their own about whether a price is high or low for a particular investor's purposes."
+      ]
+    },
+    "ownership": {
+      "title": "Who owns a company, and why it matters",
+      "summary": "Reading the largest shareholders, control, ownership groups and the free float from the companies' own reports.",
+      "keypoints": [
+        "Listed companies publish their 20 largest shareholders in each interim report.",
+        "A single block above 50% controls a company; 20% to 50% gives influence.",
+        "Many Sri Lankan companies belong to groups: a parent controls several listed companies.",
+        "The free float, the part likely to change hands, affects how easily the shares trade."
+      ],
+      "sections": [
+        {
+          "h": "The top 20",
+          "p": [
+            "Each quarter, a listed company publishes its 20 largest shareholders with their holdings. ZinvestIQ reads those lists, resolves holdings through custodian and margin accounts to the owner where the filing shows it, and groups the owners by type: listed companies, other companies, funds, insurers and the state, and individuals."
+          ]
+        },
+        {
+          "h": "Control and influence",
+          "p": [
+            "Votes are added up by block: a holder's own accounts plus the companies it controls. A block of more than 50% of the voting shares controls the company; one of 20% to 50% has influence over it. A controlled company's decisions, on dividends, on new shares and on strategy, are in practice its controller's."
+          ]
+        },
+        {
+          "h": "Ownership groups",
+          "p": [
+            "Many listed companies are part of a group: a holding company controls several others, which may in turn control more. ZinvestIQ follows these chains and names each company's group, with the other listed companies in it, so the reader can see when several shares belong to one family of businesses."
+          ]
+        },
+        {
+          "h": "The free float",
+          "p": [
+            "The free float estimates the part of a company's voting shares not held by the company itself, by companies it controls, or by blocks of 10% or more. A small free float can mean thin trading, wider gaps between purchase and sale prices, and larger price moves on small orders."
+          ]
+        }
+      ],
+      "limits": [
+        "The lists are as at the report date and change in between.",
+        "Holdings below the top 20, including many directors' holdings, are not visible, so the free float is an estimate.",
+        "Who owns a company describes its register; it is not a view on the shares."
+      ]
+    },
+    "directors-dealings": {
+      "title": "Directors' dealings, explained",
+      "summary": "What listed companies must disclose about their directors' trading, how to read a dealing, and what it can and cannot tell you.",
+      "keypoints": [
+        "Directors and accounts related to them must disclose dealings in their company's shares to the CSE.",
+        "Each dealing shows who, which account, purchase or disposal, how many shares, at what price, and when it was disclosed.",
+        "Patterns, several directors dealing within a short time, are more informative than a single dealing.",
+        "A dealing can have personal reasons and is never a forecast."
+      ],
+      "sections": [
+        {
+          "h": "Why dealings are disclosed",
+          "p": [
+            "Directors know their company better than outside investors. To keep the market fair, the CSE's rules require a listed company to announce its directors' dealings in its shares, including dealings by accounts related to them, promptly after they happen. The notices are public."
+          ]
+        },
+        {
+          "h": "Reading a dealing",
+          "p": [
+            "ZinvestIQ reads each notice and records the date of the dealing, whether it was a purchase or a disposal, the number of shares, the price and the value, the director, the account that dealt as filed, and how many weekdays passed before it was disclosed. Every row links to the company's own notice.",
+            "Related accounts are companies or family members linked to the director. A dealing by a company in the same ownership group can be a transfer within the group rather than a view on the shares; the site marks those."
+          ]
+        },
+        {
+          "h": "What to look at",
+          "p": [
+            "The size of a dealing compared with the company's usual daily turnover and with the director's position. Whether several directors dealt in the same direction within a few weeks. Whether purchases came after a fall in the price, or disposals after a rise. And how long the disclosure took."
+          ]
+        }
+      ],
+      "limits": [
+        "A dealing can be for tax, a loan, an inheritance or a family transfer, with no connection to the company's prospects.",
+        "Directors' smaller holdings and dealings through accounts not disclosed as related are not visible.",
+        "Past dealings say nothing certain about future prices."
+      ]
+    },
+    "bonds-basics": {
+      "title": "Bonds and bills, step by step",
+      "summary": "How treasury bills and bonds work, why a bond's price and its yield move in opposite directions, and how they compare with a fixed deposit.",
+      "keypoints": [
+        "Treasury bills last up to a year and pay no coupon: they are issued below face value and repaid in full.",
+        "Treasury bonds pay a fixed coupon twice a year and repay their face value at maturity, two to twenty years or more ahead.",
+        "A bond's yield is the yearly return built into today's price if it is kept until it matures.",
+        "When yields rise, existing bonds' prices fall, and the other way round."
+      ],
+      "sections": [
+        {
+          "h": "Treasury bills",
+          "p": [
+            "The government issues treasury bills of about three, six and twelve months. A bill pays no interest along the way: it is issued at a discount and repaid at its full face value. The difference is the return. A Rs 100,000 one-year bill issued at Rs 90,000 pays a yield of about 11%."
+          ]
+        },
+        {
+          "h": "Treasury bonds",
+          "p": [
+            "Treasury bonds lend to the government for longer. Each pays a fixed coupon every six months, stated as a yearly percentage of its face value, and repays the face value at maturity. After they are issued at auction, bonds are traded between investors through primary dealers and banks, which publish the yields at which they would deal."
+          ]
+        },
+        {
+          "h": "Price and yield",
+          "p": [
+            "A bond's coupons are fixed, but its price changes. If market yields rise after a bond was issued, new bonds pay more, so the older bond's price falls until its yield matches. If yields fall, the older bond's price rises. Price and yield always move in opposite directions.",
+            "The longer the bond, the more its price moves for the same change in yield. That matters only if the bond is disposed of before maturity: kept to the end, it repays its face value whatever happened in between."
+          ]
+        },
+        {
+          "h": "Compared with a fixed deposit",
+          "p": [
+            "A bill or bond and a fixed deposit both pay a known rupee return if kept to the end. The differences are the borrower (the government or a bank), whether the money can be reached before the end and at what price, and the tax treatment. Comparing the yield on a bond with the rate on a deposit of the same length is the starting point; the savings page shows how the two compared since 2003."
+          ]
+        },
+        {
+          "h": "Reading the bonds pages",
+          "p": [
+            "The bonds page lists every government bond the dealers quoted today, with its yield, its distance from the fitted curve and how actively it trades. Each bond's own page shows its yield over time and, in the paid plans, how unusual its position is and what it earns."
+          ]
+        }
+      ],
+      "limits": [
+        "Government securities are the lowest-risk rupee investment, but their value before maturity moves with yields.",
+        "Quoted yields are dealers' screens; the yield actually obtained depends on the dealer and the amount.",
+        "Inflation can still leave a fixed return worth less in real terms."
+      ]
+    },
+    "yield-curve": {
+      "title": "The yield curve, and how to read it",
+      "summary": "What the yield curve shows, why it usually slopes upward, what moves it, and how ZinvestIQ fits it each day.",
+      "keypoints": [
+        "The yield curve lines up government yields by how long each bond or bill has left.",
+        "It usually slopes upward: lending for longer usually earns more.",
+        "It moves with the Central Bank's policy rate, inflation expectations and the government's borrowing.",
+        "ZinvestIQ fits one smooth curve through the dealers' quotes each day, and measures every bond against it."
+      ],
+      "sections": [
+        {
+          "h": "What the curve shows",
+          "p": [
+            "Plot each government bond's yield against the years it has left and a pattern appears: the yield curve. It answers a simple question for every length of time: what does the government pay to borrow for that long? It is the base from which other rupee interest rates are set."
+          ]
+        },
+        {
+          "h": "Its shape",
+          "p": [
+            "Normally the curve slopes upward: lenders want more for tying up money longer and for the risk that inflation or rates rise in the meantime. A flat curve means short and long yields are close. An inverted curve, with short yields above long ones, usually appears when short-term rates are high and expected to fall."
+          ]
+        },
+        {
+          "h": "What moves it",
+          "p": [
+            "The short end follows the Central Bank's policy rate closely. The long end reflects expectations about inflation and future rates, and the amount the government needs to borrow. Auctions, the government's financing plans and changes in inflation all move parts of the curve."
+          ]
+        },
+        {
+          "h": "How ZinvestIQ fits it",
+          "p": [
+            "Each day, ZinvestIQ takes the dealers' quoted yields for every government bond and fits a smooth Nelson-Siegel curve through them, giving less weight to quotes with a wide gap between bid and offer. On the chart, dots are bonds and the line is the fitted curve. A bond's distance from the line, in basis points, shows whether it is quoted higher or lower than bonds of a similar maturity."
+          ]
+        }
+      ],
+      "limits": [
+        "The curve is fitted to quotes, which can differ from where trades are done.",
+        "A smooth curve cannot follow every bond: some sit off it for ordinary reasons such as trading activity or coupon.",
+        "The curve's shape describes today's market; it does not forecast rates."
+      ]
+    },
+    "bond-relative-value": {
+      "title": "Why some bonds sit off the curve",
+      "summary": "The ordinary reasons a bond is quoted above or below the fitted curve, and how a z-score says whether today's distance is unusual for that bond.",
+      "keypoints": [
+        "A bond's distance from the curve (its residual) is measured in basis points: 100 bp = 1%.",
+        "Most distances have ordinary causes: how often the bond trades, its coupon, recent auctions.",
+        "What is informative is a distance unusual for that particular bond; the z-score measures it against the bond's own last 60 observations.",
+        "Pairs compare neighbouring bonds in the same way."
+      ],
+      "sections": [
+        {
+          "h": "Ordinary reasons for a distance",
+          "p": [
+            "A smooth curve cannot pass through every bond. A bond that rarely trades may keep a stale quote. A bond just reopened at auction can sit higher while the new supply is absorbed. A bond with a much higher or lower coupon than its neighbours can be quoted differently because investors value income and price gains differently. Benchmark bonds that trade every day often sit slightly below the curve because they are easy to trade.",
+            "So a bond 20 bp above the curve is not, on its own, remarkable. What matters is whether 20 bp is unusual for that bond."
+          ]
+        },
+        {
+          "h": "The z-score",
+          "p": [
+            "For each bond, ZinvestIQ takes its distance from the curve over its previous 60 observations, works out the average and the usual size of the day-to-day variation (the standard deviation), and compares today's distance with them: z = (today − average) ÷ standard deviation. The day being scored is never part of its own history.",
+            "A z-score near 0 is an ordinary day for that bond. Beyond +2 or −2, the distance is one seen only rarely in its recent history. The page also shows the deviation in basis points, because a large z on a bond that barely moves can be a small distance."
+          ]
+        },
+        {
+          "h": "Pairs",
+          "p": [
+            "Neighbouring bonds usually move together. The gap between two of them, scored the same way, shows when one has moved away from the other more than usual. Choosing a bond on the page lists its pairs with the bonds around it."
+          ]
+        },
+        {
+          "h": "Reading the page",
+          "p": [
+            "Bonds are listed by maturity and never ranked, because the page describes each bond rather than picking any out. Read the z-score with the bond's trading activity: a high reading on a bond that rarely trades may only mean its quote has not been tested."
+          ]
+        }
+      ],
+      "limits": [
+        "Sixty observations is a short history from one market period; the past range may not be the right yardstick.",
+        "An unusual reading describes the past and is not a forecast of the bond's next move.",
+        "Quotes can differ from where business is done; see the guide on trades and quotes."
+      ]
+    },
+    "trades-vs-quotes": {
+      "title": "Dealer quotes and actual trades",
+      "summary": "The difference between the yields dealers show on their screens and the yields at which bonds actually trade, and how ZinvestIQ measures it.",
+      "keypoints": [
+        "Dealers publish the yields at which they would purchase (bid) and dispose of (offer) each bond: the quote screen.",
+        "Trades are reported separately, a day or more later.",
+        "The execution gap is the typical difference between trade yields and quoted mids over the last 20 days, across the market.",
+        "A positive gap means trades were done at higher yields, that is lower prices, than the screen showed."
+      ],
+      "sections": [
+        {
+          "h": "Quotes and trades",
+          "p": [
+            "Each day the Public Debt Management Office publishes the yields dealers quote for every government bond, and separately the trades reported in the secondary market. Quotes show where dealers say they would deal; trades show where business was done, in what amount."
+          ]
+        },
+        {
+          "h": "The execution gap",
+          "p": [
+            "On each day a bond both quoted and traded, its traded yield can be compared with its quoted mid. ZinvestIQ takes the median of those differences, in basis points, across every such bond-day in the last 20 calendar days. It is one figure for the market, published only when there are at least eight observations. A blended figure was chosen because, tested on past data, it described the next period better than figures split by maturity."
+          ]
+        },
+        {
+          "h": "Why it matters",
+          "p": [
+            "Every quote-based number, the curve itself included, inherits the gap. When trades are consistently done at yields above the screen, the screen overstates prices. The curve page shows trades as separate points for the same reason."
+          ]
+        }
+      ],
+      "limits": [
+        "A 20-day median of a few dozen observations moves with the market; it describes a recent period, not a precise level.",
+        "Trade reports arrive later than quotes, so the latest days are revised when they come in.",
+        "The gap for any one trade, or any one investor, can be very different."
+      ]
+    },
+    "money-flows": {
+      "title": "Money flows, explained",
+      "summary": "How directors' and related accounts' dealings are added up by company and by account, what a cluster is, and how to read the totals.",
+      "keypoints": [
+        "Money flows add up the disclosed dealings of directors and their related accounts, by company and by account.",
+        "Companies are listed by total value dealt: activity, not direction.",
+        "A cluster is two or more different accounts making purchases in a company, with purchases exceeding disposals.",
+        "Free visitors see the flows a week after the dealings; Plus shows them on the day."
+      ],
+      "sections": [
+        {
+          "h": "From dealings to flows",
+          "p": [
+            "Each directors' dealing is one transaction. Money flows add them up over a window of 30, 90 or 365 days ending on the latest dealing date: for each company, the value purchased and disposed of, the net, how many different accounts made purchases or disposals, and how many dealings there were."
+          ]
+        },
+        {
+          "h": "Clusters",
+          "p": [
+            "One director's purchase can have many reasons. Two or more different accounts making purchases in the same company within the window, with purchases above disposals, is a pattern worth noticing; the site marks it as a cluster."
+          ]
+        },
+        {
+          "h": "Large dealings and accounts",
+          "p": [
+            "Dealings of Rs 10 million or more in the last 30 days are listed separately, with the director and the account, and with a mark when the account belongs to the company's own ownership group, where the dealing may be a transfer within the group. The accounts table adds up each account's dealings across every company it dealt in."
+          ]
+        }
+      ],
+      "limits": [
+        "Only disclosed dealings by directors and related accounts are counted, not other investors' trading.",
+        "Large totals can come from a single transfer between related parties.",
+        "Flows describe past activity; they are not a forecast."
+      ]
+    },
+    "diversification": {
+      "title": "Diversification and risk",
+      "summary": "Why a portfolio of many shares moves less than a single share, why some risk cannot be spread away, and why the number of shares matters on a small market such as the CSE.",
+      "keypoints": [
+        "A single company can fall sharply for reasons of its own; a portfolio spreads that risk.",
+        "Shares that move differently from each other reduce a portfolio's ups and downs the most.",
+        "The market's own movements cannot be spread away: all shares are exposed to them.",
+        "On the CSE, a few large companies and sectors dominate, which limits how widely money can be spread."
+      ],
+      "sections": [
+        {
+          "h": "Two kinds of risk",
+          "p": [
+            "A share's price moves for two kinds of reason. Some are its own: a contract won or lost, a fraud, a change of management. Others are shared by the whole market: interest rates, the economy, the exchange rate. Holdings across many companies average out the first kind, because one company's bad news is offset by another's good news. The second kind remains however many shares a portfolio contains."
+          ]
+        },
+        {
+          "h": "How many shares",
+          "p": [
+            "Studies of large markets found that most of the reduction in a portfolio's ups and downs comes from the first dozen or two shares, with less from each one added after that (Evans and Archer, 1968); later work argued that more are needed for the benefit to be complete (Statman, 1987). The answer depends on how differently the shares move from each other.",
+            "On the CSE, a few large companies make up much of the market's value, and shares in the same sector or group often move together. Ten shares from one group or one sector spread risk far less than ten from different parts of the economy."
+          ]
+        },
+        {
+          "h": "Measuring it",
+          "p": [
+            "Volatility, the usual size of a portfolio's ups and downs, and the correlation between shares, how far they move together, are the standard measures. Each share's page shows its beta against the ASPI, a measure of how much it has tended to move with the market."
+          ]
+        }
+      ],
+      "limits": [
+        "Measures of risk are based on the past, and correlations tend to rise in a crisis, just when spreading matters most.",
+        "This guide explains how diversification works; it does not say how any portfolio should be built.",
+        "Trading costs and minimum lot sizes make very wide spreading costly for small amounts."
+      ]
+    },
+    "carry-rolldown": {
+      "title": "Carry and roll-down",
+      "summary": "What a bond earns over time if the yield curve does not move: the income over its funding cost, and the gain as it ages along the curve.",
+      "keypoints": [
+        "Carry is a bond's yield less the cost of funding it.",
+        "Roll-down is the price gain as a bond ages and its yield moves down an upward-sloping curve.",
+        "Both are estimates for an unchanged curve, stated per year in basis points.",
+        "Divided by duration, they put long and short bonds on the same footing."
+      ],
+      "sections": [
+        {
+          "h": "Carry",
+          "p": [
+            "A bond pays its yield for as long as it is owned. Against that stands the cost of the money used: for a dealer, the cost of funding; for a saver, what the money would earn elsewhere. ZinvestIQ uses the 12-month treasury bill yield plus a small margin as the funding rate, so carry is the bond's yield less that rate."
+          ]
+        },
+        {
+          "h": "Roll-down",
+          "p": [
+            "As time passes, a five-year bond becomes a four-and-three-quarter-year bond. If the curve slopes upward and does not move, the bond is now valued at a slightly lower yield, so its price rises a little. That gain, measured over a quarter and stated per year, is the roll-down. On a steep part of the curve it can be large; on a flat part, close to zero."
+          ]
+        },
+        {
+          "h": "Per unit of duration",
+          "p": [
+            "Long bonds usually show more carry and roll-down, but they also move more when yields change. Dividing carry plus roll-down by duration gives what each bond earns per unit of rate risk, which makes bonds of different lengths comparable."
+          ]
+        }
+      ],
+      "limits": [
+        "Everything assumes the curve does not move; any change in yields will usually outweigh carry over a short period.",
+        "The funding margin is an assumption, and each investor's own cost of money differs.",
+        "Tax is not modelled."
+      ]
+    },
+    "duration-convexity": {
+      "title": "Duration and convexity",
+      "summary": "How much a bond's price changes when yields move, and why the change is not quite a straight line.",
+      "keypoints": [
+        "Modified duration is roughly the percentage price change for a 1% change in yield.",
+        "Longer bonds, and bonds with lower coupons, have higher duration.",
+        "Convexity measures how the price change bends: prices rise a little more when yields fall than they drop when yields rise by the same amount.",
+        "The scenario table on each bond's page applies both to yield moves of different sizes."
+      ],
+      "sections": [
+        {
+          "h": "Duration",
+          "p": [
+            "A bond with a modified duration of 5 loses about 5% of its price if yields rise by one percentage point, and gains about 5% if they fall by one. Duration grows with a bond's remaining life and is larger when its coupon is low, because more of its value comes at the end."
+          ]
+        },
+        {
+          "h": "Convexity",
+          "p": [
+            "Duration gives a straight-line estimate. The true relationship between price and yield curves upward, so for large moves the price gains a little more when yields fall, and loses a little less when they rise, than duration alone says. Convexity measures that curvature; it matters most for long bonds and large yield moves."
+          ]
+        },
+        {
+          "h": "The scenario table",
+          "p": [
+            "Each bond's page applies its duration and convexity to yield moves of different sizes and shows the estimated price after each. It answers the question: if yields moved by this much, roughly where would this bond's price be?"
+          ]
+        }
+      ],
+      "limits": [
+        "The estimates assume the whole curve moves by the same amount; in practice short and long yields often move differently.",
+        "They are approximations; for very large moves the full price calculation differs slightly.",
+        "A bond kept to maturity repays its face value whatever the path of its price."
+      ]
+    }
   }
 }

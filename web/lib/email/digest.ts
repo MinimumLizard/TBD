@@ -37,8 +37,9 @@ export interface Digest {
   unsubscribe: { label: string; href: string };
 }
 
-const COLOURS = { navy: "#0b2545", accent: "#0f7c86", gold: "#e09f3e", text: "#0f1b2d", muted: "#5a6a80",
-                  border: "#dfe5ee", soft: "#f4f7fb", up: "#12805c", down: "#c2412d" };
+// The site's light palette (app/globals.css); e-mail programs cannot read the site's stylesheet.
+const COLOURS = { navy: "#18212c", accent: "#1d4f7a", gold: "#a06b16", text: "#1c2127", muted: "#5c6370",
+                  border: "#e2ded4", soft: "#f6f5f1", up: "#1f7a4d", down: "#b03a2e" };
 
 export function escape(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -79,14 +80,15 @@ function sectionHtml(s: Section): string {
 
 /** The e-mail's HTML: tables and inline styles only, which is what e-mail programs display reliably. */
 export function renderHtml(d: Digest): string {
-  const font = "Manrope,'Segoe UI',Helvetica,Arial,sans-serif";
+  const font = "Inter,'Segoe UI',Helvetica,Arial,sans-serif";
+  const serif = "'Source Serif 4',Georgia,'Times New Roman',serif";
   return [
     `<div style="background:${COLOURS.soft};padding:24px 8px;font-family:${font};color:${COLOURS.text}">`,
     `<span style="display:none;max-height:0;overflow:hidden">${escape(d.preheader)}</span>`,
     `<table role="presentation" align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid ${COLOURS.border};border-radius:12px;overflow:hidden">`,
     `<tr><td style="background:${COLOURS.navy};padding:20px 24px;color:#ffffff">`,
-    `<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#b9d6e6;font-weight:600">${escape(d.eyebrow)}</div>`,
-    `<div style="font-size:22px;font-weight:800;margin-top:4px">${escape(d.heading)}</div></td></tr>`,
+    `<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c3c8cf;font-weight:600">${escape(d.eyebrow)}</div>`,
+    `<div style="font-family:${serif};font-size:24px;font-weight:600;margin-top:4px">${escape(d.heading)}</div></td></tr>`,
     ...d.sections.map(sectionHtml),
     `<tr><td style="padding:16px 24px;background:${COLOURS.soft};font-size:12px;color:${COLOURS.muted}">`,
     ...d.disclaimers.map((x) => `<p style="margin:0 0 8px">${escape(x)}</p>`),

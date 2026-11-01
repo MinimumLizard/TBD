@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import Explain from "@/components/Explain";
+import PageHead from "@/components/PageHead";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import PreviewNote from "@/components/PreviewNote";
@@ -23,8 +25,9 @@ export default async function CarryPage() {
   const f = carry.data?.funding;
   return (
     <>
-      <h1>{t("carry.title")}</h1>
-      <p className="lead">{t("carry.intro")}</p>
+      <PageHead eyebrow={<>{t("bonds.eyebrow")} · <span className="tier-pill pro">{t("tiers.pro")}</span></>}
+                title={t("carry.title")} lead={t("carry.intro")} />
+      <Explain why={t("carry.why")} how={<p>{t("carry.how")}</p>} related={[{ href: "/learn/carry-rolldown", label: t("bond.guideCarry") }, { href: "/learn/duration-convexity", label: t("bond.guideDuration") }]} />
       {!carry.access.allowed ? (
         <Locked access={carry.access} />
       ) : (

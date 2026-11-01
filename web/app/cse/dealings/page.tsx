@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import PageHead from "@/components/PageHead";
+import Section from "@/components/Section";
 import DealingsTable from "@/components/DealingsTable";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
@@ -32,92 +34,111 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
   const largeNames = (await dealingNames(viewer, (f?.large ?? []).map((d) => d.transaction_id))).data ?? new Map();
   const shareHref = (code: string) => `/cse/shares/${encodeURIComponent(`${code}.N0000`)}`;
   const companies = f?.companies ?? [];
+  const recentRows = recent.data ?? [];
+  const parts = [
+    { id: "recent", label: t("dealings.sections.recent") },
+    { id: "flows", label: t("dealings.sections.flows") },
+    ...(flow.access.allowed && f?.summary ? [{ id: "large", label: t("dealings.sections.large") }, { id: "accounts", label: t("dealings.sections.accounts") }] : []),
+  ];
+  const guide = [{ href: "/learn/directors-dealings", label: t("share.guideDealings") }, { href: "/learn/money-flows", label: t("dealings.guideFlows") }];
   return (
     <>
-      <h1>{t("dealings.title")}</h1>
-      <p className="lead">{t("dealings.intro")}</p>
-      <p className="small muted">{t("dealings.namesNote")}</p>
+      <PageHead eyebrow={t("cse.eyebrow")} title={t("dealings.title")} lead={t("dealings.intro")}
+                meta={<p className="small muted">{t("dealings.namesNote")}</p>} parts={parts} />
 
-      <h2>{t("dealings.recent")}</h2>
-      {!recent.access.allowed ? (
-        <Locked access={recent.access} />
-      ) : (recent.data ?? []).length === 0 ? (
-        <p className="muted">{t("dealings.none")}</p>
-      ) : (
-        <>
-          <DealingsTable rows={recent.data ?? []} showCompany />
-          <p className="small muted">
-            {t("dealings.recentNote", { count: (recent.data ?? []).length })} {t("dealings.sideOtherNote")}
-          </p>
-        </>
-      )}
+      <Section id="recent" open title={t("dealings.sections.recent")}
+               summary={recent.access.allowed && recentRows.length ? t("dealings.sections.recentSum", { count: recentRows.length, date: date(recentRows[0].deal_date) }) : undefined}
+               why={t("dealings.sections.recentWhy")} how={<p>{t("dealings.sections.recentHow")}</p>} related={guide}>
+        {!recent.access.allowed ? (
+          <Locked access={recent.access} />
+        ) : recentRows.length === 0 ? (
+          <p className="muted">{t("dealings.none")}</p>
+        ) : (
+          <>
+            <DealingsTable rows={recentRows} showCompany />
+            <p className="small muted">
+              {t("dealings.recentNote", { count: recentRows.length })} {t("dealings.sideOtherNote")}
+            </p>
+          </>
+        )}
+      </Section>
 
-      <h2 id="flows">{t("dealings.flows")}</h2>
-      {!flow.access.allowed ? (
-        <Locked access={flow.access} />
-      ) : !f?.summary ? (
-        <p className="muted">{t("common.noData")}</p>
-      ) : (
-        <>
-          <PreviewNote access={flow.access} />
-          <AsOf day={f.summary.as_of} calendar="cse" preview />
-          <div className="tiles">
-            <StatTile label={t("dealings.summaryDealings")} value={int(f.summary.n_dealings)}
-                      note={f.first_date ? t("dealings.summaryDealingsNote", { date: date(f.first_date) }) : null} />
-            <StatTile label={t("dealings.summaryLag")}
-                      value={f.summary.lag_median != null ? t("dealings.lagValue", { n: f.summary.lag_median }) : "—"} />
-          </div>
-          <nav className="tabs" aria-label={t("dealings.windowLabel")}>
-            {WINDOWS.map((w) => (
-              <Link key={w} href={`/cse/dealings?window=${w}#flows`} aria-current={w === window ? "page" : undefined}>
-                {t(`dealings.windows.${w}` as never)}
-              </Link>
-            ))}
-          </nav>
-          <p>{t("dealings.flowsIntro", { window: t(`dealings.windows.${window}` as never), date: date(f.summary.as_of) })}</p>
-          {companies.length === 0 ? (
-            <p className="muted">{t("dealings.noFlows")}</p>
-          ) : (
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t("dealings.company")}</th>
-                    <th className="num">{t("dealings.purchases")}</th>
-                    <th className="num">{t("dealings.disposals")}</th>
-                    <th className="num">{t("dealings.net")}</th>
-                    <th className="num">{t("dealings.purchasers")}</th>
-                    <th className="num">{t("dealings.disposers")}</th>
-                    <th className="num">{t("dealings.transactions")}</th>
-                    <th><Term id="cluster">{t("dealings.cluster")}</Term></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {companies.slice(0, SHOWN_COMPANIES).map((c) => (
-                    <tr key={c.symbol}>
-                      <td>
-                        <Link href={shareHref(c.symbol)}>{c.symbol}</Link>
-                        <span className="sub">{c.company}</span>
-                      </td>
-                      <td className="num">{rs(c.purchase_value)}</td>
-                      <td className="num">{rs(c.disposal_value)}</td>
-                      <td className="num">{lkr(c.net_value)}</td>
-                      <td className="num">{int(c.n_purchasers)}</td>
-                      <td className="num">{int(c.n_disposers)}</td>
-                      <td className="num">{int(c.n_transactions)}</td>
-                      <td>{c.cluster ? t("dealings.cluster") : ""}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <Section id="flows" tier="plus" open={flow.access.allowed} title={t("dealings.sections.flows")}
+               summary={flow.access.allowed && f?.summary ? t("dealings.sections.flowsSum", { count: f.summary.n_dealings, companies: companies.length, window: t(`dealings.windows.${window}` as never) }) : t("dealings.sections.flowsLocked")}
+               why={t("dealings.sections.flowsWhy")} how={<p>{t("dealings.sections.flowsHow")}</p>} related={guide}>
+        {!flow.access.allowed ? (
+          <Locked access={flow.access} />
+        ) : !f?.summary ? (
+          <p className="muted">{t("common.noData")}</p>
+        ) : (
+          <>
+            <PreviewNote access={flow.access} />
+            <AsOf day={f.summary.as_of} calendar="cse" preview />
+            <div className="tiles">
+              <StatTile label={t("dealings.summaryDealings")} value={int(f.summary.n_dealings)}
+                        note={f.first_date ? t("dealings.summaryDealingsNote", { date: date(f.first_date) }) : null} />
+              <StatTile label={t("dealings.summaryLag")}
+                        value={f.summary.lag_median != null ? t("dealings.lagValue", { n: f.summary.lag_median }) : "—"} />
             </div>
-          )}
-          <p className="small muted">
-            {companies.length > SHOWN_COMPANIES && <>{t("dealings.more", { count: companies.length - SHOWN_COMPANIES })} </>}
-            {t("dealings.clusterNote")}
-          </p>
+            <nav className="tabs" aria-label={t("dealings.windowLabel")}>
+              {WINDOWS.map((w) => (
+                <Link key={w} href={`/cse/dealings?window=${w}#flows`} aria-current={w === window ? "page" : undefined}>
+                  {t(`dealings.windows.${w}` as never)}
+                </Link>
+              ))}
+            </nav>
+            <p>{t("dealings.flowsIntro", { window: t(`dealings.windows.${window}` as never), date: date(f.summary.as_of) })}</p>
+            {companies.length === 0 ? (
+              <p className="muted">{t("dealings.noFlows")}</p>
+            ) : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("dealings.company")}</th>
+                      <th className="num">{t("dealings.purchases")}</th>
+                      <th className="num">{t("dealings.disposals")}</th>
+                      <th className="num">{t("dealings.net")}</th>
+                      <th className="num">{t("dealings.purchasers")}</th>
+                      <th className="num">{t("dealings.disposers")}</th>
+                      <th className="num">{t("dealings.transactions")}</th>
+                      <th><Term id="cluster">{t("dealings.cluster")}</Term></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {companies.slice(0, SHOWN_COMPANIES).map((c) => (
+                      <tr key={c.symbol}>
+                        <td>
+                          <Link href={shareHref(c.symbol)}>{c.symbol}</Link>
+                          <span className="sub">{c.company}</span>
+                        </td>
+                        <td className="num">{rs(c.purchase_value)}</td>
+                        <td className="num">{rs(c.disposal_value)}</td>
+                        <td className="num">{lkr(c.net_value)}</td>
+                        <td className="num">{int(c.n_purchasers)}</td>
+                        <td className="num">{int(c.n_disposers)}</td>
+                        <td className="num">{int(c.n_transactions)}</td>
+                        <td>{c.cluster ? t("dealings.cluster") : ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="small muted">
+              {companies.length > SHOWN_COMPANIES && <>{t("dealings.more", { count: companies.length - SHOWN_COMPANIES })} </>}
+              {t("dealings.clusterNote")}
+            </p>
 
-          <h3>{t("dealings.large")}</h3>
+          </>
+        )}
+      </Section>
+
+      {flow.access.allowed && f?.summary && (
+        <>
+          <Section id="large" tier="plus" title={t("dealings.sections.large")}
+                   summary={f.large.length ? t("dealings.sections.largeSum", { count: f.large.length, date: date(f.summary.as_of) }) : t("dealings.noLarge", { date: date(f.summary.as_of) })}
+                   why={t("dealings.sections.largeWhy")} how={<p>{t("dealings.sections.largeHow")}</p>}>
           {f.large.length === 0 ? (
             <p className="muted">{t("dealings.noLarge", { date: date(f.summary.as_of) })}</p>
           ) : (
@@ -160,9 +181,11 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
             </>
           )}
 
+          </Section>
           {f.accounts.length > 0 && (
-            <>
-              <h3>{t("dealings.accountsTitle")}</h3>
+            <Section id="accounts" tier="plus" title={t("dealings.sections.accounts")}
+                     summary={t("dealings.sections.accountsSum", { count: f.accounts.length })}
+                     why={t("dealings.sections.accountsWhy")} how={<p>{t("dealings.sections.accountsHow")}</p>}>
               <p>{t("dealings.accountsIntro", { window: t(`dealings.windows.${window}` as never), date: date(f.summary.as_of) })}</p>
               <div className="table-wrap">
                 <table>
@@ -200,7 +223,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                   </tbody>
                 </table>
               </div>
-            </>
+            </Section>
           )}
         </>
       )}

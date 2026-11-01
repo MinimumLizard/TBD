@@ -7,7 +7,7 @@ import { GLOSSARY, type GlossaryTerm } from "@/lib/glossary";
 export default async function Term({ id, children }: { id: GlossaryTerm; children?: React.ReactNode }) {
   const t = await getTranslations();
   return (
-    <Link href={`/learn#${id}`} className="term" title={t(`learn.terms.${id}.short` as never)}>
+    <Link href={`/learn/glossary#${id}`} className="term" title={t(`learn.terms.${id}.short` as never)}>
       {children ?? t(`learn.terms.${id}.name` as never)}
     </Link>
   );

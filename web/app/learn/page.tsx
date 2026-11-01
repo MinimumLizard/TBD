@@ -1,40 +1,63 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import { GLOSSARY } from "@/lib/glossary";
+import PageHead from "@/components/PageHead";
+import { GUIDES, LEVELS } from "@/lib/guides";
 
 export async function generateMetadata() {
   const t = await getTranslations();
   return { title: t("learn.title") };
 }
 
-// Plain-language explanations of every term the site uses. Each has an anchor, so a term anywhere links here.
+const TIER_OF_LEVEL = { basics: "free", deeper: "plus", advanced: "pro" } as const;
+
+// The Learn hub: guides at three levels, each level matching a tier's tools. Every guide is free to read.
 export default async function LearnPage() {
   const t = await getTranslations();
   return (
     <>
-      <h1>{t("learn.title")}</h1>
-      <p className="lead">{t("learn.intro")}</p>
-      <h2>{t("learn.guidesTitle")}</h2>
-      <div className="guides">
-        <Link href="/learn/savings" className="card">
-          <strong className="display">{t("learn.savingsGuide")}</strong>
-          <span className="muted small">{t("learn.savingsGuideBody")}</span>
-        </Link>
+      <PageHead eyebrow={t("menu.learn.label")} title={t("learn.title")} lead={t("learn.intro")} />
+      {LEVELS.map((level) => (
+        <section key={level} id={level} style={{ scrollMarginTop: 90 }}>
+          <div className="level-head">
+            <h2>{t(`guides.levels.${level}.title`)}</h2>
+            <span className={`tier-pill ${TIER_OF_LEVEL[level]}`}>{t(`guides.levels.${level}.tools`)}</span>
+          </div>
+          <p className="muted" style={{ marginTop: -4 }}>{t(`guides.levels.${level}.desc`)}</p>
+          <div className="learn-cards">
+            {GUIDES.filter((g) => g.level === level).map((g) => (
+              <Link key={g.slug} href={`/learn/${g.slug}`} className="card">
+                <span className="kicker">{t("ui.minutes", { count: g.minutes })}</span>
+                <strong className="display">{t(`guides.${g.slug}.title` as never)}</strong>
+                <span className="muted small">{t(`guides.${g.slug}.summary` as never)}</span>
+              </Link>
+            ))}
+            {level === "basics" && (
+              <Link href="/learn/savings" className="card">
+                <span className="kicker">{t("learn.savingsKicker")}</span>
+                <strong className="display">{t("learn.savingsGuide")}</strong>
+                <span className="muted small">{t("learn.savingsGuideBody")}</span>
+              </Link>
+            )}
+          </div>
+        </section>
+      ))}
+      <div className="section-head">
+        <h2>{t("learn.moreTitle")}</h2>
       </div>
-      <div className="letters" aria-label={t("learn.title")}>
-        {GLOSSARY.map((id) => (
-          <a key={id} href={`#${id}`}>{t(`learn.terms.${id}.name` as never)}</a>
-        ))}
-      </div>
-      <div className="learn-grid">
-        {GLOSSARY.map((id) => (
-          <section key={id} id={id} className="card">
-            <h2 style={{ fontSize: "1.05rem" }}>{t(`learn.terms.${id}.name` as never)}</h2>
-            <p><strong>{t(`learn.terms.${id}.short` as never)}</strong></p>
-            <p className="muted" style={{ marginBottom: 0 }}>{t(`learn.terms.${id}.long` as never)}</p>
-          </section>
-        ))}
+      <div className="tier-strip">
+        <div>
+          <Link href="/learn/glossary" className="display" style={{ fontSize: "1.1rem", fontWeight: 600 }}>{t("menu.learn.glossary.title")}</Link>
+          <p>{t("menu.learn.glossary.desc")}</p>
+        </div>
+        <div>
+          <Link href="/methods" className="display" style={{ fontSize: "1.1rem", fontWeight: 600 }}>{t("menu.learn.methods.title")}</Link>
+          <p>{t("menu.learn.methods.desc")}</p>
+        </div>
+        <div>
+          <Link href="/about" className="display" style={{ fontSize: "1.1rem", fontWeight: 600 }}>{t("menu.learn.about.title")}</Link>
+          <p>{t("menu.learn.about.desc")}</p>
+        </div>
       </div>
     </>
   );
