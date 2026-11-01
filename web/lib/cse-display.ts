@@ -1,3 +1,4 @@
+import { registry } from "./registry";
 export const HEADLINE_INDICES = ["ASI", "S&P SL20", "ASTRI", "S&P SL20 TRI"] as const;
 export const MOVERS_MIN_TURNOVER = 1_000_000; // the old terminal's display floor for largest rises and falls (Rs)
 
@@ -48,4 +49,17 @@ export function companyName(raw: string | null | undefined): string | null {
     .map((w) => (KEEP_UPPER.has(w) ? w : w.charAt(0) + w.slice(1).toLowerCase()))
     .join(" ")
     .replace(/\b(Of|And|The|For)\b/g, (m, _w, offset) => (offset === 0 ? m : m.toLowerCase()));
+}
+
+/** The normalising key of a sector label: leading GICS codes dropped, letters only, upper case (as
+ * data_platform/models/_lib/cse_sectors.py `key`). */
+export function sectorKey(label: string): string {
+  return label.replace(/^\s*[\d\s-]+/, "").toUpperCase().replace(/[^A-Z]/g, "");
+}
+
+/** A share's industry group, one of the 20 S&P/CSE groups, or null when its label cannot be resolved: the owner's
+ * assignment first, then the label (the same rules as the portfolio lab, models/_lib/cse_sectors.py). */
+export function sectorGroup(symbol: string, label: string | null | undefined): string | null {
+  const { overrides, by_key } = registry.sectors;
+  return overrides[symbol] ?? by_key[sectorKey(label ?? "")] ?? null;
 }

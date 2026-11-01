@@ -260,7 +260,21 @@
     "dy": "Div. yield",
     "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile).",
     "why": "One table for every listed share, so a company can be found and compared with the rest of the market: its latest price, how it moved against the ASPI, and its valuation figures.",
-    "how": "Sort by any column by selecting its heading. Returns against the ASPI show whether a share's price did better or worse than the market over the same period. P/E, P/B and dividend yield come from each company's latest interim report; compare them between similar companies rather than across the whole market. Select a share for its full page."
+    "how": "Sort by any column by selecting its heading. Returns against the ASPI show whether a share's price did better or worse than the market over the same period. P/E, P/B and dividend yield come from each company's latest interim report; compare them between similar companies rather than across the whole market. Select a share for its full page.",
+    "introBySector": "Every company listed on the Colombo Stock Exchange, grouped by industry. Type part of a company's name or its symbol to find it, or choose a sector; open a sector to see its companies.",
+    "compareTitle": "Compare all shares",
+    "compareIntro": "Every listed share in one table, sortable by any column: price change, turnover, returns against the ASPI and company figures.",
+    "compareLink": "Compare all shares in one sortable table",
+    "bySectorLink": "Shares by sector",
+    "searchPlaceholder": "Company or symbol, e.g. John Keells or JKH",
+    "sector": "Sector",
+    "allSectors": "All sectors",
+    "otherSector": "Other and unclassified",
+    "sectorSum": "{count, plural, one {# share} other {# shares}} · today {up} rose, {down} fell · median change {median}",
+    "company": "Company",
+    "ret3m": "3 months",
+    "noMatch": "No share matches. Try part of the company's name, or its symbol.",
+    "howBySector": "Companies are grouped into the 20 industry groups the CSE's sector indices use, alphabetically within each. Each sector's line shows how many of its shares rose and fell today and the median change. P/E and dividend yield come from each company's latest interim report; compare them within a sector rather than across the market. For sorting by any figure, use the comparison table."
   },
   "dealings": {
     "title": "Directors' dealings",
@@ -613,7 +627,16 @@
     },
     "guideCurve": "The yield curve",
     "guideBonds": "Bonds and bills, step by step",
-    "guideRv": "Bonds off the curve"
+    "guideRv": "Bonds off the curve",
+    "searchPlaceholder": "Bond name, ISIN or maturity year",
+    "band": "Maturity",
+    "allBands": "All maturities",
+    "bands": {
+      "short": "Under 2 years",
+      "medium": "2 to 5 years",
+      "long": "5 to 10 years",
+      "longest": "Over 10 years"
+    }
   },
   "bond": {
     "yieldChart": "Quoted mid yield",
@@ -1273,7 +1296,9 @@
     "level": "Level",
     "readGuide": "Read the guide",
     "minutes": "{count} min read",
-    "seeItLive": "See it on the site"
+    "seeItLive": "See it on the site",
+    "find": "Find",
+    "shownOf": "{shown} of {total} shown"
   },
   "menu": {
     "plansDesc": "What is free, and what Plus and Pro add",
@@ -1284,12 +1309,16 @@
         "desc": "Indices, turnover, rises and falls, foreign investors' flows"
       },
       "allShares": {
-        "title": "All shares",
-        "desc": "Every listed share: returns, company figures and ownership"
+        "title": "Shares by sector",
+        "desc": "Every listed company, grouped by industry, with a search box"
       },
       "dealings": {
         "title": "Directors' dealings",
         "desc": "Shares directors and their related accounts traded, from their notices"
+      },
+      "compare": {
+        "title": "Compare all shares",
+        "desc": "One sortable table: returns, turnover, P/E, P/B and dividend yield"
       }
     },
     "bonds": {
@@ -1945,5 +1974,22 @@
         "A bond kept to maturity repays its face value whatever the path of its price."
       ]
     }
+  },
+  "search": {
+    "eyebrow": "Search",
+    "title": "Find a share, bond or topic",
+    "lead": "Every listed company, every government bond, and every guide, term and page on the site. Type to narrow the list.",
+    "placeholder": "Search shares, bonds, guides and terms",
+    "short": "Search",
+    "matures": "matures {date}",
+    "groups": {
+      "shares": "Shares",
+      "bonds": "Government bonds",
+      "guides": "Guides",
+      "glossary": "Glossary",
+      "pages": "Pages"
+    },
+    "none": "Nothing matches. Try fewer or shorter words: part of a company's name, a symbol, or a bond's maturity year.",
+    "more": "and {count} more: type to find them"
   }
 }

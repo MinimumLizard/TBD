@@ -12,7 +12,7 @@ export interface RelatedLink {
 // summary stay visible when it is closed, so a closed section still says something; inside, the panel answers why it
 // matters and how to read it, then links to what it connects to. A plain <details>: it works without JavaScript, and
 // the browser's find-in-page opens it.
-export default async function Section({ id, title, summary, tier, open = false, why, how, related, children }: {
+export default async function Section({ id, title, summary, tier, open = false, why, how, related, group = false, hidden = false, children }: {
   id: string;
   title: React.ReactNode;
   summary?: React.ReactNode;
@@ -21,11 +21,13 @@ export default async function Section({ id, title, summary, tier, open = false, 
   why?: React.ReactNode;
   how?: React.ReactNode;
   related?: RelatedLink[];
+  group?: boolean; // a group of a filtered list: hidden when none of its items match (components/FilterBar.tsx)
+  hidden?: boolean;
   children: React.ReactNode;
 }) {
   const t = await getTranslations();
   return (
-    <details className="section" id={id} open={open}>
+    <details className="section" id={id} open={open} hidden={hidden} data-group={group ? "" : undefined}>
       <summary>
         <span className="s-title">
           {title}

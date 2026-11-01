@@ -173,6 +173,14 @@ def order(manifests: dict[str, Manifest]) -> list[str]:
     return done
 
 
+def _web_sectors() -> dict:
+    from ._lib import cse_sectors
+    overrides = yaml.safe_load((REPO_ROOT / "config" / "sector_overrides.yaml").read_text())
+    return {"groups": list(cse_sectors.INDUSTRY_GROUPS),
+            "by_key": {cse_sectors.key(g): g for g in cse_sectors.INDUSTRY_GROUPS} | dict(cse_sectors.LABEL_ALIASES),
+            "overrides": cse_sectors.load_overrides(overrides)}
+
+
 def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
     """Everything the web app needs, in one generated file, so it never reads outside web/: tiers and each model's
     minimum tier, labels, current version and method page; the disclaimer texts; the trading calendars (for the
@@ -191,6 +199,9 @@ def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
         "disclaimers": {key: {"en": " ".join(value["en"].split())} for key, value in
                         yaml.safe_load(DISCLAIMERS.read_text()).items()},
         "calendars": calendars,
+        # The 20 industry groups a share's sector label resolves to, the label aliases and the owner's per-share
+        # assignments (config/sector_overrides.yaml): the same rules as models/_lib/cse_sectors.py, for display.
+        "sectors": _web_sectors(),
         "models": {
             name: {
                 "market": m.market,

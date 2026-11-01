@@ -4,9 +4,12 @@
 // - A link to a section (#id) opens that section, and any closed section around the target.
 // - The "open all / close all" button on long pages.
 // - Opening one menu closes the others; a click elsewhere closes them all.
+// - Lists with a filter bar (components/FilterBar.tsx) filter as the visitor types (lib/filter.ts has the rule).
 // The static preview copy carries the same behaviour in scripts/export-static.mjs (it has no React).
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+
+import { matchesQuery } from "@/lib/filter";
 
 function openTarget() {
   const id = decodeURIComponent(window.location.hash.slice(1));
@@ -16,6 +19,48 @@ function openTarget() {
     if (el instanceof HTMLDetailsElement) el.open = true;
     el = el.parentElement;
   }
+}
+
+function wireFilter(form: HTMLFormElement): () => void {
+  const scope = document.getElementById(form.dataset.filter ?? "");
+  const input = form.querySelector<HTMLInputElement>("input[name=q]");
+  if (!scope || !input) return () => {};
+  const selects = Array.from(form.querySelectorAll<HTMLSelectElement>("select"));
+  const count = form.querySelector<HTMLElement>("[data-filter-count]");
+  form.querySelector<HTMLElement>("[data-filter-go]")?.setAttribute("hidden", "");
+  const items = Array.from(scope.querySelectorAll<HTMLElement>("[data-search]"));
+  const groups = Array.from(scope.querySelectorAll<HTMLElement>("[data-group]"));
+  for (const g of groups) if (g instanceof HTMLDetailsElement && g.dataset.openInitial === undefined) g.dataset.openInitial = String(g.open);
+  const apply = () => {
+    let shown = 0;
+    for (const el of items) {
+      const ok = matchesQuery(el.dataset.search ?? "", input.value) && selects.every((s) => !s.value || el.dataset[s.name] === s.value);
+      el.hidden = !ok;
+      if (ok) shown++;
+    }
+    const active = input.value.replace(/\s+/g, "") !== "" || selects.some((s) => s.value);
+    scope.toggleAttribute("data-idle", !active && scope.hasAttribute("data-idle-list"));
+    for (const g of groups) {
+      const any = g.querySelector("[data-search]:not([hidden])") !== null;
+      g.hidden = !any;
+      if (g instanceof HTMLDetailsElement) g.open = active ? any : g.dataset.openInitial === "true";
+    }
+    if (count?.dataset.template) count.textContent = count.dataset.template.replace("{shown}", String(shown)).replace("{total}", String(items.length));
+    const url = new URL(window.location.href); // keep the address in step, so a filtered list can be shared
+    for (const [name, value] of [["q", input.value], ...selects.map((s) => [s.name, s.value])]) {
+      if (value) url.searchParams.set(name, value); else url.searchParams.delete(name);
+    }
+    window.history.replaceState(window.history.state, "", url);
+  };
+  const onSubmit = (e: Event) => { e.preventDefault(); apply(); };
+  form.addEventListener("submit", onSubmit);
+  input.addEventListener("input", apply);
+  selects.forEach((s) => s.addEventListener("change", apply));
+  return () => {
+    form.removeEventListener("submit", onSubmit);
+    input.removeEventListener("input", apply);
+    selects.forEach((s) => s.removeEventListener("change", apply));
+  };
 }
 
 export default function PageScripts() {
@@ -52,7 +97,9 @@ export default function PageScripts() {
     };
     menus().forEach((m) => m.addEventListener("toggle", onMenu));
     document.addEventListener("click", onClick);
+    const filters = Array.from(document.querySelectorAll<HTMLFormElement>("form[data-filter]")).map(wireFilter);
     return () => {
+      filters.forEach((off) => off());
       window.removeEventListener("hashchange", openTarget);
       toggles.forEach((b) => b.removeEventListener("click", onToggle));
       menus().forEach((m) => m.removeEventListener("toggle", onMenu));

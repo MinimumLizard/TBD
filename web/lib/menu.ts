@@ -20,6 +20,7 @@ export const MENUS: Menu[] = [
     items: [
       { key: "market", href: "/cse" },
       { key: "allShares", href: "/cse/shares" },
+      { key: "compare", href: "/cse/shares/compare" },
       { key: "dealings", href: "/cse/dealings" },
     ],
   },

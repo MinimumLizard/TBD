@@ -473,6 +473,68 @@
       ]
     }
   },
+  "sectors": {
+    "by_key": {
+      "APPLICATIONSOFTWARE": "Software & Services",
+      "AUTOMOBILESCOMPONENTS": "Automobiles & Components",
+      "BANKS": "Banks",
+      "CAPITALGOODS": "Capital Goods",
+      "COMMERCIALPROFESSIONALSERVICES": "Commercial & Professional Services",
+      "CONSUMERDURABLESAPPAREL": "Consumer Durables & Apparel",
+      "CONSUMERFINANCE": "Diversified Financials",
+      "CONSUMERSERVICES": "Consumer Services",
+      "DIVERSIFIEDFINANCIAL": "Diversified Financials",
+      "DIVERSIFIEDFINANCIALS": "Diversified Financials",
+      "DIVERSIFIEDFINANCIALSERVICES": "Diversified Financials",
+      "ENERGY": "Energy",
+      "FOODBEVERAGETOBACCO": "Food, Beverage & Tobacco",
+      "FOODSTAPLESRETAILING": "Food & Staples Retailing",
+      "HEALTHCAREEQUIPMENTSERVICES": "Health Care Equipment & Services",
+      "HOUSEHOLDPERSONALPRODUCTS": "Household & Personal Products",
+      "INDEPENDENTPOWERPRODUCERSENERGYTRADERS": "Utilities",
+      "INSURANCE": "Insurance",
+      "INVESTMENTBANKINGBROKERAGE": "Diversified Financials",
+      "MATERIALS": "Materials",
+      "MULTILINEINSURANCE": "Insurance",
+      "PROPERTYCASUALTYINSURANCE": "Insurance",
+      "REALESTATE": "Real Estate Management & Development",
+      "REALESTATEDEVELOPMENT": "Real Estate Management & Development",
+      "REALESTATEMANAGEMENTDEVELOPMENT": "Real Estate Management & Development",
+      "RETAILING": "Retailing",
+      "SOFTWARESERVICES": "Software & Services",
+      "TELECOMMUNICATIONSERVICES": "Telecommunication Services",
+      "TRANSPORTATION": "Transportation",
+      "UTILITIES": "Utilities"
+    },
+    "groups": [
+      "Energy",
+      "Materials",
+      "Capital Goods",
+      "Commercial & Professional Services",
+      "Transportation",
+      "Automobiles & Components",
+      "Consumer Durables & Apparel",
+      "Consumer Services",
+      "Retailing",
+      "Food & Staples Retailing",
+      "Food, Beverage & Tobacco",
+      "Household & Personal Products",
+      "Health Care Equipment & Services",
+      "Banks",
+      "Diversified Financials",
+      "Insurance",
+      "Software & Services",
+      "Telecommunication Services",
+      "Utilities",
+      "Real Estate Management & Development"
+    ],
+    "overrides": {
+      "HNBF.N0000": "Diversified Financials",
+      "HNBF.X0000": "Diversified Financials",
+      "MSL.N0000": "Transportation",
+      "VPEL.N0000": "Utilities"
+    }
+  },
   "tiers": [
     "free",
     "plus",
@@ -493,6 +555,11 @@
     "models.cse_lab_frontier",
     "models.cse_lab_nav",
     "models.cse_lab_holding",
-    "models.cse_lab_trade"
+    "models.cse_lab_trade",
+    "models.cse_bt_summary",
+    "models.cse_bt_nav",
+    "models.cse_bt_event",
+    "models.cse_bt_target",
+    "models.cse_bt_trade"
   ]
 }

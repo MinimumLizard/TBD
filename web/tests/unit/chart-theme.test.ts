@@ -10,7 +10,7 @@ describe("chart theme", () => {
   test("takes the theme's tokens, with the light theme as fallback", () => {
     expect(p.text).toBe("#e7edf6");
     expect(p.series[0]).toBe("#3cc6c0");
-    expect(p.series[1]).toBe("#a06b16");
+    expect(p.series[1]).toBe("#a3741c");
   });
 
   test("colours axes, labels and legend without touching the data", () => {

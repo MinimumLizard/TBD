@@ -23,6 +23,7 @@ interface Registry {
   unpublished_outputs: string[];
   disclaimers: Record<string, { en: string }>;
   calendars: Record<string, { name: string; closures: string[] }>;
+  sectors: { groups: string[]; by_key: Record<string, string>; overrides: Record<string, string> };
   models: Record<string, ModelEntry>;
 }
 

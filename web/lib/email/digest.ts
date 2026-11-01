@@ -38,8 +38,8 @@ export interface Digest {
 }
 
 // The site's light palette (app/globals.css); e-mail programs cannot read the site's stylesheet.
-const COLOURS = { navy: "#18212c", accent: "#1d4f7a", gold: "#a06b16", text: "#1c2127", muted: "#5c6370",
-                  border: "#e2ded4", soft: "#f6f5f1", up: "#1f7a4d", down: "#b03a2e" };
+const COLOURS = { navy: "#17241d", accent: "#23573f", gold: "#a3741c", text: "#1a1d1a", muted: "#5d625c",
+                  border: "#deded6", soft: "#f5f5f2", up: "#23704a", down: "#ad3a2c" };
 
 export function escape(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
 import Brief from "@/components/Brief";
+import FilterBar from "@/components/FilterBar";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import Chart from "@/components/Chart";
@@ -12,6 +13,7 @@ import { bondHref, bondName } from "@/lib/bond-display";
 import { LOW_WEIGHT, curveOption, curvePoints, nelsonSiegel } from "@/lib/charts";
 import { bondCurve, bondLiquidity, bondQuotes, bondReference } from "@/lib/data/bonds";
 import { NONE, date, int, lkr, num, percent, signed } from "@/lib/format";
+import { matchesQuery, param, searchText } from "@/lib/filter";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +24,12 @@ export async function generateMetadata() {
   return { title: t("bonds.title") };
 }
 
-export default async function BondsPage() {
+const BANDS = [["short", 0, 2], ["medium", 2, 5], ["long", 5, 10], ["longest", 10, Infinity]] as const;
+
+export default async function BondsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const query = param(params.q);
+  const bandParam = param(params.band);
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
   const curve = await bondCurve(viewer);
   const day = curve.data?.fit?.obs_date;
@@ -34,6 +41,16 @@ export default async function BondsPage() {
     (ref.data?.get(a.isin)?.maturity_date ?? "").localeCompare(ref.data?.get(b.isin)?.maturity_date ?? ""),
   );
 
+  const yearsLeft = (isin: string) => {
+    const m = ref.data?.get(isin)?.maturity_date;
+    return m && day ? (Date.parse(m) - Date.parse(day)) / (365.25 * 864e5) : null;
+  };
+  const bandOf = (isin: string) => {
+    const y = yearsLeft(isin);
+    return y == null ? "" : BANDS.find(([, lo, hi]) => y >= lo && y < hi)?.[0] ?? "";
+  };
+  const textOf = (isin: string) => searchText(bondName(isin, ref.data), isin, ref.data?.get(isin)?.maturity_date?.slice(0, 4));
+  const showRow = (isin: string) => matchesQuery(textOf(isin), query) && (!bandParam || bandOf(isin) === bandParam);
   const ns = (tau: number) => (fit ? nelsonSiegel(tau, fit.beta0, fit.beta1, fit.beta2, fit.lambda_years) : null);
   const [y1, y5, y10] = [ns(1), ns(5), ns(10)];
   const slope = y1 != null && y10 != null ? (y10 - y1) * 100 : null;
@@ -85,7 +102,7 @@ export default async function BondsPage() {
         )}
       </Section>
 
-      <Section id="table" title={t("bonds.sections.table")}
+      <Section id="table" title={t("bonds.sections.table")} open={query !== "" || bandParam !== ""}
                summary={quotes.access.allowed ? t("bonds.sections.tableSum", { n: rows.length }) : undefined}
                why={t("bonds.sections.tableWhy")} how={<p>{t("bonds.sections.tableHow")}</p>}
                related={[{ href: "/learn/bond-relative-value", label: t("bonds.guideRv") }]}>
@@ -93,8 +110,12 @@ export default async function BondsPage() {
           <Locked access={quotes.access} />
         ) : (
           <>
+            <FilterBar scope="bond-table" action="/bonds#table" placeholder={t("bonds.searchPlaceholder")} query={query}
+                       selects={[{ name: "band", label: t("bonds.band"), all: t("bonds.allBands"), value: bandParam,
+                                   options: BANDS.map(([b]) => ({ value: b, label: t(`bonds.bands.${b}`) })) }]}
+                       shown={rows.filter((q) => showRow(q.isin)).length} total={rows.length} />
             <p className="small muted">{t("bonds.tableNote")}</p>
-            <div className="table-wrap">
+            <div className="table-wrap" id="bond-table">
               <table>
                 <thead>
                   <tr>
@@ -114,7 +135,7 @@ export default async function BondsPage() {
                     const l = liq.get(q.isin);
                     const r = residual.get(q.isin);
                     return (
-                      <tr key={q.isin}>
+                      <tr key={q.isin} data-search={textOf(q.isin)} data-band={bandOf(q.isin)} hidden={!showRow(q.isin)}>
                         <td>
                           <Link href={bondHref(q.isin)}>{bondName(q.isin, ref.data)}</Link>
                         </td>

@@ -43,12 +43,24 @@ export default async function SiteHeader({ viewer }: { viewer: Viewer }) {
           )}
           <Link href="/plans">{t("nav.plans")}</Link>
         </nav>
+        <form className="site-search" action="/search" method="get" role="search">
+          <label>
+            <span className="visually-hidden">{t("search.placeholder")}</span>
+            <input type="search" name="q" placeholder={t("search.short")} autoComplete="off" />
+          </label>
+        </form>
         <Link href="/plans" className="tier-badge">
           {t("tiers.viewing", { tier: t(`tiers.${viewer.tier}`) })}
         </Link>
         <details className="mobile-menu">
           <summary>{t("ui.menu")}</summary>
           <nav className="menu-panel" aria-label={t("ui.mainMenu")}>
+            <form className="site-search mobile" action="/search" method="get" role="search">
+              <label>
+                <span className="visually-hidden">{t("search.placeholder")}</span>
+                <input type="search" name="q" placeholder={t("search.placeholder")} autoComplete="off" />
+              </label>
+            </form>
             {MENUS.map((menu) => (
               <div key={menu.key} style={{ display: "contents" }}>
                 <span className="m-group">{t(`menu.${menu.key}.label` as never)}</span>

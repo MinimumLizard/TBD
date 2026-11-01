@@ -1,6 +1,6 @@
 /* ZinvestIQ design tokens: one place for colour, type and spacing. Mobile first: every page is laid out at 375 px
    wide first. Idea (docs/research/retail-investor-needs-2026-11.md §4): a calm research page, not a trading app. Warm
-   paper and ink, one deep accent for links and charts, green and red only for "up" and "down", a serif for headings
+   paper and ink, one deep evergreen accent for links and charts, green and red only for "up" and "down", a serif for headings
    and a clean sans for text and figures. No gradients, glows or heavy shadows. */
 @font-face {
   font-family: "Inter";
@@ -32,25 +32,25 @@
 }
 
 :root {
-  --bg: #f6f5f1;              /* paper */
+  --bg: #f5f5f2;              /* paper */
   --surface: #ffffff;
-  --surface-2: #f1efe9;
-  --border: #e2ded4;
-  --border-strong: #cdc7ba;
-  --text: #1c2127;            /* ink */
-  --muted: #5c6370;
-  --accent: #1d4f7a;          /* deep ink blue: links, charts, focus */
-  --accent-strong: #143a5c;
-  --accent-soft: #e8eef5;
-  --navy: #18212c;            /* the footer's ground */
-  --gold: #a06b16;            /* a second chart colour and small highlights */
-  --up: #1f7a4d;
-  --up-soft: #e5f1ea;
-  --down: #b03a2e;
-  --down-soft: #f7e7e3;
+  --surface-2: #efefea;
+  --border: #deded6;
+  --border-strong: #c9c9bf;
+  --text: #1a1d1a;            /* ink */
+  --muted: #5d625c;
+  --accent: #23573f;          /* deep evergreen: links, charts, focus (the owner's choice, 2026-11-01) */
+  --accent-strong: #183f2d;
+  --accent-soft: #e6efe9;
+  --navy: #17241d;            /* the footer's ground */
+  --gold: #a3741c;            /* a second chart colour and small highlights */
+  --up: #23704a;
+  --up-soft: #e5f0e9;
+  --down: #ad3a2c;
+  --down-soft: #f6e6e2;
   --warn-bg: #fbf3e1;
   --warn-text: #6e4b0f;
-  --plus: #5a4a8a;
+  --plus: #5b4d86;
   --pro: #8a5a12;
   --shadow: 0 1px 2px rgba(28, 33, 39, 0.04);
   --font: "Inter", "Noto Sans", "Noto Sans Sinhala", "Noto Sans Tamil", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -70,17 +70,17 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121417;
-    --surface: #1a1d21;
-    --surface-2: #22262b;
-    --border: #2e3339;
-    --border-strong: #3d434a;
-    --text: #e8e6e1;
-    --muted: #9da3ab;
-    --accent: #8db4d9;
-    --accent-strong: #b3cde6;
-    --accent-soft: #1d2a37;
-    --navy: #0d0f12;
+    --bg: #111513;
+    --surface: #181d1a;
+    --surface-2: #202622;
+    --border: #2c3430;
+    --border-strong: #3b4540;
+    --text: #e6e8e3;
+    --muted: #9ba39c;
+    --accent: #7cc4a0;
+    --accent-strong: #a6dcc0;
+    --accent-soft: #1a2c23;
+    --navy: #0c0f0d;
     --gold: #d3a24f;
     --up: #6cc495;
     --up-soft: #17291f;
@@ -408,3 +408,32 @@ dl.facts dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
 
 /* Names as filed can be long (a notice may list several directors): wrap them instead of widening the table. */
 td.names { white-space: normal; min-width: 11rem; max-width: 18rem; }
+
+/* Finding things: the filter bar over long lists, the header's search box and the search page. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s3); align-items: center; margin: var(--s3) 0 var(--s2); padding: var(--s3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.filter-bar .filter-q { flex: 1 1 260px; }
+.filter-bar input, .filter-bar select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 9px 12px; width: 100%; }
+.filter-bar input:focus, .filter-bar select:focus, .site-search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.filter-bar .filter-select { flex: 0 1 240px; }
+.filter-bar .button { padding: 9px 18px; }
+.filter-bar .filter-count { flex: 0 0 auto; margin-left: auto; }
+[hidden] { display: none !important; }
+.site-search { display: none; }
+.site-search input { font: inherit; font-size: 0.88rem; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px 6px 32px; width: 170px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d625c' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 11px 50%; }
+@media (min-width: 1120px) { .site-search { display: block; } }
+.site-search.mobile { display: block; padding: 4px 4px 8px; }
+.site-search.mobile input { width: 100%; }
+.search-results { display: grid; gap: var(--s2) var(--s5); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .search-results { grid-template-columns: 1fr 1fr; } }
+.search-results section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s3) var(--s5) var(--s4); }
+.search-results h2 { font-size: 1.1rem; margin: var(--s2) 0; }
+.search-results ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.search-results li { display: grid; gap: 1px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.search-results li:last-child { border-bottom: 0; }
+.search-results li a { font-weight: 600; }
+.search-results .idle-more { display: none; margin: var(--s2) 0 0; }
+.search-results[data-idle] li:nth-child(n+9) { display: none; }
+.search-results[data-idle] .idle-more { display: block; }

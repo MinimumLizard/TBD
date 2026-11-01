@@ -11,11 +11,11 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
   bond_execution_gap: { api: ["/api/v1/bonds/execution-gap"], pages: ["/bonds/execution"] },
   bond_carry: { api: ["/api/v1/bonds/carry"], pages: ["/bonds/carry"] },
   cse_market_tape: { api: ["/api/v1/cse/market"], pages: ["/", "/cse"] },
-  cse_security_metrics: { api: ["/api/v1/cse/shares"], pages: ["/cse", "/cse/shares"] },
+  cse_security_metrics: { api: ["/api/v1/cse/shares"], pages: ["/cse", "/cse/shares", "/cse/shares/compare"] },
   cse_corporate_actions: { api: ["/api/v1/cse/shares/AAA.N0000/corporate-actions"], pages: ["/cse/shares/AAA.N0000"] },
   cse_total_returns: { api: ["/api/v1/cse/shares/AAA.N0000/total-return"], pages: ["/cse/shares/AAA.N0000"] },
   cse_ownership: { api: ["/api/v1/cse/shares/AAA.N0000/ownership"], pages: ["/cse/shares/AAA.N0000"] },
-  cse_fundamentals: { api: ["/api/v1/cse/shares/AAA.N0000/fundamentals"], pages: ["/cse/shares", "/cse/shares/AAA.N0000"] },
+  cse_fundamentals: { api: ["/api/v1/cse/shares/AAA.N0000/fundamentals"], pages: ["/cse/shares", "/cse/shares/compare", "/cse/shares/AAA.N0000"] },
   cse_dealings: { api: ["/api/v1/cse/dealings", "/api/v1/cse/dealings?symbol=AAA.N0000"], pages: ["/cse/dealings", "/cse/shares/AAA.N0000"] },
   cse_flows: { api: ["/api/v1/cse/flows"], pages: ["/cse/dealings"] },
   lk_savings_compare: { api: ["/api/v1/savings"], pages: ["/learn/savings"] },
@@ -25,4 +25,4 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
 export const DETAIL_PAGES = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000"];
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/cse", "/cse/shares", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
+export const ALL_PAGES = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
