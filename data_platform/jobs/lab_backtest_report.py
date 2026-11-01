@@ -192,7 +192,7 @@ are within what chance alone produces; the test lengthens by itself as the recor
 </ul>
 <h3>Every review of the example portfolio</h3>
 {table(["Date", "Why", "In", "Out", "Traded", "Cost", "Weeks of data"], log)}
-<p class="small muted">Plus {drifts} small drift-band adjustments between reviews.</p>"""
+<p class="small muted">Plus {drifts} small drift-band adjustment{"" if drifts == 1 else "s"} between reviews.</p>"""
 
 
 def reason(h: dict, median_vol: float, k: int) -> str:

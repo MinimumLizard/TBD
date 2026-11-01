@@ -105,6 +105,7 @@ css += `
 .lab-page .lab-chart figcaption { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); }
 .lab-page .lab-chart .lg i { display: inline-block; width: 12px; height: 3px; margin-right: 5px; vertical-align: middle; }
 .lab-page ol.steps li { margin-bottom: 6px; }
+.lab-page td { white-space: normal; min-width: 6rem; vertical-align: top; }
 .lab-page .table-wrap .table-wrap { border: 0; }
 `;
 
