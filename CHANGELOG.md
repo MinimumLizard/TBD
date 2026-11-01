@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-11-01 (later) — Evergreen, finding things, and the lab's walk-forward test (decision 0024)
+
+- **Evergreen** is the site's palette (the owner's choice): light and dark tokens, charts and the weekly e-mail. The
+  preview no longer offers palettes.
+- **Finding things** (the owner: "no search bar, nothing separated by section"):
+  - a search box in the header on every page, and a search page over every share, government bond, guide, glossary
+    term and page;
+  - the shares page now groups every company by its industry group (the 20 S&P/CSE groups, the lab's rules, exported
+    to the site with the owner's per-share assignments), each group collapsible with a one-line summary of the day,
+    with a search box and a sector filter that filter as one types;
+  - the sortable table moved to `/cse/shares/compare` (with the same filters), and the bonds table gained a search box
+    and a maturity filter.
+  - All of it works without JavaScript (plain GET forms, filtered on the server) and in the static preview
+    (`lib/filter.ts`, `components/FilterBar.tsx`, `components/PageScripts.tsx`).
+- **The lab's walk-forward test** (`cse_lab_backtest` 1.0.0, internal; migration 0017):
+  - On each past date, the lab's own rules are applied with only what was known then, from the first date they can
+    run (8 April 2026: half a year of weekly returns; the CSE's public history reaches back one year).
+  - It simulates holding the result with the record's rules and costs, against the ASPI and treasury bills.
+  - Two rebalancing policies: quarterly, and dynamic (a monthly check, rebalancing past 3 % estimated tracking error).
+  - Tested: the rows up to a date do not change when later data arrives; the engine's rules are tested on made-up
+    numbers.
+  - Over 8 April to 16 October 2026 the market fell (ASPI −7.9 %, prices only) and every rules-based share portfolio
+    lost money with it (−5.0 % to −9.8 %), while bills returned +4.8 %. Costs took about 2 to 3 %. The monthly check
+    traded about twice as often without earning its costs back.
+- **The lab report** opens with the rules step by step, the test (chart, both policies, costs, every review), and
+  today's example portfolio (minimum variance, 15 names, quarterly: the proposal of decision 0024) with the reason
+  for each holding. It is written as education; the preview shows it as one page.
+- **Checks:** Python tests (the lab's end-to-end tests extended); copy lint 0; registry 19 models, 0 problems; website
+  types, unit tests (new: filters and sectors), build; tier-leak suite (the test's tables seeded as never-shown).
+
 ## 2026-11-01 — Site redesign: professional look, collapsible sections, explanations, guides (owner's review)
 
 - **Why:** the owner's review of the preview (2026-11-01): the colours looked artificial, long pages needed drop-downs,

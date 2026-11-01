@@ -5,8 +5,7 @@
 //
 // It crawls every page a visitor can reach, then fetches each page again as a Plus and a Pro subscriber. Every page
 // file holds all three versions: the free one as the page, the paid ones (where they differ) in inert <template>
-// elements, and a bar at the top switches between them, and between three colour palettes for the owners to choose
-// from. For each page it removes the app's scripts (the copy is plain HTML), links one shared stylesheet and script,
+// elements, and a bar at the top switches between them. For each page it removes the app's scripts (the copy is plain HTML), links one shared stylesheet and script,
 // rewrites links to the copy's flat file names, and draws charts from their data-chart attribute with ECharts from
 // cdnjs. With --lab, the owner's internal portfolio-lab report (python -m data_platform.jobs.lab_report) is added as
 // one page, marked internal. The copy is for the owners' eyes only, never a public site: it carries every tier's
@@ -24,7 +23,7 @@ const LAB = arg("--lab");
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>] [--lab <file>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/cse", "/cse/shares", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
+const SEEDS = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
                "/learn/glossary", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
 const TIERS = ["free", "plus", "pro"];
 const TIER_NAMES = { free: "Free", plus: "Plus", pro: "Pro" };
@@ -75,21 +74,12 @@ for (const [path, v] of pages) {
 }
 
 // 2. One shared stylesheet: the site's, without its self-hosted font faces (Google Fonts serves the same faces to
-// the copy), plus the two alternative palettes and the preview bar.
+// the copy), plus the preview bar and the lab page's styles.
 const first = pages.get("/").free;
 let css = "";
 for (const m of first.matchAll(/<link rel="stylesheet" href="([^"]+\.css)"[^>]*>/g)) css += await (await fetch(BASE + m[1])).text();
 css = css.replace(/@font-face\s*{[^}]*}/g, "");
 css += `
-/* Preview only: two alternative palettes for the owners to compare with the default (app/globals.css). */
-:root[data-theme="harbour"] { --bg: #f4f6f8; --surface: #ffffff; --surface-2: #eef1f4; --border: #dde3e9; --border-strong: #c6cfd8;
-  --text: #14212e; --muted: #586575; --accent: #0e5e6f; --accent-strong: #0a4654; --accent-soft: #e3eff1; --navy: #10222f;
-  --gold: #9b7a2f; --up: #1d7a50; --up-soft: #e4f1ea; --down: #b2392d; --down-soft: #f7e6e3; --plus: #55508f; --pro: #8a6116;
-  --warn-bg: #fbf3e1; --warn-text: #6e4b0f; color-scheme: light; }
-:root[data-theme="evergreen"] { --bg: #f5f5f2; --surface: #ffffff; --surface-2: #efefea; --border: #deded6; --border-strong: #c9c9bf;
-  --text: #1a1d1a; --muted: #5d625c; --accent: #23573f; --accent-strong: #183f2d; --accent-soft: #e6efe9; --navy: #17241d;
-  --gold: #a3741c; --up: #23704a; --up-soft: #e5f0e9; --down: #ad3a2c; --down-soft: #f6e6e2; --plus: #5b4d86; --pro: #8a5a12;
-  --warn-bg: #fbf3e1; --warn-text: #6e4b0f; color-scheme: light; }
 .pv-bar { background: #14181d; color: #e8e6e1; font: 13px/1.4 Inter, system-ui, sans-serif; padding: 8px 16px; display: flex; gap: 8px 18px;
   flex-wrap: wrap; align-items: center; justify-content: center; }
 .pv-bar strong { font-weight: 600; }
@@ -110,6 +100,12 @@ css += `
 .lab-page .frontier { fill: none; stroke: var(--accent); stroke-width: 2; }
 .lab-page circle { fill: var(--gold); }
 .lab-page h2 { border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.lab-page .lab-chart { margin: 12px 0; } .lab-page .lab-chart svg { max-width: 100%; font-size: 11px; }
+.lab-page .lab-chart .grid { stroke: var(--border); } .lab-page .lab-chart .base { stroke: var(--muted); stroke-dasharray: 2 3; }
+.lab-page .lab-chart figcaption { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); }
+.lab-page .lab-chart .lg i { display: inline-block; width: 12px; height: 3px; margin-right: 5px; vertical-align: middle; }
+.lab-page ol.steps li { margin-bottom: 6px; }
+.lab-page .table-wrap .table-wrap { border: 0; }
 `;
 
 // 3. One shared script: tier and palette switching, the sections' and menus' behaviour (as components/PageScripts.tsx
@@ -129,8 +125,8 @@ const SCRIPT = `
   }
   function charts() {
     if (!window.echarts) return;
-    var p = { text: v("--text", "#1c2127"), muted: v("--muted", "#5c6370"), border: v("--border", "#e2ded4"), surface: v("--surface", "#ffffff"),
-              series: [v("--accent", "#1d4f7a"), v("--gold", "#a06b16"), v("--plus", "#5a4a8a"), v("--down", "#b03a2e"), v("--up", "#1f7a4d")] };
+    var p = { text: v("--text", "#1a1d1a"), muted: v("--muted", "#5d625c"), border: v("--border", "#deded6"), surface: v("--surface", "#ffffff"),
+              series: [v("--accent", "#23573f"), v("--gold", "#a3741c"), v("--plus", "#5b4d86"), v("--down", "#ad3a2c"), v("--up", "#23704a")] };
     document.querySelectorAll("#ziq-root [data-chart]").forEach(function (el) {
       if (!el.offsetParent && el.closest("details:not([open])")) { el.dataset.pending = "1"; return; }
       var o = JSON.parse(el.getAttribute("data-chart"));
@@ -149,7 +145,42 @@ const SCRIPT = `
     var el = document.getElementById(id);
     while (el) { if (el.tagName === "DETAILS") el.open = true; el = el.parentElement; }
   }
+  function norm(t) { return (t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9.%]+/g, " ").replace(/^ +| +$/g, ""); }
+  function wireFilter(form) {
+    var scope = document.getElementById(form.dataset.filter), input = form.querySelector("input[name=q]");
+    if (!scope || !input) return;
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
+    var count = form.querySelector("[data-filter-count]");
+    var go = form.querySelector("[data-filter-go]"); if (go) go.hidden = true;
+    var items = Array.prototype.slice.call(scope.querySelectorAll("[data-search]"));
+    var groups = Array.prototype.slice.call(scope.querySelectorAll("[data-group]"));
+    groups.forEach(function (g) { if (g.tagName === "DETAILS" && g.dataset.openInitial === undefined) g.dataset.openInitial = String(g.open); });
+    var params = new URLSearchParams(location.search);
+    if (params.get("q")) input.value = params.get("q");
+    selects.forEach(function (sel) { if (params.get(sel.name)) sel.value = params.get(sel.name); });
+    function apply() {
+      var words = norm(input.value).split(" ").filter(Boolean), shown = 0;
+      items.forEach(function (el) {
+        var t = el.dataset.search || "";
+        var ok = words.every(function (w) { return t.indexOf(w) >= 0; }) && selects.every(function (sel) { return !sel.value || el.dataset[sel.name] === sel.value; });
+        el.hidden = !ok; if (ok) shown++;
+      });
+      var active = words.length > 0 || selects.some(function (sel) { return sel.value; });
+      if (scope.hasAttribute("data-idle-list")) { if (active) scope.removeAttribute("data-idle"); else scope.setAttribute("data-idle", ""); }
+      groups.forEach(function (g) {
+        var any = g.querySelector("[data-search]:not([hidden])") !== null;
+        g.hidden = !any;
+        if (g.tagName === "DETAILS") g.open = active ? any : g.dataset.openInitial === "true";
+      });
+      if (count && count.dataset.template) count.textContent = count.dataset.template.replace("{shown}", shown).replace("{total}", items.length);
+    }
+    form.addEventListener("submit", function (e) { e.preventDefault(); apply(); });
+    input.addEventListener("input", apply);
+    selects.forEach(function (sel) { sel.addEventListener("change", apply); });
+    apply();
+  }
   function wire() {
+    document.querySelectorAll("#ziq-root form[data-filter]").forEach(wireFilter);
     var sections = function () { return Array.prototype.slice.call(document.querySelectorAll("#ziq-root details.section")); };
     document.querySelectorAll("#ziq-root button[data-toggle-all]").forEach(function (b) {
       var label = function () { b.textContent = sections().every(function (d) { return d.open; }) ? b.dataset.close : b.dataset.open; };
@@ -181,15 +212,7 @@ const SCRIPT = `
     store.set("ziq-tier", tier);
     wire();
   }
-  function setTheme(theme) {
-    if (theme === "ledger") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
-    document.querySelectorAll("[data-pv-theme]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.pvTheme === theme)); });
-    store.set("ziq-theme", theme);
-    charts();
-  }
   document.querySelectorAll("[data-pv-tier]").forEach(function (b) { b.addEventListener("click", function () { setTier(b.dataset.pvTier); }); });
-  document.querySelectorAll("[data-pv-theme]").forEach(function (b) { b.addEventListener("click", function () { setTheme(b.dataset.pvTheme); }); });
-  setTheme(store.get("ziq-theme") || "ledger");
   var saved = store.get("ziq-tier");
   if (saved && saved !== "free" && ${JSON.stringify(TIERS)}.indexOf(saved) >= 0) setTier(saved); else wire();
 })();`;
@@ -201,8 +224,10 @@ function rewriteBody(html) {
   body = body
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
     .replace(/<div class="notice warn">\d+ sessions? behind[\s\S]*?<\/div>/g, "")
-    // the copy has no server behind it: its forms (feedback, the calculator) do nothing when sent
-    .replace(/<form\b([^>]*?)action="[^"]*"/g, '<form$1action="#" onsubmit="return false"');
+    // the copy has no server behind it: the site's search box opens the copy's search page (which filters itself);
+    // other forms (feedback, the calculator, list filters) are not sent anywhere
+    .replace(/<form\b([^>]*?)action="([^"]*)"/g, (m, attrs, action) =>
+      action === "/search" ? `<form${attrs}action="${fileName("/search")}"` : `<form${attrs}action="#" onsubmit="return false"`);
   return body.replace(/href="(\/[^"#?]*)((?:\?[^"#]*)?)((?:#[^"]*)?)"/g, (m, p, _q, hash) => {
     if (p.startsWith("/api")) return 'href="#"';
     const target = p.replace(/\/$/, "") || "/";
@@ -218,11 +243,9 @@ function bar(path, variants) {
     const same = tier !== "free" && !variants[tier];
     return `<button type="button" data-pv-tier="${tier}" aria-pressed="${tier === "free"}"${same ? ' title="The same as Free on this page"' : ""}>${TIER_NAMES[tier]}${same ? ' <span class="pv-same">=</span>' : ""}</button>`;
   }).join("");
-  const themes = [["ledger", "Ledger"], ["harbour", "Harbour"], ["evergreen", "Evergreen"]]
-    .map(([k, n]) => `<button type="button" data-pv-theme="${k}" aria-pressed="${k === "ledger"}">${n}</button>`).join("");
-  const lab = LAB ? `<a href="${fileName(LAB_PATH)}">Portfolio lab (internal)</a>` : "";
-  return `<div class="pv-bar"><strong>Private preview of ZinvestIQ</strong><span>Real data${AS_OF ? ` to ${AS_OF}` : ""}; not the live site.</span>` +
-    `<span class="pv-group"><span>View as</span>${tierButtons}</span><span class="pv-group"><span>Colours</span>${themes}</span>${lab}</div>`;
+  const lab = LAB ? `<a href="${fileName(LAB_PATH)}">Portfolio lab (preview)</a>` : "";
+  return `<div class="pv-bar"><strong>Preview of ZinvestIQ</strong><span>Real data${AS_OF ? ` to ${AS_OF}` : ""}; not the live site.</span>` +
+    `<span class="pv-group"><span>View as</span>${tierButtons}</span>${lab}</div>`;
 }
 
 function page(path, title, freeBody, variants) {
@@ -230,7 +253,7 @@ function page(path, title, freeBody, variants) {
   for (const t of TIERS) if (variants[t]) groups.set(variants[t], [...(groups.get(variants[t]) ?? []), t]);
   const templates = [...groups].map(([body, tiers]) => `<template data-tier="${tiers.join(" ")}">${body}</template>`).join("");
   const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${title}` +
-    `<link rel="stylesheet" href="${FONTS}"><link rel="stylesheet" href="style.css">`;
+    `<meta name="robots" content="noindex, nofollow"><link rel="stylesheet" href="${FONTS}"><link rel="stylesheet" href="style.css">`;
   const body = `${bar(path, variants)}<div id="ziq-root" data-tier="free">${freeBody}</div>${templates}` +
     `<script src="${ECHARTS}"></script><script src="preview.js"></script>`;
   // the main page is wrapped in a document skeleton when it is published, so it carries only its content
@@ -267,13 +290,20 @@ if (LAB && aboutFree) {
   let content = (report.match(/<body[^>]*>([\s\S]*)<\/body>/) ?? ["", report])[1];
   content = content
     .replace(/<p class="warn">/g, '<p class="notice warn">')
+    .replace(/<div class="table-wrap">/g, "").replace(/<\/table><\/div>/g, "</table>")
     .replace(/<table class="([^"]*)">/g, '<div class="table-wrap"><table class="$1">').replace(/<\/table>/g, "</table></div>")
     .replace(/<h1>[\s\S]*?<\/h1>/, "");
-  const head = `<header class="page-head"><p class="eyebrow">Internal research · not part of the site</p><h1>Portfolio lab</h1>` +
-    `<p class="lead">The owner's research report on model portfolios (decision 0023). It stays off the site until the lawyer has given a view; ` +
-    `the three mock-ups at the end show the ways it could be published, for that conversation.</p></header>`;
+  // the owner's report opens with an internal-use warning; the preview frames the page as the education piece it is
+  content = content.replace(/<p class="notice warn">[\s\S]*?<\/p>/, "");
+  const head = `<header class="page-head"><p class="eyebrow">Portfolio lab · research and education (preview)</p>` +
+    `<h1>How a rules-based portfolio is built</h1>` +
+    `<p class="lead">A worked example on the Colombo Stock Exchange: the rules written down in advance, what they would ` +
+    `have done since the first date they could run, using only what was known on each date, and today's example ` +
+    `portfolio with the reason for each holding. Research and education, not advice.</p>` +
+    `<div class="notice warn">Preview only: the lab is not part of the site until the lawyer has given a view on how ` +
+    `model portfolios may be published (decision 0024).</div></header>`;
   const framed = aboutFree.replace(/(<main\b[^>]*>)[\s\S]*(<\/main>)/, `$1<div class="lab-page">${head}${content}</div>$2`);
-  write(LAB_PATH, page(LAB_PATH, "<title>Portfolio lab (internal) · ZinvestIQ</title>", framed, {}));
+  write(LAB_PATH, page(LAB_PATH, "<title>Portfolio lab · ZinvestIQ</title>", framed, {}));
 }
 
 writeFileSync(join(OUT, "style.css"), css);
