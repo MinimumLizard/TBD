@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-09 — Janu's review: starting paths, a "how to start" guide, statistics and guide votes
+
+Janu reviewed the preview; every point and where it landed is in `docs/plan-janu-review.md`.
+
+- **"Where are you starting from?"** opens the home page (and `/start`): four choices, then one follow-up question that
+  fits the answer (only people who have not started are asked about accounts and brokers), then a path of three steps,
+  each a guide and the page of the site it explains (`web/lib/paths.ts`, `app/start/...`). Paths choose what to read,
+  never what to do with money; the result page says so. The browser remembers the last path and the home page offers
+  to continue it. The old four-card "Where to start" section is gone.
+- **New guide, "How to start investing in Sri Lanka"** (`/learn/getting-started`): fixed deposits, bills and bonds
+  (primary dealers, LankaSecure), the CDS account through a stockbroker, fees of about 1.1 % a trade, unit trusts.
+- **"You're not alone" statistics**, each with its source: about 1 in 500 Sri Lankans invests on the CSE (CSE
+  chairman, via Echelon), about 4 in 10 adults are not financially literate (CBSL survey, via The Morning), and our
+  own: how many one-year fixed deposits since 2003 lost value after tax and inflation (from `lk_savings_compare`).
+- **"Was this guide useful?"** at the end of every guide. The number of readers who found it useful appears only from
+  25 votes; nothing is invented. Migration 0018: one vote per visitor and page (a repeat replaces the earlier vote
+  while the visitor's key is kept, seven days), and `community.page_votes`, which gives the website a page's two
+  totals and nothing else. Guide pages hide the footer's identical question.
+- **Planned, not built:** one week of Pro for a review, and a chatbot. Both wait for accounts; the chatbot also needs
+  an AI service, a budget and the lawyer (`docs/plan-janu-review.md` §2 and §3). Email capture is parked, as Janu
+  marked it.
+- Tests: `web/tests/unit/paths.test.ts` (every step leads to a real guide and page with a label, the account question
+  reaches only newcomers, every address is in the tier-leak suite); `tests/test_feedback.py` (one vote per page,
+  totals only).
+
 ## 2026-11-01 (later) — Evergreen, finding things, and the lab's walk-forward test (decision 0024)
 
 - **Evergreen** is the site's palette (the owner's choice): light and dark tokens, charts and the weekly e-mail. The

@@ -99,20 +99,6 @@
     "snapshotLead": "The day's main figures for shares and for government bonds. Each tile shows the latest value and its recent trend.",
     "cseWhy": "The ASPI is the broadest measure of the share market: when most large companies' prices rise, it rises.",
     "bondsWhy": "The curve shows what the government pays to borrow for each length of time. Treasury bills, bonds and, indirectly, fixed-deposit rates are priced around it.",
-    "startTitle": "Where to start",
-    "startLead": "Pick the description closest to you. Each path leads to a short guide and the part of the site it explains.",
-    "path1Who": "I keep my savings in fixed deposits",
-    "path1What": "How fixed deposits, treasury bills and inflation compared since 2003, before and after tax.",
-    "path1Go": "Compare savings",
-    "path2Who": "I'm new to the share market",
-    "path2What": "What a share is, what moves the market, and how to read a share's page step by step.",
-    "path2Go": "Start the guide",
-    "path3Who": "I already own shares",
-    "path3What": "Each company's return with dividends included, its figures, who owns it, and what its directors traded.",
-    "path3Go": "Find your shares",
-    "path4Who": "I follow bonds and bills",
-    "path4What": "Today's yield curve, every government bond measured against it, and how dealers' quotes compare with trades.",
-    "path4Go": "See the curve",
     "linksTitle": "How Sri Lanka's markets fit together",
     "linksLead": "Shares, government securities and savings are priced against each other. Interest rates connect them.",
     "link1Title": "Interest rates set the starting point",
@@ -1397,7 +1383,9 @@
       "zscores": "Unusual positions",
       "execution": "Trades against quotes",
       "flows": "Money flows",
-      "carry": "Carry and rolldown"
+      "carry": "Carry and rolldown",
+      "search": "Search",
+      "start": "Find your starting path"
     },
     "markets-map": {
       "title": "How Sri Lanka's markets fit together",
@@ -1973,6 +1961,66 @@
         "They are approximations; for very large moves the full price calculation differs slightly.",
         "A bond kept to maturity repays its face value whatever the path of its price."
       ]
+    },
+    "review": {
+      "title": "Was this guide useful?",
+      "ask": "Your answer helps us decide which guides to improve.",
+      "count": "{count, plural, one {# reader} other {# readers}} found this guide useful.",
+      "more": "Tell us more"
+    },
+    "getting-started": {
+      "title": "How to start investing in Sri Lanka",
+      "summary": "The practical first steps: the accounts you need, where each kind of investment is bought, what it costs, and how much you need to begin.",
+      "keypoints": [
+        "A fixed deposit needs only a bank account; treasury bills and bonds go through a bank or a primary dealer; shares need a share account (CDS) opened through a stockbroker.",
+        "Opening a CDS account needs your NIC, proof of address and bank details, and is done through any licensed stockbroker.",
+        "Costs matter for small amounts: each share trade pays about 1.1 % in fees, both when shares are bought and when they are disposed of.",
+        "Unit trusts let small amounts be spread over many shares or bonds at once, through a fund manager."
+      ],
+      "sections": [
+        {
+          "h": "First, the order most people take",
+          "p": [
+            "Before any investment, most people keep money for emergencies somewhere they can reach quickly, such as a savings account or a short fixed deposit. Only money that can be left alone for years is usually put into shares, because share prices can fall and stay down for a long time.",
+            "Government treasury bills and bonds sit in between: they pay a known rupee return if kept to the end, and can be reached earlier only at the market's price."
+          ]
+        },
+        {
+          "h": "Fixed deposits",
+          "p": [
+            "Offered by licensed commercial banks and licensed finance companies. A deposit needs a bank account and an identity document; the rate is fixed for the term. Deposits at licensed institutions are covered by the Sri Lanka Deposit Insurance Scheme up to a limit per depositor and institution; the current limit is published by the Central Bank."
+          ]
+        },
+        {
+          "h": "Treasury bills and bonds",
+          "p": [
+            "The government issues them at regular auctions. Individuals usually take part through a primary dealer or a bank, which bids at the auction or offers from its own stock; each sets its own minimum amount. The securities are held in your name in the central depository for government securities (LankaSecure). The bonds pages on this site show the yields dealers quote each day."
+          ]
+        },
+        {
+          "h": "Shares on the Colombo Stock Exchange",
+          "p": [
+            "Shares are held in a Central Depository System (CDS) account, opened through a stockbroker that is a member of the CSE; the CSE publishes the list. The broker asks for your NIC, proof of address and bank details. Orders are placed through the broker, by phone or in its trading app; shares settle into your CDS account and money into your bank account.",
+            "There is no official minimum, but each trade pays fees of about 1.1 % of its value (brokerage, exchange and regulator fees), so very small, frequent trades lose a noticeable share to costs."
+          ]
+        },
+        {
+          "h": "Unit trusts",
+          "p": [
+            "A unit trust pools many investors' money and invests it in shares, bonds or deposits, run by a fund manager licensed by the Securities and Exchange Commission. It is one way to own a spread of investments with a small amount; the fund charges a yearly fee."
+          ]
+        },
+        {
+          "h": "Where ZinvestIQ fits",
+          "p": [
+            "ZinvestIQ does not take orders or look after anyone's money. It shows what the markets are doing and explains how to read them, so that whichever way you choose to invest, you understand what you are looking at."
+          ]
+        }
+      ],
+      "limits": [
+        "Fees, minimums and procedures change; check them with the bank, dealer or broker before acting.",
+        "This guide describes how each route works; it does not say which suits anyone."
+      ]
     }
   },
   "search": {
@@ -1991,5 +2039,125 @@
     },
     "none": "Nothing matches. Try fewer or shorter words: part of a company's name, a symbol, or a bond's maturity year.",
     "more": "and {count} more: type to find them"
+  },
+  "start": {
+    "eyebrow": "Start here",
+    "title": "Where are you starting from?",
+    "lead": "Pick the one closest to you. One more question, and we will show you where to begin: three steps, nothing more.",
+    "homeTitle": "Where are you starting from?",
+    "homeLead": "Pick the one closest to you and we will show you where to begin. Two questions, under a minute.",
+    "popular": "Most people start here",
+    "stepOf": "Question {n} of 2",
+    "back": "Back",
+    "again": "Start again",
+    "continue": "Continue your starting path: {label}",
+    "types": {
+      "new": {
+        "title": "I'm completely new to this",
+        "desc": "I save, but shares, bills and bonds are new to me.",
+        "short": "completely new"
+      },
+      "curious": {
+        "title": "I know the basics, but haven't invested yet",
+        "desc": "I've heard of shares and treasury bills, but haven't put money in.",
+        "short": "knows the basics, not invested yet"
+      },
+      "confused": {
+        "title": "I invest, but I'm not always sure what's going on",
+        "desc": "I own shares or bonds, but the numbers don't always make sense.",
+        "short": "invests, sometimes unsure"
+      },
+      "confident": {
+        "title": "I invest and want sharper tools",
+        "desc": "I follow the market and want deeper data and clear methods.",
+        "short": "invests regularly"
+      }
+    },
+    "questions": {
+      "new": {
+        "question": "Where is most of your savings today?",
+        "deposits": "In a fixed deposit or a savings account",
+        "cash": "Cash, or nowhere in particular yet",
+        "assets": "Gold, land or property"
+      },
+      "curious": {
+        "question": "What has held you back so far?",
+        "how": "Not knowing how to start: accounts, brokers, minimums",
+        "risk": "Worry about losing money",
+        "choose": "Not knowing what to look at"
+      },
+      "confused": {
+        "question": "What would you most like to make sense of?",
+        "returns": "How my shares have really done, dividends included",
+        "figures": "Company figures: P/E, dividends, who owns it",
+        "bonds": "Treasury bills, bonds and their yields",
+        "news": "What directors are doing, and what moved the market"
+      },
+      "confident": {
+        "question": "What do you follow most?",
+        "shares": "Listed shares",
+        "bonds": "Government bonds and bills",
+        "both": "Both"
+      }
+    },
+    "result": {
+      "eyebrow": "Your starting path",
+      "title": "Here's where to start",
+      "youSaid": "You said",
+      "step": "Step {n}",
+      "readGuide": "Read the guide",
+      "openPage": "Open the page",
+      "thenUse": "Then use it here",
+      "note": "This path chooses what to read first. It is not advice about what to do with your money, and nothing here takes your circumstances into account.",
+      "intro": {
+        "new": "Start from what you know, your savings, and build from there: what your money has actually earned, how the markets fit together, and how people take their first step.",
+        "curious": "You already have the basics. These three steps turn them into something you can use on real data.",
+        "confused": "Three steps that explain the numbers you see, each next to the page where you will find them.",
+        "confident": "The deeper tools, each with the guide that explains exactly how it is computed."
+      },
+      "why": {
+        "deposits": "See what fixed deposits have really earned since 2003, after tax and inflation.",
+        "cash": "Cash loses value to inflation every year; the first step is knowing your options.",
+        "assets": "Gold and property are one way to keep value; see how savings and the markets compare.",
+        "how": "Accounts, brokers, minimums and costs, step by step.",
+        "risk": "Risk can be measured and spread; seeing how is the first step to judging it.",
+        "choose": "What to look at first, and how to read it.",
+        "returns": "The price chart leaves out dividends; the total return does not.",
+        "figures": "What each figure measures, and what it leaves out.",
+        "bonds": "Price, yield and the curve, from the basics.",
+        "news": "What a director's dealing can and cannot tell you.",
+        "shares": "Compare every share on one table, then follow the money.",
+        "both": "The comparison table, then the bond tools."
+      }
+    },
+    "tools": {
+      "home": "Today's markets",
+      "savings": "FDs, bills and inflation",
+      "market": "The share market today",
+      "shares": "Shares by sector",
+      "compare": "Compare all shares",
+      "dealings": "Directors' dealings",
+      "bonds": "Yield curve and bonds",
+      "zscores": "Unusual positions",
+      "carry": "Carry and rolldown"
+    },
+    "stats": {
+      "title": "You're not alone",
+      "investors": {
+        "value": "1 in 500",
+        "label": "Sri Lankans is an active investor on the Colombo Stock Exchange: about 50,000 people.",
+        "source": "CSE chairman, reported by Echelon"
+      },
+      "literacy": {
+        "value": "4 in 10",
+        "label": "Sri Lankan adults are not financially literate, by the Central Bank's latest survey.",
+        "source": "Central Bank of Sri Lanka survey, reported by The Morning"
+      },
+      "savers": {
+        "value": "{lost} of {total}",
+        "label": "one-year fixed deposits since {first} lost value after tax and inflation.",
+        "source": "ZinvestIQ, from Central Bank and census data"
+      }
+    }
   }
 }

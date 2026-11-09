@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import GuideReview from "@/components/GuideReview";
 import PageHead from "@/components/PageHead";
 import { guide, neighbours } from "@/lib/guides";
 import { decodeSegment } from "@/lib/params";
@@ -60,6 +61,7 @@ export default async function GuidePage({ params }: { params: Promise<{ guide: s
           <Link key={tool.href} href={tool.href}>{t(`guides.tools.${tool.key}` as never)} →</Link>
         ))}
       </p>
+      <GuideReview page={`/learn/${slug}`} />
       <nav className="guide-nav" aria-label={t("menu.learn.guides.title")}>
         {prev ? <Link href={`/learn/${prev.slug}`}>← {t(`guides.${prev.slug}.title` as never)}</Link> : <span />}
         {next ? <Link href={`/learn/${next.slug}`}>{t(`guides.${next.slug}.title` as never)} →</Link> : <span />}

@@ -141,3 +141,10 @@ export async function submitFeedback(input: FeedbackInput, viewerTier: string, s
   const r = result.rows[0]?.r;
   return r === "ok" || r === "limited" ? r : "invalid";
 }
+
+/** The "useful" and "not useful" totals of one page's votes (migration 0018): two numbers, nothing about a visitor. */
+export async function pageVotes(page: string): Promise<{ useful: number; notUseful: number }> {
+  const result = await getPool().query("select useful, not_useful from community.page_votes($1)", [page]);
+  const r = result.rows[0];
+  return { useful: Number(r?.useful ?? 0), notUseful: Number(r?.not_useful ?? 0) };
+}

@@ -68,9 +68,9 @@ def test_one_sender_is_limited_per_hour_without_affecting_others(conn):
     for _ in range(5):
         assert submit(conn, kind="message", useful=None, topic="other", message="hello there") == "ok"
     assert submit(conn, kind="message", useful=None, topic="other", message="hello there") == "limited"
-    for _ in range(25):
-        assert submit(conn) == "ok"
-    assert submit(conn) == "limited"                                   # 30 of anything per hour
+    for i in range(25):                                                # votes on 25 pages (one vote per page counts)
+        assert submit(conn, page=f"/page-{i}") == "ok"
+    assert submit(conn, page="/page-25") == "limited"                  # 30 of anything per hour
     assert submit(conn, key=OTHER) == "ok"
     conn.execute("update community.feedback set received_at = now() - interval '2 hours'")
     assert submit(conn) == "ok"                                        # the limit is per hour
@@ -99,3 +99,41 @@ def test_the_owners_job_summarises_marks_and_deletes(conn):
     assert feedback.messages(conn) == []
     with pytest.raises(ValueError):
         feedback.mark(conn, [1], "published")
+
+
+# --- "Was this useful?" counts (migration 0018) ----------------------------------------------------------------------
+
+def votes(conn, page):
+    return conn.execute("select * from community.page_votes(%s)", (page,)).fetchone()
+
+
+def test_a_sender_votes_once_per_page_and_a_later_vote_replaces_the_earlier(conn):
+    page = "/learn/total-return"
+    assert submit(conn, page=page, useful=True) == "ok"
+    assert submit(conn, page=page, useful=True) == "ok"        # repeated: still one vote
+    assert dict(votes(conn, page)) == {"useful": 1, "not_useful": 0}
+    assert submit(conn, page=page, useful=False) == "ok"       # changed mind: the vote is replaced
+    assert dict(votes(conn, page)) == {"useful": 0, "not_useful": 1}
+    assert submit(conn, page=page, useful=True, key=OTHER) == "ok"
+    assert dict(votes(conn, page)) == {"useful": 1, "not_useful": 1}
+    assert submit(conn, page="/learn/ownership", useful=True) == "ok"   # another page is another vote
+    assert dict(votes(conn, "/learn/ownership")) == {"useful": 1, "not_useful": 0}
+
+
+def test_the_website_reads_totals_only(conn):
+    submit(conn, page="/learn/yield-curve", useful=True)
+    as_website(conn)
+    try:
+        assert dict(votes(conn, "/learn/yield-curve")) == {"useful": 1, "not_useful": 0}
+        conn.execute("savepoint s")
+        with pytest.raises(Exception, match="permission denied"):
+            conn.execute("select * from community.feedback")
+        conn.execute("rollback to savepoint s")
+    finally:
+        conn.execute("reset role")
+
+
+def test_the_checks_of_migration_0012_still_apply(conn):
+    assert submit(conn, page="not-a-path") == "invalid"
+    assert submit(conn, key="short") == "invalid"
+    assert submit(conn, kind="message", useful=None, topic="idea", message="ok") == "invalid"   # too short

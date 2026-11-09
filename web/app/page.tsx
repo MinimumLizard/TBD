@@ -7,7 +7,9 @@ import BreadthBar from "@/components/BreadthBar";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
+import StartChooser from "@/components/StartChooser";
 import StatTile from "@/components/StatTile";
+import Stats from "@/components/Stats";
 import Term from "@/components/Term";
 import { LOW_WEIGHT, curveOption, curvePoints, lineOption, nelsonSiegel } from "@/lib/charts";
 import { bondCurve, bondCurveHistory } from "@/lib/data/bonds";
@@ -60,6 +62,15 @@ export default async function Home() {
           <li>{t("home.trust2")}</li>
           <li>{t("home.trust3")}</li>
         </ul>
+      </section>
+
+      <section className="start-band" aria-labelledby="start-title">
+        <div className="section-head">
+          <h2 id="start-title">{t("start.homeTitle")}</h2>
+        </div>
+        <p className="muted" style={{ marginTop: -4 }}>{t("start.homeLead")}</p>
+        <p className="continue-path" data-continue-path="" data-template={t("start.continue", { label: "{label}" })} hidden />
+        <StartChooser />
       </section>
 
       <Brief title={t("home.briefTitle")} lines={summary.map((line) => t(line.key as never, line.values as never))} when={when} />
@@ -156,20 +167,6 @@ export default async function Home() {
       </div>
 
       <div className="section-head">
-        <h2>{t("home.startTitle")}</h2>
-      </div>
-      <p className="muted" style={{ marginTop: -4 }}>{t("home.startLead")}</p>
-      <div className="paths">
-        {([["1", "/learn/savings"], ["2", "/learn/shares-basics"], ["3", "/cse/shares"], ["4", "/bonds"]] as const).map(([n, href]) => (
-          <Link key={n} href={href}>
-            <span className="p-who">{t(`home.path${n}Who`)}</span>
-            <span className="p-what">{t(`home.path${n}What`)}</span>
-            <span className="p-go">{t(`home.path${n}Go`)} →</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="section-head">
         <h2>{t("home.linksTitle")}</h2>
       </div>
       <p className="muted" style={{ marginTop: -4 }}>{t("home.linksLead")}</p>
@@ -182,6 +179,8 @@ export default async function Home() {
           </div>
         ))}
       </div>
+
+      <Stats viewer={viewer} keys={["investors", "literacy", "savers"]} />
 
       <div className="section-head">
         <h2>{t("home.differsTitle")}</h2>

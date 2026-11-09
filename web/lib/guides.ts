@@ -17,6 +17,7 @@ export interface Guide {
 }
 
 export const GUIDES: Guide[] = [
+  { slug: "getting-started", level: "basics", minutes: 6, tools: [{ href: "/start", key: "start" }, { href: "/learn/savings", key: "savings" }] },
   { slug: "markets-map", level: "basics", minutes: 5, tools: [{ href: "/", key: "home" }, { href: "/learn/savings", key: "savings" }] },
   { slug: "shares-basics", level: "basics", minutes: 7, tools: [{ href: "/cse", key: "market" }, { href: "/cse/shares", key: "shares" }] },
   { slug: "total-return", level: "basics", minutes: 5, tools: [{ href: "/cse/shares", key: "shares" }] },

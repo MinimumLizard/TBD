@@ -63,10 +63,31 @@ function wireFilter(form: HTMLFormElement): () => void {
   };
 }
 
+// Starting paths (lib/paths.ts): a path page names itself in a hidden link; the home page offers to continue it. Only
+// this site's own /start/<type>/<answer> addresses are kept, and the label is shown as text, never as markup.
+const PATH_KEY = "ziq-path";
+function rememberPath() {
+  try {
+    const own = document.querySelector<HTMLAnchorElement>("a[data-remember-path]");
+    if (own) localStorage.setItem(PATH_KEY, JSON.stringify({ href: own.getAttribute("href"), label: own.textContent }));
+    const slot = document.querySelector<HTMLElement>("[data-continue-path]");
+    const saved = slot ? JSON.parse(localStorage.getItem(PATH_KEY) ?? "null") : null;
+    if (!slot || !saved || typeof saved.href !== "string" || !/^\/start\/[a-z]+\/[a-z]+$/.test(saved.href)) return;
+    const link = document.createElement("a");
+    link.href = saved.href;
+    link.textContent = (slot.dataset.template ?? "").replace("{label}", String(saved.label ?? ""));
+    slot.replaceChildren(link);
+    slot.hidden = false;
+  } catch {
+    // storage blocked or unreadable: the home page simply offers no shortcut
+  }
+}
+
 export default function PageScripts() {
   const pathname = usePathname(); // the layout stays mounted across pages: wire each new page again
   useEffect(() => {
     openTarget();
+    rememberPath();
     window.addEventListener("hashchange", openTarget);
 
     const toggles = Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-toggle-all]"));

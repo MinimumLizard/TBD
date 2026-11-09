@@ -1,6 +1,7 @@
 // Where each model's outputs can be seen: its API routes and the pages that show it. The tier-leak tests request
 // every one of these as every tier. Adding a model means adding it here, and a unit test fails until it is.
 import { GUIDE_SLUGS } from "./guides";
+import { START_PAGES } from "./paths";
 import type { ModelName } from "./registry";
 
 export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }> = {
@@ -25,4 +26,4 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
 export const DETAIL_PAGES = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000"];
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
+export const ALL_PAGES = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", ...START_PAGES, "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];

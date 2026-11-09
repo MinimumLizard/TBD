@@ -23,7 +23,7 @@ const LAB = arg("--lab");
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>] [--lab <file>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
+const SEEDS = ["/", "/start", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
                "/learn/glossary", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
 const TIERS = ["free", "plus", "pro"];
 const TIER_NAMES = { free: "Free", plus: "Plus", pro: "Pro" };
@@ -180,7 +180,21 @@ const SCRIPT = `
     selects.forEach(function (sel) { sel.addEventListener("change", apply); });
     apply();
   }
+  function rememberPath() {
+    try {
+      var own = document.querySelector("#ziq-root a[data-remember-path]");
+      if (own) store.set("ziq-path", JSON.stringify({ href: own.href, label: own.textContent }));
+      var slot = document.querySelector("#ziq-root [data-continue-path]");
+      var saved = slot ? JSON.parse(store.get("ziq-path") || "null") : null;
+      if (!slot || !saved || typeof saved.href !== "string" || new URL(saved.href).origin !== location.origin) return;
+      var link = document.createElement("a");
+      link.href = saved.href;
+      link.textContent = (slot.dataset.template || "").replace("{label}", String(saved.label || ""));
+      slot.textContent = ""; slot.appendChild(link); slot.hidden = false;
+    } catch (e) {}
+  }
   function wire() {
+    rememberPath();
     document.querySelectorAll("#ziq-root form[data-filter]").forEach(wireFilter);
     var sections = function () { return Array.prototype.slice.call(document.querySelectorAll("#ziq-root details.section")); };
     document.querySelectorAll("#ziq-root button[data-toggle-all]").forEach(function (b) {

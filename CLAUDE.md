@@ -56,6 +56,11 @@ decisions).
   noindex; it shows every tier, the names and the lab page). Finding things: header search and `/search`, shares by
   sector with filters (`lib/filter.ts`, `components/FilterBar.tsx`; sector rules exported from
   `models/_lib/cse_sectors.py` with the registry), the sortable table at `/cse/shares/compare`.
+- Janu's review (2026-11-09, `docs/plan-janu-review.md`): the home page and `/start` ask "Where are you starting
+  from?", then one follow-up, then a three-step path (`web/lib/paths.ts`, text `start.*`; paths choose what to read,
+  never what to do). Guides end with "Was this guide useful?"; the count shows from 25 votes (migration 0018:
+  one vote per visitor and page, `community.page_votes` gives totals only). The Pro trial and a chatbot are plans that
+  wait for accounts.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
