@@ -14,7 +14,9 @@
     "learn": "Learn",
     "plans": "Plans",
     "feedback": "Feedback",
-    "weekly": "Weekly e-mail"
+    "weekly": "Weekly e-mail",
+    "privacy": "Privacy",
+    "markets": "Today's markets"
   },
   "tiers": {
     "free": "Free",
@@ -2050,7 +2052,6 @@
     "stepOf": "Question {n} of 2",
     "back": "Back",
     "again": "Start again",
-    "continue": "Continue your starting path: {label}",
     "types": {
       "new": {
         "title": "I'm completely new to this",
@@ -2128,10 +2129,11 @@
         "news": "What a director's dealing can and cannot tell you.",
         "shares": "Compare every share on one table, then follow the money.",
         "both": "The comparison table, then the bond tools."
-      }
+      },
+      "homeButton": "Go to my home page",
+      "homeNote": "Your home page puts the figures and pages that fit your answers first. You can change your answers at any time."
     },
     "tools": {
-      "home": "Today's markets",
       "savings": "FDs, bills and inflation",
       "market": "The share market today",
       "shares": "Shares by sector",
@@ -2139,7 +2141,8 @@
       "dealings": "Directors' dealings",
       "bonds": "Yield curve and bonds",
       "zscores": "Unusual positions",
-      "carry": "Carry and rolldown"
+      "carry": "Carry and rolldown",
+      "markets": "Today's markets"
     },
     "stats": {
       "title": "You're not alone",
@@ -2158,6 +2161,95 @@
         "label": "one-year fixed deposits since {first} lost value after tax and inflation.",
         "source": "ZinvestIQ, from Central Bank and census data"
       }
+    },
+    "welcomeEyebrow": "Sri Lanka's markets, explained",
+    "skip": "Skip: show me today's markets",
+    "promise": "Free to use. Information and education, never advice."
+  },
+  "homes": {
+    "eyebrow": "Your home",
+    "titles": {
+      "new": "Start with what you know: your savings",
+      "curious": "From knowing the basics to using them",
+      "confused": "Make sense of the numbers",
+      "confident": "Your market desk"
+    },
+    "leads": {
+      "new": "What deposits and treasury bills pay today, what inflation takes away, and the first guides to read. The share and bond pages are one click away when you are ready.",
+      "curious": "The day in a few sentences, what savings earn, and the share market's year, each next to the guide that explains it.",
+      "confused": "Today's main figures, each with a plain explanation, and the guides for the numbers that puzzle people most.",
+      "confident": "The day's figures and charts first, then the deeper tools, each with its published method."
+    },
+    "youSaid": "You said",
+    "change": "Change my answers",
+    "everything": "The full markets page",
+    "pathTitle": "Your starting path",
+    "pathStep": "Step {n}",
+    "savingsTitle": "What savings earn today",
+    "savingsMore": "The full comparison since 2003",
+    "savingsWhy": "A deposit or a bill grows your savings only when its rate, after tax, is above inflation. The comparison page shows how often that has happened.",
+    "guidesTitle": "Read next",
+    "toolsTitle": "Pages picked for you",
+    "lookupTitle": "Look something up",
+    "lookupLead": "A share, a government bond, a term or a guide.",
+    "lookupButton": "Search"
+  },
+  "signup": {
+    "title": "Keep your path: sign up free",
+    "lead": "Leave your e-mail address and we will open your free account when sign-ins open, with this starting path saved in it.",
+    "email": "E-mail address",
+    "weekly": "Also send me the weekly market summary",
+    "consent": "I agree that ZinvestIQ keeps my e-mail address to open my account and to write to me about it.",
+    "privacyLink": "How we use it",
+    "button": "Sign up",
+    "note": "Free. No card. We will send one e-mail to confirm the address, and nothing else until you confirm.",
+    "thanks": {
+      "title": "You are signed up",
+      "failTitle": "Sign up",
+      "ok": "Thank you. Your address is saved. Sign-ins are not open yet: when they open, we will send you one e-mail to confirm the address. Until you confirm, we send nothing else.",
+      "invalid": "Something was missing, so nothing was saved. Please enter an e-mail address and tick the box to agree.",
+      "limited": "Too many sign-ups came from this connection in the last hour, so this one was not saved. Please try again later.",
+      "unavailable": "Sign-up is not switched on at the moment, so nothing was saved. Please try again later.",
+      "back": "Back to where you were",
+      "home": "Go to today's markets"
     }
+  },
+  "privacy": {
+    "title": "Privacy",
+    "eyebrow": "ZinvestIQ",
+    "lead": "What ZinvestIQ keeps about you, why, and how to have it removed. In short: as little as possible.",
+    "sections": [
+      {
+        "h": "Reading the site",
+        "p": [
+          "You can read the site without an account. We do not use advertising or tracking cookies, and we do not pass data about visitors to anyone else."
+        ]
+      },
+      {
+        "h": "Your starting answers",
+        "p": [
+          "When you answer the two starting questions, the site remembers them in one cookie in your browser, so that the front page can open on your own home page. The cookie contains only the two answers, nothing that identifies you, and lasts up to a year. \"Change my answers\" replaces it; clearing your browser's cookies removes it."
+        ]
+      },
+      {
+        "h": "If you sign up",
+        "p": [
+          "We keep the e-mail address you give, the starting answers you came from, whether you asked for the weekly summary, and the date and wording of what you agreed to.",
+          "We use the address only to open your account and, if you asked for it, to send the weekly summary. We send nothing until you have confirmed the address through a link we e-mail to you, and every e-mail has a link that stops them."
+        ]
+      },
+      {
+        "h": "Feedback",
+        "p": [
+          "A message, or an answer to \"Was this page useful?\", is kept with the page it is about. We do not keep your name or your network address. A scrambled form of the address is kept for seven days, to stop floods of messages, and then erased."
+        ]
+      },
+      {
+        "h": "Having it removed",
+        "p": [
+          "Write to us through the feedback page, giving the e-mail address you signed up with, and we will delete it and tell you when it is done."
+        ]
+      }
+    ]
   }
 }

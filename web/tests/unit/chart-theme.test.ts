@@ -4,13 +4,13 @@ import { paletteFrom, themed } from "@/lib/chart-theme";
 import { lineOption } from "@/lib/charts";
 
 describe("chart theme", () => {
-  const dark: Record<string, string> = { "--text": "#e7edf6", "--muted": "#97a6bb", "--border": "#233149", "--surface": "#111b2c", "--accent": "#3cc6c0" };
+  const dark: Record<string, string> = { "--text": "#e7edf6", "--muted": "#97a6bb", "--border": "#233149", "--surface": "#111b2c", "--series-1": "#3cc6c0" };
   const p = paletteFrom((n) => dark[n] ?? "");
 
   test("takes the theme's tokens, with the light theme as fallback", () => {
     expect(p.text).toBe("#e7edf6");
     expect(p.series[0]).toBe("#3cc6c0");
-    expect(p.series[1]).toBe("#a3741c");
+    expect(p.series[1]).toBe("#c98500");
   });
 
   test("colours axes, labels and legend without touching the data", () => {

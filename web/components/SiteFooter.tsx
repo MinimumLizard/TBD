@@ -19,6 +19,7 @@ export default async function SiteFooter() {
           <div>
             <h3>{t("footer.markets")}</h3>
             <ul>
+              <li><Link href="/markets">{t("nav.markets")}</Link></li>
               <li><Link href="/cse">{t("menu.shares.market.title")}</Link></li>
               <li><Link href="/cse/shares">{t("menu.shares.allShares.title")}</Link></li>
               <li><Link href="/cse/dealings">{t("menu.shares.dealings.title")}</Link></li>
@@ -41,6 +42,7 @@ export default async function SiteFooter() {
               <li><Link href="/plans">{t("nav.plans")}</Link></li>
               <li><Link href="/email/cse">{t("nav.weekly")}</Link></li>
               <li><Link href="/feedback">{t("nav.feedback")}</Link></li>
+              <li><Link href="/privacy">{t("nav.privacy")}</Link></li>
             </ul>
           </div>
         </div>

@@ -23,7 +23,7 @@ const LAB = arg("--lab");
 if (!OUT) throw new Error("usage: node scripts/export-static.mjs <out_dir> [--as-of <date text>] [--lab <file>]");
 mkdirSync(OUT, { recursive: true });
 
-const SEEDS = ["/", "/start", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
+const SEEDS = ["/", "/start", "/markets", "/privacy", "/signup/thanks", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
                "/learn/glossary", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
 const TIERS = ["free", "plus", "pro"];
 const TIER_NAMES = { free: "Free", plus: "Plus", pro: "Pro" };
@@ -43,7 +43,8 @@ function fileName(path) {
 }
 
 async function get(path, tier) {
-  const res = await fetch(BASE + path, { headers: tier === "free" ? {} : { "x-test-tier": tier } });
+  // the copy's sign-up form opens the thank-you page as it reads after a successful sign-up
+  const res = await fetch(BASE + path + (path === "/signup/thanks" ? "?r=ok" : ""), { headers: tier === "free" ? {} : { "x-test-tier": tier } });
   if (!res.ok) throw new Error(`${path} as ${tier}: HTTP ${res.status}`);
   return res.text();
 }
@@ -80,16 +81,16 @@ let css = "";
 for (const m of first.matchAll(/<link rel="stylesheet" href="([^"]+\.css)"[^>]*>/g)) css += await (await fetch(BASE + m[1])).text();
 css = css.replace(/@font-face\s*{[^}]*}/g, "");
 css += `
-.pv-bar { background: #14181d; color: #e8e6e1; font: 13px/1.4 Inter, system-ui, sans-serif; padding: 8px 16px; display: flex; gap: 8px 18px;
+.pv-bar { background: #0c1a33; color: #e6ebf4; font: 13px/1.4 Inter, system-ui, sans-serif; padding: 8px 16px; display: flex; gap: 8px 18px;
   flex-wrap: wrap; align-items: center; justify-content: center; }
 .pv-bar strong { font-weight: 600; }
 .pv-group { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .pv-group > span { opacity: .75; margin-right: 2px; }
-.pv-group button { font: inherit; color: #e8e6e1; background: transparent; border: 1px solid rgba(255,255,255,.3); border-radius: 999px;
+.pv-group button { font: inherit; color: #e6ebf4; background: transparent; border: 1px solid rgba(255,255,255,.3); border-radius: 999px;
   padding: 1px 10px; cursor: pointer; }
-.pv-group button[aria-pressed="true"] { background: #e8e6e1; color: #14181d; font-weight: 600; }
+.pv-group button[aria-pressed="true"] { background: #e6ebf4; color: #0c1a33; font-weight: 600; }
 .pv-group button .pv-same { opacity: .6; font-size: 11px; }
-.pv-bar a { color: #e8e6e1; text-decoration: underline; }
+.pv-bar a { color: #e6ebf4; text-decoration: underline; }
 /* The internal lab page. */
 .lab-page .notice.warn b { font-weight: 600; }
 .lab-page .mockup { border: 2px dashed var(--down); border-radius: var(--radius); padding: 8px 16px; margin: 16px 0; background: var(--surface); }
@@ -126,8 +127,8 @@ const SCRIPT = `
   }
   function charts() {
     if (!window.echarts) return;
-    var p = { text: v("--text", "#1a1d1a"), muted: v("--muted", "#5d625c"), border: v("--border", "#deded6"), surface: v("--surface", "#ffffff"),
-              series: [v("--accent", "#23573f"), v("--gold", "#a3741c"), v("--plus", "#5b4d86"), v("--down", "#ad3a2c"), v("--up", "#23704a")] };
+    var p = { text: v("--text", "#111a2c"), muted: v("--muted", "#55617a"), border: v("--border", "#dce2ea"), surface: v("--surface", "#ffffff"),
+              series: [v("--series-1", "#1b4f9c"), v("--series-2", "#c98500"), v("--series-3", "#00a39a"), v("--series-4", "#6250d6"), v("--series-5", "#c2477e")] };
     document.querySelectorAll("#ziq-root [data-chart]").forEach(function (el) {
       if (!el.offsetParent && el.closest("details:not([open])")) { el.dataset.pending = "1"; return; }
       var o = JSON.parse(el.getAttribute("data-chart"));
@@ -180,17 +181,15 @@ const SCRIPT = `
     selects.forEach(function (sel) { sel.addEventListener("change", apply); });
     apply();
   }
+  // The real site remembers a visitor's starting answers in a cookie set by its server (web/proxy.ts) and opens
+  // the front door on their own home page. The copy has no server, so it does the same from the browser's storage.
   function rememberPath() {
     try {
       var own = document.querySelector("#ziq-root a[data-remember-path]");
-      if (own) store.set("ziq-path", JSON.stringify({ href: own.href, label: own.textContent }));
-      var slot = document.querySelector("#ziq-root [data-continue-path]");
-      var saved = slot ? JSON.parse(store.get("ziq-path") || "null") : null;
-      if (!slot || !saved || typeof saved.href !== "string" || new URL(saved.href).origin !== location.origin) return;
-      var link = document.createElement("a");
-      link.href = saved.href;
-      link.textContent = (slot.dataset.template || "").replace("{label}", String(saved.label || ""));
-      slot.textContent = ""; slot.appendChild(link); slot.hidden = false;
+      if (own) store.set("ziq-path", own.getAttribute("href").replace(/^start__/, "home__"));
+      document.querySelectorAll("#ziq-root a[data-skip-start]").forEach(function (a) {
+        a.addEventListener("click", function () { store.set("ziq-path", a.getAttribute("href")); });
+      });
     } catch (e) {}
   }
   function wire() {
@@ -216,6 +215,11 @@ const SCRIPT = `
   window.addEventListener("hashchange", openTarget);
 
   var root = document.getElementById("ziq-root");
+  var home = store.get("ziq-path");
+  if (root.hasAttribute("data-front-door") && home && /^[A-Za-z0-9_.-]+\\.html$/.test(home)) { location.replace(home); return; }
+  document.querySelectorAll("[data-pv-reset]").forEach(function (b) {
+    b.addEventListener("click", function () { try { localStorage.removeItem("ziq-path"); } catch (e) {} location.href = "index.html"; });
+  });
   var original = root.innerHTML;
   function setTier(tier) {
     var tpl = document.querySelector('template[data-tier~="' + tier + '"]');
@@ -242,7 +246,10 @@ function rewriteBody(html) {
     // the copy has no server behind it: the site's search box opens the copy's search page (which filters itself);
     // other forms (feedback, the calculator, list filters) are not sent anywhere
     .replace(/<form\b([^>]*?)action="([^"]*)"/g, (m, attrs, action) =>
-      action === "/search" ? `<form${attrs}action="${fileName("/search")}"` : `<form${attrs}action="#" onsubmit="return false"`);
+      action === "/search" ? `<form${attrs}action="${fileName("/search")}"`
+        // nothing typed into the copy is sent or kept: the sign-up form only opens the thank-you page
+        : action === "/api/signup" ? `<form${attrs}action="#" onsubmit="location.href='${fileName("/signup/thanks")}';return false"`
+        : `<form${attrs}action="#" onsubmit="return false"`);
   return body.replace(/href="(\/[^"#?]*)((?:\?[^"#]*)?)((?:#[^"]*)?)"/g, (m, p, _q, hash) => {
     if (p.startsWith("/api")) return 'href="#"';
     const target = p.replace(/\/$/, "") || "/";
@@ -260,7 +267,8 @@ function bar(path, variants) {
   }).join("");
   const lab = LAB ? `<a href="${fileName(LAB_PATH)}">Portfolio lab (preview)</a>` : "";
   return `<div class="pv-bar"><strong>Preview of ZinvestIQ</strong><span>Real data${AS_OF ? ` to ${AS_OF}` : ""}; not the live site.</span>` +
-    `<span class="pv-group"><span>View as</span>${tierButtons}</span>${lab}</div>`;
+    `<span class="pv-group"><span>View as</span>${tierButtons}</span>` +
+    `<span class="pv-group"><button type="button" data-pv-reset title="Forget the starting answers and open the first page again">First visit</button></span>${lab}</div>`;
 }
 
 function page(path, title, freeBody, variants) {
@@ -269,7 +277,7 @@ function page(path, title, freeBody, variants) {
   const templates = [...groups].map(([body, tiers]) => `<template data-tier="${tiers.join(" ")}">${body}</template>`).join("");
   const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${title}` +
     `<meta name="robots" content="noindex, nofollow"><link rel="stylesheet" href="${FONTS}"><link rel="stylesheet" href="style.css">`;
-  const body = `${bar(path, variants)}<div id="ziq-root" data-tier="free">${freeBody}</div>${templates}` +
+  const body = `${bar(path, variants)}<div id="ziq-root" data-tier="free"${path === "/" ? " data-front-door" : ""}>${freeBody}</div>${templates}` +
     `<script src="${ECHARTS}"></script><script src="preview.js"></script>`;
   // the main page is wrapped in a document skeleton when it is published, so it carries only its content
   return path === "/" ? `${head}\n${body}` : `<!doctype html><html lang="en"><head>${head}</head><body>${body}</body></html>`;

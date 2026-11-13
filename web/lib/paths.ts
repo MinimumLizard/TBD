@@ -26,9 +26,9 @@ export const PERSONAS: Persona[] = [
   {
     key: "new",
     answers: [
-      { key: "deposits", stat: "savers", steps: [{ page: "/learn/savings" }, { guide: "markets-map", tool: "/" }, { guide: "getting-started", tool: "/bonds" }] },
-      { key: "cash", stat: "literacy", steps: [{ guide: "getting-started", tool: "/learn/savings" }, { page: "/learn/savings" }, { guide: "markets-map", tool: "/" }] },
-      { key: "assets", stat: "savers", steps: [{ guide: "markets-map", tool: "/" }, { page: "/learn/savings" }, { guide: "getting-started", tool: "/cse" }] },
+      { key: "deposits", stat: "savers", steps: [{ page: "/learn/savings" }, { guide: "markets-map", tool: "/markets" }, { guide: "getting-started", tool: "/bonds" }] },
+      { key: "cash", stat: "literacy", steps: [{ guide: "getting-started", tool: "/learn/savings" }, { page: "/learn/savings" }, { guide: "markets-map", tool: "/markets" }] },
+      { key: "assets", stat: "savers", steps: [{ guide: "markets-map", tool: "/markets" }, { page: "/learn/savings" }, { guide: "getting-started", tool: "/cse" }] },
     ],
   },
   {
@@ -53,7 +53,7 @@ export const PERSONAS: Persona[] = [
     answers: [
       { key: "shares", steps: [{ guide: "company-figures", tool: "/cse/shares/compare" }, { guide: "money-flows", tool: "/cse/dealings" }, { guide: "diversification", tool: "/cse/shares" }] },
       { key: "bonds", steps: [{ guide: "bond-relative-value", tool: "/bonds/zscores" }, { guide: "carry-rolldown", tool: "/bonds/carry" }, { guide: "duration-convexity", tool: "/bonds/carry" }] },
-      { key: "both", steps: [{ guide: "company-figures", tool: "/cse/shares/compare" }, { guide: "bond-relative-value", tool: "/bonds/zscores" }, { guide: "markets-map", tool: "/" }] },
+      { key: "both", steps: [{ guide: "company-figures", tool: "/cse/shares/compare" }, { guide: "bond-relative-value", tool: "/bonds/zscores" }, { guide: "markets-map", tool: "/markets" }] },
     ],
   },
 ];
@@ -69,8 +69,23 @@ export function answer(personaKey: string, answerKey: string): Answer | undefine
 /** Every address of the flow: the first question, each follow-up question, each path. */
 export const START_PAGES = ["/start", ...PERSONAS.flatMap((p) => [`/start/${p.key}`, ...p.answers.map((a) => `/start/${p.key}/${a.key}`)])];
 
+/** The home page tailored to each answer (app/home/[type]/[answer], lib/homes.ts). */
+export const HOME_PAGES = PERSONAS.flatMap((p) => p.answers.map((a) => `/home/${p.key}/${a.key}`));
+
+// What the visitor answered is remembered in one first-party cookie, set by the server when a path's page is opened
+// (web/proxy.ts): "<type>.<answer>", or "skip" for a visitor who chose to go straight to the markets. The site's
+// front door then opens on their own home page. It carries no identity and nothing about what they read.
+export const START_COOKIE = "ziq-start";
+export const SKIPPED = "skip";
+
+export function readStart(value: string | null | undefined): { type: string; answer: string } | typeof SKIPPED | null {
+  if (value === SKIPPED) return SKIPPED;
+  const [type, key, ...rest] = (value ?? "").split(".");
+  return rest.length === 0 && type && key && answer(type, key) ? { type, answer: key } : null;
+}
+
 /** The message key (start.tools.<key>) naming each page a step leads to. */
 export const TOOL_KEYS: Record<string, string> = {
-  "/": "home", "/learn/savings": "savings", "/cse": "market", "/cse/shares": "shares", "/cse/shares/compare": "compare",
+  "/markets": "markets", "/learn/savings": "savings", "/cse": "market", "/cse/shares": "shares", "/cse/shares/compare": "compare",
   "/cse/dealings": "dealings", "/bonds": "bonds", "/bonds/zscores": "zscores", "/bonds/carry": "carry",
 };

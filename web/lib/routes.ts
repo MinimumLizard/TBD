@@ -1,17 +1,17 @@
 // Where each model's outputs can be seen: its API routes and the pages that show it. The tier-leak tests request
 // every one of these as every tier. Adding a model means adding it here, and a unit test fails until it is.
 import { GUIDE_SLUGS } from "./guides";
-import { START_PAGES } from "./paths";
+import { HOME_PAGES, START_PAGES } from "./paths";
 import type { ModelName } from "./registry";
 
 export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }> = {
   bond_identity: { api: ["/api/v1/bonds/quotes"], pages: ["/bonds"] },
-  bond_ns_curve: { api: ["/api/v1/bonds/curve"], pages: ["/", "/bonds"] },
+  bond_ns_curve: { api: ["/api/v1/bonds/curve"], pages: ["/markets", "/bonds"] },
   bond_liquidity: { api: ["/api/v1/bonds/liquidity"], pages: ["/bonds"] },
   bond_rv_zscores: { api: ["/api/v1/bonds/zscores"], pages: ["/bonds/zscores"] },
   bond_execution_gap: { api: ["/api/v1/bonds/execution-gap"], pages: ["/bonds/execution"] },
   bond_carry: { api: ["/api/v1/bonds/carry"], pages: ["/bonds/carry"] },
-  cse_market_tape: { api: ["/api/v1/cse/market"], pages: ["/", "/cse"] },
+  cse_market_tape: { api: ["/api/v1/cse/market"], pages: ["/markets", "/cse"] },
   cse_security_metrics: { api: ["/api/v1/cse/shares"], pages: ["/cse", "/cse/shares", "/cse/shares/compare"] },
   cse_corporate_actions: { api: ["/api/v1/cse/shares/AAA.N0000/corporate-actions"], pages: ["/cse/shares/AAA.N0000"] },
   cse_total_returns: { api: ["/api/v1/cse/shares/AAA.N0000/total-return"], pages: ["/cse/shares/AAA.N0000"] },
@@ -26,4 +26,4 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
 export const DETAIL_PAGES = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000"];
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", ...START_PAGES, "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
+export const ALL_PAGES = ["/", "/markets", ...HOME_PAGES, "/signup/thanks", "/privacy", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", ...START_PAGES, "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];

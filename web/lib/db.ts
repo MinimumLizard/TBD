@@ -11,6 +11,7 @@ import { Pool, type PoolConfig, types } from "pg";
 
 import { type Granted, isGrant } from "./entitlements";
 import type { FeedbackInput, Outcome } from "./feedback";
+import type { SignupInput, SignupOutcome } from "./signup";
 import { registry } from "./registry";
 
 types.setTypeParser(1082, (v: string) => v); // date -> "YYYY-MM-DD", never shifted by a time zone
@@ -147,4 +148,15 @@ export async function pageVotes(page: string): Promise<{ useful: number; notUsef
   const result = await getPool().query("select useful, not_useful from community.page_votes($1)", [page]);
   const r = result.rows[0];
   return { useful: Number(r?.useful ?? 0), notUseful: Number(r?.not_useful ?? 0) };
+}
+
+// The website's second write (migration 0019): a sign-up. As with feedback, its role cannot read or change the table;
+// it can only call this function, which checks every field again and limits how often one sender can write. The
+// answer never says whether the address was already there.
+export async function submitSignup(input: SignupInput, consentVersion: string, senderKey: string): Promise<SignupOutcome> {
+  const result = await getPool().query("select community.submit_signup($1, $2, $3, $4, $5, $6) as r", [
+    input.email, input.type, input.answer, input.weekly, consentVersion, senderKey,
+  ]);
+  const r = result.rows[0]?.r;
+  return r === "ok" || r === "limited" ? r : "invalid";
 }

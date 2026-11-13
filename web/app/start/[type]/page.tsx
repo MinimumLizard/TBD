@@ -18,7 +18,7 @@ export default async function StartQuestionPage({ params }: { params: Promise<{ 
   if (!p) notFound();
   const t = await getTranslations();
   return (
-    <>
+    <div className="onboarding">
       <PageHead eyebrow={`${t("start.eyebrow")} · ${t(`start.types.${p.key}.short` as never)}`}
                 title={t(`start.questions.${p.key}.question` as never)}
                 meta={<p className="small muted">{t("start.stepOf", { n: 2 })}</p>} />
@@ -30,6 +30,6 @@ export default async function StartQuestionPage({ params }: { params: Promise<{ 
         ))}
       </div>
       <p className="small"><Link href="/start">← {t("start.back")}</Link></p>
-    </>
+    </div>
   );
 }

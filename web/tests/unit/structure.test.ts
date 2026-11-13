@@ -34,8 +34,8 @@ test("only the data layer reads model outputs, and it always goes through the ti
   }
   for (const f of sources(path.join("lib", "data"))) {
     if (f.endsWith("common.ts")) continue;
-    if (f.endsWith("feedback.ts")) {
-      // the one write: it may call submitFeedback and nothing that reads
+    if (f.endsWith("feedback.ts") || f.endsWith("signup.ts")) {
+      // the two writes (feedback, sign-ups): they may call their submit function and nothing that reads
       expect(text(f), f).not.toMatch(/readOutput|buildQuery/);
       continue;
     }

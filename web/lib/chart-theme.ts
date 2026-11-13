@@ -39,10 +39,11 @@ export function themed(option: Obj, p: Palette): Obj {
 export function paletteFrom(get: (name: string) => string): Palette {
   const v = (name: string, fallback: string) => get(name).replace(/^\s+|\s+$/g, "") || fallback;
   return {
-    text: v("--text", "#1a1d1a"),
-    muted: v("--muted", "#5d625c"),
-    border: v("--border", "#deded6"),
+    text: v("--text", "#111a2c"),
+    muted: v("--muted", "#55617a"),
+    border: v("--border", "#dce2ea"),
     surface: v("--surface", "#ffffff"),
-    series: [v("--accent", "#23573f"), v("--gold", "#a3741c"), v("--plus", "#5b4d86"), v("--down", "#ad3a2c"), v("--up", "#23704a")],
+    // a fixed order, checked for colour-blind separation; no green or red (those mean "rose" and "fell")
+    series: [v("--series-1", "#1b4f9c"), v("--series-2", "#c98500"), v("--series-3", "#00a39a"), v("--series-4", "#6250d6"), v("--series-5", "#c2477e")],
   };
 }

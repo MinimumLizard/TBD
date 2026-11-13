@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import PageHead from "@/components/PageHead";
+import SignupBox from "@/components/SignupBox";
 import Stats from "@/components/Stats";
 import { guide } from "@/lib/guides";
 import { decodeSegment } from "@/lib/params";
@@ -17,8 +18,9 @@ export async function generateMetadata() {
 }
 
 // A starting path: three steps, each a guide and the page it explains (lib/paths.ts). It chooses what to read; it
-// says nothing about what to do with money (hard rule 4). The page remembers itself in the browser, so the home page
-// can offer to continue it (components/PageScripts.tsx).
+// says nothing about what to do with money (hard rule 4). Opening it makes it the visitor's answer: web/proxy.ts sets
+// the cookie that opens the front door on their own home page (the hidden link below does the same job in the
+// static preview, which has no server).
 export default async function StartPathPage({ params }: { params: Promise<{ type: string; answer: string }> }) {
   const raw = await params;
   const type = decodeSegment(raw.type);
@@ -29,7 +31,7 @@ export default async function StartPathPage({ params }: { params: Promise<{ type
   const tool = (href: string) => t(`start.tools.${TOOL_KEYS[href]}` as never);
   const label = `${t(`start.types.${type}.short` as never)} · ${t(`start.questions.${type}.${key}` as never)}`;
   return (
-    <>
+    <div className="onboarding">
       <PageHead eyebrow={t("start.result.eyebrow")} title={t("start.result.title")}
                 lead={t(`start.result.intro.${type}` as never)}
                 meta={<p className="small muted">{t("start.result.youSaid")}: {label}</p>} />
@@ -59,9 +61,14 @@ export default async function StartPathPage({ params }: { params: Promise<{ type
           );
         })}
       </ol>
+      <div className="path-next">
+        <Link className="button" href={`/home/${type}/${key}`}>{t("start.result.homeButton")} →</Link>
+        <span className="small muted">{t("start.result.homeNote")}</span>
+      </div>
+      <SignupBox page={`/start/${type}/${key}`} type={type} answer={key} />
       {a.stat && <Stats viewer={viewer} keys={[a.stat]} />}
       <p className="small muted">{t("start.result.note")}</p>
       <p className="small"><Link href="/start">{t("start.again")}</Link></p>
-    </>
+    </div>
   );
 }
