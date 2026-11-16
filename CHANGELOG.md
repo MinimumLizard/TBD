@@ -13,13 +13,13 @@
   Chart colours are a fixed order of five, checked for colour-blind separation and contrast in light and dark.
 - **Portfolio lab, version 1.1.0** (internal; `docs/research/portfolio-lab-optimisation-2026-11.md`):
   - The first rules' "minimum-variance" portfolio was no steadier than the market (13.6 % volatility against the
-    ASPI's 12.6 %, 8 April to 16 November 2026).
+    ASPI's 12.6 %, 8 April to 12 November 2026).
   - Five covariance estimates were compared on realised risk, weekly, with only what was known each week. The
     estimate from daily returns with two lagged days gave 10.2 % against the first rules' 13.0 % (realised variance
     0.62 of theirs, 90 % interval 0.52 to 0.72). The test is stored with the model (migration 0020).
   - A review now trades the least that keeps estimated volatility within 1 % of the minimum, and a K-name portfolio
     is filled with the shares minimum variance would take next.
-  - Result for the example portfolio, with costs: volatility 10.6 %, largest fall −10.0 %, costs Rs 18,608, against
+  - Result for the example portfolio, with costs: volatility 10.7 %, largest fall −10.0 %, costs Rs 18,608, against
     13.6 %, −15.7 % and Rs 24,066 under the first rules. Returns over seven months are not evidence either way.
   - Version 1.0.0 keeps running as the reference; its rows are unchanged.
 - **Charts.** Site: turnover and foreign-flow bars and an ASPI/S&P SL20 comparison (market page), yields over time

@@ -4,8 +4,8 @@ The owner asked for the portfolio lab to be optimised and finished. This note re
 and what did not, with the numbers. The lab stays internal research: nothing here is published or shown on the site,
 and nothing here is advice (decision 0010 point 6, `docs/plan-retail-features.md` §5).
 
-**How the numbers were measured.** On the working database built from the old repositories' state of 13 November
-2026, with CSE prices to 16 November:
+**How the numbers were measured.** On the working database built from the old repositories' state of 12 to 13
+November 2026 (every source to 12 November):
 
 - `uv run python -m data_platform.jobs.models --model cse_lab_backtest` (the stored results, both versions);
 - `uv run python scripts/research/lab_tournament.py <out.json>` (the wider comparison of rules).
@@ -14,11 +14,11 @@ and nothing here is advice (decision 0010 point 6, `docs/plan-retail-features.md
 
 The lab's first rules built a "minimum-variance" portfolio that was **no steadier than the market**.
 
-| 8 April to 16 November 2026, Rs 1 mn, with costs | Return | Volatility | Largest fall | Costs |
+| 8 April to 12 November 2026, Rs 1 mn, with costs | Return | Volatility | Largest fall | Costs |
 |---|---|---|---|---|
-| Example portfolio, first rules (1.0.0) | −0.0 % | 13.6 % | −15.7 % | Rs 24,066 |
-| ASPI (prices only) | −0.8 % | 12.6 % | −14.9 % | – |
-| Treasury bills | +5.6 % | 0.4 % | none | – |
+| Example portfolio, first rules (1.0.0) | +1.9 % | 13.6 % | −15.7 % | Rs 24,066 |
+| ASPI (prices only) | +1.1 % | 12.6 % | −14.9 % | – |
+| Treasury bills | +5.5 % | 0.4 % | none | – |
 
 The cause was the estimate of how shares move together. It used at most 52 weekly returns for about 140 shares, far
 fewer observations than shares. It forecast a volatility of 11.4 % and delivered 13.0 %.
@@ -46,7 +46,7 @@ was measured over the week that followed, without costs.
 
 ## 3. What else was tested, and the outcome
 
-With costs, through the same engine as the model (these rows were measured with prices to 12 November).
+With costs, through the same engine as the model.
 
 | Question | Tested | Outcome |
 |---|---|---|
@@ -58,12 +58,12 @@ With costs, through the same engine as the model (these rows were measured with 
 
 ## 4. The result: version 1.1.0
 
-| 8 April to 16 November 2026, Rs 1 mn, with costs | Return | Volatility | Largest fall | Costs | Traded |
+| 8 April to 12 November 2026, Rs 1 mn, with costs | Return | Volatility | Largest fall | Costs | Traded |
 |---|---|---|---|---|---|
-| **Example portfolio, current rules (1.1.0)** | +2.3 % | **10.6 %** | **−10.0 %** | Rs 18,608 | 68 % |
-| Example portfolio, first rules (1.0.0) | −0.0 % | 13.6 % | −15.7 % | Rs 24,066 | 118 % |
-| ASPI (prices only) | −0.8 % | 12.6 % | −14.9 % | – | – |
-| Treasury bills | +5.6 % | 0.4 % | none | – | – |
+| **Example portfolio, current rules (1.1.0)** | +3.8 % | **10.7 %** | **−10.0 %** | Rs 18,608 | 68 % |
+| Example portfolio, first rules (1.0.0) | +1.9 % | 13.6 % | −15.7 % | Rs 24,066 | 118 % |
+| ASPI (prices only) | +1.1 % | 12.6 % | −14.9 % | – | – |
+| Treasury bills | +5.5 % | 0.4 % | none | – | – |
 
 The example portfolio is still minimum variance, 15 names, quarterly reviews (decision 0024). What changed is how
 its risk is estimated and how much it trades.
