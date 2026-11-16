@@ -90,14 +90,22 @@ def check_dates(sessions: list[str], start: str) -> list[str]:
     return out
 
 
-def build_target(dm: DateModel, portfolio: str, prev_names: list[str] | None, spec: dict, max_weight: float) -> Target:
+def build_target(dm: DateModel, portfolio: str, prev_names: list[str] | None, spec: dict, max_weight: float,
+                 current: dict[str, float] | None = None) -> Target:
     """The lab's K-name rule on this date (as cse_portfolio_lab's FewerNames): the K largest names of the full
     portfolio of the same kind, a name already held staying while it ranks in the top buffer x K, re-optimised with
-    the cap max(max_weight, 1.5 / K) and the floor 0.5 / K. Equal weight uses minimum variance's names."""
+    the cap max(max_weight, 1.5 / K) and the floor 0.5 / K. Equal weight uses minimum variance's names.
+
+    Two options of the spec (decision 0025; absent, the rule is version 1.0.0's):
+      fill: marginal   when the full minimum-variance portfolio has fewer names than K, the remaining places go to
+                       the shares it would take next (cse_optimize.ranking);
+      tolerance: x     for minimum variance, when weights are held already (`current`): the least trading that
+                       keeps the estimated volatility within x of the minimum (cse_optimize.nearest_within)."""
     kind, k = kind_k(portfolio)
     source = "min_variance" if kind == "equal_weight" else kind
     p = dm.problem
-    ranked = opt.ranking(dm.full[source], p.symbols)
+    fill = p.cov if spec.get("fill") == "marginal" and source == "min_variance" else None
+    ranked = opt.ranking(dm.full[source], p.symbols, fill)
     names = opt.retail_names(ranked, k, prev_names, spec["buffer"])
     if len(names) < k:
         raise opt.Infeasible(f"the full portfolio has only {len(names)} names")
@@ -105,6 +113,8 @@ def build_target(dm: DateModel, portfolio: str, prev_names: list[str] | None, sp
     cap, floor = opt.retail_cap(k, max_weight), opt.retail_floor(k)
     sub = opt.subproblem(p, [idx[s] for s in names], cap)
     w = opt.solve_retail(kind, sub, floor)
+    if kind == "min_variance" and current and spec.get("tolerance"):
+        w = opt.nearest_within(sub, floor, w, np.array([current.get(s, 0.0) for s in names]), float(spec["tolerance"]))
     rc = opt.risk_contributions(w, sub.cov)
     sd = np.sqrt(np.diag(sub.cov))
     corr = sub.cov / np.outer(sd, sd)
@@ -172,8 +182,9 @@ def run(sessions: list[str], start: str, model_on: Callable[[str], DateModel | N
                         kind, k = kind_k(port)       # equal weight follows minimum variance's names (listed first)
                         src_port = f"min_variance_{k}" if kind == "equal_weight" else port
                         prev = books[policy][src_port].names if src_port in books[policy] else None
+                        held = weights_of(book.state, pricer)[1] if book is not None else None
                         try:
-                            tgt = build_target(dm, port, prev, spec, max_weight)
+                            tgt = build_target(dm, port, prev, spec, max_weight, held)
                         except opt.Infeasible as exc:
                             out.notes.append(f"{s} {policy} {port}: {exc}")
                             tgt = None

@@ -287,10 +287,20 @@ def retail_floor(k: int) -> float:
     return 0.5 / k
 
 
-def ranking(full: np.ndarray, symbols: list[str]) -> list[str]:
-    """The full portfolio's names (weight > 1e-6), largest weight first (numpy's argsort, as the research script)."""
+def ranking(full: np.ndarray, symbols: list[str], cov: np.ndarray | None = None) -> list[str]:
+    """The full portfolio's names (weight > 1e-6), largest weight first (numpy's argsort, as the research script).
+
+    With `cov` (the "marginal" fill, decision 0025): the shares the full portfolio leaves out follow, in the order
+    they would come in: smallest covariance with the portfolio, (cov w)_i, first. A minimum-variance portfolio
+    leaves a share out exactly when that covariance is too high, so this is the rules' own next choice. It matters
+    when the full portfolio has fewer names than the K-name version needs."""
     order = np.argsort(-full)
-    return [symbols[i] for i in order if full[i] > 1e-6]
+    held = [symbols[i] for i in order if full[i] > 1e-6]
+    if cov is None:
+        return held
+    marginal = cov @ full
+    rest = sorted((i for i in range(len(symbols)) if full[i] <= 1e-6), key=lambda i: (marginal[i], symbols[i]))
+    return held + [symbols[i] for i in rest]
 
 
 def retail_names(ranked: list[str], k: int, previous: list[str] | None, buffer: float) -> list[str]:
@@ -342,6 +352,30 @@ def solve_retail(kind: str, p: Problem, floor: float) -> np.ndarray:
     if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
         raise Infeasible(f"minimum variance on {n} names: the sector or group caps and the floor cannot all be met")
     return _clean(x.value)
+
+
+def nearest_within(p: Problem, floor: float, best: np.ndarray, current: np.ndarray, tolerance: float) -> np.ndarray:
+    """The least trading that is still nearly the best (decision 0025): among the portfolios on these names that
+    meet every cap and the floor and whose estimated volatility is within `tolerance` (relative) of the minimum-
+    variance portfolio `best`, the one closest to the weights held now, `current` (the sum of the absolute changes
+    in weight, which is what trading costs are paid on). With tolerance 0 this is `best` itself.
+
+    Why: near its minimum the volatility of a portfolio changes very little with the weights, so a review that moves
+    every weight to the exact minimum pays costs for almost no reduction in risk. Falls back to `best` if the solver
+    does not finish."""
+    if tolerance <= 0:
+        return best
+    limit = (1 + tolerance) * float(np.sqrt(best @ p.cov @ best))
+    root = np.linalg.cholesky(p.cov + 1e-12 * np.eye(len(best)))      # x'Sx = |L'x|^2
+    x = cp.Variable(len(best))
+    problem = cp.Problem(cp.Minimize(cp.norm1(x - current)),
+                         _constraints(p, x) + [cp.sum(x) == 1, x >= floor, cp.norm(root.T @ x, 2) <= limit])
+    problem.solve(solver=SOLVER)
+    if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE) or x.value is None:
+        return best
+    w = _clean(x.value)
+    ok = constraint_report(w, p)["ok"] and w.min() >= floor - 1e-6 and np.sqrt(w @ p.cov @ w) <= limit * (1 + 1e-6)
+    return w if ok else best
 
 
 def tracking_error(w: np.ndarray, full: np.ndarray, cov: np.ndarray) -> float:

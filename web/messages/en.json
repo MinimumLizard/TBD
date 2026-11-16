@@ -220,7 +220,15 @@
       "sectorsHow": "A sector with few companies can move sharply on one company's news; check the share pages behind a large sector move."
     },
     "guideShares": "Shares, step by step",
-    "guideMap": "How the markets fit together"
+    "guideMap": "How the markets fit together",
+    "indexedChart": "ASPI and S&P SL20, start of the period = 100",
+    "indexedNote": "Both indices are set to 100 on the first day shown, so their paths can be compared on one scale. The ASPI covers every listed share; the S&P SL20 covers 20 of the largest and most traded.",
+    "turnoverChart": "Turnover, session by session",
+    "turnoverAvgSeries": "Average of the last 20 sessions",
+    "turnoverChartNote": "Each bar is the value of shares that changed hands in one session. A day far above the line usually has one or two very large deals in it.",
+    "rsMn": "Rs mn",
+    "foreignChart": "Foreign purchases less sales, session by session",
+    "foreignChartNote": "Above zero, foreign investors' purchases were larger than their sales that day; below zero, smaller. One large deal can decide a day."
   },
   "shares": {
     "title": "Shares",
@@ -624,7 +632,10 @@
       "medium": "2 to 5 years",
       "long": "5 to 10 years",
       "longest": "Over 10 years"
-    }
+    },
+    "yieldsChart": "Yields on the fitted curve over time",
+    "yieldsSeries": "{years, plural, one {# year} other {# years}}",
+    "yieldsNote": "Each line is the fitted curve's yield at one maturity, day by day. When the lines move apart, the curve is steepening; when they close in, it is flattening."
   },
   "bond": {
     "yieldChart": "Quoted mid yield",
@@ -723,7 +734,11 @@
     "total": "Total (bp)",
     "perDuration": "Per year of duration (bp)",
     "why": "Two bonds with the same yield can earn different amounts over time, depending on the cost of funding them and how they age along the curve. Per unit of duration, bonds of different lengths become comparable.",
-    "how": "All figures are in basis points per year. Carry: the bond's yield less the funding rate. Roll-down: the gain as the bond ages along an unchanged curve. Their total divided by duration puts long and short bonds on the same footing. These are estimates under an unchanged curve; when yields move, duration says how much the price changes."
+    "how": "All figures are in basis points per year. Carry: the bond's yield less the funding rate. Roll-down: the gain as the bond ages along an unchanged curve. Their total divided by duration puts long and short bonds on the same footing. These are estimates under an unchanged curve; when yields move, duration says how much the price changes.",
+    "chart": "Carry and roll-down against duration",
+    "chartX": "Modified duration (years)",
+    "chartY": "Carry + roll-down (bp a year)",
+    "chartNote": "Each point is one bond. Further right, the bond's price moves more for a given change in yields; higher up, it earns more if the curve stays where it is. The two usually rise together, which is why the table also shows the figure per unit of duration."
   },
   "methods": {
     "title": "Methods",

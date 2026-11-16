@@ -2,7 +2,9 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
+import Chart from "@/components/Chart";
 import Explain from "@/components/Explain";
+import { scatterOption } from "@/lib/charts";
 import PageHead from "@/components/PageHead";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
@@ -35,6 +37,14 @@ export default async function CarryPage() {
           <PreviewNote access={carry.access} />
           <AsOf day={carry.data?.date ?? null} calendar="lk_bond_market" preview={Boolean(carry.access.allowed && carry.access.maxDate)} />
           {f && <p className="small">{t("carry.funding", { rate: percent(f.rate_pct, 3), bill: percent(f.bill_pct, 3), date: date(f.bill_as_of) })}</p>}
+          {(carry.data?.rows.length ?? 0) > 2 && (
+            <>
+              <Chart label={t("carry.chart")} height={320}
+                     option={scatterOption(carry.data!.rows.map((r) => [Math.round(r.duration * 100) / 100, Math.round(r.total_bp * 10) / 10, r.isin]),
+                                           { series: t("carry.total"), x: t("carry.chartX"), y: t("carry.chartY") })} />
+              <p className="small muted">{t("carry.chartNote")}</p>
+            </>
+          )}
           <div className="table-wrap">
             <table>
               <thead>

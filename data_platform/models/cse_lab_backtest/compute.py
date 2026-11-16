@@ -17,9 +17,15 @@ used as first recorded for earlier dates: a company delisted before then is miss
 from __future__ import annotations
 
 import datetime as dt
+import math
 from collections import defaultdict
+from dataclasses import dataclass, field
+from typing import Callable
+
+import numpy as np
 
 from .._lib import cse_backtest as bt
+from .._lib import cse_covariance as cv
 from .._lib import cse_estimates as est
 from .._lib import cse_optimize as opt
 from .._lib.cse_calendar import excluded_sessions
@@ -28,21 +34,199 @@ from ..cse_lab_record import compute as record
 from ..cse_risk_estimates import compute as risk
 
 OUTPUTS = ("models.cse_bt_summary", "models.cse_bt_nav", "models.cse_bt_event", "models.cse_bt_target",
-           "models.cse_bt_trade")
+           "models.cse_bt_trade", "models.cse_bt_risk_test")
+BASELINE = "identity"                      # the old tool's estimator: what every other is compared with
+BLOCK, DRAWS, SEED = 5, 2000, 20261113     # the risk test's paired block bootstrap (fixed seed: the same rows each run)
 
 
 def _d(s: str) -> dt.date:
     return dt.date.fromisoformat(s)
 
 
-def compute(inputs, as_of):
+@dataclass
+class Setup:
+    """The facts and the rules' inputs for a walk-forward run: built once, shared by compute() and the research
+    script that compares estimators and policies (scripts/research/lab_tournament.py)."""
+    params: dict
+    h: est.History
+    sessions: list[str]
+    aspi: dict[str, float]
+    closes: dict
+    actions: list[dict]
+    rf_on: Callable[[str], float | None]
+    estimates_on: Callable[[str], tuple[est.Outcome, dict, dict] | None]
+    ocfg: dict
+    rcfg: dict
+    spec: dict
+    _cache: dict = field(default_factory=dict)
+
+    @property
+    def lags(self) -> int:
+        return int(self.params.get("daily_lags", 2))
+
+    def model_on(self, s: str, covariance: str | None = None) -> bt.DateModel | None:
+        """The rules' inputs on session s, with the covariance by `covariance` (default: the version's own)."""
+        method = covariance or self.params.get("covariance", "identity")
+        if (s, method) in self._cache:
+            return self._cache[(s, method)]
+        dm = None
+        got = self.estimates_on(s)
+        if got is not None and got[0].estimates is not None:
+            o, gmap, glabels = got
+            e = o.estimates
+            cov = e.cov if method == BASELINE else covariance_by(method, self.h, e, self.lags)[0]
+            prob = opt.make_problem(e.symbols, e.sectors, cov, e.er, e.rf, e.median_turnover, self.ocfg, gmap)
+            try:
+                opt.check_feasible(prob)
+                full = {"min_variance": opt.min_variance(prob), "max_sharpe": opt.max_sharpe(prob)}
+                vol = dict(zip(e.symbols, np.sqrt(np.diag(cov)).tolist()))
+                dm = bt.DateModel(s, prob, full, len(e.weeks), o.status != "ok", e.rf, e.beta.to_dict(), vol, glabels,
+                                  float(np.median(list(vol.values()))))
+            except opt.Infeasible:
+                dm = None
+        self._cache[(s, method)] = dm
+        return dm
+
+    def start(self) -> str | None:
+        """The first session with enough history for the estimates and a published bill yield."""
+        need = int(self.params["preview_min_weeks"]) + 1
+        return next((s for s in self.sessions if len(self.h.weeks_all(s)) >= need and self.rf_on(s) is not None
+                     and self.model_on(s)), None)
+
+
+def daily_returns(h: est.History, e: est.Estimates) -> tuple[np.ndarray, float]:
+    """The daily total returns of the estimate's shares over the same span as its weekly returns (from the Wednesday
+    before the first week to the estimate date), a session without a trade counting as no change, and the number of
+    sessions in a year over that span. Only facts on or before the estimate date are read."""
+    first = (dt.date.fromisoformat(e.weeks[0]) - dt.timedelta(days=7)).isoformat()
+    days = [s for s in h.sessions if first <= s <= e.session]
+    levels = np.column_stack([est.sample_on_or_before(h.tri[s], days).to_numpy() for s in e.symbols])
+    D = levels[1:] / levels[:-1] - 1
+    D = np.where(np.isfinite(D), D, 0.0)
+    years = max((dt.date.fromisoformat(days[-1]) - dt.date.fromisoformat(days[0])).days / 365.25, 1 / 365.25)
+    return D, (len(days) - 1) / years
+
+
+def covariance_by(method: str, h: est.History, e: est.Estimates, lags: int = 2) -> tuple[np.ndarray, float]:
+    if method == "daily":
+        D, per_year = daily_returns(h, e)
+        return cv.daily(D, per_year, lags)
+    return cv.estimate(method, e.returns.to_numpy(), e.market.to_numpy())
+
+
+# --- the risk test (version 1.1.0): which covariance estimator forecasts risk best -------------------------------
+
+def weekly_dates(su: Setup, start: str) -> list[str]:
+    """The last session on or before each Wednesday, from the walk-forward start."""
+    out: list[str] = []
+    for w in est.wednesdays(start, su.sessions[-1]):
+        s = max((x for x in su.sessions if x <= w), default=None)
+        if s and s >= start and (not out or s != out[-1]):
+            out.append(s)
+    return out
+
+
+def hold(su: Setup, symbols: list[str], w: np.ndarray, s0: str, s1: str) -> tuple[list[float], np.ndarray]:
+    """Daily returns of weights w set at s0's close and left alone until s1's close (total returns, no costs), and
+    the weights at s1."""
+    days = [s for s in su.sessions if s0 <= s <= s1]
+    lv = np.column_stack([est.sample_on_or_before(su.h.tri[s], days).to_numpy() for s in symbols])
+    rel = lv / lv[0]
+    rel = np.where(np.isfinite(rel), rel, 1.0)
+    value = rel @ w
+    end = rel[-1] * w
+    return list(value[1:] / value[:-1] - 1), end / end.sum()
+
+
+def variance_ratio(a: np.ndarray, b: np.ndarray) -> tuple[float, float, float]:
+    """Variance of a over variance of b, with a 90 % interval from a paired moving-block bootstrap (blocks of BLOCK
+    days, so runs of calm and of turbulent days stay together; the same days are drawn for both series)."""
+    rng = np.random.default_rng(SEED)
+    n = len(a)
+    starts = np.arange(n - BLOCK + 1)
+    ratios = []
+    for _ in range(DRAWS):
+        idx = np.concatenate([np.arange(s, s + BLOCK) for s in rng.choice(starts, size=math.ceil(n / BLOCK))])[:n]
+        ratios.append(np.var(a[idx], ddof=1) / np.var(b[idx], ddof=1))
+    return float(np.var(a, ddof=1) / np.var(b, ddof=1)), float(np.quantile(ratios, 0.05)), float(np.quantile(ratios, 0.95))
+
+
+def risk_test(su: Setup, start: str, k: int | None, methods: tuple[str, ...] = cv.METHODS) -> list[dict]:
+    """Every week from `start`, the minimum-variance portfolio is built with each estimator (the lab's caps; k None:
+    the full portfolio, else the K-name version with its buffer) and held for a week without costs. Per estimator:
+    the realised volatility (what a minimum-variance portfolio exists to keep low), the volatility it forecast, how
+    much its weights changed from week to week, and its realised variance against the baseline estimator's with a
+    90 % interval. Two reference rows: equal weight across the universe, and the ASPI.
+
+    Each week's portfolio reads only facts up to its date; the returns that judge it come after. Nothing here looks
+    at which estimator earned more: with months of data a difference in return is noise, a difference in risk is not."""
+    dates = weekly_dates(su, start)
+    spec = {**su.spec, "tolerance": 0}          # the test compares estimators, not trading rules
+    series = {m: [] for m in methods}
+    forecast = {m: [] for m in methods}
+    turnover = {m: [] for m in methods}
+    names = {m: [] for m in methods}
+    prev: dict = {m: None for m in methods}
+    prev_names: dict = {m: None for m in methods}
+    equal: list[float] = []
+    used: list[str] = []
+    for s0, s1 in zip(dates, dates[1:]):
+        models = {m: su.model_on(s0, m) for m in methods}
+        if any(v is None for v in models.values()):
+            continue
+        used.append(s0)
+        for m, dm in models.items():
+            p = dm.problem
+            symbols, w = p.symbols, dm.full["min_variance"]
+            if k is not None:
+                try:
+                    tgt = bt.build_target(dm, f"min_variance_{k}", prev_names[m], spec, su.ocfg["max_weight"])
+                    prev_names[m] = tgt.names
+                    symbols, w = tgt.names, np.array([tgt.weights[x] for x in tgt.names])
+                except opt.Infeasible:      # as the lab does: keep what it had (the first time: the full portfolio)
+                    if prev[m] is not None and all(x in p.symbols for x in prev[m][0]):
+                        symbols, w = prev[m]
+            ids = [p.symbols.index(x) for x in symbols]
+            r, end = hold(su, symbols, w, s0, s1)
+            series[m] += r
+            forecast[m].append(float(math.sqrt(w @ p.cov[np.ix_(ids, ids)] @ w)))
+            names[m].append(float(1 / (w ** 2).sum()))
+            if prev[m] is not None:
+                old, new = dict(zip(*prev[m])), dict(zip(symbols, w))
+                turnover[m].append(sum(abs(new.get(x, 0) - old.get(x, 0)) for x in set(old) | set(new)) / 2)
+            prev[m] = (symbols, end)
+        p = models[methods[0]].problem
+        equal += hold(su, p.symbols, np.full(len(p.symbols), 1 / len(p.symbols)), s0, s1)[0]
+    if len(used) < 4:
+        return []
+    days = [s for s in su.sessions if used[0] <= s <= dates[-1]]
+    per_year = (len(days) - 1) / max((_d(days[-1]) - _d(days[0])).days / 365.25, 1 / 365.25)
+    ann = lambda r: float(np.std(r, ddof=1) * math.sqrt(per_year))  # noqa: E731
+    aspi = np.array([su.aspi[s] for s in days])
+    scope = "full" if k is None else f"k{k}"
+    common = {"scope": scope, "start_date": _d(used[0]), "end_date": _d(dates[-1]), "n_weeks": len(used),
+              "n_days": len(days) - 1}
+    rows = [{**common, "estimator": "ref_equal_weight", "realised_volatility": ann(equal)},
+            {**common, "estimator": "ref_market", "realised_volatility": ann(aspi[1:] / aspi[:-1] - 1)}]
+    base = np.array(series[BASELINE]) if BASELINE in series else None
+    for m in methods:
+        a = np.array(series[m])
+        ratio = variance_ratio(a, base) if base is not None and m != BASELINE else (1.0, 1.0, 1.0) if m == BASELINE else (None,) * 3
+        rows.append({**common, "estimator": m, "realised_volatility": ann(a),
+                     "forecast_volatility": float(np.mean(forecast[m])),
+                     "weekly_turnover": float(np.mean(turnover[m])) if turnover[m] else None,
+                     "effective_names": float(np.mean(names[m])),
+                     "variance_ratio": ratio[0], "ratio_low": ratio[1], "ratio_high": ratio[2]})
+    return rows
+
+
+def setup(inputs, as_of) -> Setup | None:
     p = inputs.params
-    out: dict[str, list[dict]] = {t: [] for t in OUTPUTS}
     skip = excluded_sessions(inputs)
     h = risk.history(inputs, as_of, skip)
     sessions, aspi, closes, actions = record.market_facts(inputs, as_of, skip)
     if not sessions or not h.sessions:
-        return out
+        return None
     stored = risk.latest_version(inputs, "cse.sector_overrides", "overrides", as_of)
     overrides = load_overrides({"overrides": stored["overrides"]} if stored else {})
     lists, labels, groups = risk.security_lists(inputs, as_of), risk.sector_labels(inputs), risk.ownership_groups(inputs, as_of)
@@ -52,41 +236,39 @@ def compute(inputs, as_of):
                               "notional_lkr")}
     rcfg = {k: p[k] for k in ("record_notional_lkr", "cost_per_side", "dividend_withholding", "rebalance_months",
                               "band_relative", "band_absolute", "min_trade_lkr", "te_threshold")}
-    spec = p["fewer_names"]
 
     def rf_on(s: str) -> float | None:
         return risk.risk_free(p["risk_free"], bills, _d(s))[0]
 
-    cache: dict[str, bt.DateModel | None] = {}
+    seen: dict[str, tuple | None] = {}
 
-    def model_on(s: str) -> bt.DateModel | None:
-        if s in cache:
-            return cache[s]
-        day = _d(s)
-        rf = rf_on(s)
-        securities = lists.at(day) or []
-        lab = labels.at(day) or {}
-        equities = [x.symbol for x in securities if x.symbol.endswith(est.EQUITY_SUFFIXES)]
-        sectors = {x: classify(x, lab.get(x), overrides) for x in equities}
-        gmap, glabels = risk.for_symbols(groups.at(day), equities)
-        dm = None
-        if rf is not None:
-            o = est.run_date(h, securities, sectors, set(), {**ecfg, "risk_free_annual": rf}, s, p["preview_min_weeks"])
-            e = o.estimates
-            if e is not None:
-                prob = opt.make_problem(e.symbols, e.sectors, e.cov, e.er, rf, e.median_turnover, ocfg, gmap)
-                try:
-                    opt.check_feasible(prob)
-                    full = {"min_variance": opt.min_variance(prob), "max_sharpe": opt.max_sharpe(prob)}
-                    dm = bt.DateModel(s, prob, full, len(e.weeks), o.status != "ok", rf, e.beta.to_dict(),
-                                      e.vol.to_dict(), glabels, float(e.vol.median()))
-                except opt.Infeasible:
-                    dm = None
-        cache[s] = dm
-        return dm
+    def estimates_on(s: str):
+        if s not in seen:
+            day, rf = _d(s), rf_on(s)
+            if rf is None:
+                seen[s] = None
+            else:
+                securities = lists.at(day) or []
+                lab = labels.at(day) or {}
+                equities = [x.symbol for x in securities if x.symbol.endswith(est.EQUITY_SUFFIXES)]
+                sectors = {x: classify(x, lab.get(x), overrides) for x in equities}
+                gmap, glabels = risk.for_symbols(groups.at(day), equities)
+                o = est.run_date(h, securities, sectors, set(), {**ecfg, "risk_free_annual": rf}, s, p["preview_min_weeks"])
+                seen[s] = (o, gmap, glabels)
+        return seen[s]
 
-    need = int(p["preview_min_weeks"]) + 1
-    start = next((s for s in sessions if len(h.weeks_all(s)) >= need and rf_on(s) is not None and model_on(s)), None)
+    return Setup(p, h, sessions, aspi, closes, actions, rf_on, estimates_on, ocfg, rcfg, p["fewer_names"])
+
+
+def compute(inputs, as_of):
+    out: dict[str, list[dict]] = {t: [] for t in OUTPUTS}
+    su = setup(inputs, as_of)
+    if su is None:
+        return out
+    p, sessions, model_on, rcfg, spec, ocfg = su.params, su.sessions, su.model_on, su.rcfg, su.spec, su.ocfg
+    closes, actions, aspi, rf_on = su.closes, su.actions, su.aspi, su.rf_on
+
+    start = su.start()
     if start is None:
         return out
     portfolios, policies = list(p["portfolios"]), list(p["policies"])
@@ -129,6 +311,9 @@ def compute(inputs, as_of):
         "symbol": t["symbol"], "action": t["action"], "shares": t["shares"], "price": t["price"], "value": t["value"],
         "cost": t["cost"], "reason": t["reason"]} for t in res.trades]
     out["models.cse_bt_summary"] = summaries(res, rcfg)
+    methods = tuple(p.get("risk_test_estimators", []))
+    for k in p.get("risk_test_sizes", []):
+        out["models.cse_bt_risk_test"] += risk_test(su, start, k or None, methods)
     return out
 
 

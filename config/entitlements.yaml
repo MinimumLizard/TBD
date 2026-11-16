@@ -78,6 +78,7 @@ unpublished_outputs:
   - models.cse_bt_event
   - models.cse_bt_target
   - models.cse_bt_trade
+  - models.cse_bt_risk_test          # migration 0020
 
 # Models computed for the owner's research only: no tier, every output unpublished, and left out of the website's copy
 # of the registry entirely (no methods page, no plans entry, no API listing).

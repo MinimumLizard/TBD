@@ -560,6 +560,7 @@
     "models.cse_bt_nav",
     "models.cse_bt_event",
     "models.cse_bt_target",
-    "models.cse_bt_trade"
+    "models.cse_bt_trade",
+    "models.cse_bt_risk_test"
   ]
 }

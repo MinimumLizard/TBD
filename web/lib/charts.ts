@@ -23,6 +23,42 @@ export function lineOption(series: { name: string; points: [string, number | nul
   };
 }
 
+/** Bars over time (one value per session), with an optional line on the same scale (a moving average). */
+export function barOption(bars: { name: string; points: [string, number | null][] }, line?: { name: string; points: [string, number | null][] },
+                          yName?: string) {
+  return {
+    animation: false,
+    tooltip: { trigger: "axis" },
+    legend: line ? LEGEND : undefined,
+    grid: { left: 56, right: 16, top: line ? TOP_WITH_LEGEND : yName ? 32 : 16, bottom: 32 },
+    xAxis: { type: "time" },
+    yAxis: { type: "value", name: yName },
+    series: [
+      { name: bars.name, type: "bar", data: bars.points, barMaxWidth: 14, itemStyle: { borderRadius: [3, 3, 0, 0] } },
+      ...(line ? [{ name: line.name, type: "line", showSymbol: false, data: line.points, lineStyle: { width: 2 } }] : []),
+    ],
+  };
+}
+
+/** Each series divided by its first value and multiplied by 100, so series of different size share one scale. */
+export function indexed(points: [string, number | null][]): [string, number | null][] {
+  const base = points.find((p) => p[1] != null && p[1] !== 0)?.[1];
+  return base ? points.map(([d, v]) => [d, v == null ? null : Math.round((v / base) * 10000) / 100]) : points;
+}
+
+/** Labelled points on two value axes (one mark per bond), with a zero line across. */
+export function scatterOption(points: [number, number, string][], names: { series: string; x: string; y: string }) {
+  return {
+    animation: false,
+    tooltip: { trigger: "item" },
+    grid: { left: 56, right: 16, top: 32, bottom: 44 },
+    xAxis: { type: "value", name: names.x, nameLocation: "middle", nameGap: 28, scale: true },
+    yAxis: { type: "value", name: names.y, scale: true },
+    series: [{ name: names.series, type: "scatter", symbolSize: 9, data: points,
+               markLine: { silent: true, symbol: "none", label: { show: false }, data: [{ yAxis: 0 }] } }],
+  };
+}
+
 export function curveOption(args: {
   quotes: [number, number, string][];
   wide?: [number, number, string][];

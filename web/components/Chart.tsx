@@ -5,13 +5,13 @@
 // page as data-chart, so the page's static copy (the owner's preview) can draw the same chart without this script.
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts/core";
-import { LineChart, ScatterChart } from "echarts/charts";
+import { BarChart, LineChart, ScatterChart } from "echarts/charts";
 import { DataZoomComponent, GridComponent, LegendComponent, MarkLineComponent, TooltipComponent } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 
 import { paletteFrom, themed } from "@/lib/chart-theme";
 
-echarts.use([LineChart, ScatterChart, GridComponent, LegendComponent, MarkLineComponent, TooltipComponent, DataZoomComponent, CanvasRenderer]);
+echarts.use([BarChart, LineChart, ScatterChart, GridComponent, LegendComponent, MarkLineComponent, TooltipComponent, DataZoomComponent, CanvasRenderer]);
 
 export default function Chart({ option, label, height = 320 }: { option: Record<string, unknown>; label: string; height?: number }) {
   const ref = useRef<HTMLDivElement>(null);

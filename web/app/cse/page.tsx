@@ -9,11 +9,11 @@ import BreadthBar from "@/components/BreadthBar";
 import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
-import { lineOption } from "@/lib/charts";
+import { barOption, indexed, lineOption } from "@/lib/charts";
 import { MOVERS_MIN_TURNOVER, isHeadline } from "@/lib/cse-display";
 import Term from "@/components/Term";
 import { companyName } from "@/lib/cse-display";
-import { type IndexSession, type ShareSession, indexHistory, marketTape, securityNames, shares } from "@/lib/data/cse";
+import { type IndexSession, type ShareSession, indexHistory, marketSessionsSince, marketTape, securityNames, shares } from "@/lib/data/cse";
 import { int, lkr, num, pct, percent, ratio, signed, tone } from "@/lib/format";
 import { marketSummary } from "@/lib/summary";
 import { getViewer } from "@/lib/viewer";
@@ -27,7 +27,12 @@ export async function generateMetadata() {
 
 export default async function CsePage() {
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
-  const [tape, aspi, all, names] = await Promise.all([marketTape(viewer), indexHistory(viewer, "ASI"), shares(viewer), securityNames(viewer)]);
+  const [tape, aspi, sp, past, all, names] = await Promise.all([
+    marketTape(viewer), indexHistory(viewer, "ASI"), indexHistory(viewer, "S&P SL20"), marketSessionsSince(viewer, "2000-01-01"),
+    shares(viewer), securityNames(viewer),
+  ]);
+  const mn = (v: number | null) => (v == null ? null : Math.round(v / 1e4) / 100); // rupees to Rs mn, two decimals
+  const history = past.data ?? [];
 
   const indexRows = (rows: IndexSession[]) => (
     <div className="table-wrap">
@@ -130,6 +135,17 @@ export default async function CsePage() {
             {aspi.data && aspi.data.length > 1 && (
               <Chart label={t("cse.aspiChart")} option={lineOption([{ name: "ASPI", points: aspi.data.map((r) => [r.session_date, r.value]) }], undefined, { area: true })} />
             )}
+            {aspi.data && sp.data && aspi.data.length > 1 && sp.data.length > 1 && (
+              <>
+                <h3>{t("cse.indexedChart")}</h3>
+                <Chart label={t("cse.indexedChart")} height={260}
+                       option={lineOption([
+                         { name: "ASPI", points: indexed(aspi.data.map((r) => [r.session_date, r.value])) },
+                         { name: "S&P SL20", points: indexed(sp.data.map((r) => [r.session_date, r.value])) },
+                       ])} />
+                <p className="small muted">{t("cse.indexedNote")}</p>
+              </>
+            )}
           </Section>
           {s && (
             <>
@@ -153,6 +169,16 @@ export default async function CsePage() {
                     <span className="muted small">{vsAvg(s.trades, s.trades_avg20)}</span>
                   </div>
                 </div>
+                {history.length > 2 && (
+                  <>
+                    <h3>{t("cse.turnoverChart")}</h3>
+                    <Chart label={t("cse.turnoverChart")} height={260}
+                           option={barOption({ name: t("cse.turnover"), points: history.map((r) => [r.session_date, mn(r.turnover)]) },
+                                             { name: t("cse.turnoverAvgSeries"), points: history.map((r) => [r.session_date, mn(r.turnover_avg20)]) },
+                                             t("cse.rsMn"))} />
+                    <p className="small muted">{t("cse.turnoverChartNote")}</p>
+                  </>
+                )}
               </Section>
               <Section id="breadth" title={t("cse.sections.breadth")}
                        summary={t("cse.sections.breadthSum", { up: s.equities_up ?? 0, down: s.equities_down ?? 0, net: lkr(s.foreign_net) })}
@@ -179,6 +205,14 @@ export default async function CsePage() {
                     </dl>
                   </div>
                 </div>
+                {history.filter((r) => r.foreign_net != null).length > 2 && (
+                  <>
+                    <h3>{t("cse.foreignChart")}</h3>
+                    <Chart label={t("cse.foreignChart")} height={240}
+                           option={barOption({ name: t("cse.foreignNet"), points: history.map((r) => [r.session_date, mn(r.foreign_net)]) }, undefined, t("cse.rsMn"))} />
+                    <p className="small muted">{t("cse.foreignChartNote")}</p>
+                  </>
+                )}
               </Section>
               <Section id="valuation" title={t("cse.sections.valuation")}
                        summary={t("cse.sections.valuationSum", { per: num(s.per, 1), pbv: num(s.pbv, 1), dy: percent(s.dy, 1) })}

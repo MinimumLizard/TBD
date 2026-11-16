@@ -10,8 +10,8 @@ import Chart from "@/components/Chart";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import { bondHref, bondName } from "@/lib/bond-display";
-import { LOW_WEIGHT, curveOption, curvePoints, nelsonSiegel } from "@/lib/charts";
-import { bondCurve, bondLiquidity, bondQuotes, bondReference } from "@/lib/data/bonds";
+import { curveOption, curvePoints, lineOption, LOW_WEIGHT, nelsonSiegel } from "@/lib/charts";
+import { bondCurve, bondCurveHistory, bondLiquidity, bondQuotes, bondReference } from "@/lib/data/bonds";
 import { NONE, date, int, lkr, num, percent, signed } from "@/lib/format";
 import { matchesQuery, param, searchText } from "@/lib/filter";
 import { getViewer } from "@/lib/viewer";
@@ -33,7 +33,8 @@ export default async function BondsPage({ searchParams }: { searchParams: Promis
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
   const curve = await bondCurve(viewer);
   const day = curve.data?.fit?.obs_date;
-  const [ref, quotes, liquidity] = await Promise.all([bondReference(viewer), bondQuotes(viewer, day), bondLiquidity(viewer, day)]);
+  const [ref, quotes, liquidity, fits] = await Promise.all([bondReference(viewer), bondQuotes(viewer, day), bondLiquidity(viewer, day), bondCurveHistory(viewer)]);
+  const fitHistory = fits.data ?? [];
   const fit = curve.data?.fit ?? null;
   const residual = new Map((curve.data?.points ?? []).filter((p) => p.source === "quote").map((p) => [p.isin, p.residual_bp]));
   const liq = new Map((liquidity.data?.rows ?? []).map((r) => [r.isin, r]));
@@ -96,6 +97,17 @@ export default async function BondsPage({ searchParams }: { searchParams: Promis
             {fit.trade_bias_bp != null && t("bonds.tradeBias", { bias: signed(fit.trade_bias_bp, 1) })}
           </p>
           <p className="small muted">{t("bonds.curveNote")}</p>
+          {fitHistory.length > 2 && (
+            <>
+              <h3>{t("bonds.yieldsChart")}</h3>
+              <Chart label={t("bonds.yieldsChart")} height={280}
+                     option={lineOption(([1, 5, 10] as const).map((years) => ({
+                       name: t("bonds.yieldsSeries", { years }),
+                       points: fitHistory.map((f) => [f.obs_date, Math.round(nelsonSiegel(years, f.beta0, f.beta1, f.beta2, f.lambda_years) * 1000) / 1000] as [string, number]),
+                     })), t("bonds.yield"))} />
+              <p className="small muted">{t("bonds.yieldsNote")}</p>
+            </>
+          )}
           </>
         ) : (
           <p>{t("common.noData")}</p>
