@@ -15,7 +15,8 @@ import argparse
 import csv
 from pathlib import Path
 
-from ..core import db, settings as settings_mod
+from ..core import db
+from ..core import settings as settings_mod
 
 STATUSES = ("pending", "confirmed", "unsubscribed")
 REPO = Path(__file__).resolve().parents[2]

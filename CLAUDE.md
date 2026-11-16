@@ -51,7 +51,7 @@ decisions).
   (collapsible, a summary line, why/how, related guides) under `components/PageHead.tsx`; guides live in `lib/guides.ts`
   with text in `messages` (`guides.<slug>`), menus in `lib/menu.ts`. The private preview (`web/scripts/export-static.mjs`)
   holds every tier's version of each page and, with `--lab`, the internal lab report as a preview-only page: that is
-  for the owners' eyes and is never a route of the real site. Palette: Evergreen (owner, 2026-11-01). The owner asked
+  for the owners' eyes and is never a route of the real site. Palette: Evergreen (owner, 2026-11-01), replaced by Ceylon Sapphire on 2026-11-16 (decision 0025). The owner asked
   for the preview as a public link (decision 0024: shared from the Artifact's Share menu by the owner; pages carry
   noindex; it shows every tier, the names and the lab page). Finding things: header search and `/search`, shares by
   sector with filters (`lib/filter.ts`, `components/FilterBar.tsx`; sector rules exported from
@@ -61,6 +61,18 @@ decisions).
   never what to do). Guides end with "Was this guide useful?"; the count shows from 25 votes (migration 0018:
   one vote per visitor and page, `community.page_votes` gives totals only). The Pro trial and a chatbot are plans that
   wait for accounts.
+- First visit and sign-up (2026-11-16, decision 0025): `/` shows only "Where are you starting from?"; each answer has
+  a home page (`/home/<type>/<answer>`, `web/lib/homes.ts`, blocks in `web/components/home/`); the answer is kept in
+  the `ziq-start` cookie set by `web/proxy.ts`, which then opens `/` on that home; the full overview is `/markets`.
+  Tailoring orders free blocks only; it never changes what a tier sees. Sign-up (`components/SignupBox.tsx`,
+  `/api/signup`, migration 0019, `jobs.signups`) stores an address with consent; the website can write but never read
+  it; nothing is sent before confirmation; the lawyer's data-protection view is needed before the real site collects
+  any. Palette: Ceylon Sapphire (tokens and `--series-1..5` in `app/globals.css`; no green or red as chart colours).
+- Lab 1.1.0 (decision 0025, `docs/research/portfolio-lab-optimisation-2026-11.md`): `cse_lab_backtest` 1.1.0 is
+  current (1.0.0 the reference): covariance from daily returns with two lagged days (`_lib/cse_covariance.py`),
+  chosen on realised risk in the stored risk test (`models.cse_bt_risk_test`, migration 0020), the marginal fill, and
+  reviews that trade the least within 1 % of minimum volatility. Never choose a method on backtested returns. The
+  other three lab models still use the weekly estimate (proposed next step). Report charts: `jobs/lab_charts.py`.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
@@ -126,6 +138,7 @@ uv run python -m data_platform.jobs.lab_report --out <file outside the repo>   #
 uv run python -m data_platform.jobs.gapcheck                   # missing days, unconfirmed closures
 uv run python -m data_platform.jobs.backup replicate|export|verify
 uv run python -m data_platform.jobs.feedback summary|list|mark|delete   # visitors' feedback (owner only)
+uv run python -m data_platform.jobs.signups summary|list|export|unsubscribe|delete   # e-mail sign-ups (owner only; personal data)
 uv run python -m data_platform.migration.bonds|cse|legacy|cse_corporate_actions|cse_dealings|cse_reports ...  # history migration + reconciliation
 uv run python -m data_platform.jobs.models [--market lk_bonds|cse|lk_savings] [--model NAME]   # compute models (--as-of D: in memory only)
 uv run python -m data_platform.models.registry check|order|publish|export-web       # manifests; web copy

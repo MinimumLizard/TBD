@@ -56,6 +56,11 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
   (owner, 2026-10-19, decision 0021); the lawyer's answer to `docs/plan-retail-features.md` §7 item 9 is needed
   before anything is public.
 - **Bond volume dating (finding V3):** date the 3 disputed volume files by the PDMO index label instead of the data?
+- **The first visit, sign-up, palette and lab 1.1.0 (2026-11-16, decision 0025):** built. Three short decisions in
+  `docs/plan-janu-review.md` §5 (the palette, the sign-up wording, the weekly-summary box). On the lab: whether to
+  move its other three models to the daily estimate (`docs/research/portfolio-lab-optimisation-2026-11.md` §6).
+- **Bond volume dating, a new case (2026-11-16):** the PDMO trade summary of 15 September 2026 is dated differently
+  by the old tool and the new parser. Decide it with finding V3.
 - **Janu's review (2026-11-09):** built: the starting paths, the "how to start" guide, the statistics and guide votes.
   Three short decisions on the one-week Pro trial (`docs/plan-janu-review.md` §2: the 7-day-use bar, quoting
   reviews, Plus users too?) and, for a chatbot (§3), a provider account and budget, the lawyer's view, and who Hatim
@@ -77,6 +82,9 @@ A Sri Lankan lawyer to read `compliance/disclaimers.yaml`, the method pages and 
 rules on investment advice; and the CSE's data terms (the licence enquiry is still outstanding: `config/sources.yaml`).
 Add the questions in `docs/plan-retail-features.md` §7: model portfolios and rebalancing, the FD comparison,
 user discussion, the name, and personal data. The answer decides how much of the portfolio work can be published.
+- **New (2026-11-16):** the sign-up form and the privacy page (decision 0025): the data-protection law for
+  collecting e-mail addresses, who is named as responsible for the data, and whether the starting-answers cookie needs
+  a notice.
 
 ### 5. Switch-on (when approved): `docs/phase3-4-verification.md` §6
 Accounts (Supabase Pro, Cloudflare R2, Backblaze B2, Healthchecks.io), secrets, "Migrate history", then the

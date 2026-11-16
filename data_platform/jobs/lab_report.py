@@ -275,12 +275,9 @@ table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #d8dde6;paddi
 th{background:#f2f4f8}.small td{font-size:13px}.warn{background:#fff3cd;border:1px solid #e0c060;padding:8px 12px}
 .mockup{border:2px dashed #b03030;padding:8px 14px;margin:14px 0}.mock{color:#b03030;font-weight:bold}
 .note{color:#555;font-size:13px}svg{width:100%;max-width:640px;font-size:11px}.axis{stroke:#888}
-.frontier{fill:none;stroke:#2a5db0;stroke-width:2}circle{fill:#b05a2a}
-.lab-chart{margin:12px 0}.lab-chart svg{max-width:100%;font-size:11px}.lab-chart .grid{stroke:#e5e5df}
-.lab-chart .base{stroke:#999;stroke-dasharray:2 3}.lab-chart figcaption{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}
-.lab-chart .lg i{display:inline-block;width:12px;height:3px;margin-right:5px;vertical-align:middle}
-.explain{background:#f2f4f0;border-radius:8px;padding:8px 14px}.small{font-size:13px}.muted{color:#5d625c}
-ol.steps li{margin-bottom:6px}"""
+.frontier{fill:none;stroke:#1b4f9c;stroke-width:2}circle{fill:#c98500}
+.explain{background:#eef2f7;border-radius:8px;padding:8px 14px}.small{font-size:13px}.muted{color:#55617a}
+ol.steps li{margin-bottom:6px}""" + bt_report.charts.STYLE
 
 
 def build(conn, version: str, params: dict | None = None) -> str:
@@ -301,6 +298,7 @@ def build(conn, version: str, params: dict | None = None) -> str:
                                                          "where name is not null")}
         parts.append(bt_report.section_intro())
         parts.append(bt_report.section_rules(bt_params))
+        parts.append(bt_report.section_evidence(conn))
         parts.append(bt_report.section_backtest(conn))
         parts.append(bt_report.section_today(conn, names))
         parts.append("<h2>Workings</h2><p class=\"note\">The lab's full computation on the latest estimate date: the "

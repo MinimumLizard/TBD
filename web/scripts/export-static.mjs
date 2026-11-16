@@ -101,10 +101,13 @@ css += `
 .lab-page .frontier { fill: none; stroke: var(--accent); stroke-width: 2; }
 .lab-page circle { fill: var(--gold); }
 .lab-page h2 { border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-.lab-page .lab-chart { margin: 12px 0; } .lab-page .lab-chart svg { max-width: 100%; font-size: 11px; }
-.lab-page .lab-chart .grid { stroke: var(--border); } .lab-page .lab-chart .base { stroke: var(--muted); stroke-dasharray: 2 3; }
-.lab-page .lab-chart figcaption { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); }
-.lab-page .lab-chart .lg i { display: inline-block; width: 12px; height: 3px; margin-right: 5px; vertical-align: middle; }
+.lab-page .lab-chart { margin: 14px 0; } .lab-page .lab-chart svg { max-width: 100%; font-size: 11px; }
+.lab-page .lab-chart text { fill: var(--muted); } .lab-page .lab-chart text.val { fill: var(--text); }
+.lab-page .lab-chart .grid { stroke: var(--border); } .lab-page .lab-chart .base { stroke: var(--muted); stroke-dasharray: 3 3; }
+.lab-page .lab-chart figcaption { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.8rem; color: var(--muted); }
+.lab-page .lab-chart .lg i { display: inline-block; width: 14px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 3px solid transparent; }
+.lab-page .lab-chart .lg i.line { height: 3px; border: 0; } .lab-page .lab-chart .lg i.bar { height: 9px; width: 9px; border: 0; border-radius: 2px; }
+.lab-page .lab-chart .lg i.dash { border-top-style: dashed; background: none; } .lab-page .lab-chart .lg i.dot { border-top-style: dotted; background: none; }
 .lab-page ol.steps li { margin-bottom: 6px; }
 .lab-page td { white-space: normal; min-width: 6rem; vertical-align: top; }
 .lab-page .table-wrap .table-wrap { border: 0; }

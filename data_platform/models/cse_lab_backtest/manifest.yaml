@@ -82,7 +82,7 @@ versions:
       participation: 0.20
       days_to_build: 10
       notional_lkr: 1000000
-      # new: fill (the shares minimum variance would take next, when it holds fewer than K) and tolerance (a review
+      # new: fill (the shares minimum variance would take next, when it has fewer than K) and tolerance (a review
       # trades the least that keeps the estimated volatility within 1 % of the minimum)
       fewer_names: {sizes: [10, 15], kinds: [min_variance, max_sharpe, equal_weight], buffer: 1.5, fill: marginal,
                     tolerance: 0.01}

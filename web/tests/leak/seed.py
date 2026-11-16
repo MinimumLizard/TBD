@@ -198,6 +198,10 @@ def seed(conn) -> dict:
          "today": False, "weight": 0.6420975318, "risk_contribution": 1.0, "volatility": 0.2, "beta": 1.0,
          "avg_correlation": 0.0, "sector": "Banks", "group_key": "AAA.N0000", "group_name": None, "at_cap": False,
          "at_floor": False, "rank": 1, "in_previous": False}])
+    put("cse_lab_backtest", "models.cse_bt_risk_test", [
+        {"scope": "full", "estimator": "daily", "start_date": OLD, "end_date": NEW, "n_weeks": 31, "n_days": 150,
+         "realised_volatility": 0.5318642097, "forecast_volatility": 0.5, "weekly_turnover": 0.05,
+         "effective_names": 14.0, "variance_ratio": 0.6, "ratio_low": 0.5, "ratio_high": 0.7}])
 
     # Savings education (monthly data): the latest complete month is the first of last month.
     month = (TODAY.replace(day=1) - dt.timedelta(days=1)).replace(day=1)
@@ -281,7 +285,8 @@ def seed(conn) -> dict:
                   # the portfolio lab (internal research): a weight, an expected return, a record value
                   "0.8642097531", "86.42%", "0.7531864209", "75.32%", "86420975.31", "86,420,975", "Rs 86.4 mn",
                   # its walk-forward test: a value and a model weight
-                  "64209753.18", "64,209,753", "Rs 64.2 mn", "0.6420975318", "64.21%"],
+                  "64209753.18", "64,209,753", "Rs 64.2 mn", "0.6420975318", "64.21%",
+                  "0.5318642097", "53.19%", "53.2%"],
     }
 
 

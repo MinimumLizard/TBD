@@ -19,8 +19,8 @@ from __future__ import annotations
 import datetime as dt
 import math
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 import numpy as np
 
@@ -126,7 +126,7 @@ def weekly_dates(su: Setup, start: str) -> list[str]:
     return out
 
 
-def hold(su: Setup, symbols: list[str], w: np.ndarray, s0: str, s1: str) -> tuple[list[float], np.ndarray]:
+def left_alone(su: Setup, symbols: list[str], w: np.ndarray, s0: str, s1: str) -> tuple[list[float], np.ndarray]:
     """Daily returns of weights w set at s0's close and left alone until s1's close (total returns, no costs), and
     the weights at s1."""
     days = [s for s in su.sessions if s0 <= s <= s1]
@@ -160,6 +160,8 @@ def risk_test(su: Setup, start: str, k: int | None, methods: tuple[str, ...] = c
 
     Each week's portfolio reads only facts up to its date; the returns that judge it come after. Nothing here looks
     at which estimator earned more: with months of data a difference in return is noise, a difference in risk is not."""
+    if not methods:
+        return []
     dates = weekly_dates(su, start)
     spec = {**su.spec, "tolerance": 0}          # the test compares estimators, not trading rules
     series = {m: [] for m in methods}
@@ -187,7 +189,7 @@ def risk_test(su: Setup, start: str, k: int | None, methods: tuple[str, ...] = c
                     if prev[m] is not None and all(x in p.symbols for x in prev[m][0]):
                         symbols, w = prev[m]
             ids = [p.symbols.index(x) for x in symbols]
-            r, end = hold(su, symbols, w, s0, s1)
+            r, end = left_alone(su, symbols, w, s0, s1)
             series[m] += r
             forecast[m].append(float(math.sqrt(w @ p.cov[np.ix_(ids, ids)] @ w)))
             names[m].append(float(1 / (w ** 2).sum()))
@@ -196,12 +198,12 @@ def risk_test(su: Setup, start: str, k: int | None, methods: tuple[str, ...] = c
                 turnover[m].append(sum(abs(new.get(x, 0) - old.get(x, 0)) for x in set(old) | set(new)) / 2)
             prev[m] = (symbols, end)
         p = models[methods[0]].problem
-        equal += hold(su, p.symbols, np.full(len(p.symbols), 1 / len(p.symbols)), s0, s1)[0]
+        equal += left_alone(su, p.symbols, np.full(len(p.symbols), 1 / len(p.symbols)), s0, s1)[0]
     if len(used) < 4:
         return []
     days = [s for s in su.sessions if used[0] <= s <= dates[-1]]
     per_year = (len(days) - 1) / max((_d(days[-1]) - _d(days[0])).days / 365.25, 1 / 365.25)
-    ann = lambda r: float(np.std(r, ddof=1) * math.sqrt(per_year))  # noqa: E731
+    ann = lambda r: float(np.std(r, ddof=1) * math.sqrt(per_year))
     aspi = np.array([su.aspi[s] for s in days])
     scope = "full" if k is None else f"k{k}"
     common = {"scope": scope, "start_date": _d(used[0]), "end_date": _d(dates[-1]), "n_weeks": len(used),

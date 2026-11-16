@@ -17,7 +17,7 @@ here changes the rule that the site gives information and education, never advic
 | Avoid choice overload | **Built** | Each path shows three steps, and the first is marked as the one to start with. The old four-card "Where to start" section is removed |
 | One week of Pro in exchange for a review | **Plan (§2)** | Needs accounts (Phase 4b) |
 | A chatbot | **Plan (§3)** | Needs an AI service account, a budget and a lawyer's view of the answers it may give |
-| Email capture | **Parked** | Janu's notes marked it for later; the weekly e-mail plan stays as in `docs/plan-retail-features.md` §2 |
+| Email capture | **Built 2026-11-16** (§5) | A sign-up box on each path's page and each home page: e-mail address, consent, optional weekly summary |
 
 How it works:
 
@@ -88,7 +88,7 @@ advice, so it needs the tightest limits.
      to involve (perhaps someone who has built one).
 - **Order:** after accounts, because a limit per account is the simplest way to cap cost and abuse.
 
-## 4. What the owner may want to change
+## 4. What the owner may want to change (first round)
 
 - The four starting types and their follow-up questions: the wording is in `web/messages/en.json` (`start.types`,
   `start.questions`).
@@ -98,3 +98,42 @@ advice, so it needs the tightest limits.
   - The "1 in 500" figure is the CSE chairman's "about 50,000 active investors, 0.2 % of the population".
   - The "4 in 10" figure is the CBSL survey's 58 % financially literate.
   - If newer figures are published, update `start.stats` and the links in `web/components/Stats.tsx`.
+
+## 5. Second round (2026-11-13): the first visit, tailored homes and sign-up
+
+The owner and Janu asked for the first visit to show only the starting question, for different things to be shown by
+answer, and for a sign-up afterwards. Decision 0025 has the reasoning; this is what exists.
+
+| Asked | Built | Where |
+|---|---|---|
+| No noise on a first visit | The front door is the question, four answers and "skip". The menus, search and footer links are hidden there | `/`, `web/components/Welcome.tsx` |
+| Different things shown by answer | A home page per answer (13 of them): its own order of blocks, guides and pages | `/home/<type>/<answer>`, `web/lib/homes.ts` |
+| Coming back | The front door opens on the visitor's home page. "Change my answers" asks again | `web/proxy.ts`, one cookie |
+| Sign up after the questions | A sign-up box on the path's page and on the home page | `web/components/SignupBox.tsx`, migration 0019 |
+| The whole overview, for anyone | "Today's markets" | `/markets` |
+
+What each kind of visitor sees first:
+
+- **Completely new:** what deposits and bills pay today next to inflation, then the day in brief. No yield-curve
+  chart.
+- **Knows the basics:** the day in brief, savings, the share market's year.
+- **Invests, sometimes unsure:** the day in brief, the main figures with explanations, a search box. Someone who
+  chose bonds gets the yield figures and the curve.
+- **Invests regularly:** the figures and both charts first, then the deeper tools with their tiers. Shares-only and
+  bonds-only answers get their own market first.
+
+Sign-up, plainly:
+
+- It stores the address, the starting answers, the weekly-summary choice, and the date and wording agreed to.
+- Accounts do not exist yet, so nothing is sent until the address is confirmed through a link, when sign-ins open.
+- The owner's tool: `uv run python -m data_platform.jobs.signups summary|list|export|unsubscribe|delete`.
+- In the preview the form sends and keeps nothing; it only opens the thank-you page.
+
+**Before the real site collects addresses:** the lawyer's view of the data-protection law, and a named contact on
+the privacy page (decision 0025, consequences).
+
+**Owner decisions:**
+
+1. Is "Ceylon Sapphire" the palette to keep?
+2. Is the sign-up wording right ("Keep your path: sign up free")?
+3. Should the weekly summary box be offered at sign-up, or only once the e-mail exists?

@@ -84,13 +84,13 @@ def test_daily_adds_the_lagged_covariances_that_stale_prices_hide():
                         + [news[:-1] + rng.normal(0, 0.004, 2000) for _ in range(3)])
     with_lags, _ = cv.daily(D, 240, lags=2)
     without, _ = cv.daily(D, 240, lags=0)
-    corr = lambda c: c[0, 3] / np.sqrt(c[0, 0] * c[3, 3])       # noqa: E731
+    corr = lambda c: c[0, 3] / np.sqrt(c[0, 0] * c[3, 3])
     assert abs(corr(without)) < 0.1 and corr(with_lags) > 0.3
     assert np.linalg.eigvalsh(with_lags).min() > 0
 
 
 def test_unknown_method_and_missing_inputs_are_refused():
-    R, market = sample()
+    R, _ = sample()
     with pytest.raises(ValueError, match="unknown covariance method"):
         cv.estimate("sample", R)
     with pytest.raises(ValueError, match="market"):

@@ -333,3 +333,57 @@ def test_a_backtest_decision_uses_only_data_up_to_its_date(conn, store, tmp_path
     for t, col in tables.items():
         after = [r for r in bt_rows(conn, t) if r[col] <= cut and not r.get("today")]
         assert same(before[t], after), t
+
+
+# --- the walk-forward test, version 1.1.0 (decision 0025) -----------------------------------------------------------------
+
+NEW_PARAMS = {**BT_PARAMS, "cse_lab_backtest": {
+    **BT_PARAMS["cse_lab_backtest"],
+    "fewer_names": {**BT_PARAMS["cse_lab_backtest"]["fewer_names"], "fill": "marginal", "tolerance": 0.01},
+    "risk_test_sizes": [0, 2]}}
+
+
+@pytest.mark.db
+def test_version_1_1_0_uses_only_data_up_to_each_date_too(conn, store, tmp_path):
+    """The daily-return covariance, the fill and the least-trading review: every value, rebalance, trade and model
+    weight up to a cut is unchanged when the later data arrives."""
+    cut = D("2026-08-14")
+    load(conn, store, until=cut)
+    settings(conn, tmp_path)
+    run_models(conn, BT_MODELS, NEW_PARAMS)
+    tables = {"models.cse_bt_nav": "session_date", "models.cse_bt_event": "session_date",
+              "models.cse_bt_trade": "session_date", "models.cse_bt_target": "as_of"}
+    before = {t: [r for r in rows(conn, t) if not r.get("today")] for t in tables}
+    assert before["models.cse_bt_nav"] and before["models.cse_bt_event"]
+    load(conn, store, since=cut)
+    run_models(conn, BT_MODELS, NEW_PARAMS)
+    for t, col in tables.items():
+        after = [r for r in rows(conn, t) if r[col] <= cut and not r.get("today")]
+        assert same(before[t], after), t
+    # and it is a different method from 1.0.0: the model weights are not the same
+    new = {(r["as_of"], r["portfolio"], r["symbol"]): r["weight"] for r in rows(conn, "models.cse_bt_target")}
+    old = {(r["as_of"], r["portfolio"], r["symbol"]): r["weight"] for r in rows(conn, "models.cse_bt_target", "1.0.0")}
+    assert new != old
+
+
+@pytest.mark.db
+def test_the_risk_test_compares_every_estimator_on_the_same_weeks(conn, store, tmp_path):
+    load(conn, store)
+    settings(conn, tmp_path)
+    run_models(conn, BT_MODELS, NEW_PARAMS)
+    test = rows(conn, "models.cse_bt_risk_test")
+    assert {r["scope"] for r in test} == {"full", "k2"}
+    assert rows(conn, "models.cse_bt_risk_test", "1.0.0") == []                 # the first version has no risk test
+    for scope in ("full", "k2"):
+        got = {r["estimator"]: r for r in test if r["scope"] == scope}
+        assert set(got) == {"identity", "oas", "constant_corr", "single_index", "daily", "ref_equal_weight", "ref_market"}
+        assert len({(r["start_date"], r["end_date"], r["n_weeks"], r["n_days"]) for r in got.values()}) == 1
+        assert got["identity"]["variance_ratio"] == 1.0
+        for name, r in got.items():
+            assert r["realised_volatility"] > 0
+            if name.startswith("ref_"):
+                assert r["forecast_volatility"] is None and r["variance_ratio"] is None
+            else:
+                assert r["forecast_volatility"] > 0 and r["ratio_low"] <= r["variance_ratio"] <= r["ratio_high"]
+    start = min(r["session_date"] for r in rows(conn, "models.cse_bt_nav"))
+    assert all(r["start_date"] >= start for r in test)                          # judged only on returns after the start

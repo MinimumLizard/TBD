@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-11-16 — First visit, tailored homes, sign-up, a new palette, the lab's version 1.1.0 (decision 0025)
+
+- **The front door asks one question and shows nothing else.** After the two questions each visitor has a home page
+  built for their answer (`/home/<type>/<answer>`, 13 of them, `web/lib/homes.ts`); the front door opens there on
+  later visits (one first-party cookie, set by `web/proxy.ts`). The old overview is `/markets`.
+- **Sign-up with an e-mail address** on each path's page and each home: consent required, the weekly summary
+  optional, stored through one checked database function the website can call but never read (migration 0019).
+  Nothing is sent until an address is confirmed; accounts do not exist yet and the page says so. Owner's tool:
+  `python -m data_platform.jobs.signups`. A plain `/privacy` page.
+- **Palette "Ceylon Sapphire"**: sapphire and navy with a little gold. Green and red mean only "rose" and "fell".
+  Chart colours are a fixed order of five, checked for colour-blind separation and contrast in light and dark.
+- **Portfolio lab, version 1.1.0** (internal; `docs/research/portfolio-lab-optimisation-2026-11.md`):
+  - The first rules' "minimum-variance" portfolio was no steadier than the market (13.6 % volatility against the
+    ASPI's 12.6 %, 8 April to 16 November 2026).
+  - Five covariance estimates were compared on realised risk, weekly, with only what was known each week. The
+    estimate from daily returns with two lagged days gave 10.2 % against the first rules' 13.0 % (realised variance
+    0.62 of theirs, 90 % interval 0.52 to 0.72). The test is stored with the model (migration 0020).
+  - A review now trades the least that keeps estimated volatility within 1 % of the minimum, and a K-name portfolio
+    is filled with the shares minimum variance would take next.
+  - Result for the example portfolio, with costs: volatility 10.6 %, largest fall −10.0 %, costs Rs 18,608, against
+    13.6 %, −15.7 % and Rs 24,066 under the first rules. Returns over seven months are not evidence either way.
+  - Version 1.0.0 keeps running as the reference; its rows are unchanged.
+- **Charts.** Site: turnover and foreign-flow bars and an ASPI/S&P SL20 comparison (market page), yields over time
+  (bonds page), carry against duration (carry page). Lab report: value over time, falls from the peak, the risk
+  test, cost per review, value against risk by share, sectors.
+- **Found, not fixed:** on the newest data the bond migration's reconciliation reports one PDMO trade-summary file
+  (15 September 2026) dated differently by the old tool and the new parser (35 trades missing, 8 extra, 7 differing
+  on that day). It is the kind of case finding V3 describes; it needs the owner's decision like the others.
+
 ## 2026-11-09 — Janu's review: starting paths, a "how to start" guide, statistics and guide votes
 
 Janu reviewed the preview; every point and where it landed is in `docs/plan-janu-review.md`.
