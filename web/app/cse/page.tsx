@@ -32,7 +32,7 @@ export default async function CsePage() {
     shares(viewer), securityNames(viewer),
   ]);
   const mn = (v: number | null) => (v == null ? null : Math.round(v / 1e4) / 100); // rupees to Rs mn, two decimals
-  const history = past.data ?? [];
+  const history = (past.data ?? []).filter((r) => r.turnover != null); // sessions with the CSE's daily summary
 
   const indexRows = (rows: IndexSession[]) => (
     <div className="table-wrap">

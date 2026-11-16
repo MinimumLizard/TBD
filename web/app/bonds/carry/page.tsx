@@ -40,7 +40,7 @@ export default async function CarryPage() {
           {(carry.data?.rows.length ?? 0) > 2 && (
             <>
               <Chart label={t("carry.chart")} height={320}
-                     option={scatterOption(carry.data!.rows.map((r) => [Math.round(r.duration * 100) / 100, Math.round(r.total_bp * 10) / 10, r.isin]),
+                     option={scatterOption(carry.data!.rows.map((r) => [Math.round(r.duration * 100) / 100, Math.round(r.total_bp * 10) / 10, bondName(r.isin, ref.data)]),
                                            { series: t("carry.total"), x: t("carry.chartX"), y: t("carry.chartY") })} />
               <p className="small muted">{t("carry.chartNote")}</p>
             </>
