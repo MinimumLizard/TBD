@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-17 — The lab on the new estimate everywhere, and the lab page rewritten for a first-time reader
+
+- **All four lab models now use the daily-return risk estimate** (the owner's go-ahead). `cse_risk_estimates`,
+  `cse_portfolio_lab` and `cse_lab_record` have a version 1.2.0 (1.1.0 stays as the reference):
+  - the covariance comes from the same shared function as the backtest (`_lib/cse_covariance.daily_window`), so the
+    two agree exactly on the same date (on 12 November, the 26 shares in the backtest's portfolios; also tested);
+  - the portfolio lab rebuilds it and checks the shrinkage to the last bit;
+  - its 10- and 15-name versions follow the backtest's two rules (fill a short portfolio, trade the least within 1 %
+    of the minimum);
+  - the record starts its own 1.2.0 series from its first run.
+- **The lab page, rewritten as a lesson** (`jobs/lab_report.py`, `jobs/lab_backtest_report.py`):
+  - opens with what the page is (a worked example, not a list of shares) and three plain points;
+  - **today's example portfolio first**, with two pie charts (by share, by sector) and four headline numbers;
+  - then how it would have done since April (one chart, three numbers);
+  - then **how the portfolio is kept in shape**: whether it rebalances automatically (on paper, yes; in real life
+    nothing trades by itself) and what the reviews cost (a pie chart);
+  - the rules, the evidence, the comparisons, the specialist workings and the lawyer's mock-ups are closed
+    drop-downs.
+- **Readability**: the risk/return frontier chart's labels were black on the dark theme (contrast 1.1 to 1). It is
+  rebuilt in the theme's colours. An automated check measured 26,266 pieces of text on 31 site pages and 1,357 on the
+  lab page, in light and dark; the only other failure (the weekly e-mail preview's table headers in dark mode) is
+  fixed.
+- **Drop-downs** on the two long pages that had none: the savings comparison (the calculator opens when used) and
+  the markets overview.
+
 ## 2026-11-16 — First visit, tailored homes, sign-up, a new palette, the lab's version 1.1.0 (decision 0025)
 
 - **The front door asks one question and shows nothing else.** After the two questions each visitor has a home page

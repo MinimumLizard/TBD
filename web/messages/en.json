@@ -125,7 +125,8 @@
     "tiersLead": "Everything you need to understand the markets is free. The paid plans add tools for following government bonds closely, and money flows on the day.",
     "tierFree": "Daily markets, every share's page, the yield curve, the savings comparison, and every guide.",
     "tierPlus": "Each bond's full history against the curve, how unusual its position is, trades against quotes, and money flows on the day.",
-    "tierPro": "Carry, roll-down, duration and convexity for every bond: what a bond earns and how its price reacts to rate changes."
+    "tierPro": "Carry, roll-down, duration and convexity for every bond: what a bond earns and how its price reacts to rate changes.",
+    "differsSum": "The whole picture, explained not rated, with numbers you can check and disclosures made readable"
   },
   "cse": {
     "title": "Stock market",
@@ -1284,7 +1285,14 @@
     "assume7": "This describes the past, from averages. It is not advice about anyone's savings.",
     "sourceCbsl": "Source: Central Bank of Sri Lanka",
     "sourceDcs": "Source: Department of Census and Statistics, Sri Lanka",
-    "sourcesBoth": "Sources: Central Bank of Sri Lanka (interest rates); Department of Census and Statistics, Sri Lanka (CCPI)."
+    "sourcesBoth": "Sources: Central Bank of Sri Lanka (interest rates); Department of Census and Statistics, Sri Lanka (CCPI).",
+    "sections": {
+      "everyPeriod": "Every period since 2003",
+      "everyPeriodSum": "How often each one beat the other, and beat inflation, over 1 to 10 years; the worst, typical and best",
+      "rates": "Rates and inflation, month by month",
+      "assumptions": "What these figures assume",
+      "assumptionsSum": "Averages, not any bank's offer; interest renewed each year; the tax deducted at source"
+    }
   },
   "ui": {
     "whyItMatters": "Why it matters.",

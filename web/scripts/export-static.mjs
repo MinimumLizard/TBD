@@ -91,23 +91,21 @@ css += `
 .pv-group button[aria-pressed="true"] { background: #e6ebf4; color: #0c1a33; font-weight: 600; }
 .pv-group button .pv-same { opacity: .6; font-size: 11px; }
 .pv-bar a { color: #e6ebf4; text-decoration: underline; }
-/* The internal lab page. */
+/* The internal lab page. Its charts carry their own styles (data_platform/jobs/lab_charts.py), drawn in the site's
+   tokens, so they follow the light and dark themes. */
 .lab-page .notice.warn b { font-weight: 600; }
 .lab-page .mockup { border: 2px dashed var(--down); border-radius: var(--radius); padding: 8px 16px; margin: 16px 0; background: var(--surface); }
 .lab-page .mock { color: var(--down); font-weight: 600; }
 .lab-page .note { color: var(--muted); font-size: 0.85rem; }
-.lab-page svg { width: 100%; max-width: 640px; font-size: 11px; }
-.lab-page .axis { stroke: var(--muted); }
-.lab-page .frontier { fill: none; stroke: var(--accent); stroke-width: 2; }
-.lab-page circle { fill: var(--gold); }
-.lab-page h2 { border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-.lab-page .lab-chart { margin: 14px 0; } .lab-page .lab-chart svg { max-width: 100%; font-size: 11px; }
-.lab-page .lab-chart text { fill: var(--muted); } .lab-page .lab-chart text.val { fill: var(--text); }
-.lab-page .lab-chart .grid { stroke: var(--border); } .lab-page .lab-chart .base { stroke: var(--muted); stroke-dasharray: 3 3; }
-.lab-page .lab-chart figcaption { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.8rem; color: var(--muted); }
-.lab-page .lab-chart .lg i { display: inline-block; width: 14px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 3px solid transparent; }
-.lab-page .lab-chart .lg i.line { height: 3px; border: 0; } .lab-page .lab-chart .lg i.bar { height: 9px; width: 9px; border: 0; border-radius: 2px; }
-.lab-page .lab-chart .lg i.dash { border-top-style: dashed; background: none; } .lab-page .lab-chart .lg i.dot { border-top-style: dotted; background: none; }
+.lab-page .lab-intro .lead { max-width: 70ch; }
+.lab-page .lab-intro ul { padding-left: 1.2rem; max-width: 70ch; }
+.lab-page .lab-intro li { margin-bottom: 4px; }
+.lab-page h2.deeper { margin-top: var(--s7); }
+.lab-page .donuts { display: grid; grid-template-columns: 1fr; gap: var(--s2) var(--s6); margin: var(--s4) 0; }
+@media (min-width: 900px) { .lab-page .donuts { grid-template-columns: 1fr 1fr; } }
+.lab-page .donuts h3 { margin: 0 0 var(--s1); }
+.lab-page details.more { margin: var(--s4) 0; border-top: 1px solid var(--border); padding-top: var(--s3); }
+.lab-page details.more > summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 .lab-page ol.steps li { margin-bottom: 6px; }
 .lab-page td { white-space: normal; min-width: 6rem; vertical-align: top; }
 .lab-page .table-wrap .table-wrap { border: 0; }
@@ -321,11 +319,9 @@ if (LAB && aboutFree) {
     .replace(/<h1>[\s\S]*?<\/h1>/, "");
   // the owner's report opens with an internal-use warning; the preview frames the page as the education piece it is
   content = content.replace(/<p class="notice warn">[\s\S]*?<\/p>/, "");
-  const head = `<header class="page-head"><p class="eyebrow">Portfolio lab · research and education (preview)</p>` +
+  // the report opens with its own plain-language introduction (data_platform/jobs/lab_backtest_report.py)
+  const head = `<header class="page-head"><p class="eyebrow">Portfolio lab · learning by example (preview)</p>` +
     `<h1>How a rules-based portfolio is built</h1>` +
-    `<p class="lead">A worked example on the Colombo Stock Exchange: the rules written down in advance, what they would ` +
-    `have done since the first date they could run, using only what was known on each date, and today's example ` +
-    `portfolio with the reason for each holding. Research and education, not advice.</p>` +
     `<div class="notice warn">Preview only: the lab is not part of the site until the lawyer has given a view on how ` +
     `model portfolios may be published (decision 0024).</div></header>`;
   const framed = aboutFree.replace(/(<main\b[^>]*>)[\s\S]*(<\/main>)/, `$1<div class="lab-page">${head}${content}</div>$2`);

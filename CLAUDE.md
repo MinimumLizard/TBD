@@ -71,8 +71,12 @@ decisions).
 - Lab 1.1.0 (decision 0025, `docs/research/portfolio-lab-optimisation-2026-11.md`): `cse_lab_backtest` 1.1.0 is
   current (1.0.0 the reference): covariance from daily returns with two lagged days (`_lib/cse_covariance.py`),
   chosen on realised risk in the stored risk test (`models.cse_bt_risk_test`, migration 0020), the marginal fill, and
-  reviews that trade the least within 1 % of minimum volatility. Never choose a method on backtested returns. The
-  other three lab models still use the weekly estimate (proposed next step). Report charts: `jobs/lab_charts.py`.
+  reviews that trade the least within 1 % of minimum volatility. Never choose a method on backtested returns. Since
+  2026-11-17 the other three lab models have a 1.2.0 on the same estimate (shared `daily_window`; the portfolio lab
+  rebuilds the covariance and checks the shrinkage). The lab page (`jobs/lab_report.py` + `lab_backtest_report.py`)
+  is written for a first-time reader: today's portfolio with pie charts first, then results, then how rebalancing
+  works; everything technical in closed drop-downs (`fold()`, the site's `details.section` markup). Charts
+  (`jobs/lab_charts.py`) draw text in theme tokens; check both themes (decision 0025).
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

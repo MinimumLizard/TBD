@@ -74,6 +74,20 @@ portfolio. Following `docs/plan-retail-features.md` §6, for K = 10 and 15:
 - If the caps and the floor cannot all be met on a rebalance date, the portfolio keeps the weights it had and the date
   says why.
 
+## Version 1.2.0 (current; decision 0025)
+
+- **On `cse_risk_estimates` 1.2.0**: the covariance from daily returns. It is rebuilt here from the total-return levels
+  and the session calendar (`_lib/cse_covariance.daily_window`, `daily`), and the rebuilt shrinkage must equal the
+  stored one to the last bit, or the run stops.
+- **Filling a K-name portfolio** (as `cse_lab_backtest` 1.1.0): a sharper estimate concentrates the full
+  minimum-variance portfolio in fewer names, sometimes fewer than K. The remaining places then go to the shares it
+  would take next, those with the smallest covariance with the portfolio, (Σw)ᵢ.
+- **Trading the least that is nearly the best**: on a quarterly date, the minimum-variance K-name weights are those
+  closest (Σ|wᵢ − pᵢ|) to the weights set at the previous quarterly date, p, among those that meet every cap and the
+  floor and whose estimated volatility is within 1 % of the minimum. (The backtest measures the change from the
+  weights actually held after drift; this model has no holdings, so it measures it from the weights it last set.) At
+  the first formation it is the minimum itself. Maximum Sharpe and equal weight are unchanged.
+
 ## Notional
 
 The liquidity caps depend on the portfolio's size. Version 1.0.0 used the old owner's own size (a personal setting,

@@ -40,7 +40,7 @@ versions:
         sessions, and with the stored data/lab/<session>.json and latest.json. See
         docs/migration/parity-cse-portfolio-lab.json.
   - method_version: "1.1.0"
-    status: current
+    status: reference
     changes: >-
       Risk-free rate from the CBSL's 12-month treasury bill yield as published by the estimate date (not the typed
       9.9 %); no personal exclusions; no preview; estimate dates from the first session with a year of weekly returns.
@@ -56,3 +56,23 @@ versions:
       exclusions: none
       first_estimate_date: null
       preview_min_weeks: null
+  - method_version: "1.2.0"
+    status: current
+    changes: >-
+      The covariance, and so each share's volatility and the shrinkage stored, from the daily total returns over the
+      same span as the weekly returns, with two days of lagged covariances (decision 0025: it forecast risk best in
+      cse_lab_backtest's risk test). Betas, expected returns and the universe are 1.1.0's.
+    requires_models:
+      cse_total_returns: "1.0.0"
+      cse_ownership: "1.0.0"
+    parameters:
+      min_history_weeks: 52
+      min_traded_share: 0.80
+      min_median_turnover_lkr: 1000000
+      risk_free: {source: cbsl_tb_12m, publication_delay_months: 1}
+      equity_risk_premium: 0.06      # ASSUMPTION, labelled as one wherever it is shown
+      exclusions: none
+      first_estimate_date: null
+      preview_min_weeks: null
+      covariance: daily              # _lib/cse_covariance.py; the same as cse_lab_backtest 1.1.0
+      daily_lags: 2

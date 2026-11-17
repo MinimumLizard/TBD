@@ -20,8 +20,10 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
-from ..core import db, settings as settings_mod
+from ..core import db
+from ..core import settings as settings_mod
 from ..core.settings import REPO_ROOT
 from ..models import registry
 from ..models._lib import cse_optimize as opt
@@ -80,7 +82,17 @@ def problem_at(conn, version: str, day: dt.date, notional: float, params: dict):
     cfg = {k: params[k] for k in ("max_weight", "max_sector_weight", "max_group_weight", "participation",
                                   "days_to_build")}
     cfg["notional_lkr"] = notional
-    prob, _ = lab_model.problem_of(summary, rows, weekly, cfg)
+    daily = None
+    if params.get("covariance", "identity") == "daily":     # version 1.2.0: rebuilt from the daily returns
+        tri: dict[str, dict] = defaultdict(dict)
+        for r in q(conn, """select symbol, session_date, tri from models.cse_total_return where method_version = '1.0.0'
+                            and session_date <= %s and symbol = any(%s)""", day, [r["symbol"] for r in rows]):
+            tri[r["symbol"]][r["session_date"].isoformat()] = r["tri"]
+        sessions = [r["session_date"].isoformat() for r in q(conn, """select session_date from cse.indices_daily_current
+                    where index_code = 'ASI' and session_date <= %s order by session_date""", day)]
+        daily = lab_model.Daily({k: pd.Series(v, dtype=float).sort_index() for k, v in tri.items()}, sessions,
+                                int(params.get("daily_lags", 2)))
+    prob, _ = lab_model.problem_of(summary, rows, weekly, cfg, daily)
     return summary, prob
 
 
@@ -95,7 +107,7 @@ def reason_kind(reason: str) -> str:
             return kind
     return reason
 
-def section_status(summary: dict, lab: dict, uni: list[dict]) -> str:
+def section_status(summary: dict, lab: dict, uni: list[dict], params: dict | None = None) -> str:
     reasons = defaultdict(int)
     for r in uni:
         if not r["included"]:
@@ -105,8 +117,9 @@ def section_status(summary: dict, lab: dict, uni: list[dict]) -> str:
 <h2>Estimate date {esc(summary['as_of'])}</h2>
 <ul>
 <li>Universe: <b>{lab['n_universe']}</b> shares of {summary['n_securities']} securities listed; weekly returns
-{esc(summary['first_week'])} to {esc(summary['last_week'])} ({summary['history_weeks']} weeks); Ledoit-Wolf shrinkage
-{num(summary['shrinkage'])}.</li>
+{esc(summary['first_week'])} to {esc(summary['last_week'])} ({summary['history_weeks']} weeks);
+{"covariance from the daily returns over the same span, with two days of lagged covariances" if (params or {}).get("covariance") == "daily" else "covariance from the weekly returns"},
+Ledoit-Wolf shrinkage {num(summary['shrinkage'])}.</li>
 <li>Risk-free rate: <b>{pct(summary['risk_free'], 2)}</b> ({esc(summary['risk_free_source'])}).</li>
 <li>Equity risk premium: <b>{pct(summary['equity_risk_premium'])}</b> &mdash; an <b>assumption</b>, used only for the
 CAPM expected returns.</li>
@@ -125,7 +138,7 @@ def section_portfolios(conn, version: str, day: dt.date) -> str:
         weights[w["portfolio"]].append(w)
     head = ["Portfolio", "Names", "Weights set on", "E[R]", "Volatility", "Sharpe", "Tracking error vs full",
             "What binds", "Note"]
-    body = [[f"<b>{esc(opt.LABELS.get(p['portfolio'], p['portfolio']))}</b>", p["n_names"] or "–",
+    body = [[f"<b>{esc(opt.LABELS.get(p['portfolio']) or bt_report.LABELS.get(p['portfolio'], p['portfolio']))}</b>", p["n_names"] or "–",
              esc(p["formed_on"] or "–"), pct(p["expected_return"]), pct(p["volatility"]), num(p["sharpe"]),
              pct(p["tracking_error"]), esc(p["binding"] or ""), esc(p["message"] or "")] for p in ports]
     out = ["<h2>The portfolios</h2>", table(head, body)]
@@ -135,38 +148,37 @@ def section_portfolios(conn, version: str, day: dt.date) -> str:
             continue
         rows = [[esc(w["symbol"]), pct(w["weight"], 2), esc(w["sector"] or ""), pct(w["risk_contribution"]),
                  "at cap" if w["at_cap"] else ""] for w in ws]
-        out.append(f"<details><summary>{esc(p['portfolio'])}: {len(ws)} names</summary>"
+        label = opt.LABELS.get(p["portfolio"]) or bt_report.LABELS.get(p["portfolio"], p["portfolio"])
+        out.append(f"<details class=\"more\"><summary>{esc(label)}: {len(ws)} names</summary>"
                    + table(["Share", "Weight", "Sector", "Share of risk", ""], rows, "small") + "</details>")
     return "\n".join(out)
+
+
+FRONTIER_POINTS = [("min_variance", "Minimum variance", 2), ("max_sharpe", "Maximum Sharpe", 1),
+                   ("risk_parity", "Risk parity", 3), ("equal_weight", "Equal weight", 4)]
 
 
 def section_frontier(conn, version: str, day: dt.date) -> str:
     pts = q(conn, """select expected_return, volatility from models.cse_lab_frontier where method_version = %s
                      and as_of = %s order by point""", version, day)
-    ports = q(conn, """select portfolio, expected_return, volatility from models.cse_lab_portfolio
-                       where method_version = %s and as_of = %s and volatility is not null""", version, day)
+    ports = {r["portfolio"]: r for r in q(conn, """select portfolio, expected_return, volatility from
+                     models.cse_lab_portfolio where method_version = %s and as_of = %s and volatility is not null""",
+                                          version, day)}
     if not pts:
-        return "<h2>Frontier</h2><p>No frontier on this date.</p>"
-    xs = [p["volatility"] for p in pts + ports]
-    ys = [p["expected_return"] for p in pts + ports]
-    x0, x1, y0, y1 = min(xs) * 0.95, max(xs) * 1.05, min(ys) * 0.97, max(ys) * 1.03
-    W, H, M = 640, 360, 50
-    sx = lambda v: M + (v - x0) / (x1 - x0) * (W - 2 * M)  # noqa: E731
-    sy = lambda v: H - M - (v - y0) / (y1 - y0) * (H - 2 * M)  # noqa: E731
-    line = " ".join(f"{sx(p['volatility']):.1f},{sy(p['expected_return']):.1f}" for p in pts)
-    dots = "".join(f'<circle cx="{sx(p["volatility"]):.1f}" cy="{sy(p["expected_return"]):.1f}" r="4"/>'
-                   f'<text x="{sx(p["volatility"]) + 6:.1f}" y="{sy(p["expected_return"]) - 6:.1f}">'
-                   f'{esc(p["portfolio"])}</text>' for p in ports)
-    ticks = "".join(f'<text x="{sx(v):.1f}" y="{H - M + 18}" text-anchor="middle">{v * 100:.0f}%</text>'
-                    for v in np.linspace(x0, x1, 5))
-    ticks += "".join(f'<text x="{M - 8}" y="{sy(v) + 4:.1f}" text-anchor="end">{v * 100:.1f}%</text>'
-                     for v in np.linspace(y0, y1, 5))
-    return f"""<h2>Constrained efficient frontier</h2>
-<svg viewBox="0 0 {W} {H}" role="img" aria-label="Frontier: expected return against volatility">
-<line x1="{M}" y1="{H - M}" x2="{W - M}" y2="{H - M}" class="axis"/><line x1="{M}" y1="{M}" x2="{M}" y2="{H - M}" class="axis"/>
-<polyline points="{line}" class="frontier"/>{dots}{ticks}
-<text x="{W / 2}" y="{H - 8}" text-anchor="middle">Estimated volatility (a year)</text>
-<text x="14" y="{H / 2}" transform="rotate(-90 14 {H / 2})" text-anchor="middle">CAPM expected return</text></svg>"""
+        return "<h3>The trade-off between risk and expected return</h3><p>No frontier on this date.</p>"
+    points = [{"label": label, "x": ports[k]["volatility"], "y": ports[k]["expected_return"],
+               "colour": bt_report.charts.colour(c)} for k, label, c in FRONTIER_POINTS if k in ports]
+    if "market" in ports:
+        points.append({"label": "The market (ASPI)", "x": ports["market"]["volatility"],
+                       "y": ports["market"]["expected_return"], "colour": bt_report.charts.MUTED})
+    chart = bt_report.charts.frontier([(p["volatility"], p["expected_return"]) for p in pts], points,
+                                      aria="Expected return against volatility for the full portfolios")
+    return f"""<h3>The trade-off between risk and expected return</h3>
+<p>Each point is one of the full portfolios on {esc(day)}. Further right, it swings more; higher up, it has a higher
+expected return. The line is the best trade-off the rules' limits allow: no portfolio within the limits sits above
+it. The expected returns come from an assumption (6 % a year above bills, scaled by each share's beta), so the
+vertical position is only as good as that assumption; the horizontal one is measured.</p>
+{chart}"""
 
 
 def section_fewer_names(prob: opt.Problem, max_weight: float) -> str:
@@ -269,26 +281,46 @@ circumstances. Example output with {k} names and the default caps: {sample}, &he
 do (decision 0010 point 4).</p></div>"""
 
 
-STYLE = """body{font:15px/1.5 system-ui,sans-serif;margin:24px auto;max-width:1000px;padding:0 16px;color:#1d2433;
-background:#fff}h1{font-size:24px}h2{font-size:19px;margin-top:32px;border-bottom:1px solid #d8dde6}
-table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #d8dde6;padding:3px 8px;text-align:left}
-th{background:#f2f4f8}.small td{font-size:13px}.warn{background:#fff3cd;border:1px solid #e0c060;padding:8px 12px}
-.mockup{border:2px dashed #b03030;padding:8px 14px;margin:14px 0}.mock{color:#b03030;font-weight:bold}
-.note{color:#555;font-size:13px}svg{width:100%;max-width:640px;font-size:11px}.axis{stroke:#888}
-.frontier{fill:none;stroke:#1b4f9c;stroke-width:2}circle{fill:#c98500}
-.explain{background:#eef2f7;border-radius:8px;padding:8px 14px}.small{font-size:13px}.muted{color:#55617a}
-ol.steps li{margin-bottom:6px}""" + bt_report.charts.STYLE
+STYLE = """:root{--bg:#f5f7fa;--surface:#fff;--surface-2:#edf1f6;--border:#dce2ea;--text:#111a2c;--muted:#55617a;
+--accent:#1b4f9c;--accent-soft:#e7eefa;--gold:#c98500;--down:#b8392b;--warn-bg:#fdf3dc;--warn-text:#6b4a0e;
+--series-1:#1b4f9c;--series-2:#c98500;--series-3:#00a39a;--series-4:#6250d6;--series-5:#c2477e;--other:#9aa5b5}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#111a2b;--surface-2:#17223a;--border:#25324b;
+--text:#e6ebf4;--muted:#9aa7bd;--accent:#8ab4f8;--accent-soft:#152748;--gold:#e0a83a;--down:#f08b7d;--warn-bg:#2e2613;
+--warn-text:#ecd08f;--series-1:#4a8fe8;--series-2:#c98500;--series-3:#17a096;--series-4:#9085e9;--series-5:#d55181;
+--other:#5d6b82}}
+body{font:15px/1.55 system-ui,sans-serif;margin:24px auto;max-width:1000px;padding:0 16px;color:var(--text);
+background:var(--bg)}a{color:var(--accent)}h1{font-size:26px}h2{font-size:20px;margin-top:32px}h3{font-size:16px}
+table{border-collapse:collapse;margin:8px 0;background:var(--surface)}td,th{border:1px solid var(--border);
+padding:4px 8px;text-align:left;vertical-align:top}th{background:var(--surface-2)}.small td,.small{font-size:13px}
+.warn{background:var(--warn-bg);color:var(--warn-text);border-radius:8px;padding:8px 12px}
+.mockup{border:2px dashed var(--down);border-radius:8px;padding:8px 14px;margin:14px 0}.mock{color:var(--down);font-weight:bold}
+.note,.muted{color:var(--muted)}.note{font-size:13px}
+.explain{background:var(--accent-soft);border-radius:8px;padding:8px 14px;margin:12px 0}
+.lead{font-size:17px}.lab-intro ul{padding-left:20px}ol.steps li{margin-bottom:6px}
+details.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:12px 0}
+details.section>summary{list-style:none;cursor:pointer;padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+details.section>summary::-webkit-details-marker{display:none}
+details.section>summary .s-title{font-weight:600;font-size:18px}details.section>summary .s-sum{color:var(--muted);font-size:14px}
+details.section>summary .s-chev{grid-column:2;grid-row:1/span 2;align-self:center}
+details.section>summary .s-chev::before{content:"\\25BE";color:var(--muted)}details.section[open]>summary .s-chev::before{content:"\\25B4"}
+details.section[open]>summary{border-bottom:1px solid var(--border)}details.section>.s-body{padding:12px 18px 18px}
+details.more{margin:12px 0}details.more>summary{cursor:pointer;color:var(--accent);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin:12px 0}
+.tile{background:var(--surface-2);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.tile .label{font-size:13px;color:var(--muted)}.tile .value{font-size:22px;font-weight:600}.tile .sub{font-size:13px;color:var(--muted)}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px 24px}""" + bt_report.charts.STYLE
 
 
 def build(conn, version: str, params: dict | None = None) -> str:
     manifests = registry.load_all()
     params = {**manifests["cse_portfolio_lab"].version(version).parameters, **(params or {})}
     lab = latest(conn, version)
-    parts = [f"<h1>Portfolio lab &mdash; internal research report</h1>"
-             f'<p class="warn"><b>INTERNAL RESEARCH ONLY. Not for publication or distribution.</b> Version '
-             f'{esc(version)} of the lab models; generated {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC. '
-             f'Model portfolios wait for a lawyer&rsquo;s view before anything is published (decision 0010 point 6).'
-             f'</p>']
+    parts = ["<h1>Portfolio lab &mdash; internal research report</h1>",
+             (f'<p class="warn"><b>INTERNAL RESEARCH ONLY. Not for publication or distribution.</b> Version '
+              f'{esc(version)} of the lab models; generated {dt.datetime.now(dt.UTC):%Y-%m-%d %H:%M} UTC. '
+              f'Model portfolios wait for a lawyer&rsquo;s view before anything is published (decision 0010 point 6).'
+              f'</p>')]
+    parts.append(f"<style>{bt_report.charts.STYLE}</style>")   # in the body, so the owners' preview keeps it
     if lab is None:
         parts.append("<p>No estimate date with portfolios yet for this version (the estimates may still be waiting: "
                      "for a year of weekly returns, the private settings, or a published bill yield).</p>")
@@ -297,28 +329,37 @@ def build(conn, version: str, params: dict | None = None) -> str:
         names = {r["symbol"]: r["name"] for r in q(conn, "select symbol, name from models.cse_security_reference "
                                                          "where name is not null")}
         parts.append(bt_report.section_intro())
+        parts.append(bt_report.section_portfolio(conn, names))
+        parts.append(bt_report.section_since_april(conn))
+        parts.append(bt_report.section_rebalancing(conn))
+        parts.append('<h2 class="deeper">Go deeper</h2><p class="muted">Each part below opens with a click. They '
+                     "explain the rules, the evidence for them and the full workings, for anyone who wants the "
+                     "detail.</p>")
         parts.append(bt_report.section_rules(bt_params))
         parts.append(bt_report.section_evidence(conn))
-        parts.append(bt_report.section_backtest(conn))
-        parts.append(bt_report.section_today(conn, names))
-        parts.append("<h2>Workings</h2><p class=\"note\">The lab's full computation on the latest estimate date: the "
-                     "universe, every portfolio, the frontier, the effect of fewer names and the forward record.</p>")
+        parts.append(bt_report.section_compare(conn))
         day = lab["as_of"]
         summary, prob = problem_at(conn, version, day, lab["notional_lkr"], params)
         uni = q(conn, "select * from models.cse_risk_universe where method_version = %s and as_of = %s", version, day)
-        parts.append(section_status(summary, lab, uni))
-        parts.append(section_portfolios(conn, version, day))
-        parts.append(section_frontier(conn, version, day))
-        if lab["status"] == "ok":
-            parts.append(section_fewer_names(prob, params["max_weight"]))
         ports = q(conn, "select * from models.cse_lab_portfolio where method_version = %s and as_of = %s",
                   version, day)
         weights = defaultdict(list)
         for w in q(conn, "select * from models.cse_lab_weight where method_version = %s and as_of = %s", version, day):
             weights[w["portfolio"]].append(w)
-        parts.append(section_record(conn, version))
-        parts.append(CAVEATS)
-        parts.append(section_mockups(ports, weights, day))
+        workings = [section_status(summary, lab, uni, params), section_portfolios(conn, version, day),
+                    section_frontier(conn, version, day)]
+        if lab["status"] == "ok":
+            workings.append(section_fewer_names(prob, params["max_weight"]))
+        workings += [section_record(conn, version), CAVEATS]
+        body = "".join(workings).replace("<h2>", "<h3>").replace("</h2>", "</h3>")
+        parts.append(bt_report.fold("For specialists: the full workings",
+                                    f"Every portfolio, the frontier, the effect of fewer names and the forward record, "
+                                    f"on {esc(day)} (lab version {esc(version)})", body, anchor="workings"))
+        parts.append(bt_report.fold("Wording mock-ups for the lawyer",
+                                    "How the example could be worded under each of the three publishing paths "
+                                    "(internal, not in use)",
+                                    section_mockups(ports, weights, day).replace("<h2>", "<h3>").replace("</h2>", "</h3>"),
+                                    anchor="mockups"))
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" '
             f'content="width=device-width,initial-scale=1"><title>Portfolio lab report</title>'
             f'<style>{STYLE}</style></head><body>{"".join(parts)}</body></html>\n')

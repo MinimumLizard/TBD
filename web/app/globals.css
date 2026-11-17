@@ -525,3 +525,7 @@ body:has(.onboarding) header.site { position: static; }
 .picks .c-title { font-family: var(--display); font-weight: 600; font-size: 1.05rem; line-height: 1.3; display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
 .picks .c-desc { font-size: 0.88rem; color: var(--muted); }
 .lookup h2 { margin-top: 0; }
+
+/* The weekly e-mail's preview: an e-mail program shows it on white with its own inline colours, so the site's table
+   styles (and its dark theme) must not reach inside it. */
+.email-frame th, .email-frame td { background: transparent; position: static; white-space: normal; }

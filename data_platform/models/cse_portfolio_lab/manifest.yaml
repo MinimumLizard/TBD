@@ -4,7 +4,7 @@ title_key: internal.cse_portfolio_lab.title      # internal research: not on the
 summary_key: internal.cse_portfolio_lab.summary
 disclaimer_key: general
 requires_datasets:
-  - cse.indices_daily_current        # the session calendar (the quarterly rebalance dates)
+  - cse.indices_daily_current        # the session calendar (the quarterly rebalance dates; 1.2.0: the daily returns)
   - cse.lab_private_settings         # 1.0.0 only: the owner's portfolio size (LAB_PRIVATE_FILE)
   - models.cse_lab_summary           # its own earlier rows: a date whose inputs have not changed is reused
   - models.cse_lab_cap
@@ -45,7 +45,7 @@ versions:
         the same amount: the solver stops at its tolerance), so they are compared within 1e-5. See
         docs/migration/parity-cse-portfolio-lab.json.
   - method_version: "1.1.0"
-    status: current
+    status: reference
     changes: >-
       Liquidity caps for a neutral notional of Rs 1 mn (not the owner's portfolio size); the market as a reference
       row; the versions with 10 and 15 names (minimum variance, maximum Sharpe, equal weight) set on the quarterly
@@ -66,3 +66,31 @@ versions:
         kinds: [min_variance, max_sharpe, equal_weight]
         buffer: 1.5                  # a name in the portfolio stays while it ranks in the top 1.5 K
         rebalance_months: [1, 4, 7, 10]
+  - method_version: "1.2.0"
+    status: current
+    changes: >-
+      On cse_risk_estimates 1.2.0 (the covariance from daily returns, rebuilt here and checked against the stored
+      shrinkage). The versions with K names follow cse_lab_backtest 1.1.0's rules: when the full minimum-variance
+      portfolio has fewer than K names, the shares it would take next fill the places; and at a quarterly date, the
+      least change from the weights set last time that keeps the estimated volatility within 1 % of the minimum.
+    requires_models:
+      cse_risk_estimates: "1.2.0"
+      cse_total_returns: "1.0.0"     # the total-return levels, to rebuild the daily covariance
+    parameters:
+      max_weight: 0.10
+      max_sector_weight: 0.30
+      max_group_weight: 0.20
+      participation: 0.20
+      days_to_build: 10
+      notional_lkr: 1000000
+      frontier_points: 25
+      market_row: true
+      covariance: daily              # must match cse_risk_estimates 1.2.0 (the rebuilt shrinkage is checked)
+      daily_lags: 2
+      fewer_names:
+        sizes: [10, 15]
+        kinds: [min_variance, max_sharpe, equal_weight]
+        buffer: 1.5
+        rebalance_months: [1, 4, 7, 10]
+        fill: marginal               # new: the shares minimum variance would take next fill a short portfolio
+        tolerance: 0.01              # new: within 1 % of the minimum volatility, the least change from last time

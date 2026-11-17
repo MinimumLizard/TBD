@@ -136,6 +136,101 @@ def bars(rows: list[dict], *, aria: str, fmt, names: list[tuple[str, str]], refs
     return _figure("".join(parts), legend, aria, height, note)
 
 
+OTHER = "var(--other,#9aa5b5)"          # the "Other" slice of a pie: a neutral, never a sixth hue
+
+
+def donut(slices: list[tuple[str, float]], *, aria: str, centre: str = "", centre_sub: str = "",
+          size: int = 220, max_slices: int = 5, other_label: str = "Other", keep_order: bool = False) -> str:
+    """A ring chart of parts of one whole (decision 0025: the owner asked for pie charts).
+
+    At most `max_slices` named slices, in the chart colours' fixed order, largest first (or as given, with
+    `keep_order`, for parts that have an order of their own, such as dates); the rest are folded into one
+    neutral "Other" slice, so a colour always means one named part. Slices are separated by a thin gap in the page's
+    own colour. A legend beside the ring names every slice with its share, so the reading never depends on colour
+    alone; each slice also carries a <title>, which browsers show on hover."""
+    items = [(label, float(v)) for label, v in slices if v and v > 0]
+    if not keep_order:
+        items.sort(key=lambda x: -x[1])
+    if not items:
+        return ""
+    total = sum(v for _, v in items)
+    shown = items[:max_slices]
+    rest = items[max_slices:]
+    if rest:
+        shown.append((f"{other_label} ({len(rest)})" if len(rest) > 1 else rest[0][0], sum(v for _, v in rest)))
+    colours = [colour(i) for i in range(min(len(shown), len(SERIES)))]
+    if rest:
+        colours = colours[:len(shown) - 1] + [OTHER]
+    r_out, r_in = size / 2 - 4, size / 2 - 4 - size * 0.17
+    cx = cy = size / 2
+    parts, angle = [], -math.pi / 2
+    for (label, v), c in zip(shown, colours):
+        sweep = v / total * 2 * math.pi
+        a0, a1 = angle, angle + sweep
+        if sweep >= 2 * math.pi - 1e-9:            # one slice: a full ring
+            parts.append(f'<circle cx="{cx}" cy="{cy}" r="{(r_out + r_in) / 2:.1f}" fill="none" '
+                         f'style="stroke:{c}" stroke-width="{r_out - r_in:.1f}"><title>{esc(label)}: 100%</title></circle>')
+        else:
+            large = 1 if sweep > math.pi else 0
+            pt = lambda r, a: f"{cx + r * math.cos(a):.2f},{cy + r * math.sin(a):.2f}"
+            d = (f"M{pt(r_out, a0)} A{r_out:.1f},{r_out:.1f} 0 {large} 1 {pt(r_out, a1)} "
+                 f"L{pt(r_in, a1)} A{r_in:.1f},{r_in:.1f} 0 {large} 0 {pt(r_in, a0)} Z")
+            parts.append(f'<path d="{d}" style="fill:{c};stroke:var(--surface,#fff)" stroke-width="2" '
+                         f'stroke-linejoin="round"><title>{esc(label)}: {v / total:.1%}</title></path>')
+        angle = a1
+    if centre:
+        parts.append(f'<text class="val big" x="{cx}" y="{cy + (2 if centre_sub else 7)}" text-anchor="middle">{esc(centre)}</text>')
+    if centre_sub:
+        parts.append(f'<text x="{cx}" y="{cy + 20}" text-anchor="middle">{esc(centre_sub)}</text>')
+    legend = "".join(f'<li><i style="background:{c}"></i><span class="lbl">{esc(label)}</span>'
+                     f'<span class="pc">{v / total:.0%}</span></li>' for (label, v), c in zip(shown, colours))
+    return (f'<figure class="lab-donut"><svg viewBox="0 0 {size} {size}" width="{size}" height="{size}" role="img" '
+            f'aria-label="{esc(aria)}">{"".join(parts)}</svg><ul class="donut-legend">{legend}</ul></figure>')
+
+
+def frontier(line: list[tuple[float, float]], points: list[dict], *, aria: str, height: int = 340, note: str = "") -> str:
+    """Expected return against volatility: the frontier as a line, each portfolio as a labelled point.
+    points: {label, x, y, colour}. Axis text in the page's muted ink; point labels in its main ink."""
+    if not line and not points:
+        return ""
+    xs = [x for x, _ in line] + [p["x"] for p in points]
+    ys = [y for _, y in line] + [p["y"] for p in points]
+    x0, x1 = min(xs), max(xs)
+    y0, y1 = min(ys), max(ys)
+    px, py = (x1 - x0) * 0.08 or 0.01, (y1 - y0) * 0.12 or 0.01
+    x0, x1, y0, y1 = x0 - px, x1 + px, y0 - py, y1 + py
+    left, right, top, bottom = 52, 120, 14, 40
+    X = lambda v: left + (v - x0) / (x1 - x0) * (W - left - right)
+    Y = lambda v: top + (y1 - v) / (y1 - y0) * (height - top - bottom)
+    parts = []
+    for v in _ticks(y0, y1):
+        parts.append(f'<line x1="{left}" x2="{W - right}" y1="{Y(v):.1f}" y2="{Y(v):.1f}" class="grid"/>'
+                     f'<text x="{left - 6}" y="{Y(v) + 4:.1f}" text-anchor="end">{v * 100:.0f}%</text>')
+    for v in _ticks(x0, x1):
+        parts.append(f'<text x="{X(v):.1f}" y="{height - bottom + 16}" text-anchor="middle">{v * 100:.0f}%</text>')
+    parts.append(f'<text x="{(left + W - right) / 2:.0f}" y="{height - 6}" text-anchor="middle">'
+                 f'How much it swings (volatility, a year)</text>')
+    parts.append(f'<text x="12" y="{(top + height - bottom) / 2:.0f}" transform="rotate(-90 12 {(top + height - bottom) / 2:.0f})" '
+                 f'text-anchor="middle">Expected return (an assumption)</text>')
+    if line:
+        path = " ".join(f"{'M' if i == 0 else 'L'}{X(x):.1f},{Y(y):.1f}" for i, (x, y) in enumerate(line))
+        parts.append(f'<path d="{path}" fill="none" style="stroke:{colour(0)}" stroke-width="2.4">'
+                     f'<title>The best trade-off the rules allow</title></path>')
+    placed: list[float] = []
+    for p in sorted(points, key=lambda p: Y(p["y"])):
+        ly = Y(p["y"]) + 4
+        for q_ in placed:                       # keep labels from sitting on each other
+            if abs(ly - q_) < 13:
+                ly = q_ + 13
+        placed.append(ly)
+        parts.append(f'<circle cx="{X(p["x"]):.1f}" cy="{Y(p["y"]):.1f}" r="5.5" '
+                     f'style="fill:{p["colour"]};stroke:var(--surface,#fff)" stroke-width="2">'
+                     f'<title>{esc(p["label"])}: {p["x"]:.1%} volatility, {p["y"]:.1%} expected return</title></circle>'
+                     f'<text class="val" x="{X(p["x"]) + 9:.1f}" y="{ly:.1f}">{esc(p["label"])}</text>')
+    legend = [("The best trade-off the rules allow", colour(0), "line")]
+    return _figure("".join(parts), legend, aria, height, note)
+
+
 STYLE = (".lab-chart{margin:14px 0}.lab-chart svg{width:100%;max-width:100%;font-size:11px}"
          ".lab-chart text{fill:var(--muted,#55617a)}.lab-chart text.val{fill:var(--text,#111a2c)}"
          ".lab-chart .grid{stroke:var(--border,#dce2ea)}.lab-chart .base{stroke:var(--muted,#55617a);stroke-dasharray:3 3}"
@@ -144,4 +239,11 @@ STYLE = (".lab-chart{margin:14px 0}.lab-chart svg{width:100%;max-width:100%;font
          "border-top:3px solid transparent}.lab-chart .lg i.line{height:3px;border:0}"
          ".lab-chart .lg i.bar{height:9px;width:9px;border:0;border-radius:2px}"
          ".lab-chart .lg i.dash{border-top-style:dashed;background:none}"
-         ".lab-chart .lg i.dot{border-top-style:dotted;background:none}")
+         ".lab-chart .lg i.dot{border-top-style:dotted;background:none}"
+         ".lab-donut{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:8px 0}"
+         ".lab-donut svg{flex:none;max-width:100%;height:auto}.lab-donut text{fill:var(--muted,#55617a);font-size:12px}"
+         ".lab-donut text.val{fill:var(--text,#111a2c)}.lab-donut text.big{font-size:22px;font-weight:600}"
+         ".donut-legend{list-style:none;margin:0;padding:0;display:grid;gap:6px;min-width:200px;font-size:14px}"
+         ".donut-legend li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:center}"
+         ".donut-legend i{width:12px;height:12px;border-radius:3px}.donut-legend .pc{font-variant-numeric:tabular-nums;"
+         "color:var(--muted,#55617a)}")

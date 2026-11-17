@@ -29,6 +29,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from .._lib import cse_covariance as cv
 from .._lib import cse_optimize as opt
 from .._lib.cse_calendar import ASPI, excluded_sessions, session_filter
 from .._lib.cse_estimates import ledoit_wolf
@@ -38,7 +39,7 @@ OUTPUTS = ("models.cse_lab_summary", "models.cse_lab_cap", "models.cse_lab_portf
            "models.cse_lab_exposure", "models.cse_lab_frontier")
 _LIB = Path(__file__).resolve().parents[1] / "_lib"
 CODE_SHA256 = hashlib.sha256(b"".join(p.read_bytes() for p in (
-    Path(__file__), _LIB / "cse_optimize.py", _LIB / "cse_estimates.py"))).hexdigest()
+    Path(__file__), _LIB / "cse_optimize.py", _LIB / "cse_estimates.py", _LIB / "cse_covariance.py"))).hexdigest()
 
 
 def _f(v):
@@ -61,6 +62,27 @@ def risk_inputs(inputs, as_of):
                          params=wparams):
         weekly[r["series"]][r["week_end"].isoformat()] = r["weekly_return"]
     return summaries, est, weekly
+
+
+class Daily:
+    """Version 1.2.0: what rebuilds the daily covariance cse_risk_estimates used (its total-return levels and the
+    session calendar), and the number of lagged days."""
+
+    def __init__(self, tri: dict[str, pd.Series], sessions: list[str], lags: int):
+        self.tri, self.sessions, self.lags = tri, sessions, lags
+
+    def returns(self, summary: dict, symbols: list[str]) -> tuple[np.ndarray, float]:
+        return cv.daily_window(self.tri, self.sessions, symbols, summary["first_week"].isoformat(),
+                               summary["as_of"].isoformat())
+
+
+def total_return_levels(inputs, as_of, skip) -> dict[str, pd.Series]:
+    where, params = session_filter(as_of)
+    by: dict[str, dict[str, float]] = defaultdict(dict)
+    for r in inputs.rows("models.cse_total_return", "symbol, session_date, tri", where=where, params=params):
+        if r["session_date"] not in skip:
+            by[r["symbol"]][r["session_date"].isoformat()] = r["tri"]
+    return {k: pd.Series(v, dtype=float).sort_index() for k, v in by.items()}
 
 
 def stored_outputs(inputs, as_of) -> dict[str, dict[dt.date, list[dict]]]:
@@ -108,12 +130,22 @@ def returns_window(summary: dict, symbols: list[str], weekly: dict) -> pd.DataFr
     return pd.DataFrame(cols)
 
 
-def problem_of(summary: dict, rows: list[dict], weekly: dict, cfg: dict) -> tuple[opt.Problem, pd.DataFrame]:
+def problem_of(summary: dict, rows: list[dict], weekly: dict, cfg: dict,
+               daily: Daily | None = None) -> tuple[opt.Problem, pd.DataFrame]:
+    """The date's problem. The covariance is rebuilt as cse_risk_estimates made it: from the stored weekly returns
+    (Ledoit-Wolf, versions 1.0.0 and 1.1.0) or, with `daily` (version 1.2.0), from the daily returns over the same
+    span. Either way the rebuilt shrinkage must equal the stored one to the last bit."""
     symbols = [r["symbol"] for r in rows]
     R = returns_window(summary, symbols, weekly)
-    cov, shrinkage = ledoit_wolf(R)
+    if daily is None:
+        cov, shrinkage = ledoit_wolf(R)
+        source = "weekly"
+    else:
+        D, per_year = daily.returns(summary, symbols)
+        cov, shrinkage = cv.daily(D, per_year, daily.lags)
+        source = "daily"
     if shrinkage != summary["shrinkage"]:
-        raise RuntimeError(f"{summary['as_of']}: the covariance rebuilt from the stored weekly returns has shrinkage "
+        raise RuntimeError(f"{summary['as_of']}: the covariance rebuilt from the stored {source} returns has shrinkage "
                            f"{shrinkage!r}, the estimates stored {summary['shrinkage']!r}")
     er = pd.Series({r["symbol"]: r["expected_return"] for r in rows})
     med = pd.Series({r["symbol"]: r["median_turnover"] for r in rows})
@@ -210,7 +242,8 @@ class FewerNames:
                     if source in chosen:
                         names = chosen[source]
                     else:
-                        ranked = opt.ranking(full[source], p.symbols)
+                        fill = p.cov if self.spec.get("fill") == "marginal" and source == "min_variance" else None
+                        ranked = opt.ranking(full[source], p.symbols, fill)
                         prev_names = (self.state.get(f"{source}_{k}") or {}).get("names")
                         names = opt.retail_names(ranked, k, prev_names, self.spec["buffer"])
                         chosen[source] = names
@@ -219,6 +252,11 @@ class FewerNames:
                             raise opt.Infeasible(f"the full portfolio has only {len(names)} names")
                         sub = opt.subproblem(p, [idx[s] for s in names], cap)     # in ranking order
                         w = opt.solve_retail(kind, sub, floor)
+                        if kind == "min_variance" and prev is not None and self.spec.get("tolerance"):
+                            # 1.2.0: the least change from the weights set last time that keeps the estimated
+                            # volatility within the tolerance of the minimum (cse_optimize.nearest_within)
+                            current = np.array([prev["weights"].get(s, 0.0) for s in names])
+                            w = opt.nearest_within(sub, floor, w, current, float(self.spec["tolerance"]))
                         weights = {s: float(x) for s, x in zip(names, w) if x > 0}
                         self.state[name] = {"names": sorted(weights), "weights": weights, "formed_on": day}
                     except opt.Infeasible as exc:
@@ -267,11 +305,11 @@ def not_formed(day: dt.date, name: str, k: int, message: str) -> dict:
 
 
 def compute_date(summary: dict, rows: list[dict], weekly: dict, cfg: dict, p: dict, fewer: FewerNames | None,
-                 form: bool) -> dict[str, list[dict]]:
+                 form: bool, daily: Daily | None = None) -> dict[str, list[dict]]:
     day = summary["as_of"]
     out: dict[str, list[dict]] = defaultdict(list)
     labels = {r["group_key"]: r["group_name"] for r in rows}
-    prob, _ = problem_of(summary, rows, weekly, cfg)
+    prob, _ = problem_of(summary, rows, weekly, cfg, daily)
     out["models.cse_lab_cap"] = [{"as_of": day, "symbol": s, "cap": c, "liquidity_cap": lc}
                                  for s, c, lc in zip(prob.symbols, prob.caps, prob.liq_caps)]
     status, message, full = "ok", f"{len(prob.symbols)} stocks, {summary['history_weeks']} weekly returns", None
@@ -314,7 +352,13 @@ def compute(inputs, as_of):
         cfg.pop("max_group_weight")
     summaries, estimates, weekly = risk_inputs(inputs, as_of)
     stored = stored_outputs(inputs, as_of)
-    sessions = calendar(inputs, as_of, excluded_sessions(inputs))
+    skip = excluded_sessions(inputs)
+    sessions = calendar(inputs, as_of, skip)
+    daily = None
+    if p.get("covariance", "identity") == "daily":
+        daily = Daily(total_return_levels(inputs, as_of, skip), sessions, int(p.get("daily_lags", 2)))
+    elif p.get("covariance", "identity") != "identity":
+        raise ValueError(f"cse_portfolio_lab supports the identity and daily covariances, not {p['covariance']!r}")
     spec = p.get("fewer_names")
     fewer = FewerNames(spec, sessions, cfg["max_weight"]) if spec else None
     for summary in summaries:
@@ -330,8 +374,12 @@ def compute(inputs, as_of):
         form = use_fewer and (not fewer.state or is_scheduled(day.isoformat(), sessions, spec["rebalance_months"]))
         symbols = [r["symbol"] for r in rows]
         R = returns_window(summary, symbols, weekly)
+        D = None
+        if daily is not None:
+            Dm, per_year = daily.returns(summary, symbols)
+            D = [hashlib.sha256(np.ascontiguousarray(Dm).tobytes()).hexdigest(), per_year]
         key = fingerprint(summary, rows, R, {"params": p, "notional": size, "form": form,
-                                             "fewer": fewer.snapshot() if use_fewer else None})
+                                             "fewer": fewer.snapshot() if use_fewer else None, "daily": D})
         old = stored["models.cse_lab_summary"].get(day)
         if old and old[0]["inputs_sha256"] == key:
             for t in OUTPUTS:
@@ -339,7 +387,7 @@ def compute(inputs, as_of):
             if use_fewer:
                 fewer.restore(stored["models.cse_lab_portfolio"].get(day, []), stored["models.cse_lab_weight"].get(day, []))
             continue
-        rows_d = compute_date(summary, rows, weekly, cfg, p, fewer if use_fewer else None, form)
+        rows_d = compute_date(summary, rows, weekly, cfg, p, fewer if use_fewer else None, form, daily)
         rows_d["models.cse_lab_summary"][0]["inputs_sha256"] = key
         for t in OUTPUTS:
             out[t] += rows_d.get(t, [])

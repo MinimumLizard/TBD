@@ -105,7 +105,24 @@ Instead, the weekly returns (stored once per share and week), the date's univers
 exactly: `data_platform/models/_lib/cse_estimates.py ledoit_wolf()` rebuilds it from them (cse_portfolio_lab does, and
 checks that the rebuilt δ equals the stored one to the last bit).
 
-## Version 1.1.0 (current)
+## Version 1.2.0 (current; decision 0025)
+
+Everything is 1.1.0's except the covariance, and so each share's volatility and the shrinkage stored:
+
+- **The covariance comes from daily total returns** over the same span as the weekly returns (from the Wednesday
+  before the first week to the estimate date; a session without a trade counts as no change), with the covariances of
+  returns one and two sessions apart added with Bartlett weights 2/3 and 1/3 (thinly traded shares react a day or two
+  late), shrunk towards a multiple of the identity by the Ledoit-Wolf amount of the daily returns, and annualised by
+  the number of sessions a year over the span: **Σ = A [(1 − δ) S + δ (tr S / N) I]**, S = Γ₀ + Σₗ (1 − l/3)(Γₗ + Γₗ′).
+- Why: it forecast risk best of five estimates in the walk-forward risk test (`cse_lab_backtest` 1.1.0,
+  `models.cse_bt_risk_test`; `docs/research/portfolio-lab-optimisation-2026-11.md`). It is the same function as the
+  backtest's (`_lib/cse_covariance.daily_window` and `daily`), so the two give the same volatility on the same date
+  (tested).
+- Betas, expected returns, Amihud and the universe still come from the weekly returns, unchanged.
+- **Factor form, as before:** the stored shrinkage and the total-return levels (`cse_total_returns`) determine the
+  covariance exactly; `cse_portfolio_lab` 1.2.0 rebuilds it and checks the shrinkage to the last bit.
+
+## Version 1.1.0 (reference)
 
 - **Risk-free rate**: the CBSL's 12-month treasury bill yield (end of month, table 4.04) instead of the old typed
   9.9 %. Point in time: the yield of the latest month whose figure had surely been published by the date, counting a

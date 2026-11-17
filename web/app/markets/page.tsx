@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import ModelFooter from "@/components/ModelFooter";
 import PageHead from "@/components/PageHead";
+import Section from "@/components/Section";
 import Stats from "@/components/Stats";
 import MarketBrief from "@/components/home/MarketBrief";
 import { CurveCard, SharesCard } from "@/components/home/MarketCards";
@@ -55,9 +56,7 @@ export default async function MarketsPage() {
 
       <Stats viewer={viewer} keys={["investors", "literacy", "savers"]} />
 
-      <div className="section-head">
-        <h2>{t("home.differsTitle")}</h2>
-      </div>
+      <Section id="how-we-work" title={t("home.differsTitle")} summary={t("home.differsSum")}>
       <ul className="differs">
         {(["1", "2", "3", "4"] as const).map((n) => (
           <li key={n}>
@@ -66,12 +65,10 @@ export default async function MarketsPage() {
           </li>
         ))}
       </ul>
+      </Section>
 
-      <div className="section-head">
-        <h2>{t("home.tiersTitle")}</h2>
-        <Link className="more" href="/plans">{t("home.plansLink")} →</Link>
-      </div>
-      <p className="muted" style={{ marginTop: -4 }}>{t("home.tiersLead")}</p>
+      <Section id="plans" title={t("home.tiersTitle")} summary={t("home.tiersLead")}
+               related={[{ href: "/plans", label: t("home.plansLink") }]}>
       <div className="tier-strip">
         {(["free", "plus", "pro"] as const).map((tier) => (
           <div key={tier}>
@@ -80,6 +77,7 @@ export default async function MarketsPage() {
           </div>
         ))}
       </div>
+      </Section>
 
       <ModelFooter models={["cse_market_tape", "bond_ns_curve"]} />
     </>

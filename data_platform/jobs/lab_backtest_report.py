@@ -58,22 +58,78 @@ def table(head: list[str], body: list[list], cls: str = "") -> str:
     return f'<div class="table-wrap"><table class="{cls}"><thead><tr>{th}</tr></thead><tbody>{rows}</tbody></table></div>'
 
 
+def fold(title: str, summary: str, body: str, *, open_: bool = False, anchor: str = "") -> str:
+    """A drop-down section, in the site's own markup (components/Section.tsx): the title and a one-line summary stay
+    visible when it is closed. A plain <details>, so it works without scripts, in the file and in the preview."""
+    return (f'<details class="section"{f' id="{anchor}"' if anchor else ""}{" open" if open_ else ""}><summary>'
+            f'<span class="s-title">{title}</span><span class="s-sum">{summary}</span>'
+            f'<span class="s-chev" aria-hidden="true"></span></summary><div class="s-body">{body}</div></details>')
+
+
+def tiles(items: list[tuple[str, str, str]]) -> str:
+    """Headline numbers: (label, value, note)."""
+    return '<div class="tiles">' + "".join(
+        f'<div class="tile stat"><span class="label">{esc(label)}</span><span class="value">{value}</span>'
+        f'<span class="sub">{note}</span></div>' for label, value, note in items) + "</div>"
+
+
+SMALL_WORDS = {"OF", "AND", "THE", "FOR"}
+ACRONYMS = {"IOC", "LOLC", "NDB", "HNB", "DFCC", "CIC", "JKH", "HSBC", "SLT", "CDB", "AIA", "PLC", "LTD", "BPPL",
+            "ACL", "TKYO", "RIL", "HNBA"}
+
+
+def display_name(name: str | None, symbol: str) -> str:
+    """A company's name as the CSE writes it (capitals, ending in PLC), in ordinary case, with its ticker. A word that
+    is part of the ticker, or a known abbreviation, stays in capitals (Lanka IOC, LOLC Holdings)."""
+    code = symbol.split(".")[0]
+    if not name:
+        return code
+
+    def word(w: str, i: int) -> str:
+        core = w.strip("()&,.")
+        if core in ACRONYMS or (len(core) >= 3 and core in code):
+            return w
+        if w in SMALL_WORDS and i:
+            return w.lower()
+        if len(core) <= 2:
+            return w
+        return "(" + w[1:].capitalize() if w.startswith("(") else w.capitalize()
+
+    words = name.replace(" P L C", "").removesuffix(" PLC").split()
+    return f"{' '.join(word(w, i) for i, w in enumerate(words))} ({code})"
+
+
+def next_review(d: dt.date) -> dt.date:
+    """The first day of the next review month (January, April, July, October) after d."""
+    for months in range(1, 13):
+        m = (d.month - 1 + months) % 12 + 1
+        y = d.year + (d.month - 1 + months) // 12
+        if m in (1, 4, 7, 10):
+            return dt.date(y, m, 1)
+    return d
+
+
 # --- sections ------------------------------------------------------------------------------------------------------
 
 def section_intro() -> str:
     return """
-<div class="explain">
-<p><strong>What this is.</strong> A worked example of how a rules-based portfolio of CSE shares is built, tested and
-reviewed: the rules are written down in advance, applied the same way on every date with only the information
-available then, and their results are shown with their costs, good periods and bad. It is research and education. It
-does not take anyone's circumstances into account, and it is not advice to deal in any share.</p>
+<div class="lab-intro">
+<p class="lead">This page is a lesson in how a portfolio of Colombo Stock Exchange shares can be built by following
+written rules, step by step, and what those rules would have done since April. It is a worked example to learn
+from. It is not a list of shares to deal in, and it says nothing about what anyone should do with their money.</p>
+<ul class="three">
+<li><b>The rules come first.</b> They were written down before any result was seen, and applied the same way every
+time.</li>
+<li><b>No hindsight.</b> On each date the rules use only what was known on that date.</li>
+<li><b>It does not know you.</b> Your savings, goals and circumstances are not part of it, so it cannot say what
+suits you.</li>
+</ul>
 </div>"""
 
 
 def section_rules(p: dict) -> str:
     k = 15
-    return f"""
-<h2>The rules, step by step</h2>
+    return fold("The rules, step by step", "Six steps, from which shares can be considered to how often it is reviewed", f"""
 <ol class="steps">
 <li><b>Which shares can be considered.</b> Ordinary shares that traded on at least {p['min_traded_share']:.0%} of the
 sessions in the past year, with median daily turnover of at least Rs {p['min_median_turnover_lkr'] / 1e6:.0f} mn and a
@@ -102,7 +158,7 @@ dynamic alternative also checks on the first session of every month and rebalanc
 away from the rules' new portfolio by more than {p['te_threshold']:.0%} of estimated tracking error.</li>
 <li><b>Costs.</b> Every trade pays {p['cost_per_side']:.2%} of its value; whole shares only; dividends, splits and
 rights issues are booked on their ex-date.</li>
-</ol>"""
+</ol>""", anchor="rules")
 
 
 def drawdown(points: list[tuple[dt.date, float]]) -> list[tuple[dt.date, float]]:
@@ -138,9 +194,8 @@ def section_evidence(conn) -> str:
                      "&ndash;" if e == "identity" else f"{r['variance_ratio']:.2f} ({r['ratio_low']:.2f} to {r['ratio_high']:.2f})",
                      pct(r["weekly_turnover"]), pct(s["realised_volatility"]) if s else "–"])
     k = k_scope[1:] if k_scope else ""
-    return f"""
-<h2>Why the rules estimate risk the way they do</h2>
-<p>A minimum-variance portfolio is only as good as its estimate of how the shares move together. Five ways of making
+    return fold("Why the rules measure risk this way", f"Five ways of estimating risk, tested week by week: the one used had the smallest swings ({pct(chosen['realised_volatility'])} against {pct(first['realised_volatility'])})", f"""
+<p>A portfolio built for low risk is only as good as its estimate of how the shares move together. Five ways of making
 that estimate were tested on the one thing they are for: <b>risk</b>. Every week from {day(any_row['start_date'])} to
 {day(any_row['end_date'])} ({any_row['n_weeks']} weeks), the minimum-variance portfolio was built with each estimate,
 using only what was known that week, and its volatility was measured over the week that followed. Returns were not
@@ -162,14 +217,14 @@ difference is not chance. It also changed its weights the least from week to wee
 </ul>
 <p class="small muted">Limits. The estimate was chosen on these same {any_row['n_weeks']} weeks, which flatters it
 somewhat; the test is stored with the model and repeats itself as history grows, so the choice is checked again every
-day. The number of lagged days (two) was fixed before any result was seen; with none to four the realised volatility
-stayed between 10.0 % and 10.9 %. No costs are counted here: this compares estimates, not trading rules.</p>"""
+day. The number of lagged days (two) was fixed before any result was seen, and the result barely changes with none to
+four (the research note, §2). No costs are counted here: this compares estimates, not trading rules.</p>""", anchor="evidence")
 
 
-def section_backtest(conn) -> str:
+def section_compare(conn) -> str:
     summary = q(conn, "select * from models.cse_bt_summary where method_version = %s", NEW)
     if not summary:
-        return "<h2>What the rules would have done</h2><p>The walk-forward test has not run yet.</p>"
+        return ""
     by = {(r["policy"], r["portfolio"]): r for r in summary}
     old = {(r["policy"], r["portfolio"]): r for r in q(conn, "select * from models.cse_bt_summary where method_version = %s", OLD)}
     start, end = summary[0]["start_date"], summary[0]["end_date"]
@@ -199,13 +254,13 @@ def section_backtest(conn) -> str:
         qr, dy = by.get(("quarterly", name)), by.get(("dynamic", name))
         if not qr:
             continue
-        rows.append([esc(LABELS[name]), signed(qr["total_return"]), pct(qr["volatility"]), signed(qr["max_drawdown"]),
+        fall = "none" if not qr["max_drawdown"] else signed(qr["max_drawdown"])
+        rows.append([esc(LABELS[name]), signed(qr["total_return"]), pct(qr["volatility"]), fall,
                      lkr(qr["costs"]) if qr["costs"] is not None else "–",
                      signed(dy["total_return"]) if dy and dy["costs"] is not None else "–",
                      lkr(dy["costs"]) if dy and dy["costs"] is not None else "–",
                      esc(dy["n_rebalances"]) if dy and dy["n_rebalances"] is not None else "–"])
     flag, was = by.get(FLAGSHIP), old.get(FLAGSHIP)
-    dyn = by.get(("dynamic", port))
     mk, bills = by.get(("quarterly", "market")), by.get(("quarterly", "bills"))
     compare = ""
     if flag and was and mk:
@@ -215,34 +270,23 @@ def section_backtest(conn) -> str:
             ["The same portfolio, first rules", signed(was["total_return"]), pct(was["volatility"]),
              signed(was["max_drawdown"]), lkr(was["costs"]), pct(was["turnover"], 0)],
             [esc(LABELS["market"]), signed(mk["total_return"]), pct(mk["volatility"]), signed(mk["max_drawdown"]), "–", "–"],
-            [esc(LABELS["bills"]), signed(bills["total_return"]), pct(bills["volatility"]), "–", "–", "–"]])
-    events = q(conn, """select * from models.cse_bt_event where method_version = %s and policy = %s and
-                        portfolio = %s order by session_date""", NEW, *FLAGSHIP)
-    old_events = q(conn, """select * from models.cse_bt_event where method_version = %s and policy = %s and
-                            portfolio = %s order by session_date""", OLD, *FLAGSHIP)
-    log = [[day(e["session_date"]), esc(KIND.get(e["kind"], e["kind"])),
-            esc(", ".join(x.split(".")[0] for x in e["names_in"].split(",") if x) or "–"),
-            esc(", ".join(x.split(".")[0] for x in e["names_out"].split(",") if x) or "–"),
-            lkr(e["turnover"]), lkr(e["cost"]), esc(e["estimate_weeks"] or "–")] for e in events if e["kind"] != "drift"]
-    was_cost = {e["session_date"]: e["cost"] for e in old_events if e["kind"] != "drift"}
-    cost_chart = charts.bars(
-        [{"label": f"{day(e['session_date'])}: {KIND.get(e['kind'], e['kind'])}",
-          "values": [e["cost"], was_cost.get(e["session_date"])]} for e in events if e["kind"] != "drift"],
-        aria="Trading cost at the start and at each review, current rules and first rules",
-        fmt=lambda v: f"Rs {v:,.0f}", names=[("Current rules", charts.colour(0)), ("First rules", charts.colour(1))],
-        label_width=230)
-    drifts = sum(1 for e in events if e["kind"] == "drift")
+            [esc(LABELS["bills"]), signed(bills["total_return"]), pct(bills["volatility"]), "none", "–", "–"]])
     months = round((end - start).days / 30.4)
-    up = mk and mk["total_return"] is not None and mk["total_return"] >= 0
-    return f"""
-<h2>What the rules would have done since {day(start)}</h2>
-<p>The first date the rules could be applied honestly is <b>{day(start)}</b>: they need at least half a year of
-weekly returns, and the price history available starts in October 2025 (the CSE's public chart reaches back one year).
-From then to {day(end)} (about {months} months), each date's decision uses only what was known on that date. Each
-portfolio starts with Rs 1 million.</p>
+    mv = sorted(r["volatility"] for (pol, name), r in by.items() if pol == "quarterly" and name.startswith("min_variance"))
+    mv_range = f"{pct(mv[0])} to {pct(mv[-1])}" if len(mv) > 1 else pct(mv[0]) if mv else "–"
+    return fold("Other ways to build a portfolio, compared",
+                "The same test for maximum Sharpe, equal weight, 10 names, and the lab's first rules",
+                f"""
+<p>The example portfolio is one of several the rules can build. All of them are tested the same way, from
+{day(start)} to {day(end)}, Rs 1 million each, with costs.</p>
+<ul class="small">
+<li><b>Minimum variance</b> looks for the lowest swings. It uses no forecast of returns.</li>
+<li><b>Maximum Sharpe</b> looks for the most expected return per unit of swing. It needs a forecast of returns (here
+an assumed 6 % a year above bills, scaled by each share's beta), so it depends on an assumption.</li>
+<li><b>Equal weight</b> puts the same amount in each of minimum variance's shares: the simplest comparison.</li>
+</ul>
+<h3>The example portfolio under the current rules and under the lab's first rules</h3>
 {value}
-<p class="small muted">Quarterly reviews. Portfolio values include dividends and costs; the ASPI is a price index and
-leaves dividends out, so it understates the market's return by roughly the dividends paid.</p>
 {compare}
 <h3>How far each fell from its highest value</h3>
 {falls}
@@ -251,103 +295,190 @@ the plainest measure of what "steadier" means.</p>
 <h3>Every portfolio the rules can build</h3>
 {table(["Portfolio", "Return, quarterly", "Volatility", "Largest fall", "Costs, quarterly", "Return, dynamic",
         "Costs, dynamic", "Rebalances, dynamic"], rows)}
-<h3>Reading the result</h3>
-<ul>
-<li>The share market ended the period {"a little higher" if up else "lower"} (the ASPI {signed(mk['total_return'] if mk else None)})
-after falling {signed(mk['max_drawdown'] if mk else None)} on the way; treasury bills returned
-{signed(bills['total_return'] if bills else None)} with no fall at all. Over a few months, which way the market went
-matters far more than how a share portfolio was built.</li>
-<li>The example portfolio did what minimum variance is for: its volatility was {pct(flag['volatility'] if flag else None)}
-against the market's {pct(mk['volatility'] if mk else None)}, and its largest fall {signed(flag['max_drawdown'] if flag else None)}
-against {signed(mk['max_drawdown'] if mk else None)}. Under the first rules the same portfolio was no steadier than the
-market ({pct(was['volatility'] if was else None)}, largest fall {signed(was['max_drawdown'] if was else None)}).</li>
-<li>Costs remain large for a portfolio of Rs 1 million: {lkr(flag['costs'] if flag else None)} over the period
-({pct((flag['costs'] or 0) / 1_000_000 if flag else None)} of the starting value), more than half of it the cost of the
-first purchases. Trading only what is worth its cost brought it down from {lkr(was['costs'] if was else None)}.</li>
-<li>The monthly check (the dynamic policy) traded more and did not make the portfolio steadier
-({pct(dyn['volatility'] if dyn else None)}, costs {lkr(dyn['costs'] if dyn else None)}), which is why the example
-keeps quarterly reviews.</li>
+<p class="small muted">"Dynamic" checks every month and rebalances when the portfolio has moved too far from the
+rules' fresh choice. It traded more and was no steadier, which is why the example keeps quarterly reviews.</p>
+<ul class="small">
+<li>The minimum-variance portfolios were the steadiest share portfolios: volatility {mv_range} against the market's
+{pct(mk['volatility'] if mk else None)}. Under the first rules the same 15-name portfolio was no steadier than the
+market ({pct(was['volatility'] if was else None)}).</li>
+<li>Costs: {lkr(flag['costs'] if flag else None)} over the period under the current rules, against
+{lkr(was['costs'] if was else None)} under the first rules.</li>
 <li>{months} months is far too short to judge any method on its return. Differences of a few percentage points
-between these portfolios are within what chance alone produces; the test lengthens by itself as the record grows.</li>
-</ul>
-<h3>Every review of the example portfolio</h3>
-{cost_chart}
-{table(["Date", "Why", "In", "Out", "Traded", "Cost", "Weeks of data"], log)}
-<p class="small muted">Plus {drifts} small drift-band adjustment{"" if drifts == 1 else "s"} between reviews.</p>"""
+between these portfolios are within what chance alone produces.</li>
+</ul>""", anchor="compare")
 
 
-def reason(h: dict, median_vol: float, k: int) -> str:
+def plain_reason(h: dict, median_vol: float) -> str:
+    """One short line, in plain words, of why the rules include a share (the full measurements are in the table
+    under it)."""
     bits = []
     vol, corr = h["volatility"], h["avg_correlation"]
-    if vol is not None:
-        bits.append(("steadier than most of the shares considered" if vol < median_vol else "more volatile than the median share considered")
-                    + f" (volatility {vol * 100:.0f}% a year")
-        bits[-1] += f", beta {h['beta']:.2f})" if h.get("beta") is not None else ")"
+    if vol is not None and median_vol:
+        bits.append("steadier than most shares" if vol < median_vol else "swings more than most shares")
     if corr is not None:
-        bits.append("moves largely independently of the other names" if corr < 0.15 else
-                    "moves only partly with the other names" if corr < 0.35 else "moves closely with the other names")
-        bits[-1] += f" (average correlation {corr:.2f})"
+        bits.append("moves largely on its own" if corr < 0.15 else "moves partly with the others" if corr < 0.35
+                    else "moves closely with the others")
     if h["at_cap"]:
-        bits.append("at the per-share cap: the rules would give it more without the cap")
-    elif h["at_floor"]:
-        bits.append(f"at the floor of {0.5 / k:.1%}: the smallest weight worth its costs")
-    rc = h["risk_contribution"]
-    if rc is not None:
-        bits.append(f"{rc * 100:.0f}% of the portfolio's estimated risk for {h['weight'] * 100:.0f}% of its value")
-    bits.append("kept from the previous review" if h["in_previous"] else "new at this review")
-    s = "; ".join(bits)
+        bits.append("at the 10 % limit per share")
+    s = ", ".join(bits) if bits else "chosen by the rules"
     return s[0].upper() + s[1:] + "."
 
 
-def section_today(conn, names: dict[str, str]) -> str:
+def section_portfolio(conn, names: dict[str, str]) -> str:
+    """Today's example portfolio, at the top of the page: what it contains, in two pie charts and a short list."""
     policy, port = FLAGSHIP
-    k = int(port.rsplit("_", 1)[1])
     last = q(conn, """select max(as_of) d from models.cse_bt_target where method_version = %s and policy = %s
                       and portfolio = %s and applied""", NEW, policy, port)[0]["d"]
     if last is None:
-        return ""
+        return fold("Today's example portfolio", "Not formed yet.", "<p>The rules have not formed it yet.</p>", open_=True)
     held = q(conn, """select * from models.cse_bt_target where method_version = %s and policy = %s
                       and portfolio = %s and applied and as_of = %s order by weight desc""", NEW, policy, port, last)
-    today = q(conn, """select * from models.cse_bt_target where method_version = %s and policy = %s
-                       and portfolio = %s and today""", NEW, policy, port)
     event = q(conn, """select * from models.cse_bt_event where method_version = %s and policy = %s and portfolio = %s
                        and session_date = %s and kind <> 'drift'""", NEW, policy, port, last)
-    e = event[0] if event else None
-    median_vol = (e or {}).get("universe_volatility_median") or 0.0
-    sectors = defaultdict(float)
+    e = event[0] if event else {}
+    summary = {r["portfolio"]: r for r in q(conn, """select * from models.cse_bt_summary where method_version = %s
+                                                      and policy = %s""", NEW, policy)}
+    flag, mk = summary.get(port), summary.get("market")
+    median_vol = e.get("universe_volatility_median") or 0.0
+    sectors: dict[str, float] = defaultdict(float)
     for h in held:
-        sectors[h["sector"]] += h["weight"]
-    rows = [[f"<b>{esc(names.get(h['symbol'], h['symbol']))}</b><br><span class='small muted'>{esc(h['symbol'])} · "
-             f"{esc(h['sector'])}</span>", pct(h["weight"]), esc(reason(h, median_vol, k))] for h in held]
-    changed_today = sorted({t["symbol"] for t in today} ^ {h["symbol"] for h in held}) if today else []
-    out = "; ".join(f"{esc(names.get(s, s))} ({esc(s.split('.')[0])})" for s in (e["names_out"].split(",") if e and e["names_out"] else []))
-    weight_chart = charts.bars(
-        [{"label": names.get(h["symbol"], h["symbol"])[:34], "values": [h["weight"] * 100, (h["risk_contribution"] or 0) * 100]}
-         for h in held],
-        aria="Each share's part of the portfolio's value and of its estimated risk",
-        fmt=lambda v: f"{v:.1f}%", names=[("Part of the value", charts.colour(0)), ("Part of the estimated risk", charts.colour(1))],
-        label_width=250)
-    sector_chart = charts.bars(
-        [{"label": s_, "values": [w * 100]} for s_, w in sorted(sectors.items(), key=lambda kv: -kv[1])],
-        aria="The portfolio's value by sector", fmt=lambda v: f"{v:.0f}%", names=[("Part of the value", charts.colour(0))],
-        refs=[(30.0, "sector cap 30%")], label_width=250)
-    return f"""
-<h2>Today's example portfolio, and the reason for each holding</h2>
-<p>The same rules, applied at the latest review ({day(last)}): minimum variance with {k} names. These are the weights the
-rules set; they stay until the next quarterly review unless a weight drifts outside its band.
-{f"Estimated volatility {pct(e['model_volatility'])} a year." if e and e['model_volatility'] else ""}
-</p>
-<h3>Value and risk, share by share</h3>
-{weight_chart}
-<p class="small muted">Where the two bars of a share are about equal, it carries as much of the risk as of the value.
-A share with a longer second bar is one of the more volatile names; one with a shorter second bar steadies the rest.</p>
-<h3>By sector</h3>
-{sector_chart}
-<h3>The reason for each one</h3>
-{table(["Share", "Weight", "Why the rules include it"], rows)}
-<p class="small muted">Volatility and correlation are estimated from the daily returns of the
-{esc(e['estimate_weeks'] if e else '–')} weeks to the review date. Left at this review: {out or "none"}.
-{f"Rebuilt on the latest session, the rules would change {len(changed_today) // 2} name(s); under quarterly reviews that waits for the next review." if changed_today else "Rebuilt on the latest session, the rules would choose the same names."}</p>
-<div class="explain"><p><strong>How to read this.</strong> Each reason is a measurement, not a view on the company:
-the rules choose shares for how they move, alone and together, not for their prospects. A different set of rules, or
-the same rules a month later, can give a different list. Nothing here says whether any share suits anyone.</p></div>"""
+        sectors[h["sector"] or "Unclassified"] += h["weight"]
+    by_share = charts.donut([(display_name(names.get(h["symbol"]), h["symbol"]), h["weight"]) for h in held],
+                            aria="The example portfolio by share", centre=str(len(held)), centre_sub="shares",
+                            other_label="other shares")
+    by_sector = charts.donut(list(sectors.items()), aria="The example portfolio by sector", centre=str(len(sectors)),
+                             centre_sub="sectors", other_label="other sectors")
+    rows = [[f"{esc(display_name(names.get(h['symbol']), h['symbol']))}<br><span class='small muted'>{esc(h['sector'])}</span>",
+             pct(h["weight"]), esc(plain_reason(h, median_vol))] for h in held]
+    detail = [[esc(display_name(names.get(h["symbol"]), h["symbol"])), pct(h["weight"]), pct(h["volatility"], 0),
+               f"{h['beta']:.2f}" if h["beta"] is not None else "–",
+               f"{h['avg_correlation']:.2f}" if h["avg_correlation"] is not None else "–",
+               pct(h["risk_contribution"]), "kept" if h["in_previous"] else "new"] for h in held]
+    value_risk = charts.bars(
+        [{"label": display_name(names.get(h["symbol"]), h["symbol"])[:40],
+          "values": [h["weight"] * 100, (h["risk_contribution"] or 0) * 100]} for h in held],
+        aria="Each share's part of the portfolio's value and of its estimated risk", fmt=lambda v: f"{v:.1f}%",
+        names=[("Part of the value", charts.colour(0)), ("Part of the estimated risk", charts.colour(1))],
+        label_width=270)
+    nxt = next_review(last)
+    body = f"""
+<p>The same rules, applied at the latest review on <b>{day(last)}</b>, chose these {len(held)} shares and how much of
+the portfolio each takes. The weights stay as they are until the next review, on the first trading day of
+{nxt:%B %Y}.</p>
+{tiles([("Shares", str(len(held)), f"in {len(sectors)} sectors"),
+        ("Swings since April", pct(flag["volatility"] if flag else None),
+         f"a year; the market: {pct(mk['volatility'] if mk else None)}"),
+        ("Largest fall since April", signed(flag["max_drawdown"] if flag else None),
+         f"the market: {signed(mk['max_drawdown'] if mk else None)}"),
+        ("Next review", f"{nxt:%b %Y}", "first trading day")])}
+<div class="donuts">
+<div><h3>By share</h3>{by_share}</div>
+<div><h3>By sector</h3>{by_sector}</div>
+</div>
+<div class="explain"><p><strong>How to read this.</strong> The rules look for shares that are steady on their own and
+that do not all move together, so that a fall in one is often offset by the others. They choose shares for how
+their prices move, not for what the companies do or might do next. A different set of rules, or the same rules a
+month later, can give a different list.</p></div>
+<details class="more"><summary>All {len(held)} shares, and why the rules include each one</summary>
+{table(["Share", "Part of the portfolio", "Why the rules include it"], rows)}
+</details>
+<details class="more"><summary>The measurements behind each reason</summary>
+<p class="small muted">Volatility: how much the price swings in a year. Beta: how much it tends to move when the whole
+market moves by 1. Correlation: how closely it moves with the other shares here (0 = not at all, 1 = exactly).
+Share of risk: how much of the portfolio's estimated swings comes from it.</p>
+{table(["Share", "Weight", "Volatility", "Beta", "Correlation with the others", "Share of risk", "At this review"], detail)}
+{value_risk}
+<p class="small muted">Where a share's two bars are about equal, it carries as much of the risk as of the value. A
+longer second bar marks one of the more volatile names; a shorter one, a share that steadies the rest.</p>
+</details>"""
+    return fold("Today's example portfolio", f"{len(held)} shares in {len(sectors)} sectors, set on {day(last)}",
+                body, open_=True, anchor="portfolio")
+
+
+def section_since_april(conn) -> str:
+    """What the example portfolio would have done, against the market and treasury bills: one chart, three numbers."""
+    summary = {r["portfolio"]: r for r in q(conn, """select * from models.cse_bt_summary where method_version = %s
+                                                      and policy = 'quarterly'""", NEW)}
+    if FLAGSHIP[1] not in summary:
+        return ""
+    flag, mk, bills = summary[FLAGSHIP[1]], summary.get("market"), summary.get("bills")
+    start, end = flag["start_date"], flag["end_date"]
+    navs: dict[str, list] = defaultdict(list)
+    for r in q(conn, """select session_date, portfolio, nav from models.cse_bt_nav where method_version = %s
+                        and policy = 'quarterly' and portfolio in (%s, 'market', 'bills') order by session_date""",
+               NEW, FLAGSHIP[1]):
+        navs[r["portfolio"]].append((r["session_date"], r["nav"]))
+    index = lambda pts: [(d, v / pts[0][1] * 100) for d, v in pts]
+    chart = charts.lines([
+        {"label": "The example portfolio", "points": index(navs[FLAGSHIP[1]]), "colour": charts.colour(0), "width": 2.6},
+        {"label": "The share market (ASPI)", "points": index(navs["market"]), "colour": charts.MUTED, "width": 1.6,
+         "dash": "6 4"},
+        {"label": "Treasury bills", "points": index(navs["bills"]), "colour": charts.MUTED, "width": 1.6, "dash": "2 3"}],
+        aria="Value of Rs 100 in each, from the start", fmt=lambda v: f"{v:.0f}", end_fmt=lambda v: f"{v - 100:+.1f}%",
+        base=100)
+    months = round((end - start).days / 30.4)
+    body = f"""
+<p>Rs 1 million in each, from {day(start)} (the first date the rules could run honestly) to {day(end)}, about
+{months} months. The portfolio's value includes dividends and every cost of trading.</p>
+{chart}
+{tiles([("The example portfolio", signed(flag["total_return"]), f"largest fall {signed(flag['max_drawdown'])}"),
+        ("The share market", signed(mk["total_return"] if mk else None),
+         f"largest fall {signed(mk['max_drawdown'] if mk else None)}; prices only"),
+        ("Treasury bills", signed(bills["total_return"] if bills else None), "no fall at all")])}
+<div class="explain"><p><strong>What this shows, and what it does not.</strong> The portfolio swung less than the
+market and fell less at its worst, which is what these rules are built to do. Over a few months, which way the market
+went matters far more than how a portfolio was built, and treasury bills, which do not swing at all, returned more.
+{months} months says almost nothing about future returns.</p></div>"""
+    return fold("How it would have done since April", f"{signed(flag['total_return'])}, against {signed(mk['total_return'] if mk else None)} for the market and {signed(bills['total_return'] if bills else None)} for treasury bills",
+                body, open_=True, anchor="since-april")
+
+
+def section_rebalancing(conn) -> str:
+    """How the portfolio is kept in shape: the owner asked whether it rebalances automatically, and how."""
+    policy, port = FLAGSHIP
+    events = q(conn, """select * from models.cse_bt_event where method_version = %s and policy = %s and portfolio = %s
+                        order by session_date""", NEW, policy, port)
+    reviews = [e for e in events if e["kind"] != "drift"]
+    drifts = [e for e in events if e["kind"] == "drift"]
+    if not reviews:
+        return ""
+    total_cost = sum(e["cost"] for e in events)
+    costs = charts.donut([(f"{day(e['session_date'])}: {KIND.get(e['kind'], e['kind'])}", e["cost"]) for e in reviews]
+                         + ([("Small adjustments between reviews", sum(e["cost"] for e in drifts))] if drifts else []),
+                         aria="Trading costs since April, by occasion", centre=f"Rs {total_cost / 1000:,.1f}k",
+                         centre_sub="in costs", keep_order=True)
+    log = [[day(e["session_date"]), esc(KIND.get(e["kind"], e["kind"])),
+            esc(", ".join(x.split(".")[0] for x in e["names_in"].split(",") if x) or "–"),
+            esc(", ".join(x.split(".")[0] for x in e["names_out"].split(",") if x) or "–"),
+            lkr(e["turnover"]), lkr(e["cost"])] for e in reviews]
+    body = f"""
+<h3>Does it rebalance automatically?</h3>
+<p><b>In this lab, yes, on paper.</b> Every trading day the computer applies the rules to an imaginary Rs 1 million,
+exactly as written, with no one deciding anything along the way:</p>
+<ol class="steps">
+<li><b>Four times a year, a review.</b> On the first trading day of January, April, July and October the rules are run
+again on the latest prices. Shares may come in or go out, and every weight is brought back to its new target. A
+share already in the portfolio stays unless it has clearly dropped down the rules' list, so small changes do not
+cause trading.</li>
+<li><b>In between, only if something drifts too far.</b> As prices move, each share's part of the portfolio drifts.
+If one moves more than a quarter away from its target (or two percentage points), only that share is put back the
+next day.</li>
+<li><b>Every trade costs money.</b> Each change pays about 1.12 % of its value in brokerage and fees, only whole shares
+are bought, and dividends and share splits are booked on the day they apply. Because of the costs, the rules trade
+as little as they can: at a review they move the weights only as far as needed to stay within 1 % of the lowest
+risk they can find.</li>
+</ol>
+<p><b>In real life, nothing trades by itself.</b> ZinvestIQ never looks after money or places orders. Someone following
+rules like these would place the trades themselves through their own stockbroker on those dates, or a fund manager
+would do it inside a fund.</p>
+<h3>What it has cost so far</h3>
+{costs}
+<p class="small muted">{"More than half" if reviews[0]["cost"] > total_cost / 2 else "Part"} of the cost was the first
+purchases. After that: {len(reviews) - 1} quarterly review{"" if len(reviews) == 2 else "s"}, and
+{"no small adjustments" if not drifts else f"{len(drifts)} small adjustment{'' if len(drifts) == 1 else 's'}"} between
+reviews.</p>
+<details class="more"><summary>Every review in detail</summary>
+{table(["Date", "Why", "Came in", "Went out", "Traded", "Cost"], log)}
+</details>"""
+    return fold("How the portfolio is kept in shape", "Reviewed four times a year; in between, only a share that drifts too far is put back",
+                body, open_=True, anchor="rebalancing")

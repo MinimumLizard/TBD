@@ -79,10 +79,15 @@ its risk is estimated and how much it trades.
 - The limits in `data_platform/models/cse_lab_backtest/METHOD.md` all still apply (survivorship, closing prices, no
   market impact).
 
-## 6. Not done, and why
+## 6. Moved to the new estimate (2026-11-17)
 
-- `cse_risk_estimates`, `cse_portfolio_lab` and `cse_lab_record` still use the weekly estimate (their version 1.1.0).
-  They are the lab's workings (the universe, the frontier, the forward record). Moving them to the daily estimate is
-  a new version of each, and the forward record should start from the estimate the owner settles on. Proposed as the
-  next step once the owner has seen this note.
+The owner approved moving the lab's other three models to the daily estimate. `cse_risk_estimates`,
+`cse_portfolio_lab` and `cse_lab_record` now have a version 1.2.0, with 1.1.0 kept as the reference:
+
+- On 12 November the 26 shares in the backtest's portfolios have exactly the same volatility in both models.
+  Command: a join of `models.cse_bt_target` (today) with `models.cse_risk_estimate` 1.2.0 on symbol and date.
+- With the daily estimate, the full minimum-variance portfolio has 16 names, against 29 under the weekly estimate.
+
+Still waiting:
+
 - A multi-year test needs the CSE's historical data (part of the permission request, roadmap item 0).

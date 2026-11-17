@@ -120,27 +120,59 @@ def test_the_covariance_rebuilt_from_the_stored_weekly_returns_gives_the_stored_
 
 
 @pytest.mark.db
-def test_portfolios_meet_their_constraints_and_the_fewer_name_versions_their_floor(lab):
-    day = rows(lab, "models.cse_lab_summary", where="status = 'ok'")[-1]["as_of"]
-    ports = {r["portfolio"]: r for r in rows(lab, "models.cse_lab_portfolio", where=f"as_of = '{day}'")}
+def test_version_1_2_0_takes_its_covariance_from_daily_returns_and_keeps_everything_else(lab):
+    """The daily covariance, rebuilt here from the stored total-return levels, gives the stored shrinkage and every
+    stored volatility exactly; the universe, betas and expected returns are 1.1.0's."""
+    from data_platform.models._lib import cse_covariance as cv
+    s = rows(lab, "models.cse_risk_summary", "1.2.0", where="status = 'ok'")[-1]
+    old_s = rows(lab, "models.cse_risk_summary", "1.1.0", where=f"as_of = '{s['as_of']}'")[0]
+    e = sorted(rows(lab, "models.cse_risk_estimate", "1.2.0", where=f"as_of = '{s['as_of']}'"), key=lambda r: r["symbol"])
+    old = {r["symbol"]: r for r in rows(lab, "models.cse_risk_estimate", "1.1.0", where=f"as_of = '{s['as_of']}'")}
+    assert [r["symbol"] for r in e] == sorted(old)
+    for r in e:
+        for k in ("beta", "expected_return", "amihud", "median_turnover", "sector"):
+            assert r[k] == old[r["symbol"]][k], (r["symbol"], k)
+    tri: dict[str, dict] = {}
+    for r in lab.execute("select symbol, session_date, tri from models.cse_total_return where method_version = '1.0.0' "
+                         "and session_date <= %s", (s["as_of"],)):
+        tri.setdefault(r["symbol"], {})[r["session_date"].isoformat()] = r["tri"]
+    sessions = [r["session_date"].isoformat() for r in lab.execute(
+        "select session_date from cse.indices_daily_current where index_code = 'ASI' and session_date <= %s "
+        "order by session_date", (s["as_of"],))]
+    D, per_year = cv.daily_window({k: pd.Series(v, dtype=float).sort_index() for k, v in tri.items()}, sessions,
+                                  [r["symbol"] for r in e], s["first_week"].isoformat(), s["as_of"].isoformat())
+    assert D.shape == (len([x for x in sessions if x >= (s["first_week"] - dt.timedelta(days=7)).isoformat()]) - 1, len(e))
+    cov, shrink = cv.daily(D, per_year, 2)
+    assert shrink == s["shrinkage"] and shrink != old_s["shrinkage"]
+    assert np.sqrt(np.diag(cov)).tolist() == [r["volatility"] for r in e]
+    # the record follows 1.2.0's portfolios as a series of its own
+    assert {r["series"] for r in rows(lab, "models.cse_lab_nav", "1.2.0")} == {"1.2.0"}
+
+
+@pytest.mark.db
+@pytest.mark.parametrize("version", ["1.1.0", "1.2.0"])
+def test_portfolios_meet_their_constraints_and_the_fewer_name_versions_their_floor(lab, version):
+    day = rows(lab, "models.cse_lab_summary", version, where="status = 'ok'")[-1]["as_of"]
+    ports = {r["portfolio"]: r for r in rows(lab, "models.cse_lab_portfolio", version, where=f"as_of = '{day}'")}
     assert {"min_variance", "risk_parity", "max_sharpe", "equal_weight", "market"} <= set(ports)
     for name in ("min_variance", "risk_parity", "max_sharpe"):
         assert ports[name]["constraints_ok"] and ports[name]["weight_sum"] == pytest.approx(1.0)
-    w = rows(lab, "models.cse_lab_weight", where=f"as_of = '{day}'")
+    w = rows(lab, "models.cse_lab_weight", version, where=f"as_of = '{day}'")
     for k in (2, 3):
         mv = [x for x in w if x["portfolio"] == f"min_variance_{k}"]
         assert len(mv) == k and min(x["weight"] for x in mv) >= 0.5 / k - 1e-6
         assert ports[f"min_variance_{k}"]["tracking_error"] > 0
         assert ports[f"equal_weight_{k}"]["n_names"] == k
-    frontier = sorted(rows(lab, "models.cse_lab_frontier", where=f"as_of = '{day}'"), key=lambda r: r["point"])
+    frontier = sorted(rows(lab, "models.cse_lab_frontier", version, where=f"as_of = '{day}'"), key=lambda r: r["point"])
     assert len(frontier) == 25 and [f["expected_return"] for f in frontier] == sorted(
         f["expected_return"] for f in frontier)
 
 
 @pytest.mark.db
-def test_fewer_name_weights_change_only_on_rebalance_dates(lab):
+@pytest.mark.parametrize("version", ["1.1.0", "1.2.0"])
+def test_fewer_name_weights_change_only_on_rebalance_dates(lab, version):
     by = {}
-    for r in rows(lab, "models.cse_lab_portfolio", where="portfolio = 'min_variance_3' and status = 'ok'"):
+    for r in rows(lab, "models.cse_lab_portfolio", version, where="portfolio = 'min_variance_3' and status = 'ok'"):
         by[r["as_of"]] = r["formed_on"]
     formed = sorted(set(by.values()))
     assert formed[0] == min(by)                           # set on the first estimate date
@@ -159,12 +191,13 @@ def test_a_row_for_a_date_uses_only_data_up_to_it(conn, store, tmp_path):
               "models.cse_weekly_return", "models.cse_lab_summary", "models.cse_lab_portfolio", "models.cse_lab_weight",
               "models.cse_lab_frontier"]
     date_col = lambda t: "week_end" if t == "models.cse_weekly_return" else "as_of"  # noqa: E731
-    before = {t: rows(conn, t) for t in tables}
-    assert before["models.cse_lab_portfolio"]
+    versions = ("1.1.0", "1.2.0")
+    before = {(t, v): rows(conn, t, v) for t in tables for v in versions}
+    assert before[("models.cse_lab_portfolio", "1.1.0")] and before[("models.cse_lab_portfolio", "1.2.0")]
     load(conn, store, since=cut)
     run_models(conn, MODELS, PARAMS)
-    for t in tables:
-        assert same(before[t], [r for r in rows(conn, t) if r[date_col(t)] <= cut]), t
+    for (t, v), b in before.items():
+        assert same(b, [r for r in rows(conn, t, v) if r[date_col(t)] <= cut]), (t, v)
     revised = conn.execute("select count(*) n from models.revisions where table_name like 'models.cse_risk%' "
                            "or table_name like 'models.cse_lab%'").fetchone()["n"]
     assert revised == 0
@@ -174,13 +207,14 @@ def test_a_row_for_a_date_uses_only_data_up_to_it(conn, store, tmp_path):
 def test_an_unchanged_date_is_reused_and_reuse_gives_what_a_fresh_computation_gives(lab):
     again = run_models(lab, ["cse_portfolio_lab"], PARAMS)["cse_portfolio_lab"]
     assert again.counts.updated == again.counts.inserted == again.counts.deleted == 0
-    stored = {t: rows(lab, t) for t in ("models.cse_lab_portfolio", "models.cse_lab_weight")}
-    lab.execute("delete from models.cse_lab_summary where method_version = '1.1.0'")
+    tables = ("models.cse_lab_portfolio", "models.cse_lab_weight")
+    stored = {(t, v): rows(lab, t, v) for t in tables for v in ("1.1.0", "1.2.0")}
+    lab.execute("delete from models.cse_lab_summary where method_version in ('1.1.0', '1.2.0')")
     lab.commit()
     fresh = run_models(lab, ["cse_portfolio_lab"], PARAMS)["cse_portfolio_lab"]
     assert fresh.counts.updated == 0 and fresh.counts.deleted == 0
-    for t, r in stored.items():
-        assert same(rows(lab, t), r), t
+    for (t, v), r in stored.items():
+        assert same(rows(lab, t, v), r), (t, v)
 
 
 @pytest.mark.db

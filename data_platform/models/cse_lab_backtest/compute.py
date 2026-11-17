@@ -95,16 +95,9 @@ class Setup:
 
 
 def daily_returns(h: est.History, e: est.Estimates) -> tuple[np.ndarray, float]:
-    """The daily total returns of the estimate's shares over the same span as its weekly returns (from the Wednesday
-    before the first week to the estimate date), a session without a trade counting as no change, and the number of
-    sessions in a year over that span. Only facts on or before the estimate date are read."""
-    first = (dt.date.fromisoformat(e.weeks[0]) - dt.timedelta(days=7)).isoformat()
-    days = [s for s in h.sessions if first <= s <= e.session]
-    levels = np.column_stack([est.sample_on_or_before(h.tri[s], days).to_numpy() for s in e.symbols])
-    D = levels[1:] / levels[:-1] - 1
-    D = np.where(np.isfinite(D), D, 0.0)
-    years = max((dt.date.fromisoformat(days[-1]) - dt.date.fromisoformat(days[0])).days / 365.25, 1 / 365.25)
-    return D, (len(days) - 1) / years
+    """The daily total returns of the estimate's shares over the span of its weekly returns
+    (_lib/cse_covariance.daily_window)."""
+    return cv.daily_window(h.tri, h.sessions, e.symbols, e.weeks[0], e.session)
 
 
 def covariance_by(method: str, h: est.History, e: est.Estimates, lags: int = 2) -> tuple[np.ndarray, float]:

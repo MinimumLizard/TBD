@@ -39,7 +39,7 @@ versions:
         2026-10-07 to 2026-10-15), compared as the old CSV writer formats them. See
         docs/migration/parity-cse-portfolio-lab.json.
   - method_version: "1.1.0"
-    status: current
+    status: reference
     changes: >-
       Records the 1.1.0 portfolios, the versions with 10 and 15 names included, from a neutral Rs 1 mn each, starting
       at the first run with valid model weights (never backfilled); full precision; changes under Rs 2,500 (0.25 % of
@@ -50,6 +50,27 @@ versions:
     parameters:
       series: "1.1.0"
       inception: null                # the first run that finds valid model weights
+      portfolios: [min_variance, risk_parity, max_sharpe, equal_weight, min_variance_10, max_sharpe_10,
+                   equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
+      record_notional_lkr: 1000000
+      cost_per_side: 0.0112
+      dividend_withholding: 0.0
+      rebalance_months: [1, 4, 7, 10]
+      band_relative: 0.25
+      band_absolute: 0.02
+      min_trade_lkr: 2500
+      digits: null
+  - method_version: "1.2.0"
+    status: current
+    changes: >-
+      Records cse_portfolio_lab 1.2.0's portfolios (the covariance from daily returns), as its own series from the
+      first run with valid model weights (never backfilled); the rules of holding them are 1.1.0's.
+    requires_models:
+      cse_portfolio_lab: "1.2.0"
+      cse_corporate_actions: "1.0.0"
+    parameters:
+      series: "1.2.0"
+      inception: null
       portfolios: [min_variance, risk_parity, max_sharpe, equal_weight, min_variance_10, max_sharpe_10,
                    equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
       record_notional_lkr: 1000000

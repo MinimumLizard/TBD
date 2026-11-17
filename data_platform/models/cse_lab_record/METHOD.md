@@ -52,6 +52,14 @@ cost per side, 1.12 % (to be checked against the current CSE cost schedule).
 The direction of a change of shares is recorded as `increase` or `decrease`; corporate actions as `dividend`,
 `subdivision`, `scrip` or `rights`.
 
+## Versions
+
+- **1.0.0** (reference): the old tool's series, continued, with its rounding.
+- **1.1.0** (reference): the lab's 1.1.0 portfolios from a neutral Rs 1 mn, from its first run.
+- **1.2.0** (current; decision 0025): the lab's 1.2.0 portfolios (the covariance from daily returns), as a series of
+  its own (`series = 1.2.0`) from its first run with valid model weights; never backfilled, so its record starts on
+  the day it first ran. The rules of holding are 1.1.0's.
+
 ## Outputs
 
 - `models.cse_lab_nav`: per session, series and portfolio: value, cash, value of the holdings, a note (inception,

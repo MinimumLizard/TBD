@@ -24,8 +24,13 @@ Which one the lab uses is decided by a walk-forward test on realised risk, never
 """
 from __future__ import annotations
 
+import datetime as dt
+
 import numpy as np
+import pandas as pd
 from sklearn.covariance import OAS, LedoitWolf
+
+from .cse_estimates import sample_on_or_before
 
 METHODS = ("identity", "oas", "constant_corr", "single_index", "daily")
 WEEKS_PER_YEAR = 52
@@ -79,7 +84,7 @@ def constant_corr(R: np.ndarray, periods: int = WEEKS_PER_YEAR) -> tuple[np.ndar
 def single_index(R: np.ndarray, market: np.ndarray, periods: int = WEEKS_PER_YEAR) -> tuple[np.ndarray, float]:
     """Ledoit & Wolf 2003. Target: the one-factor (market) model's covariance, with the sample variances."""
     X = _demean(R)
-    T, N = X.shape
+    T, _ = X.shape
     m = np.asarray(market, dtype=float)
     m = m - m.mean()
     S = X.T @ X / T
@@ -136,3 +141,20 @@ def estimate(method: str, weekly: np.ndarray, market_weekly: np.ndarray | None =
             raise ValueError("daily needs the daily returns and the number of sessions in a year")
         return daily(daily_returns, sessions_per_year)
     raise ValueError(f"unknown covariance method {method!r}; one of {METHODS}")
+
+
+def daily_window(tri: dict[str, pd.Series], sessions: list[str], symbols: list[str], first_week: str,
+                 session: str) -> tuple[np.ndarray, float]:
+    """The daily total returns of `symbols` over the same span as an estimate's weekly returns (from the Wednesday
+    before its first week, `first_week`, to the estimate date `session`), a session without a trade counting as no
+    change, and the number of sessions in a year over that span. Reads only levels on or before `session`.
+
+    Shared by cse_lab_backtest, cse_risk_estimates and cse_portfolio_lab (from their versions 1.1.0, 1.2.0 and
+    1.2.0), so the three compute the same covariance on the same date."""
+    first = (dt.date.fromisoformat(first_week) - dt.timedelta(days=7)).isoformat()
+    days = [s for s in sessions if first <= s <= session]
+    levels = np.column_stack([sample_on_or_before(tri[s], days).to_numpy() for s in symbols])
+    D = levels[1:] / levels[:-1] - 1
+    D = np.where(np.isfinite(D), D, 0.0)
+    years = max((dt.date.fromisoformat(days[-1]) - dt.date.fromisoformat(days[0])).days / 365.25, 1 / 365.25)
+    return D, (len(days) - 1) / years

@@ -57,8 +57,8 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
   before anything is public.
 - **Bond volume dating (finding V3):** date the 3 disputed volume files by the PDMO index label instead of the data?
 - **The first visit, sign-up, palette and lab 1.1.0 (2026-11-16, decision 0025):** built. Three short decisions in
-  `docs/plan-janu-review.md` §5 (the palette, the sign-up wording, the weekly-summary box). On the lab: whether to
-  move its other three models to the daily estimate (`docs/research/portfolio-lab-optimisation-2026-11.md` §6).
+  `docs/plan-janu-review.md` §5 (the palette, the sign-up wording, the weekly-summary box). The lab's other three
+  models were moved to the daily estimate on 2026-11-17 (the owner's go-ahead).
 - **Bond volume dating, a new case (2026-11-16):** the PDMO trade summary of 15 September 2026 is dated differently
   by the old tool and the new parser. Decide it with finding V3.
 - **Janu's review (2026-11-09):** built: the starting paths, the "how to start" guide, the statistics and guide votes.

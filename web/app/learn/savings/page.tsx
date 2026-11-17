@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import Chart from "@/components/Chart";
 import PageHead from "@/components/PageHead";
+import Section from "@/components/Section";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import StatTile from "@/components/StatTile";
@@ -49,6 +50,7 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
 
   // The calculator reads its own query string; a period that ends after the data is explained, not guessed.
   const calc = through && first ? readCalc(params, first, through) : null;
+  const used = ["amount", "sy", "sm", "years"].some((k) => params[k] != null); // the calculator was just used: open it
   const calcEnd = calc ? addMonths(calc.start, 12 * calc.years) : null;
   const calcRows = calc && calcEnd && calc.start >= first! && calcEnd <= through!
     ? (await savingsGrowth(viewer, calc.start, calc.years)).data ?? []
@@ -74,7 +76,14 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHead eyebrow={t("menu.savings.label")} title={t("savings.title")} lead={t("savings.lead")} />
+      <PageHead eyebrow={t("menu.savings.label")} title={t("savings.title")} lead={t("savings.lead")}
+                parts={[
+                  { id: "ten-years", label: t("savings.chartTitle") },
+                  { id: "every-period", label: t("savings.sections.everyPeriod") },
+                  { id: "calculator", label: t("savings.calcTitle") },
+                  { id: "rates", label: t("savings.sections.rates") },
+                  { id: "assumptions", label: t("savings.sections.assumptions") },
+                ]} />
       {through && <p className="asof">{t("savings.latest", { month: monthYear(through) })}</p>}
 
       {latest && (
@@ -96,11 +105,8 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
       </section>
 
       {pathStart && pathEnd && (
-        <>
-          <div className="section-head">
-            <h2>{t("savings.chartTitle")}</h2>
-          </div>
-          <p className="small muted">{t("savings.chartNote", { start: monthYear(pathStart), end: monthYear(pathEnd) })}</p>
+        <Section id="ten-years" open title={t("savings.chartTitle")}
+                 summary={t("savings.chartNote", { start: monthYear(pathStart), end: monthYear(pathEnd) })}>
           <div className="grid two">
             <section className="card">
               <h3>{t("savings.chartNominal")}</h3>
@@ -112,14 +118,12 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
             </section>
           </div>
           <p className="small muted">{t("savings.sourcesBoth")}</p>
-        </>
+        </Section>
       )}
 
       {summary.length > 0 && first && (
-        <>
-          <div className="section-head">
-            <h2>{t("savings.summaryTitle", { first: monthYear(first) })}</h2>
-          </div>
+        <Section id="every-period" title={t("savings.summaryTitle", { first: monthYear(first) })}
+                 summary={t("savings.sections.everyPeriodSum")}>
           <p className="small muted">{t("savings.summaryNote")}</p>
           <div className="table-wrap">
             <table>
@@ -188,13 +192,11 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
             </table>
           </div>
           <p className="small muted">{t("savings.sourcesBoth")}</p>
-        </>
+        </Section>
       )}
 
       {calc && through && first && (
-        <section className="card" id="calculator" style={{ marginTop: 24 }}>
-          <h2>{t("savings.calcTitle")}</h2>
-          <p className="muted">{t("savings.calcIntro")}</p>
+        <Section id="calculator" open={used} title={t("savings.calcTitle")} summary={t("savings.calcIntro")}>
           <form method="get" action="/learn/savings#calculator" className="calc-form">
             <label className="wide">
               {t("savings.amount")}
@@ -259,16 +261,11 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
             <p>{t("common.noData")}</p>
           )}
           <p className="small muted" style={{ marginBottom: 0 }}>{t("savings.sourcesBoth")}</p>
-        </section>
+        </Section>
       )}
 
       {rates.length > 1 && (
-        <>
-          <div className="section-head">
-            <h2>{t("savings.ratesTitle")}</h2>
-          </div>
-          <p className="small muted">{t("savings.ratesNote")}</p>
-          <section className="card">
+        <Section id="rates" title={t("savings.ratesTitle")} summary={t("savings.ratesNote")}>
             <Chart
               label={t("savings.ratesTitle")}
               height={300}
@@ -279,12 +276,10 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
               ], "%", { zeroLine: false })}
             />
             <p className="small muted" style={{ marginBottom: 0 }}>{t("savings.sourceCbsl")} · {t("savings.sourceDcs")}</p>
-          </section>
-        </>
+        </Section>
       )}
 
-      <section className="card" style={{ marginTop: 24 }}>
-        <h2>{t("savings.assumptionsTitle")}</h2>
+      <Section id="assumptions" title={t("savings.assumptionsTitle")} summary={t("savings.sections.assumptionsSum")}>
         <ul className="assumptions">
           {(["assume1", "assume2", "assume3", "assume4", "assume5", "assume6", "assume7"] as const).map((k) => (
             <li key={k}>{t(`savings.${k}`)}</li>
@@ -293,7 +288,7 @@ export default async function SavingsPage({ searchParams }: { searchParams: Prom
         <p className="small" style={{ marginBottom: 0 }}>
           <Link href="/methods/lk_savings_compare">{t("common.method")} →</Link>
         </p>
-      </section>
+      </Section>
 
       <ModelFooter models={["lk_savings_compare"]} />
     </>

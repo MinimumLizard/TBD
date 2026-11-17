@@ -22,7 +22,9 @@ import datetime as dt
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 
+from .._lib import cse_covariance as cv
 from .._lib import cse_estimates as est
 from .._lib.cse_calendar import ASPI, excluded_sessions, session_filter
 from .._lib.cse_sectors import classify, load_overrides
@@ -214,10 +216,25 @@ def compute(inputs, as_of):
         else:
             outcome = est.run_date(h, securities, sectors, excluded, {**cfg, "risk_free_annual": rf}, session,
                                    p.get("preview_min_weeks"))
+            if outcome.estimates is not None:
+                use_covariance(outcome.estimates, h, p)
         rows = date_rows(day, outcome, securities, gmap, glabels, rf, rf_source, rf_month, p)
         for table, r in rows.items():
             out[table] += r
     return out
+
+
+def use_covariance(e: est.Estimates, h: est.History, p: dict) -> None:
+    """Version 1.2.0: the covariance (and so each share's volatility, and the shrinkage stored) from the daily
+    returns over the same span as the weekly ones, with `daily_lags` days of lagged covariances
+    (_lib/cse_covariance.py; decision 0025). Betas and expected returns stay on the weekly returns."""
+    if p.get("covariance", "identity") == "identity":
+        return
+    if p["covariance"] != "daily":
+        raise ValueError(f"cse_risk_estimates supports the identity and daily covariances, not {p['covariance']!r}")
+    D, per_year = cv.daily_window(h.tri, h.sessions, e.symbols, e.weeks[0], e.session)
+    e.cov, e.shrinkage = cv.daily(D, per_year, int(p.get("daily_lags", 2)))
+    e.vol = pd.Series(np.sqrt(np.diag(e.cov)), index=e.symbols)
 
 
 def date_rows(day: dt.date, o: est.Outcome, securities: list[est.Security], gmap: dict, glabels: dict,
