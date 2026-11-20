@@ -156,10 +156,91 @@ The same six are also run on the whole universe, without choosing 15 names.
   transaction levy 0.30 %, for trades up to Rs 100 mn (CAL, CT CLSA and Invest Sri Lanka schedules).
 - **F1. Dividend withholding: wrong.** The lab credits dividends in full (`dividend_withholding: 0.0`, the old
   tool's setting). Since 1 January 2023 dividends from resident companies bear a final 15 % withholding tax
-  (Inland Revenue (Amendment) Act No. 45 of 2022). The next version uses 0.15.
+  (Inland Revenue (Amendment) Act No. 45 of 2022). Fixed in every walk-forward version and in the record's 1.2.0
+  (`dividend_withholding: 0.15`); none has had a production run. The record's 1.0.0 and 1.1.0 keep the old tool's
+  setting, because 1.0.0 must reproduce the old tool (parity).
 - **F2. Weights that do not quite sum to 1:** `cse_portfolio_lab` 1.2.0 stored one set of weights summing to
   0.9999975, on 28 October. The solver keeps weights above 1e-7, but only weights above 1e-6 are stored. Found by
   the new audit (`python -m data_platform.jobs.lab_audit`). Fixed in 1.2.0, which has not had a production run.
 - **Everything else the audit checks passes on every stored row:** the cash and value of every walk-forward book,
   rebuilt from its trades and prices; caps, floors, sector and group limits; costs; whole shares; review dates; the
   summaries.
+
+### 7.5 Results (scripts/research/lab_methods.py; 31 weeks from 8 April 2026, data to 12 November)
+
+Realised volatility of each candidate, held a week at a time without costs (Q1, Q2) or walked forward with costs
+(Q3). "Ratio" is realised variance against the current method's; p is the Ledoit-Wolf (2011) studentised block
+bootstrap test, 4,999 draws, blocks of 10 sessions; Holm adjusts for the several candidates in each question.
+
+| Question | Candidate | Volatility | Ratio | p (Holm) | Adopted under §7.3 |
+|---|---|---|---|---|---|
+| Q1, whole portfolio | current (daily, two lags) | 10.24 % | 1 | | kept |
+| | nonlinear shrinkage | 15.23 % | 2.21 | 0.135 | no |
+| | exponentially weighted | 10.45 % | 1.04 | 0.577 | no |
+| Q1, 15 names | current | 10.08 % | 1 | | kept |
+| | nonlinear shrinkage | 19.90 % | 3.90 | 0.056 | no |
+| | exponentially weighted | 10.14 % | 1.01 | 0.889 | no |
+| Q2, 15 names | minimum variance (current) | 10.08 % | 1 | | kept |
+| | hierarchical risk parity | 9.41 % | 0.87 | 0.018 | passed the rule; see §7.6 |
+| | maximum diversification | 9.94 % | 0.97 | 1.000 | no |
+| | equal risk contribution | 10.10 % | 1.00 | 1.000 | no |
+| | inverse volatility | 10.28 % | 1.04 | 0.298 | no |
+| | equal weight | 10.90 % | 1.17 | 0.002 (worse) | no |
+| Q2, whole universe | minimum variance (current) | 10.24 % | 1 | | kept |
+| | the five others | 14.2 % to 19.0 % | 1.9 to 3.4 | ≤ 0.001 (worse) | no |
+
+Q3, minimum variance with 15 names, Rs 1 mn, with costs:
+
+| Rule | Return | Volatility | Largest fall | Costs | Traded | Reviews |
+|---|---|---|---|---|---|---|
+| current (quarterly) | +3.49 % | 10.66 % | −10.27 % | Rs 18,586 | 68 % | 3 |
+| half-yearly | +4.09 % | 10.64 % | −9.44 % | Rs 14,543 | 31 % | 2 |
+| partial adjustment (half way) | +4.53 % | 10.74 % | −9.68 % | Rs 18,163 | 64 % | 3 |
+| monthly | +2.72 % | 10.35 % | −10.28 % | Rs 22,151 | 100 % | 8 |
+| wider drift band | identical to current: the band never triggered in this period | | | | | |
+
+What this says:
+
+- **The risk estimate stays.** Neither alternative beat the current estimate. Nonlinear shrinkage did much worse,
+  which is the opposite of its record in large, liquid markets. The likely reason: it was applied, as
+  pre-registered, to the lag-augmented matrix. The lagged terms make that matrix only approximately a sample
+  covariance, and nonlinear shrinkage relies on that structure more than linear shrinkage does. A diagnostic on
+  plain daily returns (§7.6, D1) is also worse (14.94 %), so the lags are not the whole story; with about 130
+  sessions for about 100 shares, the high-dimensional regime the method was built for is at its edge. The
+  implementation reproduces the method on simulated data (tests/test_cse_research_methods.py).
+- **Minimum variance beats every alternative on the whole universe by a wide margin.** It is the only method that
+  uses the covariances fully; the others ignore most of them or spread weight onto volatile shares.
+- **Half-yearly reviews qualify:** 22 % less cost, no more volatile. Partial adjustment also qualifies, narrowly
+  (2 % less cost). Monthly reviews were steadier but cost 19 % more. Returns are reported but were never a
+  criterion.
+
+### 7.6 Follow-ups (post hoc: run after §7.5 was seen, so they confirm or qualify, never select)
+
+`scripts/research/lab_methods_followup.py`:
+
+| Check | Result |
+|---|---|
+| D1. Nonlinear shrinkage on plain daily returns (no lags) | 14.94 %, ratio 2.13, p 0.079: still worse than current |
+| C1. HRP **within the lab's limits** (10 % a share, 30 % a sector, floor 0.5/K) against minimum variance | 10.25 % against 10.08 %, ratio 1.03, p 0.161: no better |
+| C1. HRP without limits (as in Q2) | 9.41 %, ratio 0.87, p 0.009: confirms Q2 |
+| C2. With costs: current / HRP within limits / half-yearly / HRP half-yearly | vol 10.66 / 10.72 / 10.64 / 10.89 %; costs Rs 18,586 / 19,754 / 14,543 / 14,922 |
+
+HRP's advantage in Q2 came from the comparison, not from the method: Q2 weighted the 15 names by HRP **without**
+the lab's caps, against minimum variance **with** them. Inside the same limits HRP is no steadier, and with costs
+it is slightly more volatile and costs more. Adopting it would mean dropping the per-share and per-sector caps, a
+design choice (decision 0023), not a statistical one. So it is not adopted; the owner can decide whether the caps
+should stay (they guard against concentration that a year of data cannot justify).
+
+### 7.7 What changed (decision 0026)
+
+- `cse_lab_backtest` 1.2.0 (current): a third policy, half-yearly reviews (January and July), now the example's;
+  quarterly and the monthly check run beside it. 1.1.0 is kept as a reference.
+- `cse_portfolio_lab` 1.2.0 and `cse_lab_record` 1.2.0: versions with K names reviewed half-yearly, January and July
+  (both had no production run, decision 0015 rule 11).
+- F1 and F2 (§7.4) fixed. The audit (`python -m data_platform.jobs.lab_audit`) passes on every stored row after the
+  rerun.
+- Not adopted: nonlinear shrinkage, exponential weighting, HRP, inverse volatility, equal risk contribution,
+  maximum diversification, partial adjustment (it qualified but saved only 2 %; combining it with half-yearly
+  reviews was not tested, so it is not stacked on top), the wider drift band (no evidence either way).
+- Thirty-one weeks and two or three reviews are very little. These rules are to be re-run at the twelve-month review
+  (April 2027) with the same scripts and the same adoption rules.

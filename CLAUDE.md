@@ -77,6 +77,13 @@ decisions).
   is written for a first-time reader: today's portfolio with pie charts first, then results, then how rebalancing
   works; everything technical in closed drop-downs (`fold()`, the site's `details.section` markup). Charts
   (`jobs/lab_charts.py`) draw text in theme tokens; check both themes (decision 0025).
+- Lab second review (2026-11-20, decision 0026, research note §7): pre-registered tests (`scripts/research/lab_methods*.py`,
+  `_lib/cse_stats.py` LW2011 variance test + Holm, `_lib/cse_weighting.py`). Adopted only half-yearly reviews:
+  `cse_lab_backtest` 1.2.0 is current (policies half_yearly, quarterly, dynamic; migration 0021), and the lab and
+  record 1.2.0 review in January and July. Dividends net of the 15 % final WHT (F1). `jobs.lab_audit` checks every
+  stored lab row; run it after any lab change. Starting screen questions 3 and 4 (amount, horizon: `/start/t/a/more`,
+  `components/YourMoney.tsx`, cookie `t.a.amount.horizon`): facts only; lawyer's view needed before the real site
+  asks them.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

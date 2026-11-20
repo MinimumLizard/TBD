@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-11-20 — The lab's second review, two more starting questions, and a calmer design (decision 0026)
+
+- **The lab, checked line by line.** A new audit (`python -m data_platform.jobs.lab_audit`) rebuilds every
+  walk-forward book from its trades and prices and checks caps, floors, sector and group limits, costs, whole
+  shares, review dates and summaries on every stored row. Two faults found and fixed:
+  - **F1:** dividends were credited in full; since 2023 they bear a final 15 % withholding tax;
+  - **F2:** one stored portfolio's weights summed to 0.9999975, because tiny weights were not stored.
+
+  The 1.12 % cost per side was confirmed against brokers' schedules.
+- **Better methods, tested with the rules written first** (research note §7). The candidates were:
+  - for the risk estimate: nonlinear shrinkage and exponential weighting;
+  - for building the portfolio: hierarchical risk parity, inverse volatility, equal risk, maximum diversification
+    and equal weight;
+  - for rebalancing: partial adjustment, monthly or half-yearly reviews, and a wider band.
+
+  Each was judged by a block-bootstrap test of realised risk with a correction for testing several at once.
+  - The current risk estimate and minimum variance stay: nothing beat them within the lab's caps.
+  - **Reviews move to twice a year**: 22 % less cost, no more volatile. The new backtest version is
+    `cse_lab_backtest` 1.2.0, and the portfolio lab and record 1.2.0 follow it.
+  - The lab page compares the three schedules and explains why.
+- **Questions 3 and 4 on the starting screen**: roughly how much, and when the money might be needed. Both are
+  optional. The result and home pages show facts for those answers:
+  - what trading costs at that amount, and how many shares it buys;
+  - the deposit-insurance limit;
+  - how deposits and bills did over every past period that long;
+  - the market's largest fall in the past year.
+
+  Nothing is suggested, and the answers stay in the visitor's browser.
+- **A calmer design**:
+  - a layout bug fixed: content sat flush under the header on every page;
+  - boxes inside boxes flattened, the coloured side bars removed, softer pills and shadows, more space between
+    sections;
+  - a numbered starting path;
+  - one prompt instead of two empty cards;
+  - the lab page's intro shown as three cards.
+- Copy fixes: "fell −18.1 %" and "lost −6.0 %" (double negatives); thousands separators.
+
 ## 2026-11-17 — The lab on the new estimate everywhere, and the lab page rewritten for a first-time reader
 
 - **All four lab models now use the daily-return risk estimate** (the owner's go-ahead). `cse_risk_estimates`,

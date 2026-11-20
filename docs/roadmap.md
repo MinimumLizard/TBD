@@ -59,6 +59,10 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
 - **The first visit, sign-up, palette and lab 1.1.0 (2026-11-16, decision 0025):** built. Three short decisions in
   `docs/plan-janu-review.md` §5 (the palette, the sign-up wording, the weekly-summary box). The lab's other three
   models were moved to the daily estimate on 2026-11-17 (the owner's go-ahead).
+- **The lab's second review, questions 3 and 4, a calmer design (2026-11-20, decision 0026):** built. To confirm:
+  half-yearly reviews for the example portfolio; keeping the lab's caps (hierarchical risk parity was steadier only
+  without them); the wording of the two new questions. Re-run the review's scripts with the same rules at twelve
+  months (April 2027).
 - **Bond volume dating, a new case (2026-11-16):** the PDMO trade summary of 15 September 2026 is dated differently
   by the old tool and the new parser. Decide it with finding V3.
 - **Janu's review (2026-11-09):** built: the starting paths, the "how to start" guide, the statistics and guide votes.
@@ -85,6 +89,8 @@ user discussion, the name, and personal data. The answer decides how much of the
 - **New (2026-11-16):** the sign-up form and the privacy page (decision 0025): the data-protection law for
   collecting e-mail addresses, who is named as responsible for the data, and whether the starting-answers cookie needs
   a notice.
+- **New (2026-11-20):** the starting screen's questions 3 and 4 (amount, time horizon; decision 0026): whether facts
+  chosen by a visitor's amount and horizon count as personalised information, and the wording that keeps them facts.
 
 ### 5. Switch-on (when approved): `docs/phase3-4-verification.md` §6
 Accounts (Supabase Pro, Cloudflare R2, Backblaze B2, Healthchecks.io), secrets, "Migrate history", then the
