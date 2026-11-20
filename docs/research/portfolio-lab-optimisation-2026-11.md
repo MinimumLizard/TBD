@@ -91,3 +91,75 @@ The owner approved moving the lab's other three models to the daily estimate. `c
 Still waiting:
 
 - A multi-year test needs the CSE's historical data (part of the permission request, roadmap item 0).
+
+## 7. Second review (2026-11-20): plan, written before any result was seen
+
+The owner asked for a check of the lab for bugs, a review of every formula, and a test of better methods from the
+academic literature. This section was committed before the tests were run, so the choice cannot be fitted to the
+results.
+
+### 7.1 What is tested
+
+**Q1. The risk estimate.** Is the current one beaten? The candidates are:
+
+- **Current:** daily returns with two lagged days, Ledoit-Wolf linear shrinkage towards the identity.
+- **Nonlinear shrinkage** (Ledoit & Wolf 2020, *Annals of Statistics* 48(5), "Analytical nonlinear shrinkage of
+  large-dimensional covariance matrices"). Each eigenvalue is shrunk by its own amount instead of one common amount,
+  applied to the same lag-adjusted daily matrix.
+- **Exponentially weighted** (RiskMetrics 1996; decay 0.97 a session, half-life about 23 sessions). It weights recent
+  days more; then the current lags and shrinkage are applied.
+
+**Q2. How the portfolio is built from the same names.** The 15 names the current rules choose are weighted six ways:
+
+- **Minimum variance**, with the current caps and floor.
+- **Hierarchical risk parity** (López de Prado 2016, *Journal of Portfolio Management* 42(4), "Building diversified
+  portfolios that outperform out of sample").
+- **Inverse volatility.**
+- **Equal risk contribution** (Maillard, Roncalli & Teïletche 2010, *Journal of Portfolio Management* 36(4)).
+- **Maximum diversification** (Choueifaty & Coignard 2008, *Journal of Portfolio Management* 35(1)).
+- **Equal weight**: the naive benchmark of DeMiguel, Garlappi & Uppal (2009, *Review of Financial Studies* 22(5)),
+  which most optimised portfolios fail to beat out of sample.
+
+The same six are also run on the whole universe, without choosing 15 names.
+
+**Q3. How often, and how far, it rebalances, with costs.** The candidates are:
+
+- **Current:** quarterly, trading the least within 1 % of the minimum, the drift band in between.
+- **Partial adjustment** (after Gârleanu & Pedersen 2013, *Journal of Finance* 68(6)): at each review, move half of
+  the way from the weights held towards the new target.
+- **Monthly reviews**, same rules.
+- **Half-yearly reviews**, same rules.
+- **A wider drift band** (50 % of a target, not 25 %), in the spirit of the no-trade region of Leland (1999) and
+  Donohue & Yip (2003).
+
+### 7.2 How each is judged
+
+- **Q1 and Q2: realised risk only**, as in §2. Each week the portfolio is formed with what was known that week and
+  held for the next week without costs. Each candidate's realised variance is compared with the current method's by
+  the test of Ledoit & Wolf (2011, *Wilmott*, "Robust performance hypothesis testing with the variance"). That test is
+  a studentized circular block bootstrap of the difference in log variances, with 4,999 draws and blocks of 10
+  sessions. Holm's correction is applied across each family of comparisons.
+- **Q3:** costs, realised volatility and the largest fall over the walk-forward test, with costs.
+
+### 7.3 When something is adopted
+
+- **Q1 and Q2:** only if a candidate's realised variance is lower than the current method's with a Holm-adjusted
+  p-value below 0.05, and by at least 5 %. Anything weaker is reported and not adopted. A worse result never removes
+  the current method on this evidence alone either.
+- **Q3:** with only two or three reviews in seven months, no test has the power to decide. A rule is adopted only
+  if it costs less and is no more volatile (within 0.2 percentage points); otherwise it is reported for the
+  twelve-month review.
+
+### 7.4 Formula and input review (before the tests)
+
+- **Cost per side 1.12 %:** confirmed. Brokerage 0.64 %, CSE 0.084 %, CDS 0.024 %, SEC cess 0.072 % and share
+  transaction levy 0.30 %, for trades up to Rs 100 mn (CAL, CT CLSA and Invest Sri Lanka schedules).
+- **F1. Dividend withholding: wrong.** The lab credits dividends in full (`dividend_withholding: 0.0`, the old
+  tool's setting). Since 1 January 2023 dividends from resident companies bear a final 15 % withholding tax
+  (Inland Revenue (Amendment) Act No. 45 of 2022). The next version uses 0.15.
+- **F2. Weights that do not quite sum to 1:** `cse_portfolio_lab` 1.2.0 stored one set of weights summing to
+  0.9999975, on 28 October. The solver keeps weights above 1e-7, but only weights above 1e-6 are stored. Found by
+  the new audit (`python -m data_platform.jobs.lab_audit`). Fixed in 1.2.0, which has not had a production run.
+- **Everything else the audit checks passes on every stored row:** the cash and value of every walk-forward book,
+  rebuilt from its trades and prices; caps, floors, sector and group limits; costs; whole shares; review dates; the
+  summaries.
