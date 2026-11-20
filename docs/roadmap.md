@@ -59,9 +59,9 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
 - **The first visit, sign-up, palette and lab 1.1.0 (2026-11-16, decision 0025):** built. Three short decisions in
   `docs/plan-janu-review.md` §5 (the palette, the sign-up wording, the weekly-summary box). The lab's other three
   models were moved to the daily estimate on 2026-11-17 (the owner's go-ahead).
-- **The lab's second review, questions 3 and 4, a calmer design (2026-11-20, decision 0026):** built. To confirm:
-  half-yearly reviews for the example portfolio; keeping the lab's caps (hierarchical risk parity was steadier only
-  without them); the wording of the two new questions. Re-run the review's scripts with the same rules at twelve
+- **The lab's second review, questions 3 and 4, a calmer design (2026-11-20, decision 0026):** built. Confirmed by
+  the owner on 2026-11-20: half-yearly reviews for the example portfolio, and the lab's caps stay. To confirm: the
+  wording of the two new questions. Re-run the review's scripts with the same rules at twelve
   months (April 2027).
 - **Bond volume dating, a new case (2026-11-16):** the PDMO trade summary of 15 September 2026 is dated differently
   by the old tool and the new parser. Decide it with finding V3.

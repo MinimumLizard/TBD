@@ -1,8 +1,8 @@
 # 0026 — The lab's second review, questions 3 and 4, and a calmer design
 
 - **Date:** 2026-11-20
-- **Status:** Built on the owner's instruction of 2026-11-20. Points marked "to confirm" are choices made here for
-  the owner to accept or change.
+- **Status:** Built on the owner's instruction of 2026-11-20; points 2 and 3 confirmed by the owner the same day.
+  Points marked "to confirm" are choices made here for the owner to accept or change.
 
 ## Context
 
@@ -75,8 +75,12 @@ The owner asked for four things:
    - On the lab page, the intro's three points are three cards.
    - The palette (Ceylon Sapphire) is unchanged.
 
-## To confirm
+## Confirmed by the owner (2026-11-20)
 
 - Twice-yearly reviews for the example portfolio (point 3). Quarterly results stay visible beside it.
-- The lab's caps stay, although hierarchical risk parity without them was steadier over this short test (point 2).
+- The lab's caps stay (10 % a share, 30 % a sector, 20 % an ownership group), although hierarchical risk parity
+  without them was steadier over this short test (point 2).
+
+## To confirm
+
 - The wording of questions 3 and 4 and of their facts, before the lawyer sees it.

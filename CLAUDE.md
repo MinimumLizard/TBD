@@ -46,7 +46,8 @@ decisions).
   personal lab settings live in `LAB_PRIVATE_FILE` / secret `LAB_PRIVATE_YAML`, never in git. Read it with
   `jobs.lab_report`. Its walk-forward test, `cse_lab_backtest` (decision 0024, migration 0017, internal too), applies
   the lab's rules on each past date with only what was known then; the example portfolio proposed is minimum variance,
-  15 names, quarterly (to revisit with twelve months of results).
+  15 names, reviewed half-yearly in January and July, within the caps (owner, 2026-11-20, decision 0026; to revisit
+  with twelve months of results).
 - Site redesign (2026-11-01, `docs/research/retail-investor-needs-2026-11.md`): long pages use `components/Section.tsx`
   (collapsible, a summary line, why/how, related guides) under `components/PageHead.tsx`; guides live in `lib/guides.ts`
   with text in `messages` (`guides.<slug>`), menus in `lib/menu.ts`. The private preview (`web/scripts/export-static.mjs`)
