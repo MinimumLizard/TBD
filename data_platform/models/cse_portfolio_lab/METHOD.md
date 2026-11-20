@@ -82,11 +82,14 @@ portfolio. Following `docs/plan-retail-features.md` §6, for K = 10 and 15:
 - **Filling a K-name portfolio** (as `cse_lab_backtest` 1.1.0): a sharper estimate concentrates the full
   minimum-variance portfolio in fewer names, sometimes fewer than K. The remaining places then go to the shares it
   would take next, those with the smallest covariance with the portfolio, (Σw)ᵢ.
-- **Trading the least that is nearly the best**: on a quarterly date, the minimum-variance K-name weights are those
-  closest (Σ|wᵢ − pᵢ|) to the weights set at the previous quarterly date, p, among those that meet every cap and the
+- **Trading the least that is nearly the best**: on a review date, the minimum-variance K-name weights are those
+  closest (Σ|wᵢ − pᵢ|) to the weights set at the previous review, p, among those that meet every cap and the
   floor and whose estimated volatility is within 1 % of the minimum. (The backtest measures the change from the
   weights actually held after drift; this model has no holdings, so it measures it from the weights it last set.) At
   the first formation it is the minimum itself. Maximum Sharpe and equal weight are unchanged.
+- **Reviews twice a year**, on the first session of January and July (decision 0026, as `cse_lab_backtest` 1.2.0's
+  example), not four times.
+- **Weights below 1e-6 are set to zero** and the rest rescaled, so the stored weights sum to 1 (review F2).
 
 ## Notional
 
@@ -118,7 +121,7 @@ everything again (tested), in a fraction of the time.
   year of data a Sharpe ratio's uncertainty is roughly ±1: differences of a few hundredths are noise. Nothing here
   promises a return.
 - **Maximum Sharpe is unstable**: one new week of data can change several of its largest names. The fewer-name
-  versions therefore change only on the quarterly calendar and with a buffer.
+  versions therefore change only at the reviews and with a buffer.
 - These are model portfolios computed by rules, for research. They are not advice and not an offer, and they say
   nothing about any security's future price.
 

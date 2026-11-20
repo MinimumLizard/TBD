@@ -1,7 +1,7 @@
 """Checks every stored row of the portfolio lab against the rules it claims to follow (the owner asked for a bug hunt,
 2026-11-20). For the owner and for tests; reads the database, writes nothing.
 
-    python -m data_platform.jobs.lab_audit [--backtest 1.1.0] [--lab 1.2.0] [--record 1.2.0]
+    python -m data_platform.jobs.lab_audit [--backtest 1.2.0] [--lab 1.2.0] [--record 1.2.0]
 
 What is checked, for each version named:
 
@@ -9,6 +9,7 @@ What is checked, for each version named:
     B1  every set of model weights sums to 1, and no weight is above its cap or below its floor
     B2  no sector is above 30 % and no ownership group above 20 % of a set of model weights
     B3  every trade's value is shares x price, its cost is the cost per side x its value, shares are whole
+        (and every dividend is credited net of the withholding tax, review F1)
     B4  rebuilt from the trades alone, the cash after each session equals the cash stored, and the shares held
         valued at that session's prices (the record's own Pricer) plus the cash equal the value stored
     B5  the number of names stored is the number of shares held
@@ -26,6 +27,7 @@ Each check returns the rows that fail it; none should.
 from __future__ import annotations
 
 import argparse
+import re
 import datetime as dt
 import math
 import sys
@@ -113,6 +115,12 @@ def check_backtest(conn, version: str, facts) -> dict[str, list]:
                 fails["B3 whole shares"].append((t["session_date"], t["portfolio"], t["symbol"], t["shares"]))
         elif t["cost"] != 0:
             fails["B3 no cost on corporate actions"].append((t["session_date"], t["portfolio"], t["symbol"]))
+        if t["action"] == "dividend":
+            # review F1: dividends credited net of the final withholding tax (the rate per share is in the reason)
+            m = re.search(r"Rs ([0-9.]+)/sh", t["reason"])
+            want = t["shares"] * float(m.group(1)) * (1 - p["dividend_withholding"]) if m else None
+            if want is None or abs(t["value"] - want) > 1e-6 * max(1, want):
+                fails["B3 dividends net of withholding tax"].append((t["session_date"], t["portfolio"], t["symbol"]))
     # B4, B5, B6: rebuild every book from its trades and revalue it
     by_book: dict[tuple, list[dict]] = defaultdict(list)
     for t in trades:
@@ -173,7 +181,8 @@ def check_backtest(conn, version: str, facts) -> dict[str, list]:
     # B7: when rebalances happen
     for e in q(conn, "select * from models.cse_bt_event where method_version = %s", version):
         s = e["session_date"].isoformat()
-        if e["kind"] == "scheduled" and not rec.is_scheduled(s, sessions, p["rebalance_months"]):
+        months = p.get("half_yearly_months", [1, 7]) if e["policy"] == "half_yearly" else p["rebalance_months"]
+        if e["kind"] == "scheduled" and not rec.is_scheduled(s, sessions, months):
             fails["B7 scheduled only on review dates"].append((e["policy"], e["portfolio"], s))
         if e["kind"] == "threshold" and not (e["policy"] == "dynamic" and (
                 e["left_universe"] or (e["tracking_error"] or 0) > p["te_threshold"])):

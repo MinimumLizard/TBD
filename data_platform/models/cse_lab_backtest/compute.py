@@ -4,7 +4,7 @@
 What the lab's own rules (cse_risk_estimates 1.1.0 and cse_portfolio_lab 1.1.0: the same universe filters, estimates,
 caps, K-name selection with its buffer, floor and cap) would have built on each past date, with only what was known on
 that date, and what holding it would have done (cse_lab_record 1.1.0's execution rules: whole shares, 1.12 % a side,
-corporate actions, the drift band), under two rebalancing policies: quarterly (the lab's rule) and dynamic (a monthly
+corporate actions, the drift band), under the rebalancing policies: quarterly (the lab's first rule), half-yearly (1.2.0) and dynamic (a monthly
 check, rebalancing when the holdings have moved away from the rules' new portfolio by more than a tracking-error
 threshold). The arithmetic is data_platform/models/_lib/cse_backtest.py; this file reads the facts and writes rows.
 
@@ -101,9 +101,13 @@ def daily_returns(h: est.History, e: est.Estimates) -> tuple[np.ndarray, float]:
 
 
 def covariance_by(method: str, h: est.History, e: est.Estimates, lags: int = 2) -> tuple[np.ndarray, float]:
-    if method == "daily":
+    if method in ("daily", "daily_nonlinear", "ewma"):
         D, per_year = daily_returns(h, e)
-        return cv.daily(D, per_year, lags)
+        if method == "daily":
+            return cv.daily(D, per_year, lags)
+        if method == "daily_nonlinear":           # research candidates (the research note, §7)
+            return cv.daily_nonlinear(D, per_year, lags)
+        return cv.ewma(D, per_year, lags=lags)
     return cv.estimate(method, e.returns.to_numpy(), e.market.to_numpy())
 
 
@@ -231,6 +235,8 @@ def setup(inputs, as_of) -> Setup | None:
                               "notional_lkr")}
     rcfg = {k: p[k] for k in ("record_notional_lkr", "cost_per_side", "dividend_withholding", "rebalance_months",
                               "band_relative", "band_absolute", "min_trade_lkr", "te_threshold")}
+    if "half_yearly_months" in p:
+        rcfg["half_yearly_months"] = p["half_yearly_months"]
 
     def rf_on(s: str) -> float | None:
         return risk.risk_free(p["risk_free"], bills, _d(s))[0]

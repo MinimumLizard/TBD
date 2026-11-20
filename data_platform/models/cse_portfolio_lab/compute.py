@@ -304,6 +304,12 @@ def not_formed(day: dt.date, name: str, k: int, message: str) -> dict:
             "max_sector_over": None, "max_group_over": None, "constraints_ok": None, "binding": None}
 
 
+def drop_tiny(w: np.ndarray, floor: float) -> np.ndarray:
+    """Weights below `floor` set to 0 and the rest rescaled, so that what is stored sums to 1 (review F2)."""
+    kept = np.where(w < floor, 0.0, w)
+    return kept / kept.sum()
+
+
 def compute_date(summary: dict, rows: list[dict], weekly: dict, cfg: dict, p: dict, fewer: FewerNames | None,
                  form: bool, daily: Daily | None = None) -> dict[str, list[dict]]:
     day = summary["as_of"]
@@ -317,6 +323,10 @@ def compute_date(summary: dict, rows: list[dict], weekly: dict, cfg: dict, p: di
         full = opt.solve_full(prob)
     except opt.Infeasible as exc:
         status, message = "infeasible", str(exc)
+    if full is not None and p.get("min_weight_kept"):
+        # 1.2.0 (review F2): the solver keeps weights above 1e-7 but only weights above 1e-6 are stored, so a stored
+        # portfolio could sum to slightly less than 1. Set the smallest to 0 and rescale before anything is stored.
+        full = {k: drop_tiny(w, float(p["min_weight_kept"])) if k != "equal_weight" else w for k, w in full.items()}
     if full is not None:
         for name, w in full.items():
             for t, r in portfolio_rows(day, name, "full", w, prob, check=name != "equal_weight",

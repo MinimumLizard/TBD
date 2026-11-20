@@ -7,8 +7,10 @@ selection with its buffer, the floor), and the record's execution rules (cse_rec
 dividends, splits, scrip and rights on their ex-date, the drift band).
 
 New here: the walk forward itself, and the rebalancing policies.
-  quarterly  the lab's rule: new model weights on the first session of January, April, July and October; between
-             them only the drift band.
+  quarterly  the lab's first rule: new model weights on the first session of January, April, July and October;
+             between them only the drift band.
+  half_yearly the same on the first session of January and July only (1.2.0's example; decision 0026: it cost less
+             and was no more volatile in the second review).
   dynamic    a check on the first session of every month: the rules' portfolio is built afresh, and the holdings are
              rebalanced to it when they have moved away from it by more than a threshold, measured as the estimated
              tracking error between the two (or when a holding has left the universe); on the quarterly dates
@@ -29,7 +31,7 @@ import numpy as np
 from . import cse_optimize as opt
 from . import cse_record as rec
 
-QUARTERLY, DYNAMIC = "quarterly", "dynamic"
+QUARTERLY, HALF_YEARLY, DYNAMIC = "quarterly", "half_yearly", "dynamic"
 MARKET, BILLS = "market", "bills"
 
 
@@ -168,8 +170,10 @@ def run(sessions: list[str], start: str, model_on: Callable[[str], DateModel | N
     for s in days:
         pricer = rec.Pricer(closes, actions, s)
         dm = model_on(s) if s in checks else None
-        scheduled = rec.is_scheduled(s, sessions, cfg["rebalance_months"])
+        on_quarter = rec.is_scheduled(s, sessions, cfg["rebalance_months"])
+        on_half = rec.is_scheduled(s, sessions, cfg.get("half_yearly_months", [1, 7]))
         for policy in policies:
+            scheduled = on_half if policy == HALF_YEARLY else on_quarter
             for port in portfolios:
                 book = books[policy].get(port)
                 trades = []
@@ -177,7 +181,7 @@ def run(sessions: list[str], start: str, model_on: Callable[[str], DateModel | N
                 if book is not None:
                     trades += rec.apply_actions(book.state, actions, last, s, cfg, port, policy)
                 if dm is not None:
-                    act = book is None or (policy == QUARTERLY and scheduled) or policy == DYNAMIC
+                    act = book is None or (policy in (QUARTERLY, HALF_YEARLY) and scheduled) or policy == DYNAMIC
                     if act:
                         kind, k = kind_k(port)       # equal weight follows minimum variance's names (listed first)
                         src_port = f"min_variance_{k}" if kind == "equal_weight" else port
@@ -205,6 +209,14 @@ def run(sessions: list[str], start: str, model_on: Callable[[str], DateModel | N
                                 st = book.state
                                 before = set(book.names)
                                 st.targets = dict(tgt.weights)
+                                kappa = spec.get("partial")
+                                if kappa and why != "inception":
+                                    # research: move only part of the way from the weights held to the new target
+                                    # (after Garleanu & Pedersen 2013); names leaving the target still go
+                                    _, held = weights_of(st, pricer)
+                                    blend = {n: kappa * w + (1 - kappa) * held.get(n, 0.0) for n, w in tgt.weights.items()}
+                                    total = sum(blend.values())
+                                    st.targets = {n: w / total for n, w in blend.items()}
                                 names = sorted(set(st.targets) | set(st.shares))
                                 trades += rec.execute(st, st.targets, names, pricer, cfg, port, s, policy, why,
                                                       0.0 if why == "inception" else cfg["min_trade_lkr"])

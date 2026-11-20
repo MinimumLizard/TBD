@@ -13,8 +13,10 @@ from collections import defaultdict
 
 from . import lab_charts as charts
 
-NEW, OLD = "1.1.0", "1.0.0"                      # cse_lab_backtest: the current rules, and the first ones (reference)
-FLAGSHIP = ("quarterly", "min_variance_15")      # the example portfolio (decisions 0024, 0025)
+NEW, OLD = "1.2.0", "1.0.0"                      # cse_lab_backtest: the current rules, and the first ones (reference)
+FLAGSHIP = ("half_yearly", "min_variance_15")    # the example portfolio (decisions 0024, 0025, 0026)
+SCHEDULES = {"half_yearly": "Twice a year (the example)", "quarterly": "Four times a year (the first rules)",
+             "dynamic": "Checked every month, traded when it moved too far"}
 LABELS = {"min_variance_10": "Minimum variance, 10 names", "min_variance_15": "Minimum variance, 15 names",
           "max_sharpe_10": "Maximum Sharpe, 10 names", "max_sharpe_15": "Maximum Sharpe, 15 names",
           "equal_weight_10": "Equal weight, 10 names", "equal_weight_15": "Equal weight, 15 names",
@@ -24,7 +26,7 @@ ESTIMATORS = {"daily": "Daily returns, with lagged terms (the lab's choice)",
               "single_index": "Weekly, towards the market model",
               "oas": "Weekly, towards equal risk (OAS)",
               "identity": "Weekly, towards equal risk (the first rules)"}
-KIND = {"inception": "start", "scheduled": "quarterly review", "threshold": "monthly check: moved too far",
+KIND = {"inception": "start", "scheduled": "review", "threshold": "monthly check: moved too far",
         "drift": "drift band"}
 
 
@@ -100,11 +102,11 @@ def display_name(name: str | None, symbol: str) -> str:
 
 
 def next_review(d: dt.date) -> dt.date:
-    """The first day of the next review month (January, April, July, October) after d."""
+    """The first day of the next review month (January, July: half-yearly, decision 0026) after d."""
     for months in range(1, 13):
         m = (d.month - 1 + months) % 12 + 1
         y = d.year + (d.month - 1 + months) // 12
-        if m in (1, 4, 7, 10):
+        if m in (1, 7):
             return dt.date(y, m, 1)
     return d
 
@@ -152,10 +154,11 @@ while it still ranks in the top {int(1.5 * k)}: this buffer avoids trading on sm
 with the weights. So at a review the rules look for the weights closest to what is already there, among those whose
 estimated volatility is within {p['fewer_names'].get('tolerance', 0):.0%} of the lowest possible, instead of moving
 every weight to the exact minimum.</li>
-<li><b>When it is reviewed.</b> On the first session of January, April, July and October; between reviews a name is
-brought back only when its weight drifts by more than a quarter of its target (or two percentage points). The
-dynamic alternative also checks on the first session of every month and rebalances when the holdings have moved
-away from the rules' new portfolio by more than {p['te_threshold']:.0%} of estimated tracking error.</li>
+<li><b>When it is reviewed.</b> Twice a year, on the first session of January and of July; between reviews a name
+is brought back only when its weight drifts by more than a quarter of its target (or two percentage points). Two
+alternatives run beside it for comparison: reviews four times a year (the lab's first rules), and a check on the
+first session of every month that rebalances when the holdings have moved away from the rules' new portfolio by more
+than {p['te_threshold']:.0%} of estimated tracking error.</li>
 <li><b>Costs.</b> Every trade pays {p['cost_per_side']:.2%} of its value; whole shares only; dividends, splits and
 rights issues are booked on their ex-date.</li>
 </ol>""", anchor="rules")
@@ -230,7 +233,8 @@ def section_compare(conn) -> str:
     start, end = summary[0]["start_date"], summary[0]["end_date"]
     navs: dict[tuple[str, str], list] = defaultdict(list)
     for r in q(conn, """select method_version, session_date, portfolio, nav from models.cse_bt_nav
-                        where policy = 'quarterly' and method_version in (%s, %s) order by session_date""", NEW, OLD):
+                        where (method_version, policy) in ((%s, %s), (%s, 'quarterly')) order by session_date""",
+               NEW, FLAGSHIP[0], OLD):
         navs[(r["method_version"], r["portfolio"])].append((r["session_date"], r["nav"]))
     port = FLAGSHIP[1]
     index = lambda pts: [(d, v / pts[0][1] * 100) for d, v in pts]
@@ -251,7 +255,7 @@ def section_compare(conn) -> str:
              "equal_weight_10", "market", "bills"]
     rows = []
     for name in order:
-        qr, dy = by.get(("quarterly", name)), by.get(("dynamic", name))
+        qr, dy = by.get((FLAGSHIP[0], name)), by.get(("dynamic", name))
         if not qr:
             continue
         fall = "none" if not qr["max_drawdown"] else signed(qr["max_drawdown"])
@@ -260,8 +264,8 @@ def section_compare(conn) -> str:
                      signed(dy["total_return"]) if dy and dy["costs"] is not None else "–",
                      lkr(dy["costs"]) if dy and dy["costs"] is not None else "–",
                      esc(dy["n_rebalances"]) if dy and dy["n_rebalances"] is not None else "–"])
-    flag, was = by.get(FLAGSHIP), old.get(FLAGSHIP)
-    mk, bills = by.get(("quarterly", "market")), by.get(("quarterly", "bills"))
+    flag, was = by.get(FLAGSHIP), old.get(("quarterly", FLAGSHIP[1]))
+    mk, bills = by.get((FLAGSHIP[0], "market")), by.get((FLAGSHIP[0], "bills"))
     compare = ""
     if flag and was and mk:
         compare = table(["", "Return", "Volatility", "Largest fall", "Costs", "Traded (of average value)"], [
@@ -272,7 +276,7 @@ def section_compare(conn) -> str:
             [esc(LABELS["market"]), signed(mk["total_return"]), pct(mk["volatility"]), signed(mk["max_drawdown"]), "–", "–"],
             [esc(LABELS["bills"]), signed(bills["total_return"]), pct(bills["volatility"]), "none", "–", "–"]])
     months = round((end - start).days / 30.4)
-    mv = sorted(r["volatility"] for (pol, name), r in by.items() if pol == "quarterly" and name.startswith("min_variance"))
+    mv = sorted(r["volatility"] for (pol, name), r in by.items() if pol == FLAGSHIP[0] and name.startswith("min_variance"))
     mv_range = f"{pct(mv[0])} to {pct(mv[-1])}" if len(mv) > 1 else pct(mv[0]) if mv else "–"
     return fold("Other ways to build a portfolio, compared",
                 "The same test for maximum Sharpe, equal weight, 10 names, and the lab's first rules",
@@ -293,10 +297,11 @@ an assumed 6 % a year above bills, scaled by each share's beta), so it depends o
 <p class="small muted">Zero means a new high. The depth of a fall is what a person living through it sees; it is
 the plainest measure of what "steadier" means.</p>
 <h3>Every portfolio the rules can build</h3>
-{table(["Portfolio", "Return, quarterly", "Volatility", "Largest fall", "Costs, quarterly", "Return, dynamic",
-        "Costs, dynamic", "Rebalances, dynamic"], rows)}
-<p class="small muted">"Dynamic" checks every month and rebalances when the portfolio has moved too far from the
-rules' fresh choice. It traded more and was no steadier, which is why the example keeps quarterly reviews.</p>
+{table(["Portfolio", "Return, twice a year", "Volatility", "Largest fall", "Costs, twice a year", "Return, monthly check",
+        "Costs, monthly check", "Rebalances, monthly check"], rows)}
+<p class="small muted">The monthly check rebalances when the portfolio has moved too far from the rules' fresh
+choice. It traded more and was no steadier; the section on how the portfolio is kept in shape compares the three
+schedules.</p>
 <ul class="small">
 <li>The minimum-variance portfolios were the steadiest share portfolios: volatility {mv_range} against the market's
 {pct(mk['volatility'] if mk else None)}. Under the first rules the same 15-name portfolio was no steadier than the
@@ -398,15 +403,15 @@ longer second bar marks one of the more volatile names; a shorter one, a share t
 def section_since_april(conn) -> str:
     """What the example portfolio would have done, against the market and treasury bills: one chart, three numbers."""
     summary = {r["portfolio"]: r for r in q(conn, """select * from models.cse_bt_summary where method_version = %s
-                                                      and policy = 'quarterly'""", NEW)}
+                                                      and policy = %s""", NEW, FLAGSHIP[0])}
     if FLAGSHIP[1] not in summary:
         return ""
     flag, mk, bills = summary[FLAGSHIP[1]], summary.get("market"), summary.get("bills")
     start, end = flag["start_date"], flag["end_date"]
     navs: dict[str, list] = defaultdict(list)
     for r in q(conn, """select session_date, portfolio, nav from models.cse_bt_nav where method_version = %s
-                        and policy = 'quarterly' and portfolio in (%s, 'market', 'bills') order by session_date""",
-               NEW, FLAGSHIP[1]):
+                        and policy = %s and portfolio in (%s, 'market', 'bills') order by session_date""",
+               NEW, FLAGSHIP[0], FLAGSHIP[1]):
         navs[r["portfolio"]].append((r["session_date"], r["nav"]))
     index = lambda pts: [(d, v / pts[0][1] * 100) for d, v in pts]
     chart = charts.lines([
@@ -451,13 +456,19 @@ def section_rebalancing(conn) -> str:
             esc(", ".join(x.split(".")[0] for x in e["names_in"].split(",") if x) or "–"),
             esc(", ".join(x.split(".")[0] for x in e["names_out"].split(",") if x) or "–"),
             lkr(e["turnover"]), lkr(e["cost"])] for e in reviews]
+    sched = {r["policy"]: r for r in q(conn, """select * from models.cse_bt_summary where method_version = %s
+                                                 and portfolio = %s""", NEW, port)}
+    how_often = table(["How often", "Return", "Volatility", "Largest fall", "Costs", "Traded (of average value)"], [
+        [("<b>" if pol == policy else "") + esc(label) + ("</b>" if pol == policy else ""), signed(r["total_return"]),
+         pct(r["volatility"]), signed(r["max_drawdown"]), lkr(r["costs"]), pct(r["turnover"], 0)]
+        for pol, label in SCHEDULES.items() if (r := sched.get(pol))])
     body = f"""
 <h3>Does it rebalance automatically?</h3>
 <p><b>In this lab, yes, on paper.</b> Every trading day the computer applies the rules to an imaginary Rs 1 million,
 exactly as written, with no one deciding anything along the way:</p>
 <ol class="steps">
-<li><b>Four times a year, a review.</b> On the first trading day of January, April, July and October the rules are run
-again on the latest prices. Shares may come in or go out, and every weight is brought back to its new target. A
+<li><b>Twice a year, a review.</b> On the first trading day of January and of July the rules are run again on the
+latest prices. Shares may come in or go out, and every weight is brought back to its new target. A
 share already in the portfolio stays unless it has clearly dropped down the rules' list, so small changes do not
 cause trading.</li>
 <li><b>In between, only if something drifts too far.</b> As prices move, each share's part of the portfolio drifts.
@@ -471,14 +482,22 @@ risk they can find.</li>
 <p><b>In real life, nothing trades by itself.</b> ZinvestIQ never looks after money or places orders. Someone following
 rules like these would place the trades themselves through their own stockbroker on those dates, or a fund manager
 would do it inside a fund.</p>
+<h3>Why twice a year</h3>
+<p>Each review costs money and gains little: the rules' estimate of risk barely changes in three months, so most of
+what a review trades is noise. Research on trading costs says the same (Gârleanu and Pedersen 2013: move only part
+of the way, and less often, when trading is expensive). In the lab's second review, decided in advance, twice a year
+had to cost less without swinging more than four times a year. It did:</p>
+{how_often}
+<p class="small muted">Same portfolio, same rules, same period; only the review dates differ. A few months is far too
+short to say one schedule earns more than another, and that is not how it was chosen: only on costs and swings.</p>
 <h3>What it has cost so far</h3>
 {costs}
 <p class="small muted">{"More than half" if reviews[0]["cost"] > total_cost / 2 else "Part"} of the cost was the first
-purchases. After that: {len(reviews) - 1} quarterly review{"" if len(reviews) == 2 else "s"}, and
+purchases. After that: {len(reviews) - 1} review{"" if len(reviews) == 2 else "s"}, and
 {"no small adjustments" if not drifts else f"{len(drifts)} small adjustment{'' if len(drifts) == 1 else 's'}"} between
 reviews.</p>
 <details class="more"><summary>Every review in detail</summary>
 {table(["Date", "Why", "Came in", "Went out", "Traded", "Cost"], log)}
 </details>"""
-    return fold("How the portfolio is kept in shape", "Reviewed four times a year; in between, only a share that drifts too far is put back",
+    return fold("How the portfolio is kept in shape", "Reviewed twice a year; in between, only a share that drifts too far is put back",
                 body, open_=True, anchor="rebalancing")

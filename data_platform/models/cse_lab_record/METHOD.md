@@ -58,7 +58,8 @@ The direction of a change of shares is recorded as `increase` or `decrease`; cor
 - **1.1.0** (reference): the lab's 1.1.0 portfolios from a neutral Rs 1 mn, from its first run.
 - **1.2.0** (current; decision 0025): the lab's 1.2.0 portfolios (the covariance from daily returns), as a series of
   its own (`series = 1.2.0`) from its first run with valid model weights; never backfilled, so its record starts on
-  the day it first ran. The rules of holding are 1.1.0's.
+  the day it first ran. The rules of holding are 1.1.0's, except that dividends are credited net of the final 15 %
+  withholding tax (review F1) and the reviews are in January and July (decision 0026).
 
 ## Outputs
 

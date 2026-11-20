@@ -21,8 +21,8 @@ bills. For every review: what entered and left, and why; for every model weight:
   share, 30 % per sector, 20 % per ownership group and the liquidity cap for Rs 1 mn; the versions with K = 10 and 15
   names (the K largest weights; a name already held stays while it ranks in the top 1.5 K; re-optimised with a cap of
   max(10 %, 1.5 / K) and a floor of 0.5 / K); equal weight on minimum variance's names.
-- **Holding them** as `cse_lab_record` 1.1.0: Rs 1 mn each, whole shares, 1.12 % of each trade's value, dividends,
-  splits, scrip and rights booked on their ex-date, changes under Rs 2,500 skipped, and the drift band (a name more
+- **Holding them** as `cse_lab_record` 1.1.0: Rs 1 mn each, whole shares, 1.12 % of each trade's value, dividends (after
+  the final 15 % withholding tax), splits, scrip and rights booked on their ex-date, changes under Rs 2,500 skipped, and the drift band (a name more
   than max(25 % of its target, 2 points) from its target goes back to it at the next session).
 
 ## What version 1.1.0 changes (decision 0025)
@@ -81,9 +81,12 @@ says nothing about returns.
 
 ## The rebalancing policies
 
-1. **Quarterly** (the lab's rule): new model weights on the first session of January, April, July and October; the
-   drift band in between.
-2. **Dynamic**: a check on the first session of every month. The rules' portfolio is built afresh; the holdings are
+1. **Half-yearly** (version 1.2.0, the example's; decision 0026): new model weights on the first session of January
+   and July; the drift band in between. In the second review it cost 22 % less than quarterly reviews and was no more
+   volatile (`docs/research/portfolio-lab-optimisation-2026-11.md` §7).
+2. **Quarterly** (the lab's first rule; still run for comparison): the same on the first session of January, April,
+   July and October.
+3. **Dynamic**: a check on the first session of every month. The rules' portfolio is built afresh; the holdings are
    rebalanced to it when their **estimated tracking error** against it, √((w − w*)′ Σ (w − w*)) on the date's
    covariance, exceeds **3 % a year**, or when a holding has left the universe; on the quarterly dates always. The
    drift band in between.
@@ -122,8 +125,9 @@ says nothing about returns.
 - **Survivorship.** The list of listed securities, sector labels and ownership groups are recorded only from October
   2026 and are used as first recorded for earlier dates: a company delisted before then is missing, and the group caps
   use October's groups.
-- **Costs and prices.** Closing prices; no market impact beyond the stated cost; the cost per side is to be checked
-  against the current CSE schedule; no tax on dividends.
+- **Costs and prices.** Closing prices; no market impact beyond the stated cost. The cost per side, 1.12 %, was checked
+  against the CSE's published schedule on 2026-11-20; dividends are credited after the final 15 % withholding tax
+  (review F1).
 - These are rules applied to public data, for research and education. They are not advice and say nothing about any
   share's future price.
 
@@ -131,5 +135,8 @@ says nothing about returns.
 
 **1.0.0** (2026-11-01): first version. Kept as the reference.
 
-**1.1.0** (2026-11-16, current): the covariance from daily returns with two lagged days; the fill for K-name
+**1.1.0** (2026-11-16, reference): the covariance from daily returns with two lagged days; the fill for K-name
 portfolios; reviews that trade the least within 1 % of the minimum volatility; the stored risk test.
+
+**1.2.0** (2026-11-20, current; decision 0026): 1.1.0's rules with a third policy, half-yearly reviews, now the
+example's. Every version credits dividends net of the final 15 % withholding tax (review F1).

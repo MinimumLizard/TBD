@@ -240,7 +240,7 @@ CAVEATS = """<h2>Read these with the numbers</h2><ul>
 With one year of data a Sharpe ratio's uncertainty is roughly &plusmn;1: differences of a few hundredths are noise.
 Nothing here promises any return.</li>
 <li><b>Maximum Sharpe is unstable.</b> One new week of data can change several of its largest names; the versions with
-fewer names therefore change only on the quarterly calendar, with a buffer, and their record includes costs.</li>
+fewer names therefore change only at the half-yearly reviews, with a buffer, and their record includes costs.</li>
 <li>The ASPI is a price index (no dividends); the CSE's own data are used under the source rules of decision 0009.</li>
 <li>These are model portfolios computed by rules, for internal research. Nothing here is advice or an offer; none of
 it may be published before the lawyer's view (decision 0010 point 6).</li></ul>"""
@@ -262,13 +262,13 @@ def section_mockups(ports: list[dict], weights: dict, day: dt.date) -> str:
 lawyer decides which paths are open; none of these is in use.</p>
 <div class="mockup">{banner}<h3>P1 &middot; Licensed investment adviser</h3>
 <p><i>Model portfolio &ldquo;Minimum Variance {k}&rdquo;, prepared by [licensed adviser, SEC registration no.]. Composition at
-the quarterly review of {esc(p['formed_on'])}: {sample}, &hellip; Estimated volatility {pct(p['volatility'])} a year.
+the review of {esc(p['formed_on'])}: {sample}, &hellip; Estimated volatility {pct(p['volatility'])} a year.
 Suitability, risk disclosures and the adviser's terms apply.</i></p>
 <p class="note">Needs the SEC licence; the only path under which a portfolio could be presented as advice.</p></div>
 <div class="mockup">{banner}<h3>P2 &middot; Published rules-based index</h3>
 <p><i>ZinvestIQ CSE Minimum Variance {k} Index. Rules: the {k} largest constituents of the constrained minimum-variance
 portfolio of the eligible universe, re-weighted with caps of {max(0.10, 1.5 / k):.0%} per share, 30 % per sector and 20 % per ownership
-group, minimum weight {0.5 / k:.1%}, reconstituted on the first session of January, April, July and October. Reconstitution
+group, minimum weight {0.5 / k:.1%}, reconstituted on the first session of January and July. Reconstitution
 of {esc(p['formed_on'])}: weight changes &mdash; for example {sample}. Index level and its history are reported as
 calculated. This is an index, not a portfolio offered to anyone.</i></p>
 <p class="note">Reports weight changes of an index under published rules, with no instruction to anyone.</p></div>
@@ -296,7 +296,7 @@ padding:4px 8px;text-align:left;vertical-align:top}th{background:var(--surface-2
 .mockup{border:2px dashed var(--down);border-radius:8px;padding:8px 14px;margin:14px 0}.mock{color:var(--down);font-weight:bold}
 .note,.muted{color:var(--muted)}.note{font-size:13px}
 .explain{background:var(--accent-soft);border-radius:8px;padding:8px 14px;margin:12px 0}
-.lead{font-size:17px}.lab-intro ul{padding-left:20px}ol.steps li{margin-bottom:6px}
+.lead{font-size:17px}.lab-intro ul{padding-left:20px}.lab-intro ul.three{list-style:none;padding:0;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.lab-intro ul.three li{border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--muted)}.lab-intro ul.three li b{display:block;color:var(--text)}ol.steps li{margin-bottom:6px}
 details.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:12px 0}
 details.section>summary{list-style:none;cursor:pointer;padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}
 details.section>summary::-webkit-details-marker{display:none}

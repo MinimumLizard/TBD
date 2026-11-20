@@ -44,7 +44,7 @@ versions:
       # holding them (cse_lab_record 1.1.0)
       record_notional_lkr: 1000000
       cost_per_side: 0.0112          # VERIFY against the current CSE cost schedule
-      dividend_withholding: 0.0
+      dividend_withholding: 0.15     # the final 15 % tax on dividends since 2023 (review F1)
       rebalance_months: [1, 4, 7, 10]
       band_relative: 0.25
       band_absolute: 0.02
@@ -55,7 +55,7 @@ versions:
                                      # error against the rules' new portfolio exceeds 3 % a year
 
   - method_version: "1.1.0"
-    status: current
+    status: reference                # decision 0025's rules, kept beside 1.2.0 for comparison
     changes: >-
       The covariance is estimated from daily returns with two days of lagged covariances (it forecast risk best in the
       walk-forward risk test, which this version stores); a K-name portfolio is filled with the shares minimum variance
@@ -89,12 +89,59 @@ versions:
       portfolios: [min_variance_10, max_sharpe_10, equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
       record_notional_lkr: 1000000
       cost_per_side: 0.0112          # VERIFY against the current CSE cost schedule
-      dividend_withholding: 0.0
+      dividend_withholding: 0.15     # the final 15 % tax on dividends since 2023 (review F1)
       rebalance_months: [1, 4, 7, 10]
       band_relative: 0.25
       band_absolute: 0.02
       min_trade_lkr: 2500
       policies: [quarterly, dynamic]
+      te_threshold: 0.03
+      # new: the risk test. Every week, minimum variance with each estimator, held a week without costs: the full
+      # portfolio (0) and the 15-name version.
+      risk_test_estimators: [identity, oas, constant_corr, single_index, daily]
+      risk_test_sizes: [0, 15]
+
+  - method_version: "1.2.0"
+    status: current
+    changes: >-
+      1.1.0's rules, with a third rebalancing policy, half-yearly reviews (the first session of January and July), now
+      the example's: in the second review (decision 0026) it cost about a fifth less than quarterly reviews and was no
+      more volatile, the pre-registered test. Quarterly and dynamic still run beside it for comparison.
+    requires_models:
+      cse_total_returns: "1.0.0"
+      cse_ownership: "1.0.0"
+      cse_corporate_actions: "1.0.0"
+    parameters:
+      min_history_weeks: 52
+      preview_min_weeks: 26
+      min_traded_share: 0.80
+      min_median_turnover_lkr: 1000000
+      risk_free: {source: cbsl_tb_12m, publication_delay_months: 1}
+      equity_risk_premium: 0.06      # ASSUMPTION, used only for CAPM expected returns (maximum Sharpe)
+      # new: the covariance estimator (data_platform/models/_lib/cse_covariance.py). Chosen on realised RISK in the
+      # walk-forward risk test, never on returns; the lag count was fixed before any result was seen.
+      covariance: daily
+      daily_lags: 2
+      max_weight: 0.10
+      max_sector_weight: 0.30
+      max_group_weight: 0.20
+      participation: 0.20
+      days_to_build: 10
+      notional_lkr: 1000000
+      # new: fill (the shares minimum variance would take next, when it has fewer than K) and tolerance (a review
+      # trades the least that keeps the estimated volatility within 1 % of the minimum)
+      fewer_names: {sizes: [10, 15], kinds: [min_variance, max_sharpe, equal_weight], buffer: 1.5, fill: marginal,
+                    tolerance: 0.01}
+      portfolios: [min_variance_10, max_sharpe_10, equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
+      record_notional_lkr: 1000000
+      cost_per_side: 0.0112          # VERIFY against the current CSE cost schedule
+      dividend_withholding: 0.15     # the final 15 % tax on dividends since 2023 (review F1)
+      rebalance_months: [1, 4, 7, 10]
+      band_relative: 0.25
+      band_absolute: 0.02
+      min_trade_lkr: 2500
+      policies: [quarterly, half_yearly, dynamic]
+      half_yearly_months: [1, 7]     # new: the half-yearly policy's review months
       te_threshold: 0.03
       # new: the risk test. Every week, minimum variance with each estimator, held a week without costs: the full
       # portfolio (0) and the 15-name version.

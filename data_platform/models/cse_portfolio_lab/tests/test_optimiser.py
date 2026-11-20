@@ -155,3 +155,10 @@ def test_a_k_name_portfolio_that_cannot_meet_the_caps_says_so():
     with pytest.raises(opt.Infeasible, match="cannot all be met"):
         opt.solve_retail("min_variance", sub, 0.1)
     assert opt.solve_retail("equal_weight", sub, 0.1) == pytest.approx(np.full(5, 0.2))
+
+
+def test_tiny_weights_are_dropped_so_the_stored_weights_sum_to_one():
+    """Review F2: a weight of 2.5e-6 is kept by the solver but was not stored, so the stored set summed to 0.9999975."""
+    from data_platform.models.cse_portfolio_lab.compute import drop_tiny
+    w = drop_tiny(np.array([0.5, 0.4999975, 2.5e-7, 2.25e-6]), 1e-6)
+    assert w[2] == 0 and w[3] > 0 and w.sum() == pytest.approx(1.0, abs=1e-15)

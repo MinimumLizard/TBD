@@ -156,3 +156,34 @@ def test_the_risk_tests_variance_ratio():
     assert other[1] < other[0] < other[2] < 1.0                 # an interval around the ratio, clear of 1
     a = np.random.default_rng(9).normal(0, 0.007, 400)
     assert backtest.variance_ratio(a, b) == backtest.variance_ratio(a, b)       # a fixed seed: the same rows each run
+
+
+# --- version 1.2.0's rules (decision 0026) ---------------------------------------------------------------------------
+
+def test_half_yearly_reviews_happen_only_in_january_and_july():
+    dm = model(["A", "B"], [0.2, 0.2])
+    closes = {"A": {s: 100.0 for s in SESSIONS}, "B": {s: 100.0 for s in SESSIONS}}
+    aspi = {s: 1000.0 for s in SESSIONS}
+    cfg = {**CFG, "half_yearly_months": [1, 7]}
+    res = bt.run(SESSIONS, "2026-03-31", lambda s: dm, closes, [], aspi, lambda s: 0.0, cfg, {"buffer": 1.5}, 1.0,
+                 ["min_variance_2"], ["quarterly", "half_yearly"])
+    kinds = {(e["policy"], e["session_date"], e["kind"]) for e in res.events}
+    assert ("half_yearly", "2026-03-31", "inception") in kinds
+    assert ("half_yearly", "2026-04-01", "scheduled") not in kinds          # April is a quarterly review only
+    assert ("quarterly", "2026-04-01", "scheduled") in kinds
+    assert ("half_yearly", "2026-07-01", "scheduled") in kinds              # the first session of July
+
+
+def test_every_version_credits_dividends_after_the_final_withholding_tax():
+    """Review F1: dividends bear a final 15 % withholding tax since 1 January 2023 (Act No. 45 of 2022)."""
+    import yaml
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    for v in yaml.safe_load((root / "cse_lab_backtest" / "manifest.yaml").read_text())["versions"]:
+        assert v["parameters"]["dividend_withholding"] == 0.15, v["method_version"]
+    record = {v["method_version"]: v for v in
+              yaml.safe_load((root / "cse_lab_record" / "manifest.yaml").read_text())["versions"]}
+    assert record["1.2.0"]["parameters"]["dividend_withholding"] == 0.15
+    current = [v for v in yaml.safe_load((root / "cse_lab_backtest" / "manifest.yaml").read_text())["versions"]
+               if v["status"] == "current"]
+    assert "half_yearly" in current[0]["parameters"]["policies"]

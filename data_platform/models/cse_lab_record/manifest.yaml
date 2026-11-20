@@ -64,7 +64,9 @@ versions:
     status: current
     changes: >-
       Records cse_portfolio_lab 1.2.0's portfolios (the covariance from daily returns), as its own series from the
-      first run with valid model weights (never backfilled); the rules of holding them are 1.1.0's.
+      first run with valid model weights (never backfilled); the rules of holding them are 1.1.0's, with dividends
+      credited after the final 15 % withholding tax (review F1), and reviews half-yearly, January and July
+      (decision 0026).
     requires_models:
       cse_portfolio_lab: "1.2.0"
       cse_corporate_actions: "1.0.0"
@@ -75,8 +77,8 @@ versions:
                    equal_weight_10, min_variance_15, max_sharpe_15, equal_weight_15]
       record_notional_lkr: 1000000
       cost_per_side: 0.0112
-      dividend_withholding: 0.0
-      rebalance_months: [1, 4, 7, 10]
+      dividend_withholding: 0.15     # the final 15 % tax on dividends since 2023 (review F1)
+      rebalance_months: [1, 7]       # half-yearly (decision 0026)
       band_relative: 0.25
       band_absolute: 0.02
       min_trade_lkr: 2500

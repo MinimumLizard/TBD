@@ -123,6 +123,76 @@ def daily(D: np.ndarray, periods: float, lags: int = 2) -> tuple[np.ndarray, flo
     return ((1 - d) * S + d * (np.trace(S) / N) * np.eye(N)) * periods, d
 
 
+def nonlinear(S: np.ndarray, n: int) -> np.ndarray:
+    """Ledoit & Wolf (2020), "Analytical nonlinear shrinkage of large-dimensional covariance matrices", Annals of
+    Statistics 48(5): each sample eigenvalue is replaced by its own estimate of the population eigenvalue (a kernel
+    estimate of the spectral density and its Hilbert transform, Epanechnikov kernel, bandwidth n^(-1/3)); the
+    eigenvectors are kept. `S` is a covariance matrix estimated from `n` observations. A transcription of the
+    authors' published code, both cases: n >= the dimension p, and n < p (the p - n null eigenvalues get one value)."""
+    p = S.shape[0]
+    lam, u = np.linalg.eigh(S)                          # ascending
+    lam = np.maximum(lam, 0.0)
+    nz = lam[max(0, p - n):]                            # the min(p, n) eigenvalues that can be non-zero
+    nz = np.maximum(nz, 1e-18)
+    m = len(nz)
+    h = n ** (-1 / 3)
+    L = np.tile(nz, (m, 1)).T
+    H = h * L.T
+    with np.errstate(divide="ignore", invalid="ignore"):
+        x = (L - L.T) / H
+        f = 3 / 4 / np.sqrt(5) * np.mean(np.maximum(1 - x ** 2 / 5, 0) / H, axis=1)
+        hf = (-3 / 10 / np.pi) * x + (3 / 4 / np.sqrt(5) / np.pi) * (1 - x ** 2 / 5) * np.log(
+            np.abs((np.sqrt(5) - x) / (np.sqrt(5) + x)))
+    edge = np.abs(x) == np.sqrt(5)
+    hf[edge] = (-3 / 10 / np.pi) * x[edge]
+    hf = np.mean(np.nan_to_num(hf) / H, axis=1)
+    c = p / n
+    if p <= n:
+        d = nz / ((np.pi * c * nz * f) ** 2 + (1 - c - np.pi * c * nz * hf) ** 2)
+    else:
+        hf0 = (1 / np.pi) * (3 / 10 / h ** 2 + 3 / 4 / np.sqrt(5) / h * (1 - 1 / 5 / h ** 2)
+                             * np.log((1 + np.sqrt(5) * h) / (1 - np.sqrt(5) * h))) * np.mean(1 / nz)
+        d0 = 1 / (np.pi * (p - n) / n * hf0)
+        d1 = nz / (np.pi ** 2 * nz ** 2 * (f ** 2 + hf ** 2))
+        d = np.concatenate([np.full(p - n, d0), d1])
+    return (u * d) @ u.T
+
+
+def ewma(D: np.ndarray, periods: float, decay: float = 0.97, lags: int = 2) -> tuple[np.ndarray, float]:
+    """An exponentially weighted covariance of the daily returns (RiskMetrics 1996), recent sessions weighted more
+    (weight decay^age, normalised), with the same lagged terms and Ledoit-Wolf amount as `daily`."""
+    T = len(D)
+    w = decay ** np.arange(T - 1, -1, -1)
+    w = w / w.sum()
+    X = D - w @ D
+    S = (X * w[:, None]).T @ X
+    for lag in range(1, lags + 1):
+        if T <= lag:
+            break
+        wl = w[lag:] / w[lag:].sum()
+        G = (X[lag:] * wl[:, None]).T @ X[:-lag]
+        S = S + (1 - lag / (lags + 1)) * (G + G.T)
+    d = float(LedoitWolf().fit(D - D.mean(axis=0)).shrinkage_)
+    N = S.shape[0]
+    return ((1 - d) * S + d * (np.trace(S) / N) * np.eye(N)) * periods, d
+
+
+def daily_nonlinear(D: np.ndarray, periods: float, lags: int = 2) -> tuple[np.ndarray, float]:
+    """The lag-adjusted daily matrix of `daily`, with nonlinear shrinkage in place of the linear one. The second value
+    is the average relative change of the eigenvalues (for reporting; there is no single amount)."""
+    X = _demean(D)
+    T = len(X)
+    S = X.T @ X / T
+    for lag in range(1, lags + 1):
+        if T <= lag:
+            break
+        G = X[lag:].T @ X[:-lag] / T
+        S = S + (1 - lag / (lags + 1)) * (G + G.T)
+    C = nonlinear(S, T)
+    before, after = np.linalg.eigvalsh(S), np.linalg.eigvalsh(C)
+    return C * periods, float(np.mean(np.abs(after - before) / np.maximum(before, 1e-18)))
+
+
 def estimate(method: str, weekly: np.ndarray, market_weekly: np.ndarray | None = None,
              daily_returns: np.ndarray | None = None, sessions_per_year: float | None = None) -> tuple[np.ndarray, float]:
     """The annualised covariance and shrinkage amount by `method` (one of METHODS)."""
