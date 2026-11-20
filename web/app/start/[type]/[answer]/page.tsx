@@ -5,9 +5,12 @@ import { getTranslations } from "next-intl/server";
 import PageHead from "@/components/PageHead";
 import SignupBox from "@/components/SignupBox";
 import Stats from "@/components/Stats";
+import YourMoney from "@/components/YourMoney";
 import { guide } from "@/lib/guides";
 import { decodeSegment } from "@/lib/params";
-import { TOOL_KEYS, answer } from "@/lib/paths";
+import { cookies } from "next/headers";
+
+import { SKIPPED, START_COOKIE, TOOL_KEYS, answer, isAmount, isHorizon, readStart } from "@/lib/paths";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +24,22 @@ export async function generateMetadata() {
 // says nothing about what to do with money (hard rule 4). Opening it makes it the visitor's answer: web/proxy.ts sets
 // the cookie that opens the front door on their own home page (the hidden link below does the same job in the
 // static preview, which has no server).
-export default async function StartPathPage({ params }: { params: Promise<{ type: string; answer: string }> }) {
-  const raw = await params;
+export default async function StartPathPage({ params, searchParams }: {
+  params: Promise<{ type: string; answer: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [raw, query, jar] = await Promise.all([params, searchParams, cookies()]);
   const type = decodeSegment(raw.type);
   const key = decodeSegment(raw.answer);
   const a = answer(type, key);
   if (!a) notFound();
   const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
+  // questions 3 and 4: from the form just sent, or else what this visitor said before on this same path
+  const saved = readStart(jar.get(START_COOKIE)?.value);
+  const before = saved && saved !== SKIPPED && saved.type === type && saved.answer === key ? saved : null;
+  const asked = "amount" in query || "horizon" in query;
+  const amount = asked ? (isAmount(query.amount) ? query.amount : null) : before?.amount ?? null;
+  const horizon = asked ? (isHorizon(query.horizon) ? query.horizon : null) : before?.horizon ?? null;
   const tool = (href: string) => t(`start.tools.${TOOL_KEYS[href]}` as never);
   const label = `${t(`start.types.${type}.short` as never)} · ${t(`start.questions.${type}.${key}` as never)}`;
   return (
@@ -61,6 +73,7 @@ export default async function StartPathPage({ params }: { params: Promise<{ type
           );
         })}
       </ol>
+      <YourMoney viewer={viewer} amount={amount} horizon={horizon} more={`/start/${type}/${key}/more`} />
       <div className="path-next">
         <Link className="button" href={`/home/${type}/${key}`}>{t("start.result.homeButton")} →</Link>
         <span className="small muted">{t("start.result.homeNote")}</span>

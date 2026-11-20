@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import ModelFooter from "@/components/ModelFooter";
 import PageHead from "@/components/PageHead";
 import SignupBox from "@/components/SignupBox";
+import YourMoney from "@/components/YourMoney";
 import MarketBrief from "@/components/home/MarketBrief";
 import { CurveCard, SharesCard } from "@/components/home/MarketCards";
 import MarketTiles from "@/components/home/MarketTiles";
@@ -14,7 +15,9 @@ import SavingsSnapshot from "@/components/home/SavingsSnapshot";
 import { type Block, home } from "@/lib/homes";
 import { loadOverview } from "@/lib/overview";
 import { decodeSegment } from "@/lib/params";
-import { answer } from "@/lib/paths";
+import { cookies } from "next/headers";
+
+import { SKIPPED, START_COOKIE, answer, readStart } from "@/lib/paths";
 import type { ModelName } from "@/lib/registry";
 import { getViewer } from "@/lib/viewer";
 
@@ -40,8 +43,10 @@ export default async function HomePage({ params }: { params: Promise<{ type: str
   const a = answer(type, key);
   const h = home(type, key);
   if (!a || !h) notFound();
-  const [t, viewer] = await Promise.all([getTranslations(), getViewer()]);
+  const [t, viewer, jar] = await Promise.all([getTranslations(), getViewer(), cookies()]);
   const o = await loadOverview(viewer);
+  const saved = readStart(jar.get(START_COOKIE)?.value);
+  const mine = saved && saved !== SKIPPED && saved.type === type && saved.answer === key ? saved : null;
   const page = `/home/${type}/${key}`;
   const block = (b: Block) => {
     switch (b) {
@@ -83,6 +88,7 @@ export default async function HomePage({ params }: { params: Promise<{ type: str
         }
       />
       <PathStrip steps={a.steps} />
+      <YourMoney viewer={viewer} amount={mine?.amount ?? null} horizon={mine?.horizon ?? null} more={`/start/${type}/${key}/more`} />
       <div className="home-blocks">
         {h.blocks.map((b) => <div key={b}>{block(b)}</div>)}
       </div>

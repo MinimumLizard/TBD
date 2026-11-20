@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { GUIDE_SLUGS } from "@/lib/guides";
 import { HOME_TYPES, home } from "@/lib/homes";
 import { MENUS } from "@/lib/menu";
-import { HOME_PAGES, PERSONAS, SKIPPED, readStart } from "@/lib/paths";
+import { HOME_PAGES, PERSONAS, SKIPPED, readStart, writeStart } from "@/lib/paths";
 import { ALL_PAGES } from "@/lib/routes";
 
 describe("tailored home pages", () => {
@@ -55,7 +55,14 @@ describe("tailored home pages", () => {
 
 describe("the starting cookie", () => {
   it("is read only when it names a real answer, or the skip", () => {
-    expect(readStart("curious.how")).toEqual({ type: "curious", answer: "how" });
+    expect(readStart("curious.how")).toEqual({ type: "curious", answer: "how", amount: null, horizon: null });
+    expect(readStart("curious.how.lt1m.gt5y")).toEqual({ type: "curious", answer: "how", amount: "lt1m", horizon: "gt5y" });
+    expect(readStart("curious.how.na.y1to3")).toEqual({ type: "curious", answer: "how", amount: null, horizon: "y1to3" });
+    for (const v of ["curious.how.lt1m", "curious.how.lots.gt5y", "curious.how.lt1m.forever", "curious.how.lt1m.gt5y.x"]) {
+      expect(readStart(v), v).toBeNull();
+    }
+    expect(writeStart({ type: "new", answer: "cash", amount: "lt100k", horizon: null })).toBe("new.cash.lt100k.na");
+    expect(writeStart({ type: "new", answer: "cash", amount: null, horizon: null })).toBe("new.cash");
     expect(readStart(SKIPPED)).toBe(SKIPPED);
     for (const bad of [undefined, null, "", "curious", "curious.", "curious.nothing", "nobody.how", "curious.how.more",
                        "../etc", "curious.how/../../x", "CURIOUS.HOW"]) {

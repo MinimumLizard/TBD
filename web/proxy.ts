@@ -4,7 +4,7 @@
 // Tiers are not decided here: lib/entitlements.ts stays the only tier check.
 import { NextResponse, type NextRequest } from "next/server";
 
-import { SKIPPED, START_COOKIE, readStart } from "./lib/paths";
+import { SKIPPED, START_COOKIE, isAmount, isHorizon, readStart, writeStart } from "./lib/paths";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -34,8 +34,17 @@ export function proxy(request: NextRequest) {
     return searchParams.get("skip") === "1" ? remember(go("/markets", request), saved ? request.cookies.get(START_COOKIE)!.value : SKIPPED, request) : NextResponse.next();
   }
   const [, type, answer] = /^\/start\/([a-z]+)\/([a-z]+)$/.exec(pathname) ?? [];
-  const value = `${type}.${answer}`;
-  return readStart(value) ? remember(NextResponse.next(), value, request) : NextResponse.next();
+  const path = readStart(`${type}.${answer}`);
+  if (!path || path === SKIPPED) return NextResponse.next();
+  // the two optional questions arrive as ?amount=&horizon= (app/start/[type]/[answer]/more). Without them, a visitor
+  // returning to the same path keeps what they said before.
+  const amount = searchParams.get("amount"), horizon = searchParams.get("horizon");
+  const asked = searchParams.has("amount") || searchParams.has("horizon");
+  const kept = saved && saved !== SKIPPED && saved.type === path.type && saved.answer === path.answer ? saved : null;
+  const value = writeStart(asked
+    ? { ...path, amount: isAmount(amount) ? amount : null, horizon: isHorizon(horizon) ? horizon : null }
+    : kept ?? path);
+  return remember(NextResponse.next(), value, request);
 }
 
 export const config = { matcher: ["/", "/markets", "/start/:type/:answer"] };

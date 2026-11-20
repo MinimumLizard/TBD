@@ -2072,7 +2072,7 @@
     "homeTitle": "Where are you starting from?",
     "homeLead": "Pick the one closest to you and we will show you where to begin. Two questions, under a minute.",
     "popular": "Most people start here",
-    "stepOf": "Question {n} of 2",
+    "stepOf": "Question {n} of 4",
     "back": "Back",
     "again": "Start again",
     "types": {
@@ -2187,7 +2187,31 @@
     },
     "welcomeEyebrow": "Sri Lanka's markets, explained",
     "skip": "Skip: show me today's markets",
-    "promise": "Free to use. Information and education, never advice."
+    "promise": "Free to use. Information and education, never advice.",
+    "amounts": {
+      "lt100k": "Under Rs 100,000",
+      "lt1m": "Rs 100,000 to Rs 1 million",
+      "lt10m": "Rs 1 million to Rs 10 million",
+      "gt10m": "Over Rs 10 million"
+    },
+    "horizons": {
+      "lt1y": "Within a year",
+      "y1to3": "In 1 to 3 years",
+      "y3to5": "In 3 to 5 years",
+      "gt5y": "In more than 5 years"
+    },
+    "more": {
+      "title": "Two more questions, both optional",
+      "lead": "They let us show facts for amounts and periods like yours: what trading costs, and how deposits and bills have done over periods that long. Nothing is stored about you except these two answers, in your browser.",
+      "stepOf": "Questions 3 and 4 of 4",
+      "amountQuestion": "Roughly how much are you thinking about?",
+      "horizonQuestion": "When might you need this money?",
+      "preferNot": "Prefer not to say",
+      "notSure": "Not sure",
+      "submit": "Show my starting path",
+      "skip": "Skip these questions",
+      "why": "Your answers stay in your browser. They change the facts shown, never what anyone suggests: ZinvestIQ does not give advice."
+    }
   },
   "homes": {
     "eyebrow": "Your home",
@@ -2274,5 +2298,26 @@
         ]
       }
     ]
+  },
+  "money": {
+    "title": "For your amount and timeframe",
+    "change": "Change these answers",
+    "answer": "Answer two quick questions",
+    "empty": "Two optional questions, roughly how much and for how long, and this shows what trading costs at an amount like yours and how deposits and bills did over periods as long as yours.",
+    "amountTitle": "Your amount",
+    "horizonTitle": "Your timeframe",
+    "amountNone": "Tell us roughly how much you have in mind, and this shows what trading costs at that amount.",
+    "horizonNone": "Tell us when you might need the money, and this shows how deposits and bills did over every past period as long as yours.",
+    "cost": "Each share trade costs about 1.12 % of its value in brokerage and fees. On {amount}, that is about {each} to put money in and {each} again to take it out: {both} in all.",
+    "spread": "Spread over {count} shares, {amount} is about {per} each. At today's median share price on the CSE ({price}), that is about {shares} shares of each.",
+    "insured": "Deposit insurance covers up to {limit} per depositor at each licensed bank or finance company. Above that, at one institution, the rest depends on that institution.",
+    "large": "Share trades above Rs 100 million pay lower fees, and brokerage on trades above Rs 1 billion is negotiable.",
+    "calculator": "What {amount} would have grown to in deposits and bills",
+    "fd": "Over every {years}-year period since {first}, a 12-month fixed deposit renewed each year kept its value after tax and inflation in {n} of {total}.",
+    "bill": "Treasury bills, before tax and after inflation, did so in {n} of {total}.",
+    "worst": "The worst {years}-year period: {fd} a year for deposits after tax and inflation, and {bill} a year for bills after inflation.",
+    "shares": "Share prices swing far more: in the past year alone the ASPI fell {fall} at one point from its high. Our share history covers one year, so periods as long as yours cannot be shown for shares.",
+    "periods": "Every period since 2003, compared",
+    "note": "These are facts about the past and about costs, for amounts and periods like the ones you chose. They are not a suggestion of what to do with your money; nothing on ZinvestIQ is."
   }
 }

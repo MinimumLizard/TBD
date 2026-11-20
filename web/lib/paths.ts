@@ -66,22 +66,64 @@ export function answer(personaKey: string, answerKey: string): Answer | undefine
   return persona(personaKey)?.answers.find((a) => a.key === answerKey);
 }
 
-/** Every address of the flow: the first question, each follow-up question, each path. */
-export const START_PAGES = ["/start", ...PERSONAS.flatMap((p) => [`/start/${p.key}`, ...p.answers.map((a) => `/start/${p.key}/${a.key}`)])];
+// Questions 3 and 4 (the owner, 2026-11-20): roughly how much, and when it might be needed. Both are optional. What
+// they change is information only: costs at that amount, and what deposits and bills did over periods that long
+// (components/YourMoney.tsx). They never change what a tier may see, and nothing is suggested.
+export const AMOUNTS = ["lt100k", "lt1m", "lt10m", "gt10m"] as const;
+export const HORIZONS = ["lt1y", "y1to3", "y3to5", "gt5y"] as const;
+export type AmountKey = (typeof AMOUNTS)[number];
+export type HorizonKey = (typeof HORIZONS)[number];
+export const NOT_SAID = "na";
+
+/** A typical amount for each band, used for worked examples of costs ("for example, on Rs 50,000"). */
+export const EXAMPLE_AMOUNT: Record<AmountKey, number> = { lt100k: 50_000, lt1m: 500_000, lt10m: 5_000_000, gt10m: 20_000_000 };
+/** The deposit and bill periods (lk_savings_compare's horizons, in years) that fit each timeframe. */
+export const HORIZON_YEARS: Record<HorizonKey, number> = { lt1y: 1, y1to3: 3, y3to5: 5, gt5y: 10 };
+
+export function isAmount(v: unknown): v is AmountKey {
+  return typeof v === "string" && (AMOUNTS as readonly string[]).includes(v);
+}
+
+export function isHorizon(v: unknown): v is HorizonKey {
+  return typeof v === "string" && (HORIZONS as readonly string[]).includes(v);
+}
+
+/** Every address of the flow: the first question, each follow-up question, the two optional questions, each path. */
+export const START_PAGES = ["/start", ...PERSONAS.flatMap((p) => [
+  `/start/${p.key}`, ...p.answers.flatMap((a) => [`/start/${p.key}/${a.key}/more`, `/start/${p.key}/${a.key}`]),
+])];
 
 /** The home page tailored to each answer (app/home/[type]/[answer], lib/homes.ts). */
 export const HOME_PAGES = PERSONAS.flatMap((p) => p.answers.map((a) => `/home/${p.key}/${a.key}`));
 
 // What the visitor answered is remembered in one first-party cookie, set by the server when a path's page is opened
-// (web/proxy.ts): "<type>.<answer>", or "skip" for a visitor who chose to go straight to the markets. The site's
-// front door then opens on their own home page. It carries no identity and nothing about what they read.
+// (web/proxy.ts): "<type>.<answer>", "<type>.<answer>.<amount>.<horizon>" (either may be "na"), or "skip" for a
+// visitor who chose to go straight to the markets. The site's front door then opens on their own home page. It carries
+// no identity and nothing about what they read.
 export const START_COOKIE = "ziq-start";
 export const SKIPPED = "skip";
 
-export function readStart(value: string | null | undefined): { type: string; answer: string } | typeof SKIPPED | null {
+export interface Started {
+  type: string;
+  answer: string;
+  amount: AmountKey | null;
+  horizon: HorizonKey | null;
+}
+
+export function readStart(value: string | null | undefined): Started | typeof SKIPPED | null {
   if (value === SKIPPED) return SKIPPED;
-  const [type, key, ...rest] = (value ?? "").split(".");
-  return rest.length === 0 && type && key && answer(type, key) ? { type, answer: key } : null;
+  const parts = (value ?? "").split(".");
+  if (parts.length !== 2 && parts.length !== 4) return null;
+  const [type, key, amount, horizon] = parts;
+  if (!type || !key || !answer(type, key)) return null;
+  if (parts.length === 4 && ((amount !== NOT_SAID && !isAmount(amount)) || (horizon !== NOT_SAID && !isHorizon(horizon)))) {
+    return null;
+  }
+  return { type, answer: key, amount: isAmount(amount) ? amount : null, horizon: isHorizon(horizon) ? horizon : null };
+}
+
+export function writeStart(s: Started): string {
+  return s.amount || s.horizon ? `${s.type}.${s.answer}.${s.amount ?? NOT_SAID}.${s.horizon ?? NOT_SAID}` : `${s.type}.${s.answer}`;
 }
 
 /** The message key (start.tools.<key>) naming each page a step leads to. */

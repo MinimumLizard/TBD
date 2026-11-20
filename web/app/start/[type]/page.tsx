@@ -24,7 +24,7 @@ export default async function StartQuestionPage({ params }: { params: Promise<{ 
                 meta={<p className="small muted">{t("start.stepOf", { n: 2 })}</p>} />
       <div className="chooser answers">
         {p.answers.map((a) => (
-          <Link key={a.key} href={`/start/${p.key}/${a.key}`}>
+          <Link key={a.key} href={`/start/${p.key}/${a.key}/more`}>
             <span className="c-title">{t(`start.questions.${p.key}.${a.key}` as never)}</span>
           </Link>
         ))}

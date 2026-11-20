@@ -100,6 +100,9 @@ css += `
 .lab-page .lab-intro .lead { max-width: 70ch; }
 .lab-page .lab-intro ul { padding-left: 1.2rem; max-width: 70ch; }
 .lab-page .lab-intro li { margin-bottom: 4px; }
+.lab-page .lab-intro ul.three { list-style: none; padding: 0; max-width: none; display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: var(--s4) 0 var(--s5); }
+.lab-page .lab-intro ul.three li { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s4); font-size: 0.92rem; color: var(--muted); }
+.lab-page .lab-intro ul.three li b { display: block; color: var(--text); font-family: var(--display); font-size: 1.02rem; margin-bottom: 2px; }
 .lab-page h2.deeper { margin-top: var(--s7); }
 .lab-page .donuts { display: grid; grid-template-columns: 1fr; gap: var(--s2) var(--s6); margin: var(--s4) 0; }
 @media (min-width: 900px) { .lab-page .donuts { grid-template-columns: 1fr 1fr; } }
@@ -193,8 +196,28 @@ const SCRIPT = `
       });
     } catch (e) {}
   }
+  // Questions 3 and 4: the real site keeps the answers in its cookie and shows the matching facts from the server.
+  // The copy keeps them in the browser and shows the matching variant (every variant is in the page).
+  function personal() {
+    try {
+      var saved = (store.get("ziq-more") || "na.na").split(".");
+      [["amount", saved[0]], ["horizon", saved[1]]].forEach(function (kv) {
+        var els = document.querySelectorAll("#ziq-root [data-" + kv[0] + "]");
+        els.forEach(function (el) { el.hidden = el.getAttribute("data-" + kv[0]) !== (kv[1] && kv[1] !== "na" ? kv[1] : "none"); });
+      });
+      document.querySelectorAll("#ziq-root form[data-start-more]").forEach(function (f) {
+        f.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var pick = function (n) { var c = f.querySelector('input[name="' + n + '"]:checked'); return c && c.value ? c.value : "na"; };
+          store.set("ziq-more", pick("amount") + "." + pick("horizon"));
+          location.href = f.querySelector("a[data-start-next]").getAttribute("href");
+        });
+      });
+    } catch (e) {}
+  }
   function wire() {
     rememberPath();
+    personal();
     document.querySelectorAll("#ziq-root form[data-filter]").forEach(wireFilter);
     var sections = function () { return Array.prototype.slice.call(document.querySelectorAll("#ziq-root details.section")); };
     document.querySelectorAll("#ziq-root button[data-toggle-all]").forEach(function (b) {
@@ -219,7 +242,7 @@ const SCRIPT = `
   var home = store.get("ziq-path");
   if (root.hasAttribute("data-front-door") && home && /^[A-Za-z0-9_.-]+\\.html$/.test(home)) { location.replace(home); return; }
   document.querySelectorAll("[data-pv-reset]").forEach(function (b) {
-    b.addEventListener("click", function () { try { localStorage.removeItem("ziq-path"); } catch (e) {} location.href = "index.html"; });
+    b.addEventListener("click", function () { try { localStorage.removeItem("ziq-path"); localStorage.removeItem("ziq-more"); } catch (e) {} location.href = "index.html"; });
   });
   var original = root.innerHTML;
   function setTier(tier) {

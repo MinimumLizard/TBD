@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { GUIDE_SLUGS } from "@/lib/guides";
-import { PERSONAS, START_PAGES, TOOL_KEYS, answer, persona } from "@/lib/paths";
+import { AMOUNTS, HORIZONS, HORIZON_YEARS, PERSONAS, START_PAGES, TOOL_KEYS, answer, persona } from "@/lib/paths";
 import { ALL_PAGES } from "@/lib/routes";
 
 const messages = JSON.parse(readFileSync(join(__dirname, "../../messages/en.json"), "utf8"));
@@ -52,7 +52,7 @@ describe("starting paths", () => {
   });
 
   it("every address of the flow is a page the leak tests visit, and unknown ones are not paths", () => {
-    expect(START_PAGES).toHaveLength(1 + PERSONAS.length + PERSONAS.reduce((n, p) => n + p.answers.length, 0));
+    expect(START_PAGES).toHaveLength(1 + PERSONAS.length + 2 * PERSONAS.reduce((n, p) => n + p.answers.length, 0));
     for (const url of START_PAGES) expect(ALL_PAGES).toContain(url);
     expect(answer("new", "shares")).toBeUndefined();
     expect(answer("nobody", "cash")).toBeUndefined();
@@ -62,6 +62,22 @@ describe("starting paths", () => {
   it("each statistic has its value, label and source", () => {
     for (const k of ["investors", "literacy", "savers"]) {
       for (const f of ["value", "label", "source"]) expect(typeof start.stats[k][f], `${k}.${f}`).toBe("string");
+    }
+  });
+});
+
+describe("questions 3 and 4", () => {
+  it("every amount and timeframe has its text, and every money sentence exists", () => {
+    for (const a of AMOUNTS) expect(typeof start.amounts[a], a).toBe("string");
+    for (const h of HORIZONS) {
+      expect(typeof start.horizons[h], h).toBe("string");
+      expect([1, 3, 5, 10]).toContain(HORIZON_YEARS[h]);           // lk_savings_compare's horizons
+    }
+    for (const k of ["title", "lead", "amountQuestion", "horizonQuestion", "submit", "skip"]) {
+      expect(typeof start.more[k], k).toBe("string");
+    }
+    for (const k of ["cost", "spread", "insured", "fd", "bill", "worst", "shares", "note"]) {
+      expect(typeof messages.money[k], k).toBe("string");
     }
   });
 });
