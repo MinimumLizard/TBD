@@ -382,8 +382,10 @@
       "accounts": "Accounts that dealt",
       "accountsSum": "The {count} accounts with the largest value dealt",
       "accountsWhy": "The same people and companies appear across several listed companies. Adding up their dealings shows who was most active across the market.",
-      "accountsHow": "Each account is named as filed, with the group it belongs to where known, the value it purchased and disposed of, and the companies it dealt in."
-    }
+      "accountsHow": "Each account is named as filed, with the group it belongs to where known, the value it purchased and disposed of, and the companies it dealt in.",
+      "matching": "Dealings matching “{query}”"
+    },
+    "searchPlaceholder": "Search a director, account or company"
   },
   "share": {
     "titleSuffix": "share",
@@ -598,7 +600,6 @@
     "zscoresLink": "Residuals against their own history",
     "executionLink": "Trades against quotes",
     "carryLink": "Carry, rolldown and duration",
-    "wideQuotes": "Wide quotes (little weight)",
     "wideQuote": "wide",
     "eyebrow": "Bonds & bills",
     "leadLong": "Today's dealer quotes, the yield curve through them, and each bond against it.",
@@ -612,7 +613,7 @@
       "curve": "Today's yield curve",
       "curveSum": "1 year {y1} · 5 years {y5} · 10 years {y10}",
       "curveWhy": "The curve shows what the government pays to borrow for each length of time. Every rupee interest rate, from treasury bills to fixed deposits, is set with it in view.",
-      "curveHow": "Each dot is a bond: across, the years it has left; up, its yield. The line is the smooth curve that fits them best. A dot above the line is quoted at a higher yield than bonds of a similar maturity, a dot below at a lower one. Hollow dots are quotes with a wide gap between bid and offer, which count for less in the fit.",
+      "curveHow": "Each dot is a bond: across, the years it has left; up, its yield. The line is the curve that fits them best. A dot above the line is quoted at a higher yield than bonds of a similar maturity. Quotes with a very wide gap between bid and offer count for little in the fit and are not drawn.",
       "table": "All bonds today",
       "tableSum": "{n} bonds quoted; distance from the curve, trading activity and turnover for each",
       "tableWhy": "The table puts every bond's quote, its distance from the curve and how actively it trades side by side, so a figure can be read with its context.",
@@ -778,7 +779,9 @@
     "tagline": "Sri Lanka's share market, government bonds and bills, and savings, explained in plain language. Information and education, never investment advice.",
     "markets": "Markets",
     "company": "ZinvestIQ",
-    "learn": "Learn"
+    "learn": "Learn",
+    "dark": "Dark mode",
+    "light": "Light mode"
   },
   "models": {
     "bond_identity": {
@@ -2374,11 +2377,10 @@
       "costs": "Costs",
       "share": "Share",
       "sector": "Sector",
-      "weight": "Weight"
+      "weight": "Weight",
+      "corr": "Corr.",
+      "risk": "Risk share"
     },
-    "holdingsTitle": "All {count} shares",
-    "holdingsSum": "Largest: {top}, {weight}",
-    "atCap": "at the 10 % cap",
     "rulesTitle": "The rules",
     "rulesSum": "Five steps, written before any result was seen",
     "rules": [
@@ -2388,7 +2390,27 @@
       "The 15 largest weights, re-optimised with a floor so each position is worth its costs.",
       "Only what was known on each date is used. No forecast of returns."
     ],
-    "note": "Rules applied to public data, for education. It does not know you and is not investment advice."
+    "note": "Rules applied to public data, for education. It does not know you and is not investment advice.",
+    "whyTitle": "Why these 15: the numbers",
+    "whySum": "Steadier than most shares, and moving largely on their own",
+    "why": {
+      "est": "Estimated swings",
+      "median": "median CSE share {value}",
+      "corr": "Correlation",
+      "corrNote": "average; 0 none, 1 in step",
+      "effective": "Effective holdings",
+      "effectiveNote": "of 15 names",
+      "largest": "Largest weight",
+      "cap": "cap 10 %",
+      "tested": "Tested week by week for {weeks} weeks: the portfolio built with this risk model swung {ours} a year, against {simple} with the simplest estimate, {market} for the ASPI and {equal} for every share equally weighted.",
+      "read": "Swings: volatility a year. Corr.: how closely a share moves with the others. Risk share: its part of the portfolio's swings."
+    },
+    "last": {
+      "date": "Last review",
+      "in": "Came in",
+      "out": "Went out",
+      "traded": "Traded"
+    }
   },
   "codes": {
     "title": "Cheat codes",
@@ -2431,7 +2453,21 @@
       "owners": "Owners",
       "dealings": "Directors' trades",
       "flows": "Money flow"
-    }
+    },
+    "go": "Search",
+    "open": "Open the full page",
+    "flowsPlaceholder": "A company, e.g. JKH",
+    "companyPlaceholder": "A company name or symbol",
+    "weekLate": "Free view: a week late, to {date}.",
+    "daysLate": "Free view: {n} days late, to {date}.",
+    "net": "net",
+    "accounts": "{n, plural, one {# account} other {# accounts}}",
+    "ownersNote": "Free: the top three holders. Pro: the top 20, the controller and the chain.",
+    "groupsNote": "Open a company, then Who owns it: its controller, the holding it sits under, and its sister companies.",
+    "totalReturnNote": "Sort every share by its return with dividends included, over 1 week, 1 month and 3 months.",
+    "fdRate": "12-month FD",
+    "fdAfterTax": "After tax",
+    "inflation": "Inflation"
   },
   "tabs": {
     "label": "Main",

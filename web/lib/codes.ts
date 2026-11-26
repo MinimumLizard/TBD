@@ -13,8 +13,8 @@ export interface CheatCode {
 export const CODES: CheatCode[] = [
   { key: "dealings", href: "/cse/dealings", tier: "free" },
   { key: "flows", href: "/cse/dealings#flows", tier: "pro" },
-  { key: "owners", href: "/search?q=", tier: "free" }, // the top three free; the top 20 in Pro
-  { key: "groups", href: "/search?q=", tier: "pro" },
+  { key: "owners", href: "/search", tier: "free" }, // the top three free; the top 20 in Pro
+  { key: "groups", href: "/search", tier: "pro" },
   { key: "totalReturn", href: "/cse/shares/compare", tier: "pro" },
   { key: "lab", href: "/cse/lab", tier: "pro" },
   { key: "fd", href: "/learn/savings", tier: "free" },

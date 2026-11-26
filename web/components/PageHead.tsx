@@ -11,11 +11,14 @@ export default async function PageHead({ eyebrow, title, lead, meta, parts }: {
 }) {
   const t = await getTranslations();
   return (
+    <>
     <header className="page-head">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h1>{title}</h1>
       {lead && <p className="lead">{lead}</p>}
       {meta}
+    </header>
+      {/* outside the header, so on a phone it can stay pinned while the page scrolls */}
       {parts && parts.length > 1 && (
         <nav className="onpage" aria-label={t("ui.onThisPage")}>
           <span className="onpage-label">{t("ui.onThisPage")}</span>
@@ -27,6 +30,6 @@ export default async function PageHead({ eyebrow, title, lead, meta, parts }: {
           </button>
         </nav>
       )}
-    </header>
+    </>
   );
 }

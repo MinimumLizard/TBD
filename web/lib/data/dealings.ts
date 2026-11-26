@@ -62,6 +62,22 @@ export async function recentDealings(viewer: Viewer, limit = 60): Promise<Result
   );
 }
 
+/** Counted transactions whose company, director or account matches `query` (as filed), newest first: the search on
+ * the dealings page and the cheat codes. */
+export async function searchDealings(viewer: Viewer, query: string, limit = 60): Promise<Result<Dealing[]>> {
+  return withModel(viewer, "cse_dealings", async (g) => {
+    const like = `%${query.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+    const ids = (await readOutput<{ transaction_id: string }>(g, "models.cse_dealing_as_filed", {
+      columns: ["transaction_id"], where: "director ilike ? or account ilike ?", params: [like, like], limit: 2000,
+    })).map((r) => r.transaction_id);
+    return named(g, await readOutput<Dealing>(g, "models.cse_dealing", {
+      columns: DEALING_COLUMNS,
+      where: "superseded_by is null and deal_date is not null and (symbol ilike ? or company ilike ? or transaction_id = any(?))",
+      params: [like, like, ids], orderBy: NEWEST_FIRST, limit,
+    }));
+  });
+}
+
 /** One company's counted transactions, newest first. `code` is the company code ("AAA"), or a share ("AAA.N0000"). */
 export async function companyDealings(viewer: Viewer, code: string): Promise<Result<Dealing[]>> {
   return withModel(viewer, "cse_dealings", async (g) =>

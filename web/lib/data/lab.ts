@@ -15,6 +15,7 @@ export interface LabHolding {
   sector: string | null;
   volatility: number | null;
   avg_correlation: number | null;
+  risk_contribution: number | null; // its share of the portfolio's estimated risk
   at_cap: boolean;
 }
 
@@ -38,6 +39,15 @@ export interface LabEvent {
   names_out: string;
   turnover: number;
   cost: number;
+  nav: number;
+  model_volatility: number | null; // the portfolio's estimated volatility at the review
+  universe_volatility_median: number | null; // the median share's, among every share the rules considered
+}
+
+export interface LabRiskTest {
+  estimator: string; // daily (the lab's), constant_corr, single_index, oas, identity; ref_market, ref_equal_weight
+  realised_volatility: number;
+  n_weeks: number;
 }
 
 export interface Lab {
@@ -46,6 +56,7 @@ export interface Lab {
   summaries: LabSummary[]; // the example under each schedule, and the market and bills beside it
   nav: { session_date: string; portfolio: string; nav: number }[]; // the example, the market, bills
   events: LabEvent[]; // the example's reviews and drift trades
+  riskTest: LabRiskTest[]; // the 15-name portfolio built with each risk estimate, held a week at a time
 }
 
 export async function lab(viewer: Viewer): Promise<Result<Lab>> {
@@ -55,10 +66,10 @@ export async function lab(viewer: Viewer): Promise<Result<Lab>> {
       columns: ["as_of"], where: "policy = ? and portfolio = ? and applied", params: [policy, portfolio],
       orderBy: "as_of desc", limit: 1,
     });
-    const [holdings, summaries, nav, events] = await Promise.all([
+    const [holdings, summaries, nav, events, riskTest] = await Promise.all([
       latest
         ? readOutput<LabHolding>(g, "models.cse_bt_target", {
-            columns: ["symbol", "weight", "sector", "volatility", "avg_correlation", "at_cap"],
+            columns: ["symbol", "weight", "sector", "volatility", "avg_correlation", "risk_contribution", "at_cap"],
             where: "as_of = ? and policy = ? and portfolio = ? and applied", params: [latest.as_of, policy, portfolio],
             orderBy: "weight desc",
           })
@@ -73,10 +84,14 @@ export async function lab(viewer: Viewer): Promise<Result<Lab>> {
         params: [policy, portfolio], orderBy: "session_date",
       }),
       readOutput<LabEvent>(g, "models.cse_bt_event", {
-        columns: ["session_date", "kind", "names_in", "names_out", "turnover", "cost"],
+        columns: ["session_date", "kind", "names_in", "names_out", "turnover", "cost", "nav", "model_volatility",
+                  "universe_volatility_median"],
         where: "policy = ? and portfolio = ?", params: [policy, portfolio], orderBy: "session_date",
       }),
+      readOutput<LabRiskTest>(g, "models.cse_bt_risk_test", {
+        columns: ["estimator", "realised_volatility", "n_weeks"], where: "scope = 'k15'", orderBy: "realised_volatility",
+      }),
     ]);
-    return { formedOn: latest?.as_of ?? null, holdings, summaries, nav, events };
+    return { formedOn: latest?.as_of ?? null, holdings, summaries, nav, events, riskTest };
   });
 }

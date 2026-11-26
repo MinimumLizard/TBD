@@ -11,7 +11,7 @@ export interface FilterSelect {
 // A search box (and optional drop-downs) over a list. It is a plain GET form, so it works without JavaScript; with
 // it, the list filters as the visitor types (components/PageScripts.tsx). `scope` is the id of the element holding
 // the items (each with data-search, and data-<select name> for each drop-down).
-export default async function FilterBar({ scope, action, placeholder, query, selects = [], shown, total }: {
+export default async function FilterBar({ scope, action, placeholder, query, selects = [], shown, total, server = false }: {
   scope: string;
   action: string;
   placeholder: string;
@@ -19,10 +19,11 @@ export default async function FilterBar({ scope, action, placeholder, query, sel
   selects?: FilterSelect[];
   shown: number;
   total: number;
+  server?: boolean; // submit asks the server (it searches beyond the rows on the page); typing still filters live
 }) {
   const t = await getTranslations();
   return (
-    <form className="filter-bar" method="get" action={action} role="search" data-filter={scope}>
+    <form className="filter-bar" method="get" action={action} role="search" data-filter={scope} data-server={server ? "" : undefined}>
       <label className="filter-q">
         <span className="visually-hidden">{placeholder}</span>
         <input type="search" name="q" defaultValue={query} placeholder={placeholder} autoComplete="off" />

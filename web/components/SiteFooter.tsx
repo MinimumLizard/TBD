@@ -55,6 +55,9 @@ export default async function SiteFooter() {
         </form>
         <Disclaimer keys={SITE_WIDE_DISCLAIMERS} />
         <p style={{ marginTop: 12 }}>{t("footer.rights")}</p>
+        <button type="button" className="theme-toggle" data-theme-toggle="" data-dark={t("footer.dark")} data-light={t("footer.light")} hidden>
+          {t("footer.dark")}
+        </button>
       </div>
     </footer>
   );

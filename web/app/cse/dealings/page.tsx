@@ -5,12 +5,14 @@ import AsOf from "@/components/AsOf";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import DealingsTable from "@/components/DealingsTable";
+import FilterBar from "@/components/FilterBar";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import PreviewNote from "@/components/PreviewNote";
 import StatTile from "@/components/StatTile";
 import Term from "@/components/Term";
-import { dealingNames, flows, recentDealings } from "@/lib/data/dealings";
+import { dealingNames, flows, recentDealings, searchDealings } from "@/lib/data/dealings";
+import { matchesQuery, param, searchText } from "@/lib/filter";
 import { WINDOWS, flowWindow } from "@/lib/dealings-display";
 import { date, int, lkr } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
@@ -19,6 +21,7 @@ export const dynamic = "force-dynamic";
 
 const SHOWN_COMPANIES = 25;
 const SHOWN_DEALINGS = 30;
+const SEARCHABLE_DEALINGS = 300; // the latest 300 filter as you type; a submitted search covers every dealing
 const rs = (v: number) => (v === 0 ? "0" : lkr(v)); // no dealings on that side: a plain 0, not "Rs 0.00 mn"
 
 export async function generateMetadata() {
@@ -29,11 +32,13 @@ export async function generateMetadata() {
 export default async function DealingsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const [t, viewer, params] = await Promise.all([getTranslations(), getViewer(), searchParams]);
   const window = flowWindow(params.window);
-  const [recent, flow] = await Promise.all([recentDealings(viewer, SHOWN_DEALINGS), flows(viewer, window)]);
+  const query = param(params.q);
+  const [recent, flow] = await Promise.all([query ? searchDealings(viewer, query) : recentDealings(viewer, SEARCHABLE_DEALINGS),
+                                            flows(viewer, window)]);
   const f = flow.data;
   const largeNames = (await dealingNames(viewer, (f?.large ?? []).map((d) => d.transaction_id))).data ?? new Map();
   const shareHref = (code: string) => `/cse/shares/${encodeURIComponent(`${code}.N0000`)}`;
-  const companies = f?.companies ?? [];
+  const companies = (f?.companies ?? []).filter((c) => matchesQuery(searchText(c.symbol, c.company), query));
   const recentRows = recent.data ?? [];
   const parts = [
     { id: "recent", label: t("dealings.sections.recent") },
@@ -45,9 +50,13 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
     <>
       <PageHead eyebrow={t("cse.eyebrow")} title={t("dealings.title")} lead={t("dealings.intro")}
                 meta={<p className="small muted">{t("dealings.namesNote")}</p>} parts={parts} />
+      <FilterBar scope="dealings-body" action="/cse/dealings" placeholder={t("dealings.searchPlaceholder")} query={query} server
+                 shown={Math.min(recentRows.length, query ? recentRows.length : SHOWN_DEALINGS) + Math.min(companies.length, SHOWN_COMPANIES)}
+                 total={recentRows.length + Math.min(companies.length, SHOWN_COMPANIES)} />
+      <div id="dealings-body" data-idle-list="" data-idle={query ? undefined : ""}>
 
-      <Section id="recent" open title={t("dealings.sections.recent")}
-               summary={recent.access.allowed && recentRows.length ? t("dealings.sections.recentSum", { count: recentRows.length, date: date(recentRows[0].deal_date) }) : undefined}
+      <Section id="recent" open title={query ? t("dealings.sections.matching", { query }) : t("dealings.sections.recent")}
+               summary={recent.access.allowed && recentRows.length ? t("dealings.sections.recentSum", { count: query ? recentRows.length : Math.min(recentRows.length, SHOWN_DEALINGS), date: date(recentRows[0].deal_date) }) : undefined}
                why={t("dealings.sections.recentWhy")} how={<p>{t("dealings.sections.recentHow")}</p>} related={guide}>
         {!recent.access.allowed ? (
           <Locked access={recent.access} />
@@ -55,9 +64,9 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
           <p className="muted">{t("dealings.none")}</p>
         ) : (
           <>
-            <DealingsTable rows={recentRows} showCompany />
+            <DealingsTable rows={recentRows} showCompany visible={query ? undefined : SHOWN_DEALINGS} />
             <p className="small muted">
-              {t("dealings.recentNote", { count: recentRows.length })} {t("dealings.sideOtherNote")}
+              {t("dealings.recentNote", { count: query ? recentRows.length : Math.min(recentRows.length, SHOWN_DEALINGS) })} {t("dealings.sideOtherNote")}
             </p>
           </>
         )}
@@ -107,7 +116,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                   </thead>
                   <tbody>
                     {companies.slice(0, SHOWN_COMPANIES).map((c) => (
-                      <tr key={c.symbol}>
+                      <tr key={c.symbol} data-search={searchText(c.symbol, c.company)}>
                         <td>
                           <Link href={shareHref(c.symbol)}>{c.symbol}</Link>
                           <span className="sub">{c.company}</span>
@@ -201,7 +210,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
                   </thead>
                   <tbody>
                     {f.accounts.map((a) => (
-                      <tr key={a.actor_key}>
+                      <tr key={a.actor_key} data-search={searchText(a.actor, a.actor_group, a.companies)}>
                         <td className="names">
                           {a.actor}
                           <span className="sub">{t(`dealings.actorTypes.${a.actor_type}` as never)}</span>
@@ -227,6 +236,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
           )}
         </>
       )}
+      </div>
       <ModelFooter models={[...(recent.access.allowed ? ["cse_dealings" as const] : []),
                             ...(flow.access.allowed ? ["cse_flows" as const] : [])]} />
     </>

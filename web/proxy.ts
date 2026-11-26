@@ -4,6 +4,7 @@
 // Tiers are not decided here: lib/entitlements.ts stays the only tier check.
 import { NextResponse, type NextRequest } from "next/server";
 
+import { LOCK_HEADERS, locked } from "./lib/lock";
 import { SKIPPED, START_COOKIE, isAmount, isHorizon, readStart, writeStart } from "./lib/paths";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
@@ -22,6 +23,16 @@ function go(path: string, request: NextRequest): NextResponse {
 }
 
 export function proxy(request: NextRequest) {
+  // a private soft launch: with SITE_PASSWORD set, everything asks for it first (lib/lock.ts)
+  if (locked(request.headers.get("authorization"), process.env.SITE_PASSWORD)) {
+    return new NextResponse("ZinvestIQ is in private preview.", { status: 401, headers: LOCK_HEADERS });
+  }
+  const response = frontDoor(request);
+  if (process.env.SITE_PASSWORD) response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return response;
+}
+
+function frontDoor(request: NextRequest): NextResponse {
   const { pathname, searchParams } = request.nextUrl;
   const saved = readStart(request.cookies.get(START_COOKIE)?.value);
   if (pathname === "/") {
@@ -47,4 +58,6 @@ export function proxy(request: NextRequest) {
   return remember(NextResponse.next(), value, request);
 }
 
-export const config = { matcher: ["/", "/markets", "/start/:type/:answer"] };
+// Every request but the build's static files (the lock covers every page and API; the front door acts only on "/",
+// "/markets" and the starting paths, above).
+export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"] };

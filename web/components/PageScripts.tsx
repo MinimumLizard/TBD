@@ -27,7 +27,8 @@ function wireFilter(form: HTMLFormElement): () => void {
   if (!scope || !input) return () => {};
   const selects = Array.from(form.querySelectorAll<HTMLSelectElement>("select"));
   const count = form.querySelector<HTMLElement>("[data-filter-count]");
-  form.querySelector<HTMLElement>("[data-filter-go]")?.setAttribute("hidden", "");
+  const server = form.dataset.server !== undefined; // submit goes to the server, which searches further
+  if (!server) form.querySelector<HTMLElement>("[data-filter-go]")?.setAttribute("hidden", "");
   const items = Array.from(scope.querySelectorAll<HTMLElement>("[data-search]"));
   const groups = Array.from(scope.querySelectorAll<HTMLElement>("[data-group]"));
   for (const g of groups) if (g instanceof HTMLDetailsElement && g.dataset.openInitial === undefined) g.dataset.openInitial = String(g.open);
@@ -52,7 +53,7 @@ function wireFilter(form: HTMLFormElement): () => void {
     }
     window.history.replaceState(window.history.state, "", url);
   };
-  const onSubmit = (e: Event) => { e.preventDefault(); apply(); };
+  const onSubmit = (e: Event) => { if (server) return; e.preventDefault(); apply(); };
   form.addEventListener("submit", onSubmit);
   input.addEventListener("input", apply);
   selects.forEach((s) => s.addEventListener("change", apply));
@@ -98,8 +99,39 @@ export default function PageScripts() {
     menus().forEach((m) => m.addEventListener("toggle", onMenu));
     document.addEventListener("click", onClick);
     const filters = Array.from(document.querySelectorAll<HTMLFormElement>("form[data-filter]")).map(wireFilter);
+    // dark mode, only by choice (the footer's button), remembered in this browser
+    const themeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-theme-toggle]"));
+    const themeLabel = (b: HTMLButtonElement) => {
+      b.textContent = document.documentElement.dataset.theme === "dark" ? b.dataset.light ?? "" : b.dataset.dark ?? "";
+    };
+    const onTheme = () => {
+      const dark = document.documentElement.dataset.theme !== "dark";
+      if (dark) document.documentElement.dataset.theme = "dark";
+      else delete document.documentElement.dataset.theme;
+      try { localStorage.setItem("ziq-theme", dark ? "dark" : "light"); } catch { /* private mode: not remembered */ }
+      themeButtons.forEach(themeLabel);
+    };
+    for (const b of themeButtons) { b.hidden = false; themeLabel(b); b.addEventListener("click", onTheme); }
+    // the pinned section links (phones): mark the section on screen, and keep its link in view
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".onpage a[href^='#']"));
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        let current: HTMLAnchorElement | null = null;
+        for (const a of links) {
+          const el = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+          if (el && el.getBoundingClientRect().top < 140) current = a;
+        }
+        links.forEach((a) => a.classList.toggle("current", a === current));
+        if (current?.parentElement) current.parentElement.scrollTo({ left: current.offsetLeft - 16, behavior: "smooth" });
+      });
+    };
+    if (links.length) { window.addEventListener("scroll", onScroll, { passive: true }); onScroll(); }
     return () => {
       filters.forEach((off) => off());
+      themeButtons.forEach((b) => b.removeEventListener("click", onTheme));
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("hashchange", openTarget);
       toggles.forEach((b) => b.removeEventListener("click", onToggle));
       menus().forEach((m) => m.removeEventListener("toggle", onMenu));

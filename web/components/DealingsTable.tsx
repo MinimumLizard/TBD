@@ -3,11 +3,16 @@ import { getTranslations } from "next-intl/server";
 
 import Term from "./Term";
 import type { Dealing } from "@/lib/data/dealings";
+import { searchText } from "@/lib/filter";
 import { date, int, lkr, num } from "@/lib/format";
 
 // Directors' dealings as disclosed, with the names the company filed: one row per transaction. The side and value come first, so a
 // phone shows them without scrolling the table sideways.
-export default async function DealingsTable({ rows, showCompany = false }: { rows: Dealing[]; showCompany?: boolean }) {
+export default async function DealingsTable({ rows, showCompany = false, visible }: {
+  rows: Dealing[];
+  showCompany?: boolean;
+  visible?: number; // rows after this many are shown only while the list is being searched (data-extra)
+}) {
   const t = await getTranslations();
   return (
     <div className="table-wrap">
@@ -26,8 +31,9 @@ export default async function DealingsTable({ rows, showCompany = false }: { row
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.transaction_id}>
+          {rows.map((r, i) => (
+            <tr key={r.transaction_id} data-search={searchText(r.symbol, r.company, r.director, r.account)}
+                data-extra={visible !== undefined && i >= visible ? "" : undefined}>
               <td>{date(r.deal_date)}</td>
               {showCompany && (
                 <td>

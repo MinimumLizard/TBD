@@ -19,6 +19,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [locale, t, viewer, messages] = await Promise.all([getLocale(), getTranslations(), getViewer(), getMessages()]);
   return (
     <html lang={locale}>
+      <head>
+        {/* dark mode only when the visitor chose it (footer button); applied before the page paints */}
+        <script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('ziq-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}" }} />
+      </head>
       <body>
         <a href="#main" className="skip">
           {t("site.skip")}

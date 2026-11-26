@@ -81,16 +81,16 @@ let css = "";
 for (const m of first.matchAll(/<link rel="stylesheet" href="([^"]+\.css)"[^>]*>/g)) css += await (await fetch(BASE + m[1])).text();
 css = css.replace(/@font-face\s*{[^}]*}/g, "");
 css += `
-.pv-bar { background: #0c1a33; color: #e6ebf4; font: 13px/1.4 Inter, system-ui, sans-serif; padding: 8px 16px; display: flex; gap: 8px 18px;
+.pv-bar { background: #eef2f8; color: #0c1a33; border-bottom: 1px solid #dfe5ee; font: 13px/1.4 Inter, system-ui, sans-serif; padding: 8px 16px; display: flex; gap: 8px 18px;
   flex-wrap: wrap; align-items: center; justify-content: center; }
 .pv-bar strong { font-weight: 600; }
 .pv-group { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .pv-group > span { opacity: .75; margin-right: 2px; }
-.pv-group button { font: inherit; color: #e6ebf4; background: transparent; border: 1px solid rgba(255,255,255,.3); border-radius: 999px;
+.pv-group button { font: inherit; color: #0c1a33; background: #ffffff; border: 1px solid #c1cad6; border-radius: 999px;
   padding: 1px 10px; cursor: pointer; }
-.pv-group button[aria-pressed="true"] { background: #e6ebf4; color: #0c1a33; font-weight: 600; }
+.pv-group button[aria-pressed="true"] { background: #1b4f9c; border-color: #1b4f9c; color: #ffffff; font-weight: 600; }
 .pv-group button .pv-same { opacity: .6; font-size: 11px; }
-.pv-bar a { color: #e6ebf4; text-decoration: underline; }
+.pv-bar a { color: #1b4f9c; text-decoration: underline; }
 /* The internal lab page. Its charts carry their own styles (data_platform/jobs/lab_charts.py), drawn in the site's
    tokens, so they follow the light and dark themes. */
 .lab-page .notice.warn b { font-weight: 600; }
@@ -118,6 +118,7 @@ css += `
 // does on the real site), and the charts.
 const SCRIPT = `
 (function () {
+  try { if (localStorage.getItem("ziq-theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch (e) {}
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
                 set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   function v(n, f) { var x = getComputedStyle(document.documentElement).getPropertyValue(n).replace(/^\\s+|\\s+$/g, ""); return x || f; }
@@ -215,8 +216,34 @@ const SCRIPT = `
       });
     } catch (e) {}
   }
+  function themeButtons() {
+    document.querySelectorAll("#ziq-root button[data-theme-toggle]").forEach(function (b) {
+      var label = function () { b.textContent = document.documentElement.dataset.theme === "dark" ? b.dataset.light : b.dataset.dark; };
+      b.hidden = false; label();
+      b.addEventListener("click", function () {
+        var dark = document.documentElement.dataset.theme !== "dark";
+        if (dark) document.documentElement.dataset.theme = "dark"; else delete document.documentElement.dataset.theme;
+        store.set("ziq-theme", dark ? "dark" : "light"); label(); charts();
+      });
+    });
+  }
+  var onScroll = null;
+  function currentSection() {
+    if (onScroll) window.removeEventListener("scroll", onScroll);
+    var links = Array.prototype.slice.call(document.querySelectorAll("#ziq-root .onpage a[href^='#']"));
+    if (!links.length) return;
+    onScroll = function () {
+      var current = null;
+      links.forEach(function (a) { var el = document.getElementById(decodeURIComponent(a.hash.slice(1))); if (el && el.getBoundingClientRect().top < 140) current = a; });
+      links.forEach(function (a) { a.classList.toggle("current", a === current); });
+      if (current && current.parentElement) current.parentElement.scrollLeft = current.offsetLeft - 16;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  }
   function wire() {
     rememberPath();
+    themeButtons();
+    currentSection();
     personal();
     document.querySelectorAll("#ziq-root form[data-filter]").forEach(wireFilter);
     var sections = function () { return Array.prototype.slice.call(document.querySelectorAll("#ziq-root details.section")); };
@@ -270,7 +297,7 @@ function rewriteBody(html) {
     // the copy has no server behind it: the site's search box opens the copy's search page (which filters itself);
     // other forms (feedback, the calculator, list filters) are not sent anywhere
     .replace(/<form\b([^>]*?)action="([^"]*)"/g, (m, attrs, action) =>
-      action === "/search" ? `<form${attrs}action="${fileName("/search")}"`
+      action === "/search" || action === "/cse/dealings" ? `<form${attrs}action="${fileName(action)}"`
         // nothing typed into the copy is sent or kept: the sign-up form only opens the thank-you page
         : action === "/api/signup" ? `<form${attrs}action="#" onsubmit="location.href='${fileName("/signup/thanks")}';return false"`
         : `<form${attrs}action="#" onsubmit="return false"`);

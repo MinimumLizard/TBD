@@ -86,10 +86,11 @@ export default async function BondsPage({ searchParams }: { searchParams: Promis
             height={380}
             option={curveOption({
                 quotes: curve.data!.points.filter((p) => p.source === "quote" && (p.weight ?? 1) >= LOW_WEIGHT).map((p) => [p.tau_years, p.observed_yield, bondName(p.isin, ref.data)]),
-                wide: curve.data!.points.filter((p) => p.source === "quote" && (p.weight ?? 1) < LOW_WEIGHT).map((p) => [p.tau_years, p.observed_yield, bondName(p.isin, ref.data)]),
+                // wide, administered quotes (a tiny weight in the fit) are left off the chart: they sat in a flat band and
+                // added nothing to read (owner, 2026-11-26); the table still marks them "wide"
                 trades: curve.data!.points.filter((p) => p.source === "trade").map((p) => [p.tau_years, p.observed_yield, bondName(p.isin, ref.data)]),
                 curve: curvePoints(fit, Math.max(...curve.data!.points.map((p) => p.tau_years))),
-                names: { quotes: t("bonds.quotes"), wide: t("bonds.wideQuotes"), trades: t("bonds.trades"), curve: t("bonds.curve"), years: t("bonds.years"), yield: t("bonds.yield") },
+                names: { quotes: t("bonds.quotes"), trades: t("bonds.trades"), curve: t("bonds.curve"), years: t("bonds.years"), yield: t("bonds.yield") },
               })}
           />
           <p className="small muted">

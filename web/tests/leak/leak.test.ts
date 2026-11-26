@@ -155,6 +155,22 @@ describe("everyone", () => {
     }
   });
 
+  test("the cheat codes page previews each paid model only to the tiers that see it", async () => {
+    for (const tier of TIERS) {
+      const page = await get("/codes", tier);
+      expect(page.status).toBe(200);
+      for (const model of ["cse_flows", "cse_lab_backtest", "bond_rv_zscores", "cse_fundamentals", "cse_total_returns"] as const) {
+        const m = markers.models[model];
+        const mode = expectation(model, tier);
+        if (mode === "full") continue;
+        for (const v of [...m.new.page, ...m.new.api, ...(m.mid?.page ?? []), ...(m.mid?.api ?? [])]) {
+          expect(page.body, `/codes as ${tier} leaked ${model} ${v}`).not.toContain(v);
+        }
+        if (mode === "denied") for (const v of [...m.old.page, ...m.old.api]) expect(page.body, `/codes as ${tier} leaked ${model} ${v}`).not.toContain(v);
+      }
+    }
+  });
+
   test("a bond's own page shows each part of its analysis only to the tiers that include it", async () => {
     for (const tier of TIERS) {
       const page = await get(DETAIL[0], tier);

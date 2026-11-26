@@ -13,7 +13,7 @@ import { companyName } from "@/lib/cse-display";
 import { securityNames } from "@/lib/data/cse";
 import { type LabSummary, lab } from "@/lib/data/lab";
 import { FLAGSHIP, SCHEDULES } from "@/lib/lab-display";
-import { date, monthYear, pct, percent, rupees } from "@/lib/format";
+import { date, monthYear, num, pct, percent, rupees } from "@/lib/format";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +77,12 @@ export default async function LabPage() {
   ]);
   const reviews = d.events.filter((e) => e.kind !== "drift");
   const totalCost = d.events.reduce((s, e) => s + e.cost, 0);
+  const last = reviews[reviews.length - 1];
+  const sumW = d.holdings.reduce((s, h) => s + h.weight, 0) || 1;
+  const effective = 1 / d.holdings.reduce((s, h) => s + (h.weight / sumW) ** 2, 0);
+  const avgCorr = d.holdings.reduce((s, h) => s + h.weight * (h.avg_correlation ?? 0), 0) / sumW;
+  const rt = (e: string) => d.riskTest.find((r) => r.estimator === e)?.realised_volatility;
+  const codes = (list: string) => list.split(",").filter(Boolean).map(code).join(", ") || "–";
   return (
     <>
       {head}
@@ -98,6 +104,40 @@ export default async function LabPage() {
                slices={slices([...sectors.entries()], other)} />
       </div>
 
+      <Section id="why" open title={t("lab.whyTitle")} summary={t("lab.whySum")}>
+        <dl className="mini-stats four">
+          <div><dt>{t("lab.why.est")}</dt><dd>{percent((last?.model_volatility ?? 0) * 100, 1)}</dd>
+            <dd className="muted">{t("lab.why.median", { value: percent((last?.universe_volatility_median ?? 0) * 100, 1) })}</dd></div>
+          <div><dt>{t("lab.why.corr")}</dt><dd>{num(avgCorr, 2)}</dd><dd className="muted">{t("lab.why.corrNote")}</dd></div>
+          <div><dt>{t("lab.why.effective")}</dt><dd>{num(effective, 1)}</dd><dd className="muted">{t("lab.why.effectiveNote")}</dd></div>
+          <div><dt>{t("lab.why.largest")}</dt><dd>{percent(d.holdings[0].weight * 100, 1)}</dd><dd className="muted">{t("lab.why.cap")}</dd></div>
+        </dl>
+        <div className="table-wrap">
+          <table className="compact">
+            <thead><tr><th>{t("lab.cols.share")}</th><th className="num">{t("lab.cols.weight")}</th>
+              <th className="num">{t("lab.cols.swings")}</th><th className="num">{t("lab.cols.corr")}</th>
+              <th className="num">{t("lab.cols.risk")}</th></tr></thead>
+            <tbody>
+              {d.holdings.map((h) => (
+                <tr key={h.symbol}>
+                  <td title={h.sector ?? undefined}><Link href={`/cse/shares/${encodeURIComponent(h.symbol)}`}>{code(h.symbol)}</Link></td>
+                  <td className="num">{percent(h.weight * 100, 1)}</td>
+                  <td className="num">{h.volatility == null ? "–" : percent(h.volatility * 100, 0)}</td>
+                  <td className="num">{num(h.avg_correlation, 2)}</td>
+                  <td className="num">{h.risk_contribution == null ? "–" : percent(h.risk_contribution * 100, 1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {rt("daily") != null && (
+          <p className="small">{t("lab.why.tested", { weeks: d.riskTest[0]?.n_weeks ?? 0, ours: percent((rt("daily") ?? 0) * 100, 1),
+            simple: percent((rt("identity") ?? 0) * 100, 1), market: percent((rt("ref_market") ?? 0) * 100, 1),
+            equal: percent((rt("ref_equal_weight") ?? 0) * 100, 1) })}</p>
+        )}
+        <p className="small muted">{t("lab.why.read")}</p>
+      </Section>
+
       <Section id="record" open title={t("lab.recordTitle")}
                summary={t("lab.recordSum", { from: date(flag.start_date), to: date(flag.end_date) })}>
         <Chart option={chart} label={t("lab.recordTitle")} height={280} />
@@ -109,7 +149,7 @@ export default async function LabPage() {
           {(t.raw("lab.kept") as string[]).map((x) => <li key={x}>{x}</li>)}
         </ol>
         <div className="table-wrap">
-          <table>
+          <table className="compact">
             <thead><tr><th>{t("lab.cols.schedule")}</th><th className="num">{t("lab.cols.return")}</th>
               <th className="num">{t("lab.cols.swings")}</th><th className="num">{t("lab.cols.costs")}</th></tr></thead>
             <tbody>
@@ -128,26 +168,16 @@ export default async function LabPage() {
             </tbody>
           </table>
         </div>
+        {last && last.kind !== "inception" && (
+          <dl className="mini-stats four">
+            <div><dt>{t("lab.last.date")}</dt><dd>{date(last.session_date)}</dd></div>
+            <div><dt>{t("lab.last.in")}</dt><dd className="wrap">{codes(last.names_in)}</dd></div>
+            <div><dt>{t("lab.last.out")}</dt><dd className="wrap">{codes(last.names_out)}</dd></div>
+            <div><dt>{t("lab.last.traded")}</dt><dd>{percent((last.turnover / (last.nav || 1)) * 100, 0)}</dd>
+              <dd className="muted">{rupees(last.cost)}</dd></div>
+          </dl>
+        )}
         <p className="small muted">{t("lab.keptNote", { reviews: reviews.length, cost: rupees(totalCost) })}</p>
-      </Section>
-
-      <Section id="holdings" title={t("lab.holdingsTitle", { count: d.holdings.length })}
-               summary={t("lab.holdingsSum", { top: nameOf(d.holdings[0].symbol), weight: percent(d.holdings[0].weight * 100, 1) })}>
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>{t("lab.cols.share")}</th><th>{t("lab.cols.sector")}</th><th className="num">{t("lab.cols.weight")}</th></tr></thead>
-            <tbody>
-              {d.holdings.map((h) => (
-                <tr key={h.symbol}>
-                  <td><Link href={`/cse/shares/${encodeURIComponent(h.symbol)}`}>{code(h.symbol)}</Link>
-                    <span className="sub">{nameOf(h.symbol)}</span></td>
-                  <td className="wrap">{h.sector ?? "–"}</td>
-                  <td className="num">{percent(h.weight * 100, 1)}{h.at_cap && <span className="sub">{t("lab.atCap")}</span>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </Section>
 
       <Section id="rules" title={t("lab.rulesTitle")} summary={t("lab.rulesSum")}>
