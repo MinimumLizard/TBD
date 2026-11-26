@@ -103,7 +103,10 @@ Accounts are stubbed: every visitor is anonymous and on the free tier (decision 
 
 ## 6. Switch-on: the complete checklist
 
-This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9). Do the steps in this order.
+This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9; re-checked against the code on
+2026-11-26). Do the steps in this order. Parts A to C start collection and the models in a private database, so the
+history and the lab's live record build up; they publish nothing. Part D puts the website on the internet: wait for
+the CSE's written permission (roadmap item 0) and the lawyer's view (roadmap item 4) before it.
 
 **A. Accounts and storage**
 1. **Supabase:** create an organisation and a **Pro** project `zinvestiq-prod` in **ap-south-1 (Mumbai)**. In Database
@@ -116,8 +119,9 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
    that bucket only.
 3. **Backblaze B2:** create a private bucket `zinvestiq-raw-copy` and an application key limited to it.
 4. **Healthchecks.io:** create a project and copy its ping URL (`https://hc-ping.com/<key>`). Create checks with
-   the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history`, `cbsl-collect`,
-   `dcs-cpi-collect` and `models-all`.
+   the slugs `pdmo-collect`, `cse-api-collect`, `cse-api-announcements`, `cse-api-history`,
+   `cse-api-corporate-actions`, `cse-api-reports`, `cbsl-collect`, `dcs-cpi-collect` and `models-all` (nine; each
+   job pings `<source>-<job>`, `data_platform/core/collector.py`, and a slug with no check raises no alarm).
 
 **B. Load the history (nothing runs on a schedule yet)**
 5. **GitHub → this repo → Settings → Secrets and variables → Actions → Secrets:** add `DATABASE_URL` (the session
@@ -131,7 +135,7 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
    `config/universe.yaml` `excluded:` and `config/portfolio.yaml` `portfolio_size_lkr:`):
    `excluded: [SYMBOL.N0000, SYMBOL.N0000]` and `portfolio_size_lkr: 5000000`. It never goes in git; without it the
    lab's version 1.0.0 (the exact port of the old lab) computes nothing, and the current version 1.1.0 is unaffected.
-   Add the Healthchecks slug `cse-api-reports` too. **Do not add the
+   **Do not add the
    variable in step 7 yet:** until it exists every scheduled job skips itself, so nothing writes to the database
    while the history is being loaded.
 6. **Actions → "Migrate history (manual)" → Run workflow.** It takes up to four hours. Check that the three reports
@@ -153,7 +157,9 @@ This replaces `docs/phase2-verification.md` §5 (updated after the audit in §9)
       `web_reader.<project ref>` and that password;
     - `DATABASE_CA_CERT`: the text of the certificate from step 1 (the site refuses to connect to a remote
       database without it);
-    - `APP_ENV=production`.
+    - `APP_ENV=production`;
+    - `FEEDBACK_KEY_SECRET`: any long random text (it scrambles visitors' network addresses for the feedback and
+      sign-up rate limits; without it a deployed site switches feedback off, `web/lib/feedback.ts`).
     Never set `ALLOW_TEST_TIERS` there.
 11. Open the deployment and check the overview shows the latest session.
 
