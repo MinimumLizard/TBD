@@ -63,6 +63,11 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
   the owner on 2026-11-20: half-yearly reviews for the example portfolio, and the lab's caps stay. To confirm: the
   wording of the two new questions. Re-run the review's scripts with the same rules at twelve
   months (April 2027).
+- **The walk-forward test re-walks from 8 April 2026 on every run (noted 2026-11-26).** That keeps it simple and
+  point-in-time, but its run time grows with history. On seven months of data, one version took about a minute and a
+  half: 84 s for `cse_lab_backtest` 1.2.0, from the timestamps in the `jobs.models --market cse` log of 2026-11-20.
+  The models job's limit is 30 minutes, so this is fine for now. Within about two years, either continue the walk
+  from the last stored date or retire the reference versions.
 - **Bond volume dating, a new case (2026-11-16):** the PDMO trade summary of 15 September 2026 is dated differently
   by the old tool and the new parser. Decide it with finding V3.
 - **Janu's review (2026-11-09):** built: the starting paths, the "how to start" guide, the statistics and guide votes.
