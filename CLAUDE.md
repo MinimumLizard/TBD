@@ -42,9 +42,11 @@ decisions).
   individuals live in a private file (`OWNERSHIP_PRIVATE_FILE` / secret `OWNERSHIP_PRIVATE_YAML`), never in git.
 - Portfolio lab (Phase 3b part 4, decision 0023): `cse_risk_estimates`, `cse_portfolio_lab`, `cse_lab_record` are
   INTERNAL (`internal_models` in config/entitlements.yaml: no tier, outputs unpublished and revoked from web_reader,
-  left out of the web registry). Never add a page or route for them before the lawyer's view (plan §5). The owner's
+  left out of the web registry); never add a page or route for those three. The owner's
   personal lab settings live in `LAB_PRIVATE_FILE` / secret `LAB_PRIVATE_YAML`, never in git. Read it with
-  `jobs.lab_report`. Its walk-forward test, `cse_lab_backtest` (decision 0024, migration 0017, internal too), applies
+  `jobs.lab_report`. Its walk-forward test, `cse_lab_backtest` (decision 0024), is PUBLISHED in Pro since decision
+  0027 (the owner's written decision of 2026-11-26 to put the lab live with the site; migration 0022; page `/cse/lab`,
+  API `/api/v1/cse/lab`, `lib/data/lab.ts`); it applies
   the lab's rules on each past date with only what was known then; the example portfolio proposed is minimum variance,
   15 names, reviewed half-yearly in January and July, within the caps (owner, 2026-11-20, decision 0026; to revisit
   with twelve months of results).
@@ -85,6 +87,13 @@ decisions).
   stored lab row; run it after any lab change. Starting screen questions 3 and 4 (amount, horizon: `/start/t/a/more`,
   `components/YourMoney.tsx`, cookie `t.a.amount.horizon`): facts only; lawyer's view needed before the real site
   asks them.
+- Three tiers, cheat codes, mobile (2026-11-26, decision 0027): tiers are a ladder `free < pro < plus` (Professional
+  dropped). Pro = share analysis (flows on the day, full ownership, total returns, company figures) + the lab; Plus =
+  everything + all bond analysis. Free gets "a taste": a new `top_rows` entitlement (free sees each company's top 3
+  shareholders; `lib/db.ts` withholds controller, chain and group columns), flows a week late, the curve's last 30
+  days. Cheat codes (`lib/codes.ts`, `/codes`, `components/CheatStrip.tsx`, glowing `.glow-chip` in `--glow*`
+  tokens; per company on share pages and in search). Phones: `components/TabBar.tsx` (Home, Shares, Bonds, Codes,
+  Search); "Why it matters" and sources are closed one-liners; intros one line. Keep copy short.
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.

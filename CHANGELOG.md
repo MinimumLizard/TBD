@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-11-26 — Three tiers, the portfolio lab in Pro, cheat codes, a phone-first site (decision 0027)
+
+- **Three tiers, a ladder: Free < Pro < Plus** (the owner's choices).
+  - Pro adds share analysis: money flows on the day, full ownership (top 20, controller, chain, group), total
+    returns, company figures, and the **portfolio lab**.
+  - Plus adds every bond tool: full curve history, z-scores, trades against quotes, liquidity, carry and duration.
+  - Free keeps the market and a taste of each cheat code: directors' dealings, the top three shareholders, money
+    flows a week late, and the curve's last 30 days.
+- **The portfolio lab is a Pro page** (`/cse/lab`), on the owner's written decision to put it live with the site.
+  - It shows the example portfolio with two ring charts, its record since April against the ASPI and bills, the
+    three review schedules, the 15 shares and the rules.
+  - Only the walk-forward test is published (migration 0022). The lab's estimates and the owner's own record stay
+    internal.
+- **"Top rows": a new server-side tier rule.** A free visitor gets a company's top three shareholders, and never the
+  rest, the controller or the group. The leak suite proves both directions; 56 tests pass.
+- **Cheat codes.** One glowing amber accent appears in these places:
+  - a slim strip on the overview pages;
+  - a header link and a phone tab;
+  - a `/codes` page with eight codes;
+  - Owners · Directors' trades · Money flow on every share page and under every company in search.
+- **Built for phones.**
+  - A bottom tab bar: Home, Shares, Bonds, Codes, Search.
+  - A slimmer header and a shorter footer.
+  - One-line intros on every main page.
+  - "Why it matters" and "Sources" are closed one-liners.
+  - The stale-data warning is a small pill.
+  - Plans show three cards, with each paid tier's own topics highlighted.
+
 ## 2026-11-20 — The lab's second review, two more starting questions, and a calmer design (decision 0026)
 
 - **The lab, checked line by line.** A new audit (`python -m data_platform.jobs.lab_audit`) rebuilds every
