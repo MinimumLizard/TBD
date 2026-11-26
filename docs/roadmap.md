@@ -63,8 +63,9 @@ The three archives handed over on 2026-10-11 exist only where you saved them. Pu
   the owner on 2026-11-20: half-yearly reviews for the example portfolio, and the lab's caps stay. To confirm: the
   wording of the two new questions. Re-run the review's scripts with the same rules at twelve
   months (April 2027).
-- **Three tiers, the lab in Pro, cheat codes, phone-first (2026-11-26, decision 0027):** built. To confirm: prices for
-  Pro and Plus; whether to keep the name "Cheat codes". The lab goes live with the site (the owner's written
+- **Three tiers, the lab in Pro, cheat codes, phone-first (2026-11-26, decision 0027):** built. The name "Cheat
+  codes" stays (owner); prices later. Hosting order: `docs/hosting.md` (a private launch behind `SITE_PASSWORD` is
+  possible as soon as the accounts exist). The lab goes live with the site (the owner's written
   decision); the launch itself still waits for roadmap items 0 and 4.
 - **The walk-forward test re-walks from 8 April 2026 on every run (noted 2026-11-26).** That keeps it simple and
   point-in-time, but its run time grows with history. On seven months of data, one version took about a minute and a

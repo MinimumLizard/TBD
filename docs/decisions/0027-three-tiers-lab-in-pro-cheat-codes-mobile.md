@@ -80,7 +80,36 @@ The owner (with Janu) asked for:
    - The "behind the calendar" warning is a small pill.
    - Plans: three cards, each paid tier's own topics highlighted, and no method-link lists.
 
+## Follow-ups (owner, later on 2026-11-26)
+
+1. **The name stays: "Cheat codes". Prices are decided later.**
+2. **Cheat codes page.**
+   - Each code is a drop-down.
+   - Open, it holds a search box, a short live preview read through the same tier check (a taste for free), and a
+     link to the full page.
+   - Directors' dealings can be searched by director, related account or company, across their whole history
+     (`searchDealings`).
+3. **More white.**
+   - The site is light by default. Dark mode only when the visitor chooses it, with a footer button remembered in
+     the browser.
+   - The page ground is nearly white, and the footer is light.
+4. **Phones.** The section links stay pinned under the header as one sideways row, and mark the section on screen. A
+   jump leaves the heading visible. This follows NN/g's guidance on in-page links and accordions.
+5. **The lab: the numbers behind the portfolio, kept short.** Labelled "Why these 15: the numbers", it shows:
+   - at the last review, the estimated swings against the median CSE share's;
+   - the average correlation;
+   - the effective number of holdings;
+   - for each share: weight, swings, correlation and its share of the portfolio's risk;
+   - the risk test: the portfolio built with this risk model, against the simplest estimate, the ASPI and equal
+     weights;
+   - the last review in numbers: what came in, what went out, how much was traded and what it cost.
+6. **The yield-curve chart** no longer draws the wide, administered quotes. They have almost no weight in the fit;
+   the table still marks them "wide".
+7. **Hosting.**
+   - An optional password over the whole site (`SITE_PASSWORD`, `web/lib/lock.ts`) allows a private soft launch
+     before the CSE's permission and the lawyer's view. Search engines are told not to list it.
+   - The order of work is `docs/hosting.md`.
+
 ## To confirm
 
-- Prices for Pro and Plus: none are shown; "Opening soon".
-- Whether "Cheat codes" is the name to keep. It is a phrase the lawyer may want to see beside the disclaimer.
+- Prices for Pro and Plus: later (the owner).

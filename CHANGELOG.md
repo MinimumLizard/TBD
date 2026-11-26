@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-26 (later) — Cheat codes you can search, a lighter site, the lab's numbers, ready to host
+
+- **Cheat codes page.** Each code is a drop-down with a search and a short live preview: the latest directors'
+  trades, the largest money flows, the largest companies' owners, FD against inflation, the bonds furthest from the
+  curve, the lab's record. Directors' dealings can be searched by director, related account or company.
+- **More white.** Light by default (dark mode is now a choice in the footer), a nearly white page and a light
+  footer.
+- **Phones.** Section links stay pinned under the header and show where you are.
+- **The lab, with its numbers.**
+  - Estimated swings 11.9 % against 37.4 % for the median CSE share at the last review.
+  - Each share's weight, swings, correlation and share of risk.
+  - The risk model tested week by week: 10.1 % realised, against 12.8 % for the simplest estimate, 12.6 % for the
+    ASPI and 19.0 % with equal weights.
+  - The last review: what came in, what went out, how much was traded and what it cost.
+- **The yield curve** no longer draws wide, administered quotes.
+- **Hosting.** An optional site password for a private launch, and `docs/hosting.md`.
+
 ## 2026-11-26 — Three tiers, the portfolio lab in Pro, cheat codes, a phone-first site (decision 0027)
 
 - **Three tiers, a ladder: Free < Pro < Plus** (the owner's choices).

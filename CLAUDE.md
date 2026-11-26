@@ -93,7 +93,12 @@ decisions).
   shareholders; `lib/db.ts` withholds controller, chain and group columns), flows a week late, the curve's last 30
   days. Cheat codes (`lib/codes.ts`, `/codes`, `components/CheatStrip.tsx`, glowing `.glow-chip` in `--glow*`
   tokens; per company on share pages and in search). Phones: `components/TabBar.tsx` (Home, Shares, Bonds, Codes,
-  Search); "Why it matters" and sources are closed one-liners; intros one line. Keep copy short.
+  Search); "Why it matters" and sources are closed one-liners; intros one line. Keep copy short. Follow-ups
+  (same day): the name "Cheat codes" stays, prices later; `/codes` is drop-downs with a search and a live preview
+  each (`searchDealings` searches directors, accounts and companies); light by default, dark only by the footer
+  button (`ziq-theme`); pinned section links on phones; the lab's "Why these 15: the numbers" (risk table, risk
+  test, last review); wide quotes off the curve chart. Hosting: `docs/hosting.md`; optional `SITE_PASSWORD`
+  (`web/lib/lock.ts`, checked in `proxy.ts`, which now runs on every request but static files).
 - Next: Phase 3b (proposed order: corporate actions and total returns; risk estimates and the portfolio lab with 10/15-name
   versions, internal; fundamentals; ownership and dealings), Phase 4b (accounts, payments, emails, feedback,
   Sinhala/Tamil, Vercel), Phase 5 (retail education). Each waits for the owner's go-ahead.
