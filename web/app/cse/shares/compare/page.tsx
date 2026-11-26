@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import Explain from "@/components/Explain";
 import FilterBar from "@/components/FilterBar";
+import LockedLine from "@/components/LockedLine";
 import PageHead from "@/components/PageHead";
 
 import AsOf from "@/components/AsOf";
@@ -76,6 +77,7 @@ export default async function CompareSharesPage({ searchParams }: { searchParams
                 meta={<p className="small"><Link href="/cse/shares">← {t("shares.bySectorLink")}</Link></p>} />
       <Explain why={t("shares.why")} how={<p>{t("shares.how")}</p>}
                related={[{ href: "/learn/shares-basics", label: t("share.guideShares") }, { href: "/learn/company-figures", label: t("share.guideFigures") }]} />
+      {!ratios.access.allowed && <LockedLine access={ratios.access} what={t("shares.ratiosLocked")} />}
       {!result.access.allowed ? (
         <Locked access={result.access} />
       ) : (

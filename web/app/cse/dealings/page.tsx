@@ -63,7 +63,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
         )}
       </Section>
 
-      <Section id="flows" tier="plus" open={flow.access.allowed} title={t("dealings.sections.flows")}
+      <Section id="flows" tier="pro" open={flow.access.allowed} title={t("dealings.sections.flows")}
                summary={flow.access.allowed && f?.summary ? t("dealings.sections.flowsSum", { count: f.summary.n_dealings, companies: companies.length, window: t(`dealings.windows.${window}` as never) }) : t("dealings.sections.flowsLocked")}
                why={t("dealings.sections.flowsWhy")} how={<p>{t("dealings.sections.flowsHow")}</p>} related={guide}>
         {!flow.access.allowed ? (
@@ -136,7 +136,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
 
       {flow.access.allowed && f?.summary && (
         <>
-          <Section id="large" tier="plus" title={t("dealings.sections.large")}
+          <Section id="large" tier="pro" title={t("dealings.sections.large")}
                    summary={f.large.length ? t("dealings.sections.largeSum", { count: f.large.length, date: date(f.summary.as_of) }) : t("dealings.noLarge", { date: date(f.summary.as_of) })}
                    why={t("dealings.sections.largeWhy")} how={<p>{t("dealings.sections.largeHow")}</p>}>
           {f.large.length === 0 ? (
@@ -183,7 +183,7 @@ export default async function DealingsPage({ searchParams }: { searchParams: Pro
 
           </Section>
           {f.accounts.length > 0 && (
-            <Section id="accounts" tier="plus" title={t("dealings.sections.accounts")}
+            <Section id="accounts" tier="pro" title={t("dealings.sections.accounts")}
                      summary={t("dealings.sections.accountsSum", { count: f.accounts.length })}
                      why={t("dealings.sections.accountsWhy")} how={<p>{t("dealings.sections.accountsHow")}</p>}>
               <p>{t("dealings.accountsIntro", { window: t(`dealings.windows.${window}` as never), date: date(f.summary.as_of) })}</p>

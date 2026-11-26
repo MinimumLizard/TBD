@@ -22,7 +22,6 @@
     "free": "Free",
     "plus": "Plus",
     "pro": "Pro",
-    "professional": "Professional",
     "viewing": "Access: {tier}"
   },
   "common": {
@@ -36,13 +35,15 @@
     "units_bp": "bp",
     "notTraded": "not traded this session",
     "showing": "Showing {count} of {total}",
-    "whatIsThis": "What is this?"
+    "whatIsThis": "What is this?",
+    "behindShort": "{count, plural, one {# session} other {# sessions}} behind"
   },
   "locked": {
     "title": "Part of the {tier} tier",
-    "body": "This information is included in the {tier} tier and above. Accounts and subscriptions are not open yet.",
+    "body": "Included in {tier} and above. Accounts open soon.",
     "preview": "Free preview, shown with a {days}-day delay: data to {date}. Current values are part of the {tier} tier.",
-    "plans": "See what each plan includes"
+    "plans": "Compare plans",
+    "line": "{what}: {tier}"
   },
   "home": {
     "title": "Markets overview",
@@ -74,8 +75,8 @@
     "learn3Kicker": "Our methods",
     "learn3Title": "How every number is made",
     "learn3Body": "Each figure comes from a published method with a version number, so you can check how it was computed.",
-    "plansTitle": "Free to start, with more in Plus and Pro",
-    "plansBody": "The market data and today's yield curve are free. Deeper analysis of each bond is part of the paid plans, once accounts open.",
+    "plansTitle": "Free to start. Pro for shares, Plus for bonds",
+    "plansBody": "Market data, dealings and today's curve are free. Share analysis and the portfolio lab are Pro; bond analysis is Plus.",
     "plansLink": "Compare plans",
     "summary": {
       "aspiUp": "The ASPI rose {pct} to {value}.",
@@ -93,16 +94,15 @@
     "learn4Kicker": "Savings",
     "learn4Title": "Fixed deposits, bills and inflation",
     "learn4Body": "What Rs 100,000 grew to in a fixed deposit and in treasury bills since 2003, before and after tax and inflation.",
-    "heroLead": "The share market, government bonds and treasury bills, and fixed-deposit rates in one place. Every number comes with what it means, why it matters and how it was calculated. No tips, signals or ratings.",
+    "heroLead": "Shares, bonds, bills and FD rates in one place. Every number explained. No tips.",
     "trust1": "Public sources: the CSE, the Central Bank, the Ministry of Finance",
     "trust2": "Every method published, with a version number",
     "trust3": "Information and education, never advice",
     "briefTitle": "Today in brief",
-    "snapshotLead": "The day's main figures for shares and for government bonds. Each tile shows the latest value and its recent trend.",
     "cseWhy": "The ASPI is the broadest measure of the share market: when most large companies' prices rise, it rises.",
     "bondsWhy": "The curve shows what the government pays to borrow for each length of time. Treasury bills, bonds and, indirectly, fixed-deposit rates are priced around it.",
     "linksTitle": "How Sri Lanka's markets fit together",
-    "linksLead": "Shares, government securities and savings are priced against each other. Interest rates connect them.",
+    "linksLead": "Interest rates connect shares, bonds and savings.",
     "link1Title": "Interest rates set the starting point",
     "link1Body": "Treasury bill and bond yields are what the government pays to borrow, from three months to twenty years. They follow the Central Bank's policy and the government's borrowing needs, and they are the safest rupee return available.",
     "link1Go": "How the yield curve works",
@@ -122,10 +122,10 @@
     "differ4Title": "Disclosures made readable",
     "differ4Body": "Directors' dealings, shareholder lists and company figures from the companies' own filings, each linked to the original document.",
     "tiersTitle": "Free to start",
-    "tiersLead": "Everything you need to understand the markets is free. The paid plans add tools for following government bonds closely, and money flows on the day.",
-    "tierFree": "Daily markets, every share's page, the yield curve, the savings comparison, and every guide.",
-    "tierPlus": "Each bond's full history against the curve, how unusual its position is, trades against quotes, and money flows on the day.",
-    "tierPro": "Carry, roll-down, duration and convexity for every bond: what a bond earns and how its price reacts to rate changes.",
+    "tiersLead": "Free shows the market. Pro analyses shares and adds the portfolio lab. Plus adds every bond tool.",
+    "tierFree": "Daily markets, every share's price, directors' dealings, top shareholders, today's yield curve, savings and every guide.",
+    "tierPlus": "Everything in Pro, plus every bond tool: full curve history, z-scores, trades against quotes, liquidity, carry and duration.",
+    "tierPro": "Share analysis: money flows on the day, full ownership, total returns, company figures, and the portfolio lab.",
     "differsSum": "The whole picture, explained not rated, with numbers you can check and disclosures made readable"
   },
   "cse": {
@@ -193,7 +193,7 @@
     },
     "noTurnover": "The CSE's turnover figures for this session were not collected (the session was filled in from the price history), so the most-traded list and the largest moves are not shown.",
     "eyebrow": "Shares",
-    "leadLong": "The Colombo Stock Exchange's day in one page: where the indices closed, how much traded, how many shares rose and fell, what foreign investors did, and which shares moved most.",
+    "leadLong": "Indices, turnover, rises and falls, foreign investors and the day's movers.",
     "sections": {
       "indices": "The indices",
       "indicesSum": "ASPI {aspi} ({aspiPct}) · S&P SL20 {sp} ({spPct})",
@@ -258,9 +258,9 @@
     "ratiosHelp": "P/E, P/B and dividend yield of the company, at the voting share's close (from the companies' interim reports; blank where the figures do not reconcile).",
     "why": "One table for every listed share, so a company can be found and compared with the rest of the market: its latest price, how it moved against the ASPI, and its valuation figures.",
     "how": "Sort by any column by selecting its heading. Returns against the ASPI show whether a share's price did better or worse than the market over the same period. P/E, P/B and dividend yield come from each company's latest interim report; compare them between similar companies rather than across the whole market. Select a share for its full page.",
-    "introBySector": "Every company listed on the Colombo Stock Exchange, grouped by industry. Type part of a company's name or its symbol to find it, or choose a sector; open a sector to see its companies.",
+    "introBySector": "Every listed company by industry. Type a name or symbol.",
     "compareTitle": "Compare all shares",
-    "compareIntro": "Every listed share in one table, sortable by any column: price change, turnover, returns against the ASPI and company figures.",
+    "compareIntro": "Every share in one sortable table.",
     "compareLink": "Compare all shares in one sortable table",
     "bySectorLink": "Shares by sector",
     "searchPlaceholder": "Company or symbol, e.g. John Keells or JKH",
@@ -271,11 +271,12 @@
     "company": "Company",
     "ret3m": "3 months",
     "noMatch": "No share matches. Try part of the company's name, or its symbol.",
-    "howBySector": "Companies are grouped into the 20 industry groups the CSE's sector indices use, alphabetically within each. Each sector's line shows how many of its shares rose and fell today and the median change. P/E and dividend yield come from each company's latest interim report; compare them within a sector rather than across the market. For sorting by any figure, use the comparison table."
+    "howBySector": "Companies are grouped into the 20 industry groups the CSE's sector indices use, alphabetically within each. Each sector's line shows how many of its shares rose and fell today and the median change. P/E and dividend yield come from each company's latest interim report; compare them within a sector rather than across the market. For sorting by any figure, use the comparison table.",
+    "ratiosLocked": "P/E, dividend yield and total returns"
   },
   "dealings": {
     "title": "Directors' dealings",
-    "intro": "Listed companies must tell the CSE when one of their directors deals in the company's shares, in the director's own name or through a related party. These are those disclosures as the CSE published them, usually one to four market days after the dealing. They record what happened; they say nothing about what a share's price will do.",
+    "intro": "Directors' dealings in their own companies' shares, as filed with the CSE. Facts, not forecasts.",
     "namesNote": "Names are shown as the companies filed them with the CSE; each dealing links to its notice on the CSE's website.",
     "recent": "Recent disclosed dealings",
     "recentNote": "The {count} most recent transactions, newest first. A notice the company filed again is counted once.",
@@ -517,7 +518,7 @@
     },
     "eyebrow": "Shares · {sector}",
     "eyebrowNoSector": "Shares",
-    "leadLine": "{symbol} on the Colombo Stock Exchange. Everything on this page comes from the CSE's own data and the company's filings.",
+    "leadLine": "{symbol} · from the CSE's data and the company's filings.",
     "glance": {
       "close": "The price closed at {price} on {date}, {change} on the day.",
       "closeNoTrade": "The share did not trade on {date}; its last close was {price}.",
@@ -561,7 +562,9 @@
     "guideOwners": "Who owns a company",
     "guideDealings": "Directors' dealings, explained",
     "guideReturns": "Price return and total return",
-    "guideShares": "Shares, step by step"
+    "guideShares": "Shares, step by step",
+    "tasteUnlock": "Top 20, controller, ownership chain and group: {tier}",
+    "topTaste": "Top {count} shareholders"
   },
   "bonds": {
     "title": "Government bonds",
@@ -598,7 +601,7 @@
     "wideQuotes": "Wide quotes (little weight)",
     "wideQuote": "wide",
     "eyebrow": "Bonds & bills",
-    "leadLong": "Sri Lanka's government bonds as the dealers quoted them today, the yield curve fitted through those quotes, and each bond measured against it. Bond yields are the base on which savings rates and share valuations rest.",
+    "leadLong": "Today's dealer quotes, the yield curve through them, and each bond against it.",
     "glance": {
       "slopeUp": "The curve slopes upward: the 10-year yield is {bp} bp above the 1-year.",
       "slopeDown": "The curve slopes downward: the 10-year yield is {bp} bp below the 1-year.",
@@ -701,7 +704,7 @@
   },
   "zscores": {
     "title": "Unusual positions against the curve",
-    "intro": "Each bond's distance from the curve, compared with that bond's own previous 60 observations. A z-score of +2 means the residual is two standard deviations above its own recent average. This describes the data; it is not a forecast.",
+    "intro": "Each bond's distance from the curve against its own last 60 days. +2 means two standard deviations above usual. Not a forecast.",
     "bondsTitle": "Bonds, by maturity",
     "pairsTitle": "Pairs with {bond}",
     "pairsNote": "The residual spread between this bond and each bond of similar maturity (or, for two auctioned bonds, any maturity), against its own history. Choose another bond in the table above.",
@@ -717,7 +720,7 @@
   },
   "execution": {
     "title": "Trades against quotes",
-    "intro": "Where executed trades printed relative to the dealers' quoted mid, as a 20-day median. Positive: trades at higher yields (lower prices) than the quotes.",
+    "intro": "Where trades printed against the dealers' quoted mid (20-day median). Positive: higher yields than quoted.",
     "chart": "Median gap, trailing 20 days (bp)",
     "latest": "Latest: {gap} bp over {n} bond-days",
     "why": "Dealers' screens show where they say they would deal; trades show where business was done. The gap between the two tells you how far a quoted yield can be relied on.",
@@ -725,7 +728,7 @@
   },
   "carry": {
     "title": "Carry, rolldown and duration",
-    "intro": "What each bond's yield earns over a stated funding rate, plus rolldown along an unchanged curve, per year and per year of duration. The funding rate is the 12-month treasury bill plus 5 bp; your own funding cost will differ.",
+    "intro": "What each bond earns over the 12-month bill + 5 bp, plus roll-down, per year and per year of duration.",
     "funding": "Funding rate {rate} (12-month bill {bill} as of {date})",
     "entry": "Yield used (quote + execution gap)",
     "price": "Price",
@@ -743,7 +746,7 @@
   },
   "methods": {
     "title": "Methods",
-    "intro": "Every number on this site comes from one of these models. Each page states the method, its assumptions and its limits, and how it was checked.",
+    "intro": "How every number is made: method, assumptions, limits and checks.",
     "availableFrom": "Available from: {tier}",
     "currentVersion": "Current version {version}",
     "versions": "Versions",
@@ -766,7 +769,7 @@
     "corrections": "Corrections",
     "correctionsBody": "Sources are stored exactly as published, and every calculation is versioned. When a source corrects a figure, the correction is applied and the earlier value is kept on record.",
     "eyebrow": "About ZinvestIQ",
-    "lead": "ZinvestIQ explains Sri Lanka's markets in plain language: the share market, government bonds and treasury bills, and savings rates, side by side, from public sources, with every method published.",
+    "lead": "Sri Lanka's shares, bonds and savings rates, in plain language, from public sources.",
     "differ": "How we work",
     "differBody": "Three rules shape everything on the site. Explained, not rated: no signals, scores, stances or forecasts, anywhere. Numbers you can check: every figure comes from a published method with a version number, computed wherever possible from the data available on that day, and earlier values are kept on record when a source revises something. The whole picture: shares, government securities and savings are read together, because interest rates connect them."
   },
@@ -837,6 +840,10 @@
     "cse_fundamentals": {
       "title": "Company figures: earnings, net assets and ratios",
       "summary": "Earnings per share over the last twelve months and net assets per share, read from each company's interim reports and checked inside each report, with the P/E, P/B, return on equity and dividend yield at each session's price."
+    },
+    "cse_lab_backtest": {
+      "title": "Portfolio lab",
+      "summary": "A portfolio built by written rules from CSE shares (minimum variance, 15 names, within caps), reviewed twice a year: what it contains, how it would have done since April with costs and dividends, and how it is rebalanced."
     }
   },
   "errors": {
@@ -845,61 +852,57 @@
   },
   "plans": {
     "title": "Plans",
-    "intro": "Everything needed to understand Sri Lanka's markets is free, and always will be: every share's page, the yield curve, the savings comparison and every guide. The paid plans add the tools for following government bonds closely, and money flows on the day. Accounts and subscriptions are not open yet; these are the planned tiers.",
+    "intro": "Free shows the market. Pro analyses shares. Plus adds every bond tool. Accounts open soon.",
     "includes": "What it includes",
-    "models": "Calculations in this plan",
     "current": "You are viewing as: {tier}",
     "soon": "Opening soon",
     "free": {
-      "tagline": "Understand the markets",
+      "tagline": "See the market",
       "features": [
-        "Today's share market: indices, turnover, rises and falls, foreign investors",
-        "Every listed share: total return with dividends, company figures, who owns it, directors' dealings",
-        "Government bond quotes and today's yield curve, with each bond's last 30 days against it",
-        "How unusual each bond's position is, five days later",
-        "Fixed deposits, treasury bills and inflation since 2003, with a calculator",
-        "Every guide, the glossary and a method page for every number",
-        "Money flows by company, a week after the dealings"
+        "Today's market: indices, turnover, rises and falls, foreign investors",
+        "Every share's price, range, dividends and splits",
+        "Directors' dealings, as filed",
+        "Each company's top three shareholders and free float",
+        "Money flows a week late",
+        "Today's yield curve and bond quotes",
+        "FDs, bills and inflation since 2003",
+        "Every guide"
       ],
-      "who": "Savers comparing fixed deposits and bills, people new to shares, and shareholders following their companies."
+      "who": "Savers, newcomers and shareholders."
     },
     "plus": {
-      "tagline": "Follow each bond closely",
-      "features": [
-        "Everything in Free",
-        "Each bond's full history against the curve",
-        "How unusual each bond's position is today (z-scores), and its pairs with neighbouring bonds",
-        "Where trades were done against the dealers' quotes",
-        "Money flows by company and account, on the day"
-      ],
-      "who": "Investors who own or follow government bonds, and anyone who wants directors' and related accounts' activity on the day."
-    },
-    "pro": {
-      "tagline": "Income and price sensitivity",
-      "features": [
-        "Everything in Plus",
-        "Carry, roll-down, duration and convexity for every bond",
-        "Each bond's yield-change table"
-      ],
-      "who": "Active bond investors who compare what each bond earns and how its price reacts when rates move."
-    },
-    "professional": {
-      "tagline": "For firms and heavy users",
+      "tagline": "Shares and bonds",
       "features": [
         "Everything in Pro",
-        "Data downloads and the API (planned)"
+        "Each bond's full history against the curve",
+        "How unusual each bond's yield is today: z-scores and pairs",
+        "Where trades print against dealers' quotes",
+        "Liquidity of every bond",
+        "Carry, roll-down, duration and convexity"
       ],
-      "who": "Firms and researchers who need the data in their own tools."
+      "who": "Bond and fixed-income investors."
+    },
+    "pro": {
+      "tagline": "Analyse shares",
+      "features": [
+        "Everything in Free",
+        "Portfolio lab: a rules-built portfolio, its record since April, how it is rebalanced",
+        "Money flows on the day, by company and account",
+        "Full ownership: top 20, controller, chain and group",
+        "Total return with dividends, for every share",
+        "Company figures: P/E, P/B, ROE, dividend yield"
+      ],
+      "who": "Share investors who want the full picture."
     },
     "eyebrow": "Plans",
     "whoTitle": "Who it is for",
     "guidesLink": "Guides for this level",
     "faqTitle": "Questions",
     "faq": {
-      "freeQ": "Why is so much free?",
-      "freeA": "Understanding the market should not depend on paying for it. The free tier covers everything a saver or shareholder needs to read the markets; the paid tiers are for people who follow government bonds as closely as a dealer would.",
+      "freeQ": "What stays free?",
+      "freeA": "The market itself: prices, indices, directors' dealings, each company's top shareholders, today's yield curve, the savings comparison and every guide.",
       "previewQ": "What does a free visitor see of the paid tools?",
-      "previewA": "Each locked panel says what it would show and why that is useful. Some paid information is shown free after a delay: each bond's z-scores five days later, money flows a week later, and each bond's history against the curve for the last 30 days.",
+      "previewA": "Each locked panel says what it shows. Some paid data is free after a delay: money flows a week later, bond z-scores five days later, and the last 7 days of the yield curve.",
       "adviceQ": "Is any of this investment advice?",
       "adviceA": "No. ZinvestIQ shows what public data says and explains how to read it. It never says what to do: no tips, signals, ratings or forecasts, in any plan.",
       "dataQ": "Where does the data come from?",
@@ -908,7 +911,7 @@
   },
   "learn": {
     "title": "Learn",
-    "intro": "Plain-language guides to Sri Lanka's markets, from the basics to the tools bond professionals use. Every guide is free to read, and each links to the part of the site it explains.",
+    "intro": "Short guides, from the basics to the bond desk. All free.",
     "terms": {
       "aspi": {
         "name": "ASPI (All Share Price Index)",
@@ -1112,7 +1115,7 @@
     "savingsKicker": "Interactive",
     "moreTitle": "Reference",
     "glossaryTitle": "Glossary",
-    "glossaryIntro": "Every term used on ZinvestIQ, explained in a sentence or two. A dotted underline anywhere on the site links to its entry here."
+    "glossaryIntro": "Every term on the site in a sentence or two."
   },
   "feedback": {
     "title": "Tell us what you think",
@@ -1214,7 +1217,7 @@
   },
   "savings": {
     "title": "Fixed deposits, treasury bills and inflation",
-    "lead": "What Rs 100,000 would have grown to in a 12-month fixed deposit and in 12-month treasury bills, before and after tax, and after inflation, in every period since 2003. A look at the past from published averages: not a forecast and not advice.",
+    "lead": "Rs 100,000 in a 12-month FD or bills, before and after tax and inflation, every period since 2003. The past, not a forecast.",
     "latest": "Latest month with every figure published: {month}.",
     "fdRateTile": "Average rate on new fixed deposits",
     "fdRateNote": "AWNFDR, {month}",
@@ -1309,10 +1312,11 @@
     "minutes": "{count} min read",
     "seeItLive": "See it on the site",
     "find": "Find",
-    "shownOf": "{shown} of {total} shown"
+    "shownOf": "{shown} of {total} shown",
+    "whyShort": "Why it matters"
   },
   "menu": {
-    "plansDesc": "What is free, and what Plus and Pro add",
+    "plansDesc": "What is free, and what Pro and Plus add",
     "shares": {
       "label": "Shares",
       "market": {
@@ -1330,6 +1334,10 @@
       "compare": {
         "title": "Compare all shares",
         "desc": "One sortable table: returns, turnover, P/E, P/B and dividend yield"
+      },
+      "lab": {
+        "title": "Portfolio lab",
+        "desc": "A rules-built portfolio, its record and how it is rebalanced"
       }
     },
     "bonds": {
@@ -2051,7 +2059,7 @@
   "search": {
     "eyebrow": "Search",
     "title": "Find a share, bond or topic",
-    "lead": "Every listed company, every government bond, and every guide, term and page on the site. Type to narrow the list.",
+    "lead": "Companies, bonds, guides and terms. One search.",
     "placeholder": "Search shares, bonds, guides and terms",
     "short": "Search",
     "matures": "matures {date}",
@@ -2134,10 +2142,10 @@
       "thenUse": "Then use it here",
       "note": "This path chooses what to read first. It is not advice about what to do with your money, and nothing here takes your circumstances into account.",
       "intro": {
-        "new": "Start from what you know, your savings, and build from there: what your money has actually earned, how the markets fit together, and how people take their first step.",
-        "curious": "You already have the basics. These three steps turn them into something you can use on real data.",
-        "confused": "Three steps that explain the numbers you see, each next to the page where you will find them.",
-        "confident": "The deeper tools, each with the guide that explains exactly how it is computed."
+        "new": "Start from your savings, then see how the markets fit together.",
+        "curious": "Three steps from the basics to real data.",
+        "confused": "Three steps that explain the numbers you see.",
+        "confident": "The deeper tools, each with its method."
       },
       "why": {
         "deposits": "See what fixed deposits have really earned since 2003, after tax and inflation.",
@@ -2202,7 +2210,7 @@
     },
     "more": {
       "title": "Two more questions, both optional",
-      "lead": "They let us show facts for amounts and periods like yours: what trading costs, and how deposits and bills have done over periods that long. Nothing is stored about you except these two answers, in your browser.",
+      "lead": "Optional. They pick which facts to show; the answers stay in your browser.",
       "stepOf": "Questions 3 and 4 of 4",
       "amountQuestion": "Roughly how much are you thinking about?",
       "horizonQuestion": "When might you need this money?",
@@ -2222,10 +2230,10 @@
       "confident": "Your market desk"
     },
     "leads": {
-      "new": "What deposits and treasury bills pay today, what inflation takes away, and the first guides to read. The share and bond pages are one click away when you are ready.",
-      "curious": "The day in a few sentences, what savings earn, and the share market's year, each next to the guide that explains it.",
-      "confused": "Today's main figures, each with a plain explanation, and the guides for the numbers that puzzle people most.",
-      "confident": "The day's figures and charts first, then the deeper tools, each with its published method."
+      "new": "What savings earn, what inflation takes, and where to start.",
+      "curious": "The day in brief, what savings earn, and the market's year.",
+      "confused": "Today's main figures, each explained.",
+      "confident": "The day's figures and the deeper tools."
     },
     "youSaid": "You said",
     "change": "Change my answers",
@@ -2264,7 +2272,7 @@
   "privacy": {
     "title": "Privacy",
     "eyebrow": "ZinvestIQ",
-    "lead": "What ZinvestIQ keeps about you, why, and how to have it removed. In short: as little as possible.",
+    "lead": "What we keep about you, why, and how to remove it. As little as possible.",
     "sections": [
       {
         "h": "Reading the site",
@@ -2319,5 +2327,118 @@
     "shares": "Share prices swing far more: in the past year alone the ASPI fell {fall} at one point from its high. Our share history covers one year, so periods as long as yours cannot be shown for shares.",
     "periods": "Every period since 2003, compared",
     "note": "These are facts about the past and about costs, for amounts and periods like the ones you chose. They are not a suggestion of what to do with your money; nothing on ZinvestIQ is."
+  },
+  "lab": {
+    "title": "Portfolio lab",
+    "eyebrow": "Shares",
+    "lead": "A portfolio built by written rules and held on paper since April. A worked example to learn from, not a list to copy.",
+    "notYet": "The rules have not formed the portfolio yet.",
+    "other": "Other",
+    "example": "Example portfolio",
+    "market": "ASPI",
+    "bills": "Treasury bills",
+    "shares": "shares",
+    "sectors": "sectors",
+    "byShare": "Weights by share",
+    "bySector": "Weights by sector",
+    "tiles": {
+      "return": "Since April",
+      "vs": "ASPI {market} · bills {bills}",
+      "swings": "Swings a year",
+      "marketSwings": "ASPI {value}",
+      "fall": "Largest fall",
+      "marketFall": "ASPI {value}",
+      "next": "Next review",
+      "formed": "set on {date}"
+    },
+    "recordTitle": "Its record",
+    "recordSum": "Rs 1 million from {from} to {to}, 100 at the start",
+    "recordNote": "Includes every trading cost (1.12 % a trade) and dividends after the 15 % tax. The ASPI excludes dividends. A few months say little about the future.",
+    "keptTitle": "How it is rebalanced",
+    "keptSum": "Twice a year; in between, only a share that drifts too far",
+    "kept": [
+      "January and July: the rules run again on the latest prices and the weights are reset.",
+      "In between: a share that drifts more than a quarter from its target is put back.",
+      "Costs: each trade pays about 1.12 %, so the rules trade as little as they can."
+    ],
+    "keptNote": "{reviews} reviews so far, {cost} in costs. On paper only: nothing trades by itself.",
+    "schedules": {
+      "half_yearly": "Twice a year",
+      "quarterly": "Four times a year",
+      "dynamic": "Monthly check"
+    },
+    "cols": {
+      "schedule": "Review",
+      "return": "Return",
+      "swings": "Swings",
+      "costs": "Costs",
+      "share": "Share",
+      "sector": "Sector",
+      "weight": "Weight"
+    },
+    "holdingsTitle": "All {count} shares",
+    "holdingsSum": "Largest: {top}, {weight}",
+    "atCap": "at the 10 % cap",
+    "rulesTitle": "The rules",
+    "rulesSum": "Five steps, written before any result was seen",
+    "rules": [
+      "Shares that traded on 80 % of sessions in the past year, with median turnover of Rs 1 mn a day.",
+      "Risk from a year of daily returns, with lagged days for thin trading, shrunk towards a simpler estimate.",
+      "Minimum variance: the lowest estimated swings, with no share above 10 %, no sector above 30 %, no group above 20 %.",
+      "The 15 largest weights, re-optimised with a floor so each position is worth its costs.",
+      "Only what was known on each date is used. No forecast of returns."
+    ],
+    "note": "Rules applied to public data, for education. It does not know you and is not investment advice."
+  },
+  "codes": {
+    "title": "Cheat codes",
+    "eyebrow": "Public data, hiding in plain sight",
+    "lead": "All public. Almost nobody looks. One tap each.",
+    "note": "Every code reads public filings and published prices. Facts, not tips.",
+    "dealings": {
+      "title": "Directors' trades",
+      "line": "Every share a director dealt in, in their own company, as filed."
+    },
+    "flows": {
+      "title": "Money flows",
+      "line": "Directors' net money into or out of each company, by window."
+    },
+    "owners": {
+      "title": "Who owns it",
+      "line": "Search a company: its largest shareholders, from its own filings."
+    },
+    "groups": {
+      "title": "Ownership chains",
+      "line": "Who controls a company, through which holding, and its sister companies."
+    },
+    "totalReturn": {
+      "title": "Real returns",
+      "line": "What a share returned with dividends: the price alone hides it."
+    },
+    "lab": {
+      "title": "Portfolio lab",
+      "line": "A portfolio built by written rules, and how it would have done."
+    },
+    "fd": {
+      "title": "Did your FD beat inflation?",
+      "line": "Every 12-month period since 2003, after tax."
+    },
+    "bonds": {
+      "title": "Bonds off the curve",
+      "line": "Government bonds sitting unusually far from their usual yield."
+    },
+    "company": {
+      "owners": "Owners",
+      "dealings": "Directors' trades",
+      "flows": "Money flow"
+    }
+  },
+  "tabs": {
+    "label": "Main",
+    "home": "Home",
+    "shares": "Shares",
+    "bonds": "Bonds",
+    "codes": "Codes",
+    "search": "Search"
   }
 }

@@ -27,7 +27,7 @@ export default async function CarryPage() {
   const f = carry.data?.funding;
   return (
     <>
-      <PageHead eyebrow={<>{t("bonds.eyebrow")} · <span className="tier-pill pro">{t("tiers.pro")}</span></>}
+      <PageHead eyebrow={<>{t("bonds.eyebrow")} · <span className="tier-pill plus">{t("tiers.plus")}</span></>}
                 title={t("carry.title")} lead={t("carry.intro")} />
       <Explain why={t("carry.why")} how={<p>{t("carry.how")}</p>} related={[{ href: "/learn/carry-rolldown", label: t("bond.guideCarry") }, { href: "/learn/duration-convexity", label: t("bond.guideDuration") }]} />
       {!carry.access.allowed ? (

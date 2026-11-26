@@ -54,6 +54,11 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
           </tbody>
         </table>
       </div>
+      {o.taste ? (
+        <p className="unlock">
+          <Link href="/plans" className="glow-chip">{t("share.tasteUnlock", { tier: t(`tiers.${o.taste.fullTier}` as never) })} →</Link>
+        </p>
+      ) : (
       <dl className="facts" style={{ marginTop: 16 }}>
         <dt>{t("share.control")}</dt>
         <dd>
@@ -81,6 +86,7 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
           )}
         </dd>
       </dl>
+      )}
       <p className="small muted">
         {o.period_date && t("share.ownersNote", { date: date(o.period_date) })}
         {o.source_url && (
@@ -94,7 +100,7 @@ export default async function CompanyOwnership({ result }: { result: Result<Owne
       </p>
       {o.holders.length > 0 && (
         <>
-          <h3>{t("share.top20Table")}</h3>
+          <h3>{o.taste ? t("share.topTaste", { count: o.taste.rows }) : t("share.top20Table")}</h3>
           <div className="table-wrap">
             <table>
               <thead>

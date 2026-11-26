@@ -67,7 +67,7 @@ export default async function BondsPage({ searchParams }: { searchParams: Promis
     { id: "table", label: t("bonds.sections.table") },
     { id: "further", label: t("bonds.sections.further") },
   ];
-  const tools = [["zscores", "/bonds/zscores", "plus"], ["execution", "/bonds/execution", "plus"], ["carry", "/bonds/carry", "pro"]] as const;
+  const tools = [["zscores", "/bonds/zscores", "plus"], ["execution", "/bonds/execution", "plus"], ["carry", "/bonds/carry", "plus"]] as const;
   return (
     <>
       <PageHead eyebrow={t("bonds.eyebrow")} title={t("bonds.title")} lead={t("bonds.leadLong")}

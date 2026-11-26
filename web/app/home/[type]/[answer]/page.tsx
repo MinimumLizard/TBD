@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import ModelFooter from "@/components/ModelFooter";
 import PageHead from "@/components/PageHead";
 import SignupBox from "@/components/SignupBox";
+import CheatStrip from "@/components/CheatStrip";
 import YourMoney from "@/components/YourMoney";
 import MarketBrief from "@/components/home/MarketBrief";
 import { CurveCard, SharesCard } from "@/components/home/MarketCards";
@@ -87,6 +88,7 @@ export default async function HomePage({ params }: { params: Promise<{ type: str
           </p>
         }
       />
+      <CheatStrip />
       <PathStrip steps={a.steps} />
       <YourMoney viewer={viewer} amount={mine?.amount ?? null} horizon={mine?.horizon ?? null} more={`/start/${type}/${key}/more`} />
       <div className="home-blocks">

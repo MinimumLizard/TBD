@@ -2,9 +2,10 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import PageHead from "@/components/PageHead";
+import Bolt from "@/components/Bolt";
 import Section from "@/components/Section";
 import { LEVEL_OF_TIER } from "@/lib/guides";
-import { MODEL_NAMES, TIERS, modelEntry } from "@/lib/registry";
+import { TIERS } from "@/lib/registry";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -26,11 +27,10 @@ export default async function PlansPage() {
                 meta={<p className="small muted">{t("plans.current", { tier: t(`tiers.${viewer.tier}`) })}</p>} />
       <div className="plans">
         {TIERS.map((tier) => {
-          const models = MODEL_NAMES.filter((m) => modelEntry(m).minimum_tier === tier);
           const features = t.raw(`plans.${tier}.features`) as string[];
           const level = LEVEL_OF_TIER[tier];
           return (
-            <section key={tier} className={`plan${tier === "plus" ? " featured" : ""}`}>
+            <section key={tier} className={`plan${tier === "pro" ? " featured" : ""}`}>
               <span className={`tier-pill ${tier}`}>{t(`tiers.${tier}`)}</span>
               <h2>{t(`plans.${tier}.tagline`)}</h2>
               <span className="small muted">{tier === "free" ? t("tiers.free") : t("plans.soon")}</span>
@@ -39,19 +39,12 @@ export default async function PlansPage() {
                 {t(`plans.${tier}.who`)}
               </p>
               <strong className="small">{t("plans.includes")}</strong>
-              <ul>
-                {features.map((f) => <li key={f}>{f}</li>)}
+              <ul className="plan-features">
+                {features.map((f, i) => {
+                  const own = tier !== "free" && i > 0; // "Everything in ..." first, then what this tier adds
+                  return <li key={f} className={own ? "adds" : undefined}>{own && <Bolt size={12} />}{f}</li>;
+                })}
               </ul>
-              {models.length > 0 && (
-                <>
-                  <strong className="small">{t("plans.models")}</strong>
-                  <ul className="small">
-                    {models.map((m) => (
-                      <li key={m}><Link href={`/methods/${m}`}>{t(modelEntry(m).title_key as never)}</Link></li>
-                    ))}
-                  </ul>
-                </>
-              )}
               {level && <Link className="more" href={`/learn#${level}`}>{t("plans.guidesLink")} →</Link>}
             </section>
           );

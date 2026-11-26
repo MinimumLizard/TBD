@@ -261,6 +261,7 @@ export interface CompanyOwnership {
   source_url: string | null;
   group_members: string[]; // the other companies in the group (codes), at the same session
   holders: Holder[]; // the report's checked top-20 table(s), voting class first
+  taste: { rows: number; fullTier: string } | null; // a free taste: the top rows only, no controller or group
 }
 
 export interface Holder {
@@ -279,15 +280,23 @@ const OWNERSHIP_COLUMNS = ["session_date", "code", "report_id", "period_date", "
   "pct_nominee", "pct_own_shares", "controller_type", "controller_name", "control_pct", "control_level", "group_id",
   "group_head_type", "group_head_name", "group_size", "free_float_pct", "source_url"];
 
+// What a taste of ownership leaves out (lib/db.ts refuses these columns on a taste grant).
+const TASTE_HIDDEN = ["controller_type", "controller_name", "control_pct", "control_level", "group_id", "group_head_type",
+  "group_head_name", "group_size"];
+
 /** A company's ownership at the latest session, with the other members of its ownership group. */
 export async function companyOwnership(viewer: Viewer, code: string): Promise<Result<CompanyOwnership | null>> {
   return withModel(viewer, "cse_ownership", async (g) => {
-    const [row] = await readOutput<Omit<CompanyOwnership, "group_members" | "holders">>(g, "models.cse_company_ownership", {
-      columns: OWNERSHIP_COLUMNS, where: "code = ?", params: [code], orderBy: "session_date desc", limit: 1,
+    const taste = g.topRows !== null && g.topFullTier !== null ? { rows: g.topRows, fullTier: g.topFullTier } : null;
+    const columns = taste ? OWNERSHIP_COLUMNS.filter((c) => !TASTE_HIDDEN.includes(c)) : OWNERSHIP_COLUMNS;
+    const [read] = await readOutput<Partial<CompanyOwnership>>(g, "models.cse_company_ownership", {
+      columns, where: "code = ?", params: [code], orderBy: "session_date desc", limit: 1,
     });
-    if (!row) return null;
+    if (!read) return null;
+    const row = { controller_type: null, controller_name: null, control_pct: null, control_level: null, group_id: "",
+                  group_head_type: null, group_head_name: null, group_size: 1, ...read } as Omit<CompanyOwnership, "group_members" | "holders" | "taste">;
     const [members, holders] = await Promise.all([
-      row.group_size > 1
+      !taste && row.group_size > 1
         ? readOutput<{ code: string }>(g, "models.cse_company_ownership", {
             columns: ["code"], where: "session_date = ? and group_id = ? and code <> ?",
             params: [row.session_date, row.group_id, code], orderBy: "code",
@@ -303,6 +312,6 @@ export async function companyOwnership(viewer: Viewer, code: string): Promise<Re
           })
         : Promise.resolve([]),
     ]);
-    return { ...row, group_members: members.map((m) => m.code), holders };
+    return { ...row, group_members: members.map((m) => m.code), holders, taste };
   });
 }

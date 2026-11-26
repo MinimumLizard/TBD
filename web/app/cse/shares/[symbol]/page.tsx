@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -9,11 +10,13 @@ import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
 import Brief from "@/components/Brief";
 import DirectorsDealings from "@/components/DirectorsDealings";
+import Bolt from "@/components/Bolt";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import { lineOption } from "@/lib/charts";
 import StatTile from "@/components/StatTile";
 import Term from "@/components/Term";
+import { companyCodes } from "@/lib/codes";
 import { actionAmount, companyName } from "@/lib/cse-display";
 import {
   type TotalReturnSession, companyFigures, companyOwnership, corporateActions, securityNames, shareHistory, totalReturns,
@@ -103,7 +106,15 @@ export default async function SharePage({ params }: { params: Promise<{ symbol: 
         eyebrow={ref?.sector_label ? t("share.eyebrow", { sector: ref.sector_label }) : t("share.eyebrowNoSector")}
         title={companyName(ref?.name) ?? symbol}
         lead={t("share.leadLine", { symbol })}
-        meta={<AsOf day={last.session_date} calendar="cse" />}
+        meta={<>
+          <AsOf day={last.session_date} calendar="cse" />
+          <nav className="company-codes" aria-label={t("codes.title")}>
+            <Bolt />
+            {companyCodes(symbol).map((c) => (
+              <Link key={c.key} href={c.href} className="glow-chip">{t(`codes.company.${c.key}` as never)}</Link>
+            ))}
+          </nav>
+        </>}
         parts={parts}
       />
       <div className="tiles">

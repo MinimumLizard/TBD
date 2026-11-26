@@ -28,6 +28,7 @@ const markers = JSON.parse(fs.readFileSync(path.join(__dirname, "markers.json"),
   ancient: string;
   models: Record<string, { new: Markers; old: Markers; mid?: Markers }>;
   recent_window: Record<string, Markers>;
+  taste: Record<string, Markers>;
   bond_page: Record<string, { new: string[]; old: string[]; mid?: string[] }>;
   email_bonds: Record<string, string[]>;
   never: string[];
@@ -130,6 +131,25 @@ describe("everyone", () => {
         } else {
           for (const v of m.api) expect(api.body, `${model} as ${tier} leaked ${v}`).not.toContain(v);
           for (const v of m.page) expect(page.body, `${DETAIL[0]} as ${tier} leaked ${v}`).not.toContain(v);
+        }
+      }
+    }
+  });
+
+  test("a taste shows the top rows only: the rest appears from its full tier up, never below", async () => {
+    for (const [model, m] of Object.entries(markers.taste)) {
+      const full = modelEntry(model as ModelName).top_rows!.full_tier;
+      for (const tier of TIERS) {
+        const api = await get(MODEL_ROUTES[model as ModelName].api[0], tier);
+        const page = await get(DETAIL[1], tier);
+        if (rank(tier) >= rank(full)) {
+          for (const v of m.api) expect(api.body, `${model} as ${tier} is missing ${v}`).toContain(v);
+          for (const v of m.page) expect(page.body, `${DETAIL[1]} as ${tier} is missing ${v}`).toContain(v);
+        } else {
+          for (const v of [...m.api, ...m.page]) {
+            expect(api.body, `${model} as ${tier} leaked ${v}`).not.toContain(v);
+            expect(page.body, `${DETAIL[1]} as ${tier} leaked ${v}`).not.toContain(v);
+          }
         }
       }
     }

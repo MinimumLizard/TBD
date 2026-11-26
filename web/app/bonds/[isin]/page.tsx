@@ -235,7 +235,7 @@ export default async function BondPage({ params }: { params: Promise<{ isin: str
         )}
       </Section>
 
-      <Section id="carry" tier="pro" title={t("bond.sections.carry")}
+      <Section id="carry" tier="plus" title={t("bond.sections.carry")}
                summary={carry.access.allowed && lastC ? t("bond.sections.carrySum", { d: num(lastC.duration, 2), total: signed(lastC.total_bp, 0) }) : t("bond.sections.carryLocked")}
                why={t("bond.sections.carryWhy")} how={<p>{t("bond.sections.carryHow")}</p>}
                related={[{ href: "/learn/carry-rolldown", label: t("bond.guideCarry") }, { href: "/learn/duration-convexity", label: t("bond.guideDuration") }]}>

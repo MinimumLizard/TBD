@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import Bolt from "./Bolt";
 import Logo from "./Logo";
 import type { Viewer } from "@/lib/entitlements";
 import { MENUS, type Menu } from "@/lib/menu";
@@ -41,6 +42,7 @@ export default async function SiteHeader({ viewer }: { viewer: Viewer }) {
               </details>
             ),
           )}
+          <Link href="/codes" className="nav-codes"><Bolt />{t("codes.title")}</Link>
           <Link href="/plans">{t("nav.plans")}</Link>
         </nav>
         <form className="site-search" action="/search" method="get" role="search">
@@ -67,6 +69,10 @@ export default async function SiteHeader({ viewer }: { viewer: Viewer }) {
                 {items(menu)}
               </div>
             ))}
+            <Link href="/codes" className="m-codes">
+              <span className="m-title"><Bolt />{t("codes.title")}</span>
+              <span className="m-desc">{t("codes.lead")}</span>
+            </Link>
             <span className="m-group">{t("nav.plans")}</span>
             <Link href="/plans">
               <span className="m-title">{t("nav.plans")}</span>

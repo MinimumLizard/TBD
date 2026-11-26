@@ -138,6 +138,13 @@ def check(root: Path = MODELS_DIR) -> list[str]:
             if rw.get("full_history_tier") not in tiers or \
                     tiers.index(rw.get("full_history_tier")) <= tiers.index(entry["minimum_tier"]):
                 problems.append(f"{name}: recent_window.full_history_tier must be a tier above the minimum tier")
+        if entry and entry.get("top_rows"):
+            tr = entry["top_rows"]
+            if int(tr.get("rows", 0)) <= 0:
+                problems.append(f"{name}: top_rows.rows must be a positive number of rows")
+            if tr.get("full_tier") not in tiers or entry.get("minimum_tier") not in tiers or \
+                    tiers.index(tr.get("full_tier")) <= tiers.index(entry["minimum_tier"]):
+                problems.append(f"{name}: top_rows.full_tier must be a tier above the minimum tier")
 
     for name, m in manifests.items():
         for v in m.versions:
@@ -215,6 +222,7 @@ def web_export(manifests: dict[str, Manifest], root: Path = MODELS_DIR) -> dict:
                 "minimum_tier": ent["models"][name]["minimum_tier"],
                 "free_preview": ent["models"][name].get("free_preview"),
                 "recent_window": ent["models"][name].get("recent_window"),
+                "top_rows": ent["models"][name].get("top_rows"),
                 "method_md": (root / name / "METHOD.md").read_text(),
             } for name, m in sorted(manifests.items())
         },

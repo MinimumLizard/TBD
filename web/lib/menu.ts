@@ -22,6 +22,7 @@ export const MENUS: Menu[] = [
       { key: "allShares", href: "/cse/shares" },
       { key: "compare", href: "/cse/shares/compare" },
       { key: "dealings", href: "/cse/dealings" },
+      { key: "lab", href: "/cse/lab", tier: "pro" },
     ],
   },
   {
@@ -30,7 +31,7 @@ export const MENUS: Menu[] = [
       { key: "curve", href: "/bonds" },
       { key: "zscores", href: "/bonds/zscores", tier: "plus" },
       { key: "execution", href: "/bonds/execution", tier: "plus" },
-      { key: "carry", href: "/bonds/carry", tier: "pro" },
+      { key: "carry", href: "/bonds/carry", tier: "plus" },
     ],
   },
   {

@@ -9,7 +9,7 @@ export async function generateMetadata() {
   return { title: t("learn.title") };
 }
 
-const TIER_OF_LEVEL = { basics: "free", deeper: "plus", advanced: "pro" } as const;
+const TIER_OF_LEVEL = { basics: "free", deeper: "pro", advanced: "plus" } as const;
 
 // The Learn hub: guides at three levels, each level matching a tier's tools. Every guide is free to read.
 export default async function LearnPage() {

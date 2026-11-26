@@ -41,6 +41,7 @@ OLD7 = TODAY - dt.timedelta(days=7)   # the money flows preview's last visible d
 MID7 = TODAY - dt.timedelta(days=6)   # inside that delay: never visible to a free visitor
 MARKERS = Path(__file__).with_name("markers.json")
 PERSON = "Mr. Q. Zyxwvut"                  # a made-up individual shareholder: shown on the share page
+RANK4 = "Ms. Rankfour Hiddenholder"        # the fourth-largest holder: Pro sees it, a free taste (top three) never does
 GROUP_HEAD = "Leakcheck Holdings (Pvt) Ltd"   # a made-up company: companies may be named
 DB_NAME = os.environ.get("LEAK_DB_NAME", "tbd_leak")   # another name lets two checkouts test at once
 
@@ -148,8 +149,12 @@ def seed(conn) -> dict:
         {"report_id": 7, "share_class": "N", "row_no": 1, "rank": 1, "period_date": OLD, "code": "AAA", "symbol": "AAA.N0000",
          "name_as_filed": PERSON, "shares": 424242.17, "pct": 35.0, "fraction": 0.35, "owner_key": "ZYXWVUT",
          "owner_name": PERSON, "owner_type": "individual", "owner_symbol": "", "via": "", "rule": "",
+         "table_status": "verified", "source_url": "https://cdn.cse.lk/r.pdf", "as_of": NEW},
+        {"report_id": 7, "share_class": "N", "row_no": 4, "rank": 4, "period_date": OLD, "code": "AAA", "symbol": "AAA.N0000",
+         "name_as_filed": RANK4, "shares": 313131.0, "pct": 3.1, "fraction": 0.031, "owner_key": "RANKFOUR",
+         "owner_name": RANK4, "owner_type": "individual", "owner_symbol": "", "via": "", "rule": "",
          "table_status": "verified", "source_url": "https://cdn.cse.lk/r.pdf", "as_of": NEW}])
-    # Directors' dealings (free) and money flows (Plus, a 7-day free preview), with made-up names: the dealing's names
+    # Directors' dealings (free) and money flows (Pro, a 7-day free preview), with made-up names: the dealing's names
     # are shown to everyone (decision 0021); each money-flow account's name only to the tiers that see that date.
     put("cse_dealings", "models.cse_dealing", [
         {"transaction_id": f"{aid}:1", "announcement_id": aid, "line_no": 1, "symbol": "AAA", "company": "AAA PLC",
@@ -178,7 +183,8 @@ def seed(conn) -> dict:
         for d, name, v in ((OLD7, "Xavier R. Oldmarker", 54321000.0), (MID7, "Wendy S. Midmarker", 65432100.0),
                            (NEW, "Yolanda P. Flowmarker", 76543210.0))])
 
-    # The portfolio lab: internal research, unpublished; its markers must never appear anywhere (they are in "never").
+    # The portfolio lab's estimates and the owner's record: internal, unpublished; their markers must never appear
+    # anywhere (they are in "never"). The walk-forward test below is Pro.
     put("cse_risk_estimates", "models.cse_risk_estimate", [
         {"as_of": NEW, "symbol": "AAA.N0000", "sector": "Banks", "group_key": "AAA.N0000", "group_name": None,
          "beta": 1.0, "beta_current": 1.0, "beta_lag": 0.0, "expected_return": 0.7531864209, "volatility": 0.2,
@@ -190,11 +196,18 @@ def seed(conn) -> dict:
     put("cse_lab_record", "models.cse_lab_nav", [
         {"series": "1.1.0", "session_date": NEW, "portfolio": "min_variance_15", "nav": 86420975.31, "cash": 0.0,
          "holdings_value": 86420975.31, "note": "inception"}])
+    # The lab's walk-forward test is Pro (decision 0027): the example portfolio (half-yearly, 15 names).
     put("cse_lab_backtest", "models.cse_bt_nav", [
-        {"session_date": NEW, "policy": "quarterly", "portfolio": "min_variance_15", "nav": 64209753.18, "cash": 0.0,
-         "n_names": 15}])
+        {"session_date": d, "policy": "half_yearly", "portfolio": p, "nav": nav, "cash": 0.0, "n_names": 15}
+        for d, p, nav in ((OLD, "min_variance_15", 1e6), (NEW, "min_variance_15", 64209753.18),
+                          (OLD, "market", 1e6), (NEW, "market", 1.01e6), (OLD, "bills", 1e6), (NEW, "bills", 1.002e6))])
+    put("cse_lab_backtest", "models.cse_bt_summary", [
+        {"policy": "half_yearly", "portfolio": p, "start_date": OLD, "end_date": NEW, "end_value": 1e6,
+         "total_return": r, "volatility": 0.1, "max_drawdown": -0.05, "best_month": 0.02, "worst_month": -0.02,
+         "n_rebalances": 1, "n_drift": 0, "turnover": 0.3, "costs": 4321.0, "n_names_end": 15}
+        for p, r in (("min_variance_15", 0.0123), ("market", 0.01), ("bills", 0.002))])
     put("cse_lab_backtest", "models.cse_bt_target", [
-        {"as_of": NEW, "policy": "quarterly", "portfolio": "min_variance_15", "symbol": "AAA.N0000", "applied": True,
+        {"as_of": NEW, "policy": "half_yearly", "portfolio": "min_variance_15", "symbol": "AAA.N0000", "applied": True,
          "today": False, "weight": 0.6420975318, "risk_contribution": 1.0, "volatility": 0.2, "beta": 1.0,
          "avg_correlation": 0.0, "sector": "Banks", "group_key": "AAA.N0000", "group_name": None, "at_cap": False,
          "at_floor": False, "rank": 1, "in_previous": False}])
@@ -258,14 +271,17 @@ def seed(conn) -> dict:
             # free company figures: the latest P/E (shares list and share page); free ownership: the latest free float
             # and the group head, a company (an individual is never named)
             "cse_fundamentals": {"new": {"api": ["87.6543"], "page": ["87.7"]}, "old": {"api": [], "page": []}},
-            "cse_ownership": {"new": {"api": ["63.719", "Leakcheck Holdings", "Zyxwvut"],
-                                      "page": ["63.7%", "Leakcheck Holdings", "Zyxwvut", "424,242"]},
+            # ownership: everyone sees the free float and the top three holders (a free taste)
+            "cse_ownership": {"new": {"api": ["63.719", "Zyxwvut"], "page": ["63.7%", "Zyxwvut", "424,242"]},
                               "old": {"api": [], "page": []}},
+            # the portfolio lab (Pro): a model weight and a value
+            "cse_lab_backtest": {"new": {"api": ["0.6420975318", "64209753.18"], "page": ["64.2%"]},
+                                 "old": {"api": [], "page": []}},
             # free: the latest dealing's shares (raw in the API, formatted on the market-wide page and the share page)
             "cse_dealings": {"new": {"api": ["98765", "Zebedee Q. Markerperson", "z.pdf"],
                                      "page": ["98,765", "Zebedee Q. Markerperson", "z.pdf"]},
                              "old": {"api": [], "page": []}},
-            # Plus with a 7-day preview: purchases and the dealing count on the latest date, a day inside the delay,
+            # Pro with a 7-day preview: purchases and the dealing count on the latest date, a day inside the delay,
             # and the last date a free visitor may see
             "cse_flows": {"new": {"api": ["76543210", "73219", "Yolanda P. Flowmarker"],
                                   "page": ["Rs 76.5 mn", "73,219", "Yolanda P. Flowmarker"]},
@@ -274,18 +290,20 @@ def seed(conn) -> dict:
                           "old": {"api": ["54321000", "53219", "Xavier R. Oldmarker"],
                                   "page": ["Rs 54.3 mn", "53,219", "Xavier R. Oldmarker"]}},
         },
-        # the bond page's own analysis (formatted as that page shows it): Pro's convexity, Plus's latest z-score
+        # beyond a taste: what only the full tier sees (ownership: the fourth holder, the group head, the controller)
+        "taste": {"cse_ownership": {"api": ["Rankfour", "Leakcheck Holdings", "313131"],
+                                    "page": ["Rankfour", "Leakcheck Holdings", "313,131"]}},
+        # the bond page's own analysis (formatted as that page shows it): Plus's convexity and latest z-score
         "bond_page": {"bond_carry": {"new": ["47.3"], "old": ["36.2"]},
                       "bond_rv_zscores": {"new": ["+7.77"], "mid": ["+2.22"], "old": ["+6.66"]}},
         # the weekly bond e-mail (as /email/bonds shows it): Plus's z-scores (no delayed preview in an e-mail) and
-        # Pro's carry range and funding rate
+        # Plus's carry range and funding rate
         "email_bonds": {"bond_rv_zscores": ["+7.77", "+6.66", "+2.22"], "bond_carry": ["+120 to +120 bp", "9.05%"]},
         # reference versions and unpublished statistics: never shown to anyone, raw or formatted
         "never": ["97.79", "97.8 bp", "96.69", "96.7 bp", "31.4159", "31.42", "0.9561", "+95.61%",
                   # the portfolio lab (internal research): a weight, an expected return, a record value
                   "0.8642097531", "86.42%", "0.7531864209", "75.32%", "86420975.31", "86,420,975", "Rs 86.4 mn",
-                  # its walk-forward test: a value and a model weight
-                  "64209753.18", "64,209,753", "Rs 64.2 mn", "0.6420975318", "64.21%",
+                  # its walk-forward risk test (the website never reads it)
                   "0.5318642097", "53.19%", "53.2%"],
     }
 

@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import PageScripts from "@/components/PageScripts";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import TabBar from "@/components/TabBar";
 import { getViewer } from "@/lib/viewer";
 
 import "./globals.css";
@@ -30,6 +31,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </NextIntlClientProvider>
         </main>
         <SiteFooter />
+        <TabBar label={t("tabs.label")} tabs={[
+          { key: "home", href: "/", label: t("tabs.home") },
+          { key: "shares", href: "/cse", label: t("tabs.shares") },
+          { key: "bonds", href: "/bonds", label: t("tabs.bonds") },
+          { key: "codes", href: "/codes", label: t("tabs.codes") },
+          { key: "search", href: "/search", label: t("tabs.search") },
+        ]} />
         <PageScripts />
       </body>
     </html>

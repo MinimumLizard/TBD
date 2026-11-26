@@ -38,19 +38,16 @@ export default async function Section({ id, title, summary, tier, open = false, 
       </summary>
       <div className="s-body">
         {(why || how) && (
-          <div className="explain">
-            {why && (
-              <p>
-                <strong>{t("ui.whyItMatters")}</strong> {why}
-              </p>
-            )}
+          <details className="explain">
+            <summary>{t("ui.whyShort")}</summary>
+            {why && <p>{why}</p>}
             {how && (
-              <details>
-                <summary>{t("ui.howToRead")}</summary>
+              <>
+                <p><strong>{t("ui.howToRead")}</strong></p>
                 {how}
-              </details>
+              </>
             )}
-          </div>
+          </details>
         )}
         {children}
         {related && related.length > 0 && (

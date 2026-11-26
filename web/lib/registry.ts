@@ -2,7 +2,7 @@
 // `python -m data_platform.models.registry export-web`. CI fails if this copy is out of date.
 import registryJson from "./generated/registry.json";
 
-export type Tier = "free" | "plus" | "pro" | "professional";
+export type Tier = "free" | "pro" | "plus"; // a ladder (decision 0027)
 
 export interface ModelEntry {
   market: "lk_bonds" | "cse" | "lk_savings";
@@ -15,6 +15,7 @@ export interface ModelEntry {
   minimum_tier: Tier;
   free_preview: { delay_days: number } | null;
   recent_window: { days: number; full_history_tier: Tier } | null;
+  top_rows: { rows: number; full_tier: Tier } | null; // tiers below full_tier see only the top rows (decision 0027)
   method_md: string;
 }
 

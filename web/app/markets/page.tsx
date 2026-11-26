@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import ModelFooter from "@/components/ModelFooter";
+import CheatStrip from "@/components/CheatStrip";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import Stats from "@/components/Stats";
@@ -27,12 +28,12 @@ export default async function MarketsPage() {
     <>
       <PageHead eyebrow={t("home.eyebrow")} title={t("home.heroTitle")} lead={t("home.heroLead")}
                 meta={<ul className="trust"><li>{t("home.trust1")}</li><li>{t("home.trust2")}</li><li>{t("home.trust3")}</li></ul>} />
+      <CheatStrip />
       <MarketBrief o={o} />
 
       <div className="section-head">
         <h2>{t("home.snapshot")}</h2>
       </div>
-      <p className="small muted" style={{ marginTop: -4 }}>{t("home.snapshotLead")}</p>
       <MarketTiles o={o} />
 
       <div className="grid two" style={{ marginTop: 24 }}>
@@ -70,7 +71,7 @@ export default async function MarketsPage() {
       <Section id="plans" title={t("home.tiersTitle")} summary={t("home.tiersLead")}
                related={[{ href: "/plans", label: t("home.plansLink") }]}>
       <div className="tier-strip">
-        {(["free", "plus", "pro"] as const).map((tier) => (
+        {(["free", "pro", "plus"] as const).map((tier) => (
           <div key={tier}>
             <span className={`tier-pill ${tier}`} style={{ justifySelf: "start" }}>{t(`tiers.${tier}`)}</span>
             <p>{t(`home.tier${tier === "free" ? "Free" : tier === "plus" ? "Plus" : "Pro"}`)}</p>

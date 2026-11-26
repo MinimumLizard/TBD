@@ -109,7 +109,7 @@
       "free_preview": null,
       "market": "lk_bonds",
       "method_md": "# Carry, rolldown and duration (bond_carry)\n\n## What it shows\n\nFor each quoted bond on each day, two quantities known at the outset, in basis points per year:\n\n- **carry**: the bond's yield minus a funding rate;\n- **rolldown**: the price change from the bond ageing a quarter along an unchanged curve, annualised;\n\nplus the bond's price and modified duration, and carry plus rolldown per year of duration. Carry plus rolldown on\nits own rises almost one for one with duration; per unit of duration the bonds become comparable.\n\n## Inputs\n\nThe day's curve and quote residuals (`bond_ns_curve`), coupons (`bond_identity`), the execution gap\n(`bond_execution_gap`), and executed treasury bill trades from the PDMO trade summary.\n\n## Method (version 1.0.0)\n\n- Entry yield = quoted yield + the day's execution gap (0 when the gap is not reported). The shift is the same for\n  every bond, so it moves levels, not the ordering.\n- Funding rate = the volume-weighted yield of 12-month treasury bills (240 to 380 days left) printed within the 5\n  days to the latest such print in the last 30 days, plus 5 bp.\n- Price and modified duration from the entry yield, semi-annual coupons dated backwards from maturity, flat yield,\n  no day count.\n- Rolldown = duration \u00d7 (curve yield at \u03c4 \u2212 curve yield at \u03c4 \u2212 0.25) / 0.25, with \u03c4 \u2212 0.25 floored at 0.02 years.\n\n## Limits\n\n- The 5 bp spread over the bill is the old tool's personal assumption about one dealer's margin; a reader's own\n  funding cost will differ.\n- Tax is not modelled. Coupon income and price accretion may be taxed differently.\n- The bill rate can be up to 30 days stale; staleness is stored with each day's funding rate.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014).\n  Two kinds of bond that now reach the curve are left out here: step-coupon bonds (a level-coupon formula cannot\n  price them) and bonds quoted more than 50 bp wide (the 2023 restructuring block, posted at an administered\n  13.00/12.00; its yield is not one anyone deals at). 50 bp is the old tool's own threshold for admitting a quote.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's `carry.funding_rate()` (209 days) and `carry.profile()` (10,975 bond-days) for\nevery curve day; the largest difference is about 1e-11. Report: `docs/migration/parity-bonds.json`.\n",
-      "minimum_tier": "pro",
+      "minimum_tier": "plus",
       "outputs": [
         "models.bond_funding",
         "models.bond_carry"
@@ -117,6 +117,7 @@
       "recent_window": null,
       "summary_key": "models.bond_carry.summary",
       "title_key": "models.bond_carry.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -143,6 +144,7 @@
       "recent_window": null,
       "summary_key": "models.bond_execution_gap.summary",
       "title_key": "models.bond_execution_gap.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -170,6 +172,7 @@
       "recent_window": null,
       "summary_key": "models.bond_identity.summary",
       "title_key": "models.bond_identity.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -189,13 +192,14 @@
       "free_preview": null,
       "market": "lk_bonds",
       "method_md": "# Bond trading activity (bond_liquidity)\n\n## What it shows\n\nFor each bond, as of each day: its turnover and number of trades over the last 60 days, on how many of those days\nit traded, when it was last auctioned, the bid-to-cover ratio at its last competitive auction, and its last\ntraded yield. Bonds are grouped into three tiers by trading activity:\n\n- **core**: auctioned in the last 120 days (a current benchmark issue) and traded on at least 8 of the last 60\n  days;\n- **active**: traded on at least 10 of the last 60 days;\n- **wider**: quoted, but traded less often than that.\n\n## Inputs\n\nPDMO trade summaries (bonds only), auction results and announcements; the days on which a curve was fitted.\n\n## Method (version 1.0.0)\n\n- Trade files are published a day or more after the quotes, so the 60-day window ends on the last day whose trade\n  file had been published, unless that is more than 7 days before the day scored (then the window ends on the day\n  itself, so a stopped feed cannot keep a bond looking active).\n- A bond auctioned exactly 120 days ago still counts as a benchmark. `post_auction` marks the 14 days after an\n  auction.\n- Trade data is used by the day it describes. A day's trade file is published a day or more after its quotes, so\n  the figures for a day are first computed without that day's trades and recomputed when the file arrives; the\n  earlier values are kept in the revision record.\n\n## Limits\n\nThe thresholds (60, 120, 10, 8, 14 and 7 days) are the old tool's choices, set by inspection of this market's\nhistory, not by a formal test.\n\n## Versions\n\n- **1.1.0 (current):** the same method, reading version 2 of the curve (every two-way quote, decision 0014). Its\n  outputs are identical to 1.0.0 so far: the restructuring bonds that only version 2 fits do not trade under a\n  bond ISIN that matches their quotes.\n- **1.0.0 (reference):** reads version 1 of the curve and reproduces the old tool; kept running beside 1.1.0.\n\n## Parity\n\nVersion 1 reproduces the old tool's `liquidity.profile()` for every curve day (9,150 bond-days) exactly. The old\ntool computed this for its latest day only, so the comparison runs the old code on the old database. Report:\n`docs/migration/parity-bonds.json`.\n",
-      "minimum_tier": "free",
+      "minimum_tier": "plus",
       "outputs": [
         "models.bond_liquidity"
       ],
       "recent_window": null,
       "summary_key": "models.bond_liquidity.summary",
       "title_key": "models.bond_liquidity.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -226,6 +230,7 @@
       },
       "summary_key": "models.bond_ns_curve.summary",
       "title_key": "models.bond_ns_curve.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -256,6 +261,7 @@
       "recent_window": null,
       "summary_key": "models.bond_rv_zscores.summary",
       "title_key": "models.bond_rv_zscores.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -283,6 +289,7 @@
       "recent_window": null,
       "summary_key": "models.cse_corporate_actions.summary",
       "title_key": "models.cse_corporate_actions.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -305,6 +312,7 @@
       "recent_window": null,
       "summary_key": "models.cse_dealings.summary",
       "title_key": "models.cse_dealings.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -321,7 +329,7 @@
       },
       "market": "cse",
       "method_md": "# Directors' money flows (cse_flows)\n\n## What it shows\n\nWhere directors' money moved, from their disclosed share dealings (`cse_dealings`), per company over the last 30\ndays, 90 days and year: the value of purchases, the value of disposals, the net, how many different accounts made\npurchases and how many made disposals, how many dealings there were, and whether there was a **cluster**. Also, for\nevery dealing, the kind of account that dealt (a person, a company, a listed company, a fund\u2026) and three flags:\n**large** (Rs 10 mn or more), **related party** and **same ownership group** (the account that dealt belongs to the\ncompany's own ownership group). Each account also carries the name of its ownership group.\n\nThis describes disclosures. It is not a signal and says nothing about where a share's price will go; the order of\nthe companies on the site is by the total value dealt in either direction, not by direction.\n\n**Names are shown.** Counting different accounts needs their names; the per-account table (`models.cse_flow_actor`)\nis shown on the money-flows page under the same tier and preview as the rest of this model (decision 0021).\n\n## Inputs\n\n- `cse_dealings` 1.0.0: the transactions (`models.cse_dealing`), without re-filed notices, and their accounts as\n  filed (`models.cse_dealing_as_filed`).\n- The CSE's security list (`cse.security_list`): which accounts are listed companies, and their names.\n- The owner's confirmed aliases (`cse.ownership_confirmations`: `config/ownership_aliases.yaml` and the private file,\n  the same list `cse_ownership` uses for shareholders): spellings the owner has confirmed are one holder.\n- `cse_ownership` 1.0.0: each company's ownership group, by session (`models.cse_ownership_detail`).\n\n## Method (version 1.0.0)\n\n**The account that dealt** (the \"actor\") is the notice's account: the director for an own-account dealing, the\nrelated party for a related-account one. If that name is generic (\"Shareholders\", \"N/A\", \"Nil\", \"None\", \"-\",\n\"Please refer\u2026\", \"See\u2026\", \"As per\u2026\", \"As mentioned\u2026\", \"Attached\", \"Related party/parties\"), the director is used; if\nthat is generic too, \"<company> \u2013 directors (see notice)\".\n\nThe name is then cleaned, as the old terminal's ownership tracker cleans shareholder names:\n\n1. Leading phrases are removed: \"Purchase/Disposal/Sale/Acquisition of shares by X\", \"Directors of X\", \"Nominee\n   Directors of X\", \"Shares held by X\", \"On behalf of X\" become X; \"\u2026 are directors of X\" becomes X.\n2. Descriptions after the name are removed: \". Mr \u2026\", \" in which \u2026\", \" where \u2026\", \" which is \u2026\", \", a private\n   company \u2026\", \", privately held \u2026\", \", major/substantial/controlling shareholder \u2026\", and suffixes such as\n   \"- Directors\", \"- Common Directors\", \"- Directors / Shareholders\", \"(Directors \u2026)\". A relative keeps their own\n   name: \"Mrs X (Spouse)\" is not Mrs X.\n3. Custodian and financed accounts name their owner: \"<custodian> S/A <owner>\", \"<bank> A/C <fund>\",\n   \"<lender>/<owner>\" become the owner.\n4. Matching key: upper case, without titles (Mr, Mrs, Dr, M/S\u2026), punctuation, \"The\", account numbers (\"A/C No. 2\")\n   and legal suffixes (PLC, Ltd, (Pvt) Ltd, Private Limited\u2026). Two spellings are the same account only when their\n   keys are identical, or when the owner's aliases list them as one holder (the aliases always win); initials are\n   never matched to full names automatically.\n5. Kind of account, first match: a life or policyholders' fund is an institution; a key equal to a listed\n   company's (from the security list in force on the dealing date) is that listed company (shown under the CSE's\n   name for it); \"Estate of\u2026\" / \"Late\u2026\" an estate; a trust (not a trust fund, not a company) a trust; funds, pension\n   and provident funds, insurers, development banks, state bodies an institution; a name with a company word (Ltd,\n   PLC, Holdings, Investments, Bank\u2026) a company; \"X and Y\" or \"X/Y\" a joint account; a person's name an individual;\n   anything else a company.\n\n**Per dealing date D** (every date on which a counted dealing is dated), and per window W of 30, 90 and 365 days,\nthe dealings counted are the purchases and disposals dated after D \u2212 W days and on or before D. (Dealings dated\nlater never change the rows for D; a late notice dated D or earlier, or a re-filing, does.)\n\n- Per company: purchases = the sum of purchase values; disposals = the sum of disposal values (a missing value counts\n  as 0); net = purchases \u2212 disposals; accounts purchasing / disposing = the number of different accounts (by key) on\n  each side; dealings = the number of transactions. **Cluster**: two or more different accounts made purchases and\n  net > 0.\n- Per account (not published): the same sums over the account's dealings in all companies, the number of\n  dealings, and its net value in its six largest companies.\n- Per date: the number of dealings dated on or before D (any side), how many of them are purchases or disposals, and\n  the median disclosure lag in weekdays.\n\nPer dealing: **large** when the value is Rs 10 mn or more; **related party** when the dealing was through a related\naccount; **same ownership group** when the account's group equals the company's group. Groups are `cse_ownership`'s\nas at the dealing date (its latest session on or before that date; before its first session, the first): a\ncompany's group is the holder at the top of its chain of largest voting blocks of 20 % or more; a listed account's\ngroup is its company's group; any other account is its own group, so a holding company at the top of a group matches\nthe companies under it. A company with no shareholder table is its own group. The account's **group name** is its\ngroup's name (the account's own name when it heads no group).\n\nValues are added in the order of the old terminal's file (by dealing date, announcement date, announcement id, then\nposition in the notice), so the totals agree with it to the last digit.\n\n## Outputs\n\n- `models.cse_flow_company`: per dealing date, window and company (published).\n- `models.cse_flow_summary`: per dealing date (published).\n- `models.cse_flow_dealing`: per dealing, with the three flags (published).\n- `models.cse_flow_actor`: per dealing date, window and account, with the account's name and its group's name (shown\n  under the model's tier, decision 0021).\n\n## Limits\n\n- Windows end on the latest dealing date, not on today: after a quiet spell, \"the last 30 days\" are the 30 days to\n  the latest dealing (the old terminal's rule, kept for version 1).\n- The old page also flagged the old owner's personal watchlist; that list is personal and is not ported.\n- The old page also compared consecutive quarterly top-20 shareholder lists (audit C20); not ported yet.\n- Different spellings of one person's name are different accounts unless their keys match or the owner's aliases\n  join them. A change to the aliases changes the rows of every date on the next run (as for `cse_ownership`).\n- The groups are only as complete as the shareholder lists: a company whose top-20 table could not be checked is its\n  own group, so a dealing by its parent is not flagged.\n\n## Parity\n\nVersion 1 reproduces the old CSE terminal's money-flow tables (`cse/flows.py` build() at commit e05c6f3), computed on\nits `data/dealings/dealings.csv` with its own aliases file and ownership groups: per window, every company row\n(purchases, disposals, net, the distinct accounts on each side, the cluster flag) and every account row (its group's\nname, sums, number of dealings, net by company), the large, related-party and same-ownership-group flags of every\ndealing, the counts and the median lag, exactly, at the old page's date and at earlier dealing dates (the old code run\non the old file cut at each date). Report (counts only): `docs/migration/parity-cse-dealings-flows.json`.\n",
-      "minimum_tier": "plus",
+      "minimum_tier": "pro",
       "outputs": [
         "models.cse_flow_company",
         "models.cse_flow_summary",
@@ -331,6 +339,7 @@
       "recent_window": null,
       "summary_key": "models.cse_flows.summary",
       "title_key": "models.cse_flows.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -345,7 +354,7 @@
       "free_preview": null,
       "market": "cse",
       "method_md": "# Company figures: earnings, net assets and the ratios built on them (cse_fundamentals)\n\n## What it shows\n\nFor every listed company with interim reports: its **earnings per share over the last twelve months** (TTM EPS),\nits **net assets per share** (NAV per share), and at each session's price the **P/E**, **P/B**, **return on equity\n(ROE)**, **trailing dividends per share** and **dividend yield**, with the report the figures came from.\n\nThe CSE does not publish earnings or book values per company, so they are read from the companies' own interim\nreports. **A figure is used only if it reconciles inside its own report**; otherwise it is left blank, never\nguessed.\n\n## Inputs\n\n- The interim reports' text (`cse.financial_reports`, `cse.report_texts`; see `cse_ownership`).\n- Share counts: the company summaries and the trade summary (market capitalisation \u00f7 close = the CSE's count), and\n  each report's own period-end count from its checked shareholder table (`cse_ownership` step 2).\n- Each company's financial year end, from its CSE profile (`cse.company_fiscal_years`: `finYearEnd` 1 = 31 March,\n  2 = 31 December).\n- Closing prices (`cse.prices_daily_current`).\n- The cash dividends in use, from `cse_corporate_actions` (`models.cse_corporate_action_used`).\n\n## Method (version 1.0.0)\n\nVersion 1 reproduces the old terminal's `cse/fundamentals.py` exactly.\n\n**1. Share counts tried.** First the report's own period-end count (from its verified shareholder table: shares \u00f7\nfraction, voting plus non-voting), then every distinct count the CSE has reported for the company, newest first,\nthen today's. The first count under which the EPS reconciles is used; failing that, the first under which the NAV\nper share does.\n\n**2. EPS.** A line labelled earnings / profit / loss per share (or \"Basic EPS\"); its numbers may sit on the label\nline or on a following \"Basic\" line. A lone whole number under 100 just after the label is a note reference; years\n1990\u20132040 are dropped. Only the **first numeric column** is used. EPS \u00d7 shares must equal a profit line in the 60\nlines above, in the same first column: \"profit attributable to equity holders / owners / shareholders of the\nparent / company / bank\" first, then \"profit (loss) for the period / year / quarter\", nearest first. Units tried:\nrupees, Rs '000 and Rs mn; the unit that matches is the statement's unit. Tolerance:\n\n|EPS \u00d7 shares \u00f7 (profit \u00d7 unit) \u2212 1| \u2264 min(15 %, 2 % + \u00bd \u00d7 10^\u2212max(d, 2) \u00f7 |EPS|)\n\nwhere *d* is the number of decimals the EPS is printed with. Signs must agree. Profit used afterwards = profit line \u00d7\nunit, in rupees.\n\n**3. NAV per share.** A line labelled net asset (value) per share; group or consolidated lines first, then\ncompany-only ones. NAV \u00d7 shares must equal \"equity attributable to owners \u2026\" or \"total equity\" under the same rule.\nEquity used afterwards = that line \u00d7 unit.\n\n**4. What the first column covers.** The nearest line above the EPS (within 80 lines) naming a period length\ndecides: \"quarter\", \"three months\", \"03 months\" \u2192 the quarter; \"six / nine / twelve months\", \"year ended\", \"half\nyear\", \"cumulative\" \u2192 the year to date; both on one line \u2192 whichever comes first; none \u2192 unknown.\n\n**5. Which quarter.** The CSE's period date when it is a quarter end; else the quarter-end date in the title; else\nthe last quarter end at least 15 days before the CSE's date.\n\n**6. TTM profit.** Quarters are numbered within the financial year (for a March year end, the June quarter is Q1).\nQuarterly profit = a quarter column; or a year-to-date column minus the previous quarter's year to date in the same\nfinancial year; Q1 is both (an unknown column counts only for Q1). TTM profit = the sum of the last **four\nconsecutive** quarters, only when all four are known (otherwise the note names the missing quarter). Nothing is\nannualised or estimated.\n\n**7. Ratios**, at the session's last close P of the voting share, with S = today's shares issued (voting plus\nnon-voting; if the CSE gives none, the latest report's count):\n\n- TTM EPS = TTM profit \u00f7 S;  NAV per share = latest reconciled equity \u00f7 S\n  (so P/E = market cap \u00f7 TTM profit and P/B = market cap \u00f7 equity, as the CSE builds its market PER and PBV, and\n  correct across splits and scrip issues; the report's printed EPS and NAV stay in `models.cse_report_figures`);\n- earnings yield = TTM EPS \u00f7 P;  P/E = P \u00f7 TTM EPS, shown only when the earnings yield is above 0.2 % (a P/E above\n  500 is noise; a loss shows no P/E);\n- P/B = P \u00f7 NAV per share, when NAV > 0;  ROE = TTM EPS \u00f7 NAV per share, when NAV > 0;\n- trailing dividends D = cash dividends per share with an ex-date in the 365 days to the session;\n  dividend yield = D \u00f7 P.\n\n**8. One row per session.** Computed as at every session with a trade summary, using only the prices, share counts,\nreports (uploaded by then, period not after it), profiles and announced dividends known by then, so a session's row\nnever changes when later sessions arrive (unless a fact dated earlier arrives late; every change is kept in\n`models.revisions`).\n\n## Outputs\n\n- `models.cse_fundamentals`: per company and session: price and its date, shares, financial year end, NAV per share\n  and its period, P/B, TTM profit, TTM EPS, the quarter it ends and its note, earnings yield, P/E, ROE, trailing\n  dividends, dividend yield, and the company's latest report (id, period, PDF).\n- `models.cse_report_figures`: per report: the share count used, EPS, its column, profit and unit, NAV per share,\n  equity, the matched lines, and whether each reconciled (`verified` / `not found`), as at the latest session.\n\n## Limits\n\n- Figures are as reported, mostly unaudited; exceptional items are not removed.\n- Equity is the latest reported, so after a rights issue NAV per share is understated (and P/B overstated) until\n  the next report.\n- Many companies publish the fourth quarter only in their annual report, so they have P/B and dividend yield but no\n  TTM P/E.\n- Banks and finance companies are measured with the same ratios as everyone else.\n- An amended dividend announced after a session can still change that session's trailing dividends (the dividends\n  come from the corporate-action model's latest view).\n\n## Parity\n\n`docs/migration/parity-cse-ownership-fundamentals.json`: the old code, run on the old repo's files cut off at each of\nits sessions, against this model's rows for the same session, and the CSVs the old repo stored on 2026-10-15.\n",
-      "minimum_tier": "free",
+      "minimum_tier": "pro",
       "outputs": [
         "models.cse_report_figures",
         "models.cse_fundamentals"
@@ -353,10 +362,48 @@
       "recent_window": null,
       "summary_key": "models.cse_fundamentals.summary",
       "title_key": "models.cse_fundamentals.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
           "method_version": "1.0.0",
+          "status": "current"
+        }
+      ]
+    },
+    "cse_lab_backtest": {
+      "current_version": "1.2.0",
+      "disclaimer_key": "general",
+      "free_preview": null,
+      "market": "cse",
+      "method_md": "# Walk-forward test of the portfolio lab (cse_lab_backtest)\n\n**Internal research.** Nothing here is shown on the site: every output is unpublished (`config/entitlements.yaml`),\nthe website's database role cannot read it (migration 0017), and the owner reads it through\n`python -m data_platform.jobs.lab_report` (decision 0024). A walk-forward test is not a performance claim; it shows how\nwritten rules would have behaved, with their costs.\n\n## What it computes\n\nWhat the lab's own rules would have built and held on each past date, using only what was known on that date, from\nthe first date the rules can run to the latest session; under two rebalancing policies; against the ASPI and treasury\nbills. For every review: what entered and left, and why; for every model weight: the measurements that explain it.\n\n## The rules of version 1.0.0 (unchanged from the lab)\n\n- **Universe and estimates** as `cse_risk_estimates` 1.1.0: ordinary shares traded on 80 % of the sessions in the\n  year to the date, median daily turnover of Rs 1 mn, a known sector; weekly total returns, Ledoit-Wolf covariance,\n  Dimson beta, the CBSL 12-month bill yield as published by the date; CAPM expected returns with an assumed 6 %\n  premium (used only by maximum Sharpe).\n- **Portfolios** as `cse_portfolio_lab` 1.1.0: minimum variance and maximum Sharpe of the full universe with 10 % per\n  share, 30 % per sector, 20 % per ownership group and the liquidity cap for Rs 1 mn; the versions with K = 10 and 15\n  names (the K largest weights; a name already held stays while it ranks in the top 1.5 K; re-optimised with a cap of\n  max(10 %, 1.5 / K) and a floor of 0.5 / K); equal weight on minimum variance's names.\n- **Holding them** as `cse_lab_record` 1.1.0: Rs 1 mn each, whole shares, 1.12 % of each trade's value, dividends (after\n  the final 15 % withholding tax), splits, scrip and rights booked on their ex-date, changes under Rs 2,500 skipped, and the drift band (a name more\n  than max(25 % of its target, 2 points) from its target goes back to it at the next session).\n\n## What version 1.1.0 changes (decision 0025)\n\nThree rules differ from version 1.0.0; everything else is the same. Version 1.0.0 keeps running beside it as the\nreference, so the two can always be compared on the same dates.\n\n1. **The covariance is estimated from daily returns** (`_lib/cse_covariance.py`, `daily`). With about 140 shares and\n   26 to 52 weekly returns, the weekly estimate has far fewer observations than shares. The daily total returns over\n   the same span give about five times as many. Thinly traded shares react to news a day or two late, so same-day\n   covariances alone understate how shares move together; the covariances of returns one and two days apart are\n   added, with Bartlett weights (2/3 and 1/3), which keep the matrix positive semi-definite:\n   **S = \u0393\u2080 + \u03a3_{l=1,2} (1 \u2212 l/3)(\u0393_l + \u0393_l\u2032)**, \u0393_l the covariance of the returns l sessions apart. S is then shrunk\n   towards a multiple of the identity by the Ledoit-Wolf amount \u03b4 of the daily returns,\n   **\u03a3 = A \u00d7 [(1 \u2212 \u03b4) S + \u03b4 (tr S / N) I]**, A the number of sessions in a year over the span. A session without a\n   trade counts as no change. Betas and expected returns (used only by maximum Sharpe) still come from the weekly\n   returns. The two lagged days were fixed before any result was seen.\n2. **Filling a K-name portfolio.** A better covariance estimate concentrates the full minimum-variance portfolio in\n   fewer names, sometimes fewer than K. The remaining places then go to the shares minimum variance would take next:\n   those with the smallest covariance with the portfolio, (\u03a3w)_i (a minimum-variance portfolio leaves a share out\n   exactly when that covariance is too high). Version 1.0.0 formed no K-name portfolio on such a date.\n3. **A review trades the least that is nearly the best.** Near its minimum a portfolio's volatility changes very\n   little with the weights. On a review date, with w* the minimum-variance weights on the K names and h the weights\n   held, the model weights are those that **minimise \u03a3|w_i \u2212 h_i|** (what costs are paid on) subject to every cap,\n   the floor, \u03a3w = 1 and **\u221a(w\u2032\u03a3w) \u2264 1.01 \u00d7 \u221a(w*\u2032\u03a3w*)**. At the start, with nothing held, they are w* itself. It\n   applies to minimum variance only.\n\n## The risk test (version 1.1.0)\n\nWhich covariance estimate to use is decided on the one thing it is for, risk, never on returns: over months a\ndifference in return between two methods is chance; a difference in risk can be measured.\n\n- Every week from the start (the last session on or before each Wednesday), the minimum-variance portfolio is built\n  with each of five estimates (the first rules' weekly identity target; OAS; a constant-correlation target; a\n  single-index target; the daily estimate above), with the lab's caps, using only facts up to that date. It is then\n  left alone for a week, without costs, and its daily total returns are recorded. Done for the full portfolio and\n  for the 15-name version.\n- Per estimate: the **realised volatility** (standard deviation of those daily returns \u00d7 \u221asessions a year); the\n  average **forecast volatility** \u221a(w\u2032\u03a3w); the average weekly change in weights; and its realised variance divided by\n  the first rules', with a **90 % interval** from a paired moving-block bootstrap (blocks of 5 sessions, 2,000 draws,\n  a fixed seed so the rows are the same on every run).\n- Two reference rows: an equal amount in every share of the universe, and the ASPI.\n- The test is stored with every run (`models.cse_bt_risk_test`), so the choice is re-examined as history grows.\n\n**What it does not show.** The estimate was chosen on the same weeks that test it, which flatters it somewhat. It\nsays nothing about returns.\n\n## The start, and the walk forward\n\n- **Start**: the first session on which the estimates can be made: at least 26 weekly returns (the lab's preview\n  rule) and a published bill yield. Until a full year of weekly returns exists, each date uses all the weeks available\n  (at least 26), and is marked as a preview.\n- **Point in time**: each date's universe, estimates and portfolios read only facts up to that date\n  (`cse_estimates.run_date`); prices and corporate actions on a session are those known by that session (the record's\n  `Pricer`). Tested: the rows up to a date do not change when later data arrives.\n\n## The rebalancing policies\n\n1. **Half-yearly** (version 1.2.0, the example's; decision 0026): new model weights on the first session of January\n   and July; the drift band in between. In the second review it cost 22 % less than quarterly reviews and was no more\n   volatile (`docs/research/portfolio-lab-optimisation-2026-11.md` \u00a77).\n2. **Quarterly** (the lab's first rule; still run for comparison): the same on the first session of January, April,\n   July and October.\n3. **Dynamic**: a check on the first session of every month. The rules' portfolio is built afresh; the holdings are\n   rebalanced to it when their **estimated tracking error** against it, \u221a((w \u2212 w*)\u2032 \u03a3 (w \u2212 w*)) on the date's\n   covariance, exceeds **3 % a year**, or when a holding has left the universe; on the quarterly dates always. The\n   drift band in between.\n\n## Benchmarks\n\n- **Market**: Rs 1 mn in ASPI index units. The ASPI is a price index: it leaves out dividends, so it understates the\n  market's return by the dividends paid. The ASPI total-return index is stored only from October 2026.\n- **Bills**: Rs 1 mn growing at the 12-month treasury bill yield in force (as published), day by day.\n\n## Outputs\n\n- `models.cse_bt_summary`: per policy and portfolio: start and end, value, total return, annualised volatility of\n  daily values, the largest fall from a peak, the best and worst months, the number of rebalances and drift repairs,\n  turnover (value traded after the start \u00f7 the average value), costs, names at the end.\n- `models.cse_bt_nav`: per session, policy and portfolio: value, cash, number of names.\n- `models.cse_bt_event`: each rebalance (inception, scheduled, threshold) and drift repair: the tracking error that\n  triggered it, names in and out, the weeks of data, preview or not, what binds, the model's estimated volatility,\n  the median volatility of the universe, value traded and cost.\n- `models.cse_bt_target`: the rules' weights on each date they were computed (applied or, for the dynamic policy's\n  monthly checks, only compared), and on the latest session (\"today\", shown, not applied): weight, risk contribution,\n  volatility, beta, average correlation with the other names, sector, ownership group, at the cap or the floor, its\n  rank in the full portfolio, whether it was in the previous portfolio.\n- `models.cse_bt_trade`: every change of shares and every corporate action, with its cost and reason.\n- `models.cse_bt_risk_test` (version 1.1.0): per scope (the full portfolio, the 15-name version) and estimate: the\n  weeks and days, realised and forecast volatility, weekly turnover, the effective number of names, and the realised\n  variance against the first rules' with its 90 % interval; plus the two reference rows.\n\n## Limits (they go with every use of these numbers)\n\n- **Short.** The CSE's public price history reaches back one year, so the test starts in April 2026 with about six\n  months of results. Over six months the market's direction dominates; differences of a few points between methods\n  are within chance. The test lengthens by itself as the history grows; the CSE's historical data (part of the data\n  permission request) would allow a multi-year test.\n- **Previews.** Until October 2026 the estimates use 26 to 51 weekly returns, not a full year.\n- **Survivorship.** The list of listed securities, sector labels and ownership groups are recorded only from October\n  2026 and are used as first recorded for earlier dates: a company delisted before then is missing, and the group caps\n  use October's groups.\n- **Costs and prices.** Closing prices; no market impact beyond the stated cost. The cost per side, 1.12 %, was checked\n  against the CSE's published schedule on 2026-11-20; dividends are credited after the final 15 % withholding tax\n  (review F1).\n- These are rules applied to public data, for research and education. They are not advice and say nothing about any\n  share's future price.\n\n## Versions\n\n**1.0.0** (2026-11-01): first version. Kept as the reference.\n\n**1.1.0** (2026-11-16, reference): the covariance from daily returns with two lagged days; the fill for K-name\nportfolios; reviews that trade the least within 1 % of the minimum volatility; the stored risk test.\n\n**1.2.0** (2026-11-20, current; decision 0026): 1.1.0's rules with a third policy, half-yearly reviews, now the\nexample's. Every version credits dividends net of the final 15 % withholding tax (review F1).\n",
+      "minimum_tier": "pro",
+      "outputs": [
+        "models.cse_bt_summary",
+        "models.cse_bt_nav",
+        "models.cse_bt_event",
+        "models.cse_bt_target",
+        "models.cse_bt_trade",
+        "models.cse_bt_risk_test"
+      ],
+      "recent_window": null,
+      "summary_key": "models.cse_lab_backtest.summary",
+      "title_key": "models.cse_lab_backtest.title",
+      "top_rows": null,
+      "versions": [
+        {
+          "changes": null,
+          "method_version": "1.0.0",
+          "status": "reference"
+        },
+        {
+          "changes": "The covariance is estimated from daily returns with two days of lagged covariances (it forecast risk best in the walk-forward risk test, which this version stores); a K-name portfolio is filled with the shares minimum variance would take next when the full portfolio has fewer than K names; a review trades the least that keeps the estimated volatility within 1 % of the minimum (decision 0025).",
+          "method_version": "1.1.0",
+          "status": "reference"
+        },
+        {
+          "changes": "1.1.0's rules, with a third rebalancing policy, half-yearly reviews (the first session of January and July), now the example's: in the second review (decision 0026) it cost about a fifth less than quarterly reviews and was no more volatile, the pre-registered test. Quarterly and dynamic still run beside it for comparison.",
+          "method_version": "1.2.0",
           "status": "current"
         }
       ]
@@ -375,6 +422,7 @@
       "recent_window": null,
       "summary_key": "models.cse_market_tape.summary",
       "title_key": "models.cse_market_tape.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -398,6 +446,10 @@
       "recent_window": null,
       "summary_key": "models.cse_ownership.summary",
       "title_key": "models.cse_ownership.title",
+      "top_rows": {
+        "full_tier": "pro",
+        "rows": 3
+      },
       "versions": [
         {
           "changes": null,
@@ -420,6 +472,7 @@
       "recent_window": null,
       "summary_key": "models.cse_security_metrics.summary",
       "title_key": "models.cse_security_metrics.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -434,13 +487,14 @@
       "free_preview": null,
       "market": "cse",
       "method_md": "# CSE total returns (cse_total_returns)\n\n## What it shows\n\nFor every listed share and every session it traded in: the **total return** since the previous traded close, which\ncounts the share's confirmed cash dividends and corrects for sub-divisions, scrip dividends and rights issues; the\n**total-return index** (TRI) built from it; and, beside them, the **price-only return**. Also the total return over\n1 week, 1 month and 3 months.\n\n## Inputs\n\n- The CSE's closing prices (`cse.prices_daily_current`: the daily trade summary where it was collected, otherwise\n  the CSE's one-year chart). They are **unadjusted**: after a 1-for-5 split the price simply drops to a fifth.\n- The corporate actions in use from `cse_corporate_actions` (version 1.0.0): confirmed, or confirmed by the owner.\n  Actions awaiting confirmation are never used.\n- The ASPI's sessions, for the 1-week, 1-month and 3-month windows.\n\n## Method (version 1.0.0)\n\nFor two consecutive traded closes P\u2080 (the earlier) and P\u2081, take every action in use whose ex-date falls **after\nP\u2080's session and on or before P\u2081's**:\n\n- **F** = the product of the share-count factors that went ex (sub-division or scrip of b new shares per a held:\n  F = (a + b) / a). F = 1 when there are none.\n- **D** = the sum of the cash dividends per share that went ex. D = 0 when there are none.\n- **base** = the theoretical ex-rights price if a rights issue of m new shares for every n held, at price S, went\n  ex: (n \u00d7 P\u2080 + m \u00d7 S) / (n + m). Otherwise base = P\u2080.\n- **Total return** R = (P\u2081 \u00d7 F + D \u00d7 (1 \u2212 w)) / base \u2212 1, where w is the dividend withholding rate (0 in version\n  1, as in the old terminal: dividends counted in full).\n- **TRI** = the product of (1 + R) over every step, starting at 1 on the share's first close.\n- **Price-only return** = P\u2081 / P\u2080 \u2212 1.\n- **Total return over 5, 21 and 63 sessions** = TRI\u2081 / TRI\u2080 \u2212 1, where TRI\u2081 is the TRI on the session and TRI\u2080 the\n  TRI at the last trade on or before the ASPI session 5, 21 or 63 sessions earlier (the same windows as the share\n  metrics' price returns).\n\nAn action therefore applies to the **first traded close on or after its ex-date**, which matters for shares that\ndo not trade on the ex-date. With no actions, the total return equals the price-only return.\n\n**No double adjustment.** Because the prices are unadjusted, F and the theoretical ex-rights price are applied. At\nevery confirmed split or scrip with F \u2265 1.5 the run checks that the close actually fell by about F (whichever of\n\"fell by F\" and \"did not fall\" is nearer, on a log scale). If it did not, the prices already look adjusted and the\nrun stops rather than adjust them twice.\n\nWorked example (CIC, 2026): a final dividend of Rs 0.50 went ex on 1 July. The close was Rs 31.00 on 30 June and\nRs 31.80 on 1 July, so R = (31.80 + 0.50) / 31.00 \u2212 1 = 4.19%, while the price-only return is 2.58%.\n\n## Limits\n\n- Only actions in use count: a dividend still awaiting confirmation is left out until it is confirmed, and the\n  total return is understated meanwhile.\n- Withholding tax on dividends is not deducted (w = 0).\n- A share that did not trade has no row for that session; its TRI moves on its next trade.\n- A row for a session never changes when later sessions arrive. It changes only when a fact about an earlier date\n  arrives: a late-confirmed action, a restored price, or (through the corporate-action model) a scrip whose\n  share-count check changes.\n\n## Parity\n\nVersion 1 reproduces the old CSE terminal's `build_tris` (cse/estimates.py, with cse/returns.py) run on its own\nprices and corporate actions, for every ordinary share it listed and every traded close: at the audited commit\nf263830, 294 shares and 69,300 closes; at e05c6f3, 294 shares and 70,416 closes; every value equal (largest\ndifference 0). It also matches under an illustrative set of confirmations that puts every complete rights issue in\nuse (21 at f263830, 22 at e05c6f3), so the rights formula is compared too. 2026-10-05 is left out for the\ncomparison, because the old terminal never had that session. Reports: `docs/migration/parity-cse-corporate-actions.json`\n(f263830) and `docs/migration/parity-cse-corporate-actions-e05c6f3.json`.\n",
-      "minimum_tier": "free",
+      "minimum_tier": "pro",
       "outputs": [
         "models.cse_total_return"
       ],
       "recent_window": null,
       "summary_key": "models.cse_total_returns.summary",
       "title_key": "models.cse_total_returns.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -464,6 +518,7 @@
       "recent_window": null,
       "summary_key": "models.lk_savings_compare.summary",
       "title_key": "models.lk_savings_compare.title",
+      "top_rows": null,
       "versions": [
         {
           "changes": null,
@@ -537,9 +592,8 @@
   },
   "tiers": [
     "free",
-    "plus",
     "pro",
-    "professional"
+    "plus"
   ],
   "unpublished_outputs": [
     "models.model_stats",
@@ -555,12 +609,6 @@
     "models.cse_lab_frontier",
     "models.cse_lab_nav",
     "models.cse_lab_holding",
-    "models.cse_lab_trade",
-    "models.cse_bt_summary",
-    "models.cse_bt_nav",
-    "models.cse_bt_event",
-    "models.cse_bt_target",
-    "models.cse_bt_trade",
-    "models.cse_bt_risk_test"
+    "models.cse_lab_trade"
   ]
 }

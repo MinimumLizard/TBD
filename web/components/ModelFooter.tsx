@@ -12,7 +12,8 @@ export default async function ModelFooter({ models }: { models: ModelName[] }) {
     (k) => !SITE_WIDE_DISCLAIMERS.includes(k),
   );
   return (
-    <>
+    <details className="sources">
+      <summary>{t("common.sources")}</summary>
       <p className="small muted">
         {models.map((m, i) => (
           <span key={m}>
@@ -23,6 +24,6 @@ export default async function ModelFooter({ models }: { models: ModelName[] }) {
         ))}
       </p>
       <Disclaimer keys={keys} />
-    </>
+    </details>
   );
 }

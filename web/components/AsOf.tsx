@@ -9,9 +9,9 @@ export default async function AsOf({ day, calendar, preview = false }: { day: st
   if (!day) return <p className="asof">{t("common.noData")}</p>;
   const behind = preview ? 0 : sessionsBehind(calendar, day); // a preview is behind by design; PreviewNote says so
   return (
-    <>
-      <p className="asof">{t("common.asOf", { date: date(day) })}</p>
-      {behind > 0 && <div className="notice warn">{t("common.behind", { count: behind })}</div>}
-    </>
+    <p className="asof">
+      {t("common.asOf", { date: date(day) })}
+      {behind > 0 && <span className="behind">{t("common.behindShort", { count: behind })}</span>}
+    </p>
   );
 }

@@ -6,7 +6,7 @@ import { modelEntry } from "@/lib/registry";
 
 const TODAY = "2026-10-12";
 const version = modelEntry("bond_rv_zscores").current_version;
-const full = authorize({ id: null, tier: "professional" }, "bond_rv_zscores", TODAY) as Granted;
+const full = authorize({ id: null, tier: "plus" }, "bond_rv_zscores", TODAY) as Granted;
 const preview = authorize({ id: null, tier: "free" }, "bond_rv_zscores", TODAY) as Granted;
 
 describe("buildQuery", () => {
@@ -32,8 +32,23 @@ describe("buildQuery", () => {
     expect(buildQuery(plus, "models.bond_curve_point").text).not.toContain(">=");
   });
 
+  test("a taste of ownership: the top three holders, and no controller, chain or group", () => {
+    const taste = authorize({ id: null, tier: "free" }, "cse_ownership", TODAY) as Granted;
+    const q = buildQuery(taste, "models.cse_holding", { where: "code = ?", params: ["AAA"] });
+    expect(q.text).toContain("rank <= $2");
+    expect(q.values).toEqual([modelEntry("cse_ownership").current_version, 3, "AAA"]);
+    expect(() => buildQuery(taste, "models.cse_ownership_detail")).toThrow(/not part of the free taste/);
+    expect(() => buildQuery(taste, "models.cse_company_ownership")).toThrow(/not part of the free taste/);
+    expect(() => buildQuery(taste, "models.cse_company_ownership", { columns: ["code", "controller_name"] })).toThrow(/free taste/);
+    expect(buildQuery(taste, "models.cse_company_ownership", { columns: ["code", "free_float_pct"] }).text).not.toContain("rank");
+    const pro = authorize({ id: null, tier: "pro" }, "cse_ownership", TODAY) as Granted;
+    expect(buildQuery(pro, "models.cse_holding").text).not.toContain("rank <=");
+    expect(() => buildQuery(pro, "models.cse_company_ownership", { columns: ["controller_name"] })).not.toThrow();
+  });
+
   test("a grant cannot be made up: only authorize() issues them", () => {
-    const forged = { allowed: true, model: "bond_carry", version: "1.1.0", maxDate: null, delayDays: 0, minDate: null, fullHistoryTier: null } as Granted;
+    const forged = { allowed: true, model: "bond_carry", version: "1.1.0", maxDate: null, delayDays: 0, minDate: null,
+                     fullHistoryTier: null, topRows: null, topFullTier: null } as Granted;
     expect(() => buildQuery(forged, "models.bond_carry")).toThrow(/not a grant/);
     expect(() => buildQuery({ ...full }, "models.bond_residual_zscore")).toThrow(/not a grant/);
     expect(Object.isFrozen(full)).toBe(true);

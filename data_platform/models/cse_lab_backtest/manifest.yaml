@@ -1,7 +1,7 @@
 name: cse_lab_backtest
 market: cse
-title_key: internal.cse_lab_backtest.title       # internal research: not on the site (config/entitlements.yaml)
-summary_key: internal.cse_lab_backtest.summary
+title_key: models.cse_lab_backtest.title          # Pro (decision 0027)
+summary_key: models.cse_lab_backtest.summary
 disclaimer_key: general
 requires_datasets:
   - cse.indices_daily_current        # the ASPI: the calendar, the market proxy and the market benchmark

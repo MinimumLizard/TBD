@@ -19,6 +19,7 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
   cse_fundamentals: { api: ["/api/v1/cse/shares/AAA.N0000/fundamentals"], pages: ["/cse/shares", "/cse/shares/compare", "/cse/shares/AAA.N0000"] },
   cse_dealings: { api: ["/api/v1/cse/dealings", "/api/v1/cse/dealings?symbol=AAA.N0000"], pages: ["/cse/dealings", "/cse/shares/AAA.N0000"] },
   cse_flows: { api: ["/api/v1/cse/flows"], pages: ["/cse/dealings"] },
+  cse_lab_backtest: { api: ["/api/v1/cse/lab"], pages: ["/cse/lab"] },
   lk_savings_compare: { api: ["/api/v1/savings"], pages: ["/learn/savings"] },
 };
 
@@ -26,4 +27,4 @@ export const MODEL_ROUTES: Record<ModelName, { api: string[]; pages: string[] }>
 export const DETAIL_PAGES = ["/bonds/LKB00530H016", "/cse/shares/AAA.N0000"];
 
 // Every page of the site, for the checks that apply to all of them (no paid data for free visitors, ever).
-export const ALL_PAGES = ["/", "/markets", ...HOME_PAGES, "/signup/thanks", "/privacy", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings","/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", ...START_PAGES, "/plans", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];
+export const ALL_PAGES = ["/", "/markets", ...HOME_PAGES, "/signup/thanks", "/privacy", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/cse/lab", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn", "/learn/glossary", ...GUIDE_SLUGS.map((g) => `/learn/${g}`), "/learn/savings", ...START_PAGES, "/plans", "/codes", "/methods", "/about", "/feedback", "/feedback/thanks", "/email/cse", "/email/bonds"];

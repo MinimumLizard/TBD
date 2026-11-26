@@ -12,40 +12,45 @@
 #                                     tiers from the minimum up to (not including) T see only the last N days of the
 #                                     model's outputs; T and above see the whole history. Enforced on the server.
 
-tiers: [free, plus, pro, professional]
-
+# Three tiers, a ladder (owner, 2026-11-26, decision 0027): Free, then Pro (share analysis and the portfolio lab),
+# then Plus (everything in Pro and all bond analysis). Free keeps the facts and "a taste" of each cheat code
+# (directors' dealings, money flows a week late, each company's top three shareholders); the depth is paid.
+#
+#   top_rows: { rows: N, full_tier: T }
+#                                     tiers below T see only the first N rows of the model's ranked lists (the top N
+#                                     shareholders), and none of its withheld columns or tables (controllers, ownership
+#                                     chains and group members; web/lib/db.ts lists them). Enforced on the server.
+tiers: [free, pro, plus]
 models:
-  # LKR government bonds
+  # LKR government bonds: the list and today's curve are free (a taste); every analysis is Plus
   bond_identity:        { minimum_tier: free }    # bond list, each day's dealer quotes
   bond_ns_curve:        { minimum_tier: free, recent_window: { days: 30, full_history_tier: plus } }
-                        # the fitted yield curve and each bond's distance from it: free sees the last 30 days,
-                        # Plus and above the whole history (a bond's own analysis is tiered; owner, 2026-10-18)
-  bond_liquidity:       { minimum_tier: free }    # turnover, days traded, auction cycle, liquidity tier
+                        # the fitted yield curve and each bond's distance from it: free and Pro see the last 30 days,
+                        # Plus the whole history
+  bond_liquidity:       { minimum_tier: plus }    # turnover, days traded, auction cycle, liquidity tier
   bond_rv_zscores:      { minimum_tier: plus, free_preview: { delay_days: 5 } }   # residuals vs own history
   bond_execution_gap:   { minimum_tier: plus }    # where trades print against the quote screen
-  bond_carry:           { minimum_tier: pro }     # carry, rolldown, duration
-  # Colombo Stock Exchange
+  bond_carry:           { minimum_tier: plus }    # carry, rolldown, duration
+  # Colombo Stock Exchange: prices and published facts are free; the analysis is Pro
   cse_market_tape:      { minimum_tier: free }    # indices, turnover, breadth, foreign flows
   cse_security_metrics: { minimum_tier: free }    # per-share price, range, volume and relative-return metrics
   cse_corporate_actions: { minimum_tier: free }   # dividends, splits, scrip and rights issues: facts the CSE
                                                   # published, read from its own announcement records
-  cse_total_returns:    { minimum_tier: free }    # each share's return with those actions included (the same
-                                                  # published facts, combined by a stated formula)
-  cse_ownership:        { minimum_tier: free }    # who owns each company, by owner type, its ownership group and a
-                                                  # free-float estimate: company-level facts from the companies'
-                                                  # own filings (no individual is ever named; see below)
-  cse_fundamentals:     { minimum_tier: free }    # EPS, net assets per share, P/E, P/B, ROE, dividend yield: figures
-                                                  # the companies published, checked inside each report
-  cse_dealings:         { minimum_tier: free }    # directors' share dealings, one row per transaction: disclosures
-                                                  # the CSE published, shown without names (roles, account type,
-                                                  # side, shares, price, value); proposal, the owner decides
-  cse_flows:            { minimum_tier: plus, free_preview: { delay_days: 7 } }
+  cse_dealings:         { minimum_tier: free }    # directors' share dealings, one row per transaction, as the CSE
+                                                  # published them (a cheat code: free)
+  cse_ownership:        { minimum_tier: free, top_rows: { rows: 3, full_tier: pro } }
+                        # who owns each company: free sees the owner types, free float and the top three
+                        # shareholders; Pro the top 20, the controller, the chain and the ownership group
+  cse_total_returns:    { minimum_tier: pro }     # each share's return with dividends and share changes included
+  cse_fundamentals:     { minimum_tier: pro }     # EPS, net assets per share, P/E, P/B, ROE, dividend yield
+  cse_flows:            { minimum_tier: pro, free_preview: { delay_days: 7 } }
                         # money flows: per company over 30, 90 and 365 days, purchases, disposals, net, how many
                         # accounts on each side, clusters and the large / related-account flags; free sees them a
-                        # week late (proposal, the owner decides)
+                        # week late
+  cse_lab_backtest:     { minimum_tier: pro }     # the portfolio lab: the example portfolio, how the rules would
+                                                  # have done since April, and how it is rebalanced (decision 0027)
   # Savings education
   lk_savings_compare:   { minimum_tier: free }    # fixed deposits vs treasury bills vs inflation (education: free)
-
 # Computed and stored, but served to nobody until the owner decides otherwise. The pair-spread reversion
 # statistics measure how far spreads moved back after large z-scores; shown next to a pair they would read as a
 # performance claim (audit §8), so they need a legal view first.
@@ -56,8 +61,8 @@ models:
 # read these tables either (migration 0014).
 unpublished_outputs:
   - models.model_stats
-  # The portfolio lab (decision 0023): internal research only, until the owner has a lawyer's view on model
-  # portfolios (decision 0010 point 6, docs/plan-retail-features.md §5). Read by the owner's lab report job
+  # The portfolio lab's estimates and the owner's own portfolios (decision 0023): internal. Only its walk-forward
+  # test, on neutral settings, is on the site (Pro, decision 0027). Read by the owner's lab report job
   # (python -m data_platform.jobs.lab_report), never by the website; migration 0016 revokes them from its role.
   - models.cse_weekly_return
   - models.cse_risk_summary
@@ -72,21 +77,15 @@ unpublished_outputs:
   - models.cse_lab_nav
   - models.cse_lab_holding
   - models.cse_lab_trade
-  # The lab's walk-forward test (decision 0024), internal like the rest of the lab; migration 0017 revokes them.
-  - models.cse_bt_summary
-  - models.cse_bt_nav
-  - models.cse_bt_event
-  - models.cse_bt_target
-  - models.cse_bt_trade
-  - models.cse_bt_risk_test          # migration 0020
+  # The lab's walk-forward test (cse_lab_backtest) is published in Pro since decision 0027 (migration 0022 grants
+  # the website's role read access to its tables).
 
 # Models computed for the owner's research only: no tier, every output unpublished, and left out of the website's copy
 # of the registry entirely (no methods page, no plans entry, no API listing).
 internal_models:
   - cse_risk_estimates
   - cse_portfolio_lab
-  - cse_lab_record
-  - cse_lab_backtest
+  - cse_lab_record                 # the owner's own record (it reads the private lab settings): stays internal
 # Directors' and accounts' names (models.cse_dealing_as_filed, models.cse_flow_actor) are shown: the owner's decision of
 # 2026-10-19 (decision 0021); the lawyer's review before anything is public covers them.
 # Shareholders' names (models.cse_holding: the top-20 lists; models.cse_ownership_detail: controllers and chains),

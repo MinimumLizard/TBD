@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import AsOf from "@/components/AsOf";
 import Brief from "@/components/Brief";
+import CheatStrip from "@/components/CheatStrip";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import BreadthBar from "@/components/BreadthBar";
@@ -123,6 +124,7 @@ export default async function CsePage() {
       <PageHead eyebrow={t("cse.eyebrow")} title={t("cse.title")} lead={t("cse.leadLong")}
                 meta={tape.access.allowed ? <AsOf day={s?.session_date ?? null} calendar="cse" /> : null}
                 parts={tape.access.allowed ? parts : undefined} />
+      <CheatStrip only={["dealings", "flows", "owners", "totalReturn", "lab"]} />
       {!tape.access.allowed ? (
         <Locked access={tape.access} />
       ) : (

@@ -7,7 +7,7 @@ export type Level = "basics" | "deeper" | "advanced";
 
 export const LEVELS: Level[] = ["basics", "deeper", "advanced"];
 
-export const LEVEL_OF_TIER: Record<Tier, Level | null> = { free: "basics", plus: "deeper", pro: "advanced", professional: null };
+export const LEVEL_OF_TIER: Record<Tier, Level | null> = { free: "basics", pro: "deeper", plus: "advanced" };
 
 export interface Guide {
   slug: string;

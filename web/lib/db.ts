@@ -70,6 +70,16 @@ const DATE_COLUMN: Record<string, string | null> = {
   "models.savings_summary": null,
 };
 
+// A taste (a grant with topRows): ranked lists are cut to their first N rows, and these tables and columns are
+// withheld entirely (decision 0027: free sees each company's top three shareholders and its owner types; Pro sees the
+// top 20, the controller, the ownership chain and the group).
+const TOP_ROW_COLUMN: Record<string, string> = { "models.cse_holding": "rank" };
+const TASTE_WITHHELD_TABLES = new Set(["models.cse_ownership_detail"]);
+const TASTE_WITHHELD_COLUMNS: Record<string, string[]> = {
+  "models.cse_company_ownership": ["controller_type", "controller_name", "control_pct", "control_level", "group_id",
+    "group_head_type", "group_head_name", "group_size"],
+};
+
 export function dateColumn(table: string): string | null {
   if (table in DATE_COLUMN) return DATE_COLUMN[table];
   return table.startsWith("models.bond_") ? "obs_date" : null;
@@ -90,6 +100,13 @@ export function buildQuery(access: Granted, table: string, opts: ReadOptions = {
   if (registry.unpublished_outputs.includes(table)) throw new Error(`${table} is not published`);
   const columns = opts.columns ?? ["*"];
   for (const c of columns) if (c !== "*" && !IDENT.test(c)) throw new Error(`bad column ${c}`);
+  if (access.topRows !== null) {
+    if (TASTE_WITHHELD_TABLES.has(table)) throw new Error(`${table} is not part of the free taste`);
+    const withheld = TASTE_WITHHELD_COLUMNS[table] ?? [];
+    if (withheld.length && columns.some((c) => c === "*" || withheld.includes(c))) {
+      throw new Error(`${table}: these columns are not part of the free taste`);
+    }
+  }
   const values: unknown[] = [access.version];
   const clauses = ["method_version = $1"];
   if (access.maxDate) {
@@ -103,6 +120,10 @@ export function buildQuery(access: Granted, table: string, opts: ReadOptions = {
     if (!column) throw new Error(`${table} has no date, so it cannot be served as a recent window`);
     values.push(access.minDate);
     clauses.push(`${column} >= $${values.length}`);
+  }
+  if (access.topRows !== null && TOP_ROW_COLUMN[table]) {
+    values.push(access.topRows);
+    clauses.push(`${TOP_ROW_COLUMN[table]} <= $${values.length}`);
   }
   if (opts.where) {
     let i = 0;

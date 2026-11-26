@@ -3,7 +3,7 @@
 //   DATABASE_URL=... ALLOW_TEST_TIERS=1 npx next start -p 3100 &      # the site, on the data to show
 //   node scripts/export-static.mjs <out_dir> [--as-of "16 Oct 2026"] [--lab <lab report .html>]
 //
-// It crawls every page a visitor can reach, then fetches each page again as a Plus and a Pro subscriber. Every page
+// It crawls every page a visitor can reach, then fetches each page again as a Pro and a Plus subscriber. Every page
 // file holds all three versions: the free one as the page, the paid ones (where they differ) in inert <template>
 // elements, and a bar at the top switches between them. For each page it removes the app's scripts (the copy is plain HTML), links one shared stylesheet and script,
 // rewrites links to the copy's flat file names, and draws charts from their data-chart attribute with ECharts from
@@ -25,8 +25,8 @@ mkdirSync(OUT, { recursive: true });
 
 const SEEDS = ["/", "/start", "/markets", "/privacy", "/signup/thanks", "/search", "/cse", "/cse/shares", "/cse/shares/compare", "/cse/dealings", "/bonds", "/bonds/zscores", "/bonds/execution", "/bonds/carry", "/learn",
                "/learn/glossary", "/learn/savings", "/plans", "/methods", "/about", "/feedback", "/email/cse", "/email/bonds"];
-const TIERS = ["free", "plus", "pro"];
-const TIER_NAMES = { free: "Free", plus: "Plus", pro: "Pro" };
+const TIERS = ["free", "pro", "plus"]; // a ladder (decision 0027)
+const TIER_NAMES = { free: "Free", pro: "Pro", plus: "Plus" };
 const ECHARTS = "https://cdnjs.cloudflare.com/ajax/libs/echarts/6.0.0/echarts.min.js";
 const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Source+Serif+4:opsz,wght@8..60,500..700&display=swap";
 const LAB_PATH = "/preview/lab";
@@ -59,7 +59,7 @@ function links(html) {
   return out;
 }
 
-// 1. Crawl as a free visitor, then fetch every page as Plus and Pro.
+// 1. Crawl as a free visitor, then fetch every page as Pro and Plus.
 const pages = new Map(); // path -> { free, plus, pro } raw html
 const queue = [...SEEDS];
 while (queue.length) {
@@ -70,8 +70,8 @@ while (queue.length) {
   for (const p of links(html)) if (!pages.has(p) && !queue.includes(p)) queue.push(p);
 }
 for (const [path, v] of pages) {
-  v.plus = await get(path, "plus");
   v.pro = await get(path, "pro");
+  v.plus = await get(path, "plus");
 }
 
 // 2. One shared stylesheet: the site's, without its self-hosted font faces (Google Fonts serves the same faces to
@@ -266,7 +266,7 @@ function rewriteBody(html) {
   let body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) ?? ["", html])[1];
   body = body
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
-    .replace(/<div class="notice warn">\d+ sessions? behind[\s\S]*?<\/div>/g, "")
+    .replace(/<span class="behind">[\s\S]*?<\/span>/g, "")
     // the copy has no server behind it: the site's search box opens the copy's search page (which filters itself);
     // other forms (feedback, the calculator, list filters) are not sent anywhere
     .replace(/<form\b([^>]*?)action="([^"]*)"/g, (m, attrs, action) =>
@@ -289,7 +289,7 @@ function bar(path, variants) {
     const same = tier !== "free" && !variants[tier];
     return `<button type="button" data-pv-tier="${tier}" aria-pressed="${tier === "free"}"${same ? ' title="The same as Free on this page"' : ""}>${TIER_NAMES[tier]}${same ? ' <span class="pv-same">=</span>' : ""}</button>`;
   }).join("");
-  const lab = LAB ? `<a href="${fileName(LAB_PATH)}">Portfolio lab (preview)</a>` : "";
+  const lab = LAB ? `<a href="${fileName(LAB_PATH)}">Lab: full workings</a>` : "";
   return `<div class="pv-bar"><strong>Preview of ZinvestIQ</strong><span>Real data${AS_OF ? ` to ${AS_OF}` : ""}; not the live site.</span>` +
     `<span class="pv-group"><span>View as</span>${tierButtons}</span>` +
     `<span class="pv-group"><button type="button" data-pv-reset title="Forget the starting answers and open the first page again">First visit</button></span>${lab}</div>`;
@@ -320,12 +320,12 @@ let aboutFree = null;
 for (const [path, v] of pages) {
   const title = (v.free.match(/<title>[\s\S]*?<\/title>/) ?? [""])[0];
   const free = rewriteBody(v.free);
-  const plus = rewriteBody(v.plus);
   const pro = rewriteBody(v.pro);
-  // A paid version is stored only when it differs from the free page; Plus and Pro share one template when equal.
+  const plus = rewriteBody(v.plus);
+  // A paid version is stored only when it differs from the free page; Pro and Plus share one template when equal.
   const variants = {};
-  if (comparable(plus) !== comparable(free)) variants.plus = plus;
-  if (comparable(pro) !== comparable(free)) variants.pro = variants.plus && comparable(pro) === comparable(plus) ? variants.plus : pro;
+  if (comparable(pro) !== comparable(free)) variants.pro = pro;
+  if (comparable(plus) !== comparable(free)) variants.plus = variants.pro && comparable(plus) === comparable(pro) ? variants.pro : plus;
   variantCount += new Set(Object.values(variants)).size;
   if (path === "/about") aboutFree = free;
   write(path, page(path, title, free, variants));
@@ -343,10 +343,10 @@ if (LAB && aboutFree) {
   // the owner's report opens with an internal-use warning; the preview frames the page as the education piece it is
   content = content.replace(/<p class="notice warn">[\s\S]*?<\/p>/, "");
   // the report opens with its own plain-language introduction (data_platform/jobs/lab_backtest_report.py)
-  const head = `<header class="page-head"><p class="eyebrow">Portfolio lab · learning by example (preview)</p>` +
+  const head = `<header class="page-head"><p class="eyebrow">Portfolio lab · full workings (owners only)</p>` +
     `<h1>How a rules-based portfolio is built</h1>` +
-    `<div class="notice warn">Preview only: the lab is not part of the site until the lawyer has given a view on how ` +
-    `model portfolios may be published (decision 0024).</div></header>`;
+    `<div class="notice warn">For the owners: the complete report behind the Pro lab page (decision 0027), with the ` +
+    `evidence, the comparisons and the specialist workings. It is not a page of the site.</div></header>`;
   const framed = aboutFree.replace(/(<main\b[^>]*>)[\s\S]*(<\/main>)/, `$1<div class="lab-page">${head}${content}</div>$2`);
   write(LAB_PATH, page(LAB_PATH, "<title>Portfolio lab · ZinvestIQ</title>", framed, {}));
 }

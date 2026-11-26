@@ -9,6 +9,7 @@ import { bondReference } from "@/lib/data/bonds";
 import { securityNames } from "@/lib/data/cse";
 import { matchesQuery, param, searchText } from "@/lib/filter";
 import { date } from "@/lib/format";
+import { companyCodes } from "@/lib/codes";
 import { GLOSSARY } from "@/lib/glossary";
 import { GUIDES } from "@/lib/guides";
 import { MENUS } from "@/lib/menu";
@@ -26,6 +27,7 @@ interface Item {
   title: string;
   sub: string;
   text: string;
+  symbol?: string; // a share: its cheat codes are shown under it
 }
 
 // One place to find anything on the site: every share, every government bond, every guide, glossary term and page.
@@ -45,7 +47,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         .map((r) => {
           const name = companyName(r.name) ?? r.symbol;
           const sector = sectorGroup(r.symbol, r.sector_label) ?? "";
-          return item(`/cse/shares/${encodeURIComponent(r.symbol)}`, name, [r.symbol, sector].filter(Boolean).join(" · "), r.symbol.split(".")[0]);
+          return { ...item(`/cse/shares/${encodeURIComponent(r.symbol)}`, name, [r.symbol, sector].filter(Boolean).join(" · "), r.symbol.split(".")[0]),
+                   symbol: r.symbol };
         })
         .sort((a, b) => a.title.localeCompare(b.title, "en")),
     },
@@ -88,6 +91,13 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   <li key={i.href} data-search={i.text} hidden={!matchesQuery(i.text, query)}>
                     <Link href={i.href}>{i.title}</Link>
                     <span className="small muted">{i.sub}</span>
+                    {i.symbol && (
+                      <span className="result-codes">
+                        {companyCodes(i.symbol).map((c) => (
+                          <Link key={c.key} href={c.href} className="glow-chip small">{t(`codes.company.${c.key}` as never)}</Link>
+                        ))}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

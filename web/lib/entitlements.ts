@@ -19,6 +19,8 @@ export interface Granted {
   delayDays: number; // 0 unless this is a free preview
   minDate: string | null; // recent window: only rows dated on or after this; null = the whole history
   fullHistoryTier: Tier | null; // the tier that would see the whole history, when this grant is a recent window
+  topRows: number | null; // a taste: only the first N rows of ranked lists, and no withheld columns (lib/db.ts)
+  topFullTier: Tier | null; // the tier that would see every row, when this grant is a taste
 }
 
 export interface Denied {
@@ -50,18 +52,22 @@ export function tierRank(tier: Tier): number {
 export function authorize(viewer: Viewer, model: ModelName, today: string = todaySLT()): Access {
   const entry = modelEntry(model);
   const required = entry.minimum_tier;
+  const none = { maxDate: null, delayDays: 0, minDate: null, fullHistoryTier: null, topRows: null, topFullTier: null };
   if (tierRank(viewer.tier) >= tierRank(required)) {
     const window = entry.recent_window;
     if (window && tierRank(viewer.tier) < tierRank(window.full_history_tier)) {
-      return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0,
+      return grant({ model, version: entry.current_version, ...none,
                      minDate: addDays(today, -window.days), fullHistoryTier: window.full_history_tier });
     }
-    return grant({ model, version: entry.current_version, maxDate: null, delayDays: 0, minDate: null, fullHistoryTier: null });
+    const top = entry.top_rows;
+    if (top && tierRank(viewer.tier) < tierRank(top.full_tier)) {
+      return grant({ model, version: entry.current_version, ...none, topRows: top.rows, topFullTier: top.full_tier });
+    }
+    return grant({ model, version: entry.current_version, ...none });
   }
   if (entry.free_preview && entry.free_preview.delay_days > 0) {
     const days = entry.free_preview.delay_days;
-    return grant({ model, version: entry.current_version, maxDate: addDays(today, -days), delayDays: days,
-                   minDate: null, fullHistoryTier: null });
+    return grant({ model, version: entry.current_version, ...none, maxDate: addDays(today, -days), delayDays: days });
   }
   return { allowed: false, model, requiredTier: required };
 }

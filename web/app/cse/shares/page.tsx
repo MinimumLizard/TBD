@@ -6,6 +6,7 @@ import Explain from "@/components/Explain";
 import FilterBar from "@/components/FilterBar";
 import Locked from "@/components/Locked";
 import ModelFooter from "@/components/ModelFooter";
+import LockedLine from "@/components/LockedLine";
 import PageHead from "@/components/PageHead";
 import Section from "@/components/Section";
 import { companyName, sectorGroup } from "@/lib/cse-display";
@@ -51,6 +52,7 @@ export default async function SharesPage({ searchParams }: { searchParams: Promi
     <>
       <PageHead eyebrow={t("cse.eyebrow")} title={t("shares.title")} lead={t("shares.introBySector")}
                 meta={result.access.allowed ? <AsOf day={result.data?.date ?? null} calendar="cse" /> : null} />
+      {!ratios.access.allowed && <LockedLine access={ratios.access} what={t("shares.ratiosLocked")} />}
       {!result.access.allowed ? (
         <Locked access={result.access} />
       ) : (
